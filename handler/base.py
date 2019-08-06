@@ -456,6 +456,71 @@ class BaseHandler(MetaBaseHandler):
             self._wxuser = ObjectDict()
 
     @gen.coroutine
+    def _handle_user_info_workwx(self, userinfo):
+        """
+        根据 userId 创建 user_workwx 如果存在则不创建， 返回 wxuser_id
+        创建 聚合号 wxuser，绑定刚刚创建的 user_id
+        静默授权企业号, state 为 unionid
+
+        userinfo 结构：
+        ObjectDict(
+        "openid":" OPENID",
+        "nickname": NICKNAME,
+        "sex":"1",
+        "province":"PROVINCE"
+        "city":"CITY",
+        "country":"COUNTRY",
+        "headimgurl":    "http://wx.qlogo.cn/mmopen/g3MonUZtNHkdmzicIlibx",
+        "privilege":["PRIVILEGE1", "PRIVILEGE2"],
+        "unionid": "o6_bmasdasdsad6_2sgVt7hMZOPfL"
+        )
+        """
+        self._unionid = userinfo.unionid
+        if self.is_platform:
+            source = const.WECHAT_REGISTER_SOURCE_PLATFORM
+        else:
+            source = const.WECHAT_REGISTER_SOURCE_QX
+
+        # 创建 user_user
+        user_id = yield self.user_ps.create_user_user(
+            userinfo,
+            wechat_id=self._wechat.id,
+            remote_ip=self.request.remote_ip,
+            source=source)
+
+        if user_id:
+            self._log_customs.update(new_user=const.YES)
+
+        self.logger.debug("[_handle_user_info]user_id: {}".format(user_id))
+
+        user = yield self.user_ps.get_user_user({
+            "unionid": userinfo.unionid,
+            "parentid": 0  # 保证查找正常的 user record
+        })
+
+        # 神策数据关联：如果用户已绑定手机号，对用户做注册
+        if bool(user.username.isdigit()):
+            self.logger.debug("[sensors_signup_oauth]ret_user_id: {}, origin_user_id: {}".format(user_id,
+                                                                                                 self._sc_cookie_id))
+            self.sa.track_signup(user_id, self._sc_cookie_id or user_id)
+
+        self.track('cWxAuth', properties={'origin': source}, distinct_id=user_id,
+                   is_login_id=True if bool(user.username.isdigit()) else False)
+        # 设置用户首次授权时间
+        self.profile_set(profiles={'first_oauth_time': user.register_time}, distinct_id=user_id, is_login_id=True,
+                         once=True)
+
+        # 创建 qx 的 user_wx_user
+        yield self.user_ps.create_qx_wxuser_by_userinfo(userinfo, user_id)
+
+        # 静默授权时同步将用户信息，更新到qxuser和user_user
+        yield self._sync_userinfo(self._unionid, userinfo)
+
+        if not self._authable(self._wechat.type):
+            # 该企业号是订阅号 则无法获得当前 wxuser 信息, 无需静默授权
+            self._wxuser = ObjectDict()
+
+    @gen.coroutine
     def _update_joywok_employee_session(self):
         if self._client_env == const.CLIENT_JOYWOK and not self.current_user.employee:
             self._pass_session.clear_session(self._session_id, self._wechat.id)
