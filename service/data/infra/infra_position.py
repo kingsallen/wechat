@@ -9,12 +9,11 @@ from service.data.base import DataService
 from service.data.infra.framework.client.client import ServiceClientFactory
 from thrift_gen.gen.position.service.PositionServices import Client as PositionServiceClient
 from util.common import ObjectDict
-from util.tool.http_tool import http_get, http_post, http_patch, http_get_rp, http_get_v2
+from util.tool.http_tool import http_get, http_post, http_patch, http_get_rp, http_get_v2, http_get_clound
 from util.tool import http_tool
 from util.common.decorator import cache_new
 from conf.newinfra_service_conf.service_info import position_service
 from conf.newinfra_service_conf.position import position
-
 
 class InfraPositionDataService(DataService):
     """对接职位服务
@@ -25,6 +24,16 @@ class InfraPositionDataService(DataService):
     def get_position_list(self, params):
         """普通职位列表"""
         ret = yield http_get_v2(position.POSITION_LIST, position_service, params, timeout=7)
+        return ret
+
+    @gen.coroutine
+    def get_position_list_by_pids(self, params):
+        """
+        根据pids批量查询职位列表
+        :param params : {'pids': ''} pids:用,号分隔
+        :return:
+        """
+        ret = yield http_get_clound(api.position_service.api.CLOUD_POSITION_GET_POSITIONLIST, api.position_service.service, params)
         return ret
 
     @gen.coroutine
