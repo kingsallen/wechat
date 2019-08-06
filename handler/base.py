@@ -49,12 +49,14 @@ class BaseHandler(MetaBaseHandler):
 
         # 构建 session 过程中会缓存一份当前公众号信息
         self._wechat = None
+        self._workwx = None
         self._qx_wechat = None
         self._unionid = None
         self._wxuser = None
         self._session_id = None
         # 处理 oauth 的 service, 会在使用时初始化
         self._oauth_service = None
+        self._work_oauth_service = None
         self._pass_session = None
         self._sc_cookie_id = None  # 神策设备ID
 
@@ -327,6 +329,7 @@ class BaseHandler(MetaBaseHandler):
                     yield self._handle_user_info_workwx(workwx_userinfo)
                 else:
                     self.logger.debug("来自 workwx 的 code 无效")
+                yield self._build_workwx_session(workwx_userinfo)
 
             else:
                 # pc端授权
@@ -659,6 +662,7 @@ class BaseHandler(MetaBaseHandler):
         if self._session_id:
             if self.is_platform or self.is_help:
                 # 判断是否可以通过 session，直接获得用户信息，这样就不用跳授权页面
+                workwx_ok = yield self._get_session_by_wechat_id(self._session_id, self._wechat.id)
                 ok = yield self._get_session_by_wechat_id(self._session_id, self._wechat.id)
                 if not ok:
                     ok = yield self._get_session_by_wechat_id(self._session_id, self.settings['qx_wechat_id'])
@@ -678,7 +682,7 @@ class BaseHandler(MetaBaseHandler):
                 self.redirect(url)
 
         if need_oauth:
-            if self.in_wechat and not self._unionid:
+            if (self.in_wechat or self.in_workwx) and not self._unionid:
                 # unionid 不存在，则进行仟寻授权
                 self._oauth_service.wechat = self._qx_wechat
                 # 仟寻授权需要重定向到仟寻appid对应的域名
