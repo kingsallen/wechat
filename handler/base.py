@@ -322,10 +322,10 @@ class BaseHandler(MetaBaseHandler):
 
             elif self.in_workwx:
                 self.logger.debug("来自 workwx 的授权, 获得 userinfo")
-                userinfo = yield self._get_user_info_workwx(code)
-                if userinfo:
-                    self.logger.debug("来自 workwx 的授权, 获得 userinfo:{}".format(userinfo))
-                    yield self._handle_user_info_workwx(userinfo)
+                workwx_userinfo = yield self._get_user_info_workwx(code)
+                if workwx_userinfo:
+                    self.logger.debug("来自 workwx 的授权, 获得 userinfo:{}".format(workwx_userinfo))
+                    yield self._handle_user_info_workwx(workwx_userinfo)
                 else:
                     self.logger.debug("来自 workwx 的 code 无效")
 
