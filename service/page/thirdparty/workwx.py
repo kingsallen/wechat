@@ -31,12 +31,10 @@ class WorkWXPageService(PageService):
         if user_record:
             user_id = user_record.id
         else:
-            # 如果不存在，创建 user_user 记录，返回 user_id
-
-        params = ObjectDict()
-        ret = yield self.workwx_ds.create_workwx_user(params, headers)
-        return ret
-
+            # 如果不存在，创建 user_workwx 记录，返回 user_id
+            params = ObjectDict()
+            user_id = yield self.workwx_ds.create_workwx_user(params, headers)
+        return user_id
 
     @gen.coroutine
     def get_workwx_info(self, method, appid=None, code=None, headers=None):
