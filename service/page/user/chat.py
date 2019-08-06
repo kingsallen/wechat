@@ -257,10 +257,10 @@ class ChatPageService(PageService):
                 team_info = ObjectDict(data.get('team', {}) or {})
                 rpext = get_rpext(rpext_list, position_info.id)
 
-                imgUrl = ""
+                imgUrl = []
                 # 获取第一个banner图
                 if company_info.banner:
-                    imgUrl = make_static_url(json.loads(company_info.banner).get('banner0'))
+                    imgUrl = [make_static_url(json.loads(company_info.banner).get('banner0'))]
 
                 position = ObjectDict()
                 position.jobTitle = position_info.title
