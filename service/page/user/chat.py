@@ -229,11 +229,12 @@ class ChatPageService(PageService):
 
     @log_time
     @gen.coroutine
-    def infra_clound_get_position_list(self, params, is_employee):
+    def infra_clound_get_position_list(self, params, is_employee, banner):
         """
         根据pids获取职位列表
 
         :param params: ['1', '2', '3'] 职位ID的str列表
+        :param banner: [] 公司banner数组数据，current_user.company.banner
 
         """
 
@@ -257,11 +258,6 @@ class ChatPageService(PageService):
                 team_info = ObjectDict(data.get('team', {}) or {})
                 rpext = get_rpext(rpext_list, position_info.id)
 
-                imgUrl = []
-                # 获取第一个banner图
-                if company_info.banner:
-                    imgUrl = [make_static_url(json.loads(company_info.banner).get('banner0'))]
-
                 position = ObjectDict()
                 position.jobTitle = position_info.title
                 position.company = company_info.abbreviation
@@ -270,7 +266,7 @@ class ChatPageService(PageService):
                 position.location = position_info.city
                 position.update = position_info.updateTime
                 position.id = position_info.id
-                position.imgUrl = imgUrl
+                position.imgUrl = banner
                 position.cover = make_static_url(company_info.logo)  # TODO 如果有红包或其他特殊场景的cover设置
 
                 # 前端显示红包的逻辑为 hb_status True 就显示红包样式
@@ -382,12 +378,12 @@ class ChatPageService(PageService):
 
         if msg_type == "jobCard":
             ids = [str(p.get("id")) for p in compoundContent]
-            positions = yield self.infra_clound_get_position_list(ids, is_employee)
+            positions = yield self.infra_clound_get_position_list(ids, is_employee, current_user.company.banner)
             ret_message['compound_content'] = ObjectDict(list=positions)
 
         if msg_type == "jobSelect":
             ids = [str(p.get("id")) for p in compoundContent.get("list")]
-            positions = yield self.infra_clound_get_position_list(ids, is_employee)
+            positions = yield self.infra_clound_get_position_list(ids, is_employee, current_user.company.banner)
             ret_message['compound_content']['list'] = positions
 
         return ret_message
