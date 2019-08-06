@@ -262,7 +262,9 @@ class BaseHandler(MetaBaseHandler):
             self._wechat, self.fullurl(), self.component_access_token)
 
         # 初始化 企业微信 oauth service
-        self._workwx = yield self._get_current_wechat()
+        conds = {'id': self._wechat.company_id}
+        company = yield self.company_ps.get_company(conds=conds, need_conf=True)
+        self._workwx = yield self.workwx_ps.get_workwx(company.id, company.hraccount_id)
         self._work_oauth_service = WorkWXOauth2Service(
             self._workwx, self.fullurl())
 
@@ -277,8 +279,6 @@ class BaseHandler(MetaBaseHandler):
             "[prepare]code:{}, state:{}, request_url:{} ".format(
                 code, state, self.request.uri))
         # 预设神策分析全局属性
-        conds = {'id': self._wechat.company_id}
-        company = yield self.company_ps.get_company(conds=conds, need_conf=True)
         self.sa.register_super_properties(ObjectDict({"companyId": company.id,
                                                       "companyName": company.abbreviation}))
 
@@ -457,7 +457,7 @@ class BaseHandler(MetaBaseHandler):
             self._wxuser = ObjectDict()
 
     @gen.coroutine
-    def _handle_user_info_workwx(self, userinfo):
+    def _handle_user_info_workwx(self, workwx_userinfo):
         """
         根据 userId 创建 user_workwx 如果存在则不创建， 返回 wxuser_id
         创建 员工user_employee，绑定刚刚创建的 user_id
@@ -481,19 +481,19 @@ class BaseHandler(MetaBaseHandler):
         )
         """
         # 创建 user_workwx
-        user_id = yield self.workwx_ps.create_user_workwx(
-            userinfo,
-            wechat_id=self._wechat.id,
-            remote_ip=self.request.remote_ip)
+        workwx_user_id = yield self.workwx_ps.create_workwx_user(
+            workwx_userinfo,
+            company_id=self._wechat.company_id,
+            workwx_userid=workwx_userinfo.userid)
 
-        if user_id:
+        if workwx_user_id:
             self._log_customs.update(new_user=const.YES)
 
-        self.logger.debug("[_handle_user_info]user_id: {}".format(user_id))
+        self.logger.debug("[_handle_workwx_user_info]workwx_user_id: {}".format(workwx_user_id))
 
-        user = yield self.user_ps.get_user_user({
-            "unionid": userinfo.unionid,
-            "parentid": 0  # 保证查找正常的 user record
+        workwx_user = yield self.workwx_ps.get_workwx_user({
+            "company_id": self._wechat.company_id,
+            "workwx_userid": workwx_userinfo.userid  # 保证查找正常的 user record
         })
 
         # 神策数据关联：如果用户已绑定手机号，对用户做注册
@@ -584,30 +584,6 @@ class BaseHandler(MetaBaseHandler):
 
     @gen.coroutine
     def _get_current_wechat(self, qx=False):
-        if qx:
-            signature = self.settings['qx_signature']
-        else:
-            if self.is_platform:
-                signature = self.params['wechat_signature']
-            elif self.is_qx:
-                signature = self.settings['qx_signature']
-            elif self.is_help:
-                signature = self.settings['helper_signature']
-            else:
-                self.logger.error("wechat_signature missing")
-                raise NoSignatureError()
-
-        wechat = yield self.wechat_ps.get_wechat(conds={
-            "signature": signature
-        })
-        if not wechat:
-            self.write_error(http_code=404)
-            return
-
-        raise gen.Return(wechat)
-
-    @gen.coroutine
-    def _get_current_wechat(self):
         if qx:
             signature = self.settings['qx_signature']
         else:

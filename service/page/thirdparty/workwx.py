@@ -14,7 +14,7 @@ class WorkWXPageService(PageService):
         super().__init__()
 
     @gen.coroutine
-    def create_workwx_user(self, method, appid=None, code=None, headers=None):
+    def create_workwx_user(self, workwx_userinfo, company_id, workwx_userid):
         """
         根据微信授权得到的 userinfo 创建 workwx_user
         :param userid:
@@ -23,31 +23,38 @@ class WorkWXPageService(PageService):
         :param source:
         """
         # 查询 这个 userid 是不是已经存在
-        workwx_user_record = yield self.workwx_user_ds.get_workwx_user({
-            "unionid":  userinfo.unionid
+        params = ObjectDict({
+            "company_id": company_id,
+            "workwx_userid": workwx_userid
         })
+        workwx_user_record = yield self.workwx_ds.get_workwx_user(params)
 
         # 如果存在，返回 userid
         if workwx_user_record:
             workwx_user_id = workwx_user_record.id
         else:
             # 如果不存在，创建 user_workwx 记录，返回 user_id
-            params = ObjectDict()
-            workwx_user_id = yield self.workwx_ds.create_workwx_user(params, headers)
+            params = ObjectDict({
+                "company_id": company_id,
+                "workwx_userinfo": workwx_userinfo
+            })
+            workwx_user_id = yield self.workwx_ds.create_workwx_user(params)
         return workwx_user_id
 
     @gen.coroutine
-    def get_workwx_info(self, method, appid=None, code=None, headers=None):
-        params = ObjectDict()
-        if method == const.JMIS_USER_INFO:
-            params = ObjectDict({
-                "code": code,
-                "method": method
-            })
-        elif method == const.JMIS_SIGNATURE:
-            params = ObjectDict({
-                "appid": appid,
-                "method": method
-            })
-        ret = yield self.joywok_ds.get_joywok_info(params, headers)
+    def get_workwx_user(self, company_id, workwx_userid):
+        params = ObjectDict({
+            "company_id": company_id,
+            "workwx_userid": workwx_userid
+        })
+        ret = yield self.workwx_ds.get_workwx_user(params)
+        return ret
+
+    @gen.coroutine
+    def get_workwx(self, company_id, hraccount_id):
+        params = ObjectDict({
+            "company_id": company_id,
+            "hr_account_id": hraccount_id
+        })
+        ret = yield self.workwx_ds.get_workwx(params)
         return ret
