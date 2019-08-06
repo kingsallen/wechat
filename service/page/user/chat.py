@@ -250,7 +250,7 @@ class ChatPageService(PageService):
         pids = ','.join(params)
         res = yield self.infra_position_ds.get_position_list_by_pids({'pids': pids})
 
-        position_list = []
+        tmp_position = {}
         if res.code == const.NEWINFRA_API_SUCCESS and res.data:
             for data in res.data:
                 position_info = ObjectDict(data.get('position', {}) or {})
@@ -286,7 +286,12 @@ class ChatPageService(PageService):
                 else:
                     position.hb_status = False
 
-                position_list.append(position)
+                tmp_position.update({str(position_info.id): position})
+
+        # 处理排序
+        position_list = []
+        for pid in params:
+            position_list.append(tmp_position.get(pid))
 
         raise gen.Return(position_list)
 
