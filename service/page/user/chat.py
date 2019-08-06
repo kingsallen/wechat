@@ -257,6 +257,11 @@ class ChatPageService(PageService):
                 team_info = ObjectDict(data.get('team', {}) or {})
                 rpext = get_rpext(rpext_list, position_info.id)
 
+                imgUrl = ""
+                # 获取第一个banner图
+                if company_info.banner:
+                    imgUrl = make_static_url(json.loads(company_info.banner).get('banner0'))
+
                 position = ObjectDict()
                 position.jobTitle = position_info.title
                 position.company = company_info.abbreviation
@@ -265,7 +270,7 @@ class ChatPageService(PageService):
                 position.location = position_info.city
                 position.update = position_info.updateTime
                 position.id = position_info.id
-                position.imgUrl = company_info.banner
+                position.imgUrl = imgUrl
                 position.cover = make_static_url(company_info.logo)  # TODO 如果有红包或其他特殊场景的cover设置
 
                 # 前端显示红包的逻辑为 hb_status True 就显示红包样式
