@@ -262,8 +262,7 @@ class BaseHandler(MetaBaseHandler):
             self._wechat, self.fullurl(), self.component_access_token)
 
         # 初始化 企业微信 oauth service
-        conds = {'id': self._wechat.company_id}
-        company = yield self.company_ps.get_company(conds=conds, need_conf=True)
+        company = yield self.company_ps.get_company(conds={'id': self._wechat.company_id}, need_conf=True)
         self._workwx = yield self.workwx_ps.get_workwx(company.id, company.hraccount_id)
         self._work_oauth_service = WorkWXOauth2Service(
             self._workwx, self.fullurl())
@@ -481,12 +480,12 @@ class BaseHandler(MetaBaseHandler):
         )
         """
         # 创建 user_workwx
-        workwx_user_id = yield self.workwx_ps.create_workwx_user(
+        is_create_success = yield self.workwx_ps.create_workwx_user(
             workwx_userinfo,
             company_id=self._wechat.company_id,
             workwx_userid=workwx_userinfo.userid)
 
-        if workwx_user_id:
+        if is_create_success:
             self._log_customs.update(new_user=const.YES)
 
         self.logger.debug("[_handle_workwx_user_info]workwx_user_id: {}".format(workwx_user_id))

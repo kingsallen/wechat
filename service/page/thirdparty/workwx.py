@@ -23,23 +23,20 @@ class WorkWXPageService(PageService):
         :param source:
         """
         # 查询 这个 userid 是不是已经存在
-        params = ObjectDict({
-            "company_id": company_id,
-            "workwx_userid": workwx_userid
-        })
-        workwx_user_record = yield self.workwx_ds.get_workwx_user(params)
+        workwx_user_record = yield self.get_workwx_user(company_id, workwx_userid)
 
         # 如果存在，返回 userid
         if workwx_user_record:
-            workwx_user_id = workwx_user_record.id
+            res = True
         else:
             # 如果不存在，创建 user_workwx 记录，返回 user_id
+            workwx_userinfo.update({"company_id": company_id})
             params = ObjectDict({
-                "company_id": company_id,
                 "workwx_userinfo": workwx_userinfo
             })
-            workwx_user_id = yield self.workwx_ds.create_workwx_user(params)
-        return workwx_user_id
+            create_workwx = yield self.workwx_ds.create_workwx_user(params)
+            res = create_workwx.get('data')
+        return res
 
     @gen.coroutine
     def get_workwx_user(self, company_id, workwx_userid):
@@ -53,8 +50,8 @@ class WorkWXPageService(PageService):
     @gen.coroutine
     def get_workwx(self, company_id, hraccount_id):
         params = ObjectDict({
-            "company_id": company_id,
-            "hr_account_id": hraccount_id
+            "companyId": company_id,
+            "hraccountId": hraccount_id
         })
         ret = yield self.workwx_ds.get_workwx(params)
         return ret

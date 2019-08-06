@@ -168,6 +168,7 @@ COMPANY_ALL = 'company/all'
 COMPANY = 'company'
 CREATE_COMPANY = 'api/hrcompany/add'
 ONLY_REFERRAL_REWARD = "/v1/referral/company/config/pointsflag"
+COMPANY_GET_WORKWX = '/hraccount/company/employeebindconf/workwx'
 
 # 字典服务
 DICT_CONSTANT = "dict/constant"
