@@ -14,6 +14,31 @@ class WorkWXPageService(PageService):
         super().__init__()
 
     @gen.coroutine
+    def create_workwx_user(self, method, appid=None, code=None, headers=None):
+        """
+        根据微信授权得到的 userinfo 创建 workwx_user
+        :param userid:
+        :param wechat_id:
+        :param remote_ip:
+        :param source:
+        """
+        # 查询 这个 userid 是不是已经存在
+        user_record = yield self.workwx_user_ds.get_workwx_user({
+            "unionid":  userinfo.unionid
+        })
+
+        # 如果存在，返回 userid
+        if user_record:
+            user_id = user_record.id
+        else:
+            # 如果不存在，创建 user_user 记录，返回 user_id
+
+        params = ObjectDict()
+        ret = yield self.workwx_ds.create_workwx_user(params, headers)
+        return ret
+
+
+    @gen.coroutine
     def get_workwx_info(self, method, appid=None, code=None, headers=None):
         params = ObjectDict()
         if method == const.JMIS_USER_INFO:

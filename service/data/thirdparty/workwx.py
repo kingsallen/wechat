@@ -10,6 +10,11 @@ from util.tool.http_tool import http_get, http_post, http_put, unboxing, http_ge
 class WorkWXDataService(DataService):
 
     @gen.coroutine
+    def create_workwx_user(self, params, headers=None):
+        ret = yield http_get(path.JOYWOK_JMIS_AUTH, jdata=params, infra=False, headers=headers)
+        return ret
+
+    @gen.coroutine
     def get_joywok_info(self, params, headers=None):
         ret = yield http_get(path.JOYWOK_JMIS_AUTH, jdata=params, infra=False, headers=headers)
         return ret

@@ -463,29 +463,27 @@ class BaseHandler(MetaBaseHandler):
 
         userinfo 结构：
         ObjectDict(
-        "openid":" OPENID",
-        "nickname": NICKNAME,
-        "sex":"1",
-        "province":"PROVINCE"
-        "city":"CITY",
-        "country":"COUNTRY",
-        "headimgurl":    "http://wx.qlogo.cn/mmopen/g3MonUZtNHkdmzicIlibx",
-        "privilege":["PRIVILEGE1", "PRIVILEGE2"],
-        "unionid": "o6_bmasdasdsad6_2sgVt7hMZOPfL"
+            "userid": "zhangsan",
+            "name": "李四",
+            "department": [1, 2],
+            "order": [1, 2],
+            "position": "后台工程师",
+            "mobile": "15913215421",
+            "gender": "1",
+            "email": "zhangsan@gzdev.com",
+            "is_leader_in_dept": [1, 0],
+            "avatar": "http://wx.qlogo.cn/mmopen/ajNVdqHZLLA3WJ6DSZUfiakYe37PKnQhBIeOQBO4czqrnZDS79FH5Wm5m4X69TBicnHFlhiafvDwklOpZeXYQQ2icg/0",
+            "telephone": "020-123456",
+            "enable": 1,
+            "alias": "jackzhang",
+            "address": "广州市海珠区新港中路",
         )
         """
-        self._unionid = userinfo.unionid
-        if self.is_platform:
-            source = const.WECHAT_REGISTER_SOURCE_PLATFORM
-        else:
-            source = const.WECHAT_REGISTER_SOURCE_QX
-
-        # 创建 user_user
-        user_id = yield self.user_ps.create_user_user(
+        # 创建 user_workwx
+        user_id = yield self.workwx_ps.create_user_workwx(
             userinfo,
             wechat_id=self._wechat.id,
-            remote_ip=self.request.remote_ip,
-            source=source)
+            remote_ip=self.request.remote_ip)
 
         if user_id:
             self._log_customs.update(new_user=const.YES)
