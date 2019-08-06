@@ -23,18 +23,18 @@ class WorkWXPageService(PageService):
         :param source:
         """
         # 查询 这个 userid 是不是已经存在
-        user_record = yield self.workwx_user_ds.get_workwx_user({
+        workwx_user_record = yield self.workwx_user_ds.get_workwx_user({
             "unionid":  userinfo.unionid
         })
 
         # 如果存在，返回 userid
-        if user_record:
-            user_id = user_record.id
+        if workwx_user_record:
+            workwx_user_id = workwx_user_record.id
         else:
             # 如果不存在，创建 user_workwx 记录，返回 user_id
             params = ObjectDict()
-            user_id = yield self.workwx_ds.create_workwx_user(params, headers)
-        return user_id
+            workwx_user_id = yield self.workwx_ds.create_workwx_user(params, headers)
+        return workwx_user_id
 
     @gen.coroutine
     def get_workwx_info(self, method, appid=None, code=None, headers=None):

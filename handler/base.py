@@ -262,8 +262,9 @@ class BaseHandler(MetaBaseHandler):
             self._wechat, self.fullurl(), self.component_access_token)
 
         # 初始化 企业微信 oauth service
+        self._workwx = yield self._get_current_wechat()
         self._work_oauth_service = WorkWXOauth2Service(
-            self._wechat, self.fullurl())
+            self._workwx, self.fullurl())
 
         self._pass_session = PassportCache()
 
@@ -583,6 +584,30 @@ class BaseHandler(MetaBaseHandler):
 
     @gen.coroutine
     def _get_current_wechat(self, qx=False):
+        if qx:
+            signature = self.settings['qx_signature']
+        else:
+            if self.is_platform:
+                signature = self.params['wechat_signature']
+            elif self.is_qx:
+                signature = self.settings['qx_signature']
+            elif self.is_help:
+                signature = self.settings['helper_signature']
+            else:
+                self.logger.error("wechat_signature missing")
+                raise NoSignatureError()
+
+        wechat = yield self.wechat_ps.get_wechat(conds={
+            "signature": signature
+        })
+        if not wechat:
+            self.write_error(http_code=404)
+            return
+
+        raise gen.Return(wechat)
+
+    @gen.coroutine
+    def _get_current_wechat(self):
         if qx:
             signature = self.settings['qx_signature']
         else:
