@@ -459,8 +459,7 @@ class BaseHandler(MetaBaseHandler):
     def _handle_user_info_workwx(self, userinfo):
         """
         根据 userId 创建 user_workwx 如果存在则不创建， 返回 wxuser_id
-        创建 聚合号 wxuser，绑定刚刚创建的 user_id
-        静默授权企业号, state 为 unionid
+        创建 员工user_employee，绑定刚刚创建的 user_id
 
         userinfo 结构：
         ObjectDict(
