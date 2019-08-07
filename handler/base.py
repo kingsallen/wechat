@@ -662,10 +662,12 @@ class BaseHandler(MetaBaseHandler):
             self.get_secure_cookie(
                 const.COOKIE_SESSIONID))
 
+        workwx_ok = False
         if self._session_id:
+            if self.in_workwx:
+                workwx_ok = yield self._get_session_by_workwx_id(self._session_id, self._wechat.id)
             if self.is_platform or self.is_help:
                 # 判断是否可以通过 session，直接获得用户信息，这样就不用跳授权页面
-                workwx_ok = yield self._get_session_by_workwx_id(self._session_id, self._wechat.id)
                 ok = yield self._get_session_by_wechat_id(self._session_id, self._wechat.id)
                 if not ok:
                     ok = yield self._get_session_by_wechat_id(self._session_id, self.settings['qx_wechat_id'])
@@ -679,10 +681,12 @@ class BaseHandler(MetaBaseHandler):
             if self._client_env == const.CLIENT_JOYWOK:
                 url = self.make_url(path.JOYWOK_HOME_PAGE)
                 yield self.redirect(url)
-            elif self._client_env == const.CLIENT_WORKWX:
-                url = self._work_oauth_service.get_oauth_code_base_url()
-                self.logger.debug("workwx_oauth_redirect_url: {}".format(url))
-                self.redirect(url)
+
+        if self.in_workwx and self.request.method in ("GET", "HEAD") \
+            and not self.request.uri.startswith("/api/") and not workwx_ok:
+            url = self._work_oauth_service.get_oauth_code_base_url()
+            self.logger.debug("workwx_oauth_redirect_url: {}".format(url))
+            self.redirect(url)
 
         if need_oauth:
             if (self.in_wechat or self.in_workwx) and not self._unionid:
@@ -690,6 +694,8 @@ class BaseHandler(MetaBaseHandler):
                 self._oauth_service.wechat = self._qx_wechat
                 # 仟寻授权需要重定向到仟寻appid对应的域名
                 self._get_oauth_redirect_url()
+                if self.in_workwx:
+                    self._oauth_service.redirect_url += "&workwx_userid={}&company_id=".format(self._workwx_userid,self._wechat.company_id)
                 url = self._oauth_service.get_oauth_code_userinfo_url()
                 self.logger.debug("qx_oauth_redirect_url: {}".format(url))
                 self.redirect(url)
