@@ -51,6 +51,7 @@ class BaseHandler(MetaBaseHandler):
         self._wechat = None
         self._qx_wechat = None
         self._unionid = None
+        self._workwx_userid = None
         self._wxuser = None
         self._session_id = None
         # 处理 oauth 的 service, 会在使用时初始化
@@ -663,7 +664,7 @@ class BaseHandler(MetaBaseHandler):
         if self._session_id:
             if self.is_platform or self.is_help:
                 # 判断是否可以通过 session，直接获得用户信息，这样就不用跳授权页面
-                workwx_ok = yield self._get_session_by_wechat_id(self._session_id, self._workwx.id)
+                workwx_ok = yield self._get_session_by_workwx_id(self._session_id, self._wechat.id)
                 ok = yield self._get_session_by_wechat_id(self._session_id, self._wechat.id)
                 if not ok:
                     ok = yield self._get_session_by_wechat_id(self._session_id, self.settings['qx_wechat_id'])
@@ -1103,6 +1104,37 @@ class BaseHandler(MetaBaseHandler):
         return display_locale
 
     @gen.coroutine
+    def _build_workwx_session(self):
+        """用户确认向仟寻授权后的处理，构建 session"""
+
+        self.logger.debug("_build_workwx_session start")
+
+        session = ObjectDict()
+        session.wechat = self._wechat
+
+        # 该 session 只做首次仟寻登录查找各关联帐号所用(微信环境内)
+        if self._workwx_userid:
+            # 只对微信 oauth 用户创建qx session
+            session.workwx_user = yield self.user_ps.get_wxuser_unionid_wechat_id(
+                unionid=self._unionid,
+                wechat_id=self.settings['qx_wechat_id'],
+                fields=['id', 'unionid', 'sysuser_id']
+            )
+            self._session_id = self._make_new_session_id(
+                session.workwx_user.userid)
+            self.logger.info("session_id:{}-----workwx_userid:{}".format(self._session_id, self._workwx_userid))
+            self.set_secure_cookie(
+                const.COOKIE_SESSIONID,
+                self._session_id,
+                httponly=True,
+                domain=settings['root_host']
+            )
+
+        # 重置 wxuser，qxuser，构建完整的 session
+        self.workwx_user = ObjectDict()
+        yield self._build_session_by_workwx_userid(self._workwx_userid)
+
+    @gen.coroutine
     def _get_session_by_workwx_id(self, session_id, workwx_id):
         """尝试获取 session"""
 
@@ -1114,7 +1146,7 @@ class BaseHandler(MetaBaseHandler):
         if value:
             # 如果有 value， 返回该 value 作为 self.current_user
             session = ObjectDict(value)
-            self._workwx_userid = session.qxuser.unionid
+            self._workwx_userid = session.workwx_user.userid
             self._workwx_user = session.workwx_user
             yield self._build_session_by_workwx_userid(self._workwx_userid)
             raise gen.Return(True)
@@ -1127,12 +1159,11 @@ class BaseHandler(MetaBaseHandler):
 
         session = ObjectDict()
         # session_id = to_str(self.get_secure_cookie(const.COOKIE_SESSIONID))
-        if not _workwx_userid:
-            # 非微信环境, 忽略 wxuser, qxuser
+        if not workwx_userid:
             session.workwx_user = ObjectDict()
         else:
             session.workwx_user = yield self.user_ps.get_wxuser_unionid_wechat_id(
-                unionid=unionid, wechat_id=self._workwx.id)
+                userid=workwx_userid, wechat_id=self._wechat.company_id)
 
         if not self._session_id:
             self._session_id = self._make_new_session_id(
@@ -1155,6 +1186,7 @@ class BaseHandler(MetaBaseHandler):
 
         yield self._add_company_info_to_session(session)
         if self.is_platform and self.params.recom:
+
             yield self._add_recom_to_session(session)
 
         self.current_user = session
