@@ -50,6 +50,7 @@ class BaseHandler(MetaBaseHandler):
         # 构建 session 过程中会缓存一份当前公众号信息
         self._wechat = None
         self._qx_wechat = None
+        self._workwx = None
         self._unionid = None
         self._workwx_userid = None
         self._wxuser = None
@@ -59,6 +60,8 @@ class BaseHandler(MetaBaseHandler):
         self._work_oauth_service = None
         self._pass_session = None
         self._sc_cookie_id = None  # 神策设备ID
+        # 是否需要从企业微信跳转到微信
+        self.workwx_skip_wx = True
 
     @property
     def component_access_token(self):
@@ -266,10 +269,9 @@ class BaseHandler(MetaBaseHandler):
         # 初始化 企业微信 oauth service
         company = yield self.company_ps.get_company(conds={'id': self._wechat.company_id}, need_conf=True)
         if self.in_workwx:
-            workwx = yield self.workwx_ps.get_workwx(company.id, company.hraccount_id)
-            self._wechat = workwx
+            self._workwx = yield self.workwx_ps.get_workwx(company.id, company.hraccount_id)
             self._work_oauth_service = WorkWXOauth2Service(
-                self._wechat, self.fullurl())
+                self._workwx, self.fullurl())
 
         self._pass_session = PassportCache()
 
@@ -493,6 +495,20 @@ class BaseHandler(MetaBaseHandler):
         """
         # 创建 user_workwx
         self._workwx_userid = workwx_userinfo.userid
+
+        # 查询 这个 userid 是不是已经存在
+        workwx_user_record = yield self.workwx_ds.get_workwx_user(self._wechat.company_id, workwx_userinfo.userid)
+        # 如果存在
+        if workwx_user_record:
+            is_valid_employee = yield self.employee_ps.is_valid_employee(
+                workwx_user_record.sysuser_id,
+                workwx_user_record.company_id
+            )
+            if is_valid_employee:
+                self.workwx_skip_wx = False  #不需要从企业微信跳转到微信
+            else:
+                is_subscribe = yield self.position_ds.get_hr_wx_user(unionid, self._wechat.id) #self.user_ds.get_wxuser_sysuser_id_wechat_id
+
         is_create_success = yield self.workwx_ps.create_workwx_user(
             workwx_userinfo,
             company_id=self._wechat.company_id,
@@ -672,7 +688,7 @@ class BaseHandler(MetaBaseHandler):
         workwx_ok = False
         if self._session_id:
             if self.in_workwx:
-                workwx_ok = yield self._get_session_by_workwx_id(self._session_id, self._wechat.id)
+                workwx_ok = yield self._get_session_by_workwx_id(self._session_id, self._workwx.id)
             if self.is_platform or self.is_help:
                 # 判断是否可以通过 session，直接获得用户信息，这样就不用跳授权页面
                 ok = yield self._get_session_by_wechat_id(self._session_id, self._wechat.id)
@@ -695,7 +711,7 @@ class BaseHandler(MetaBaseHandler):
             self.logger.debug("workwx_oauth_redirect_url: {}".format(url))
             self.redirect(url)
 
-        if need_oauth:
+        if need_oauth and self.workwx_skip_wx:
             if (self.in_wechat or self.in_workwx) and not self._unionid:
                 # unionid 不存在，则进行仟寻授权
                 self._oauth_service.wechat = self._qx_wechat
@@ -1129,13 +1145,8 @@ class BaseHandler(MetaBaseHandler):
         # 该 session 只做首次仟寻登录查找各关联帐号所用(微信环境内)
         if self._workwx_userid:
             # 只对微信 oauth 用户创建qx session
-            session.workwx_user = yield self.user_ps.get_wxuser_unionid_wechat_id(
-                unionid=self._unionid,
-                wechat_id=self.settings['qx_wechat_id'],
-                fields=['id', 'unionid', 'sysuser_id']
-            )
-            self._session_id = self._make_new_session_id(
-                session.workwx_user.userid)
+            session.workwx_user = yield self.workwx_ps.get_workwx_user(self._workwx.company_id, self._workwx_userid)
+            self._session_id = self._make_new_session_id(session.workwx_user.userid)
             self.logger.info("session_id:{}-----workwx_userid:{}".format(self._session_id, self._workwx_userid))
             self.set_secure_cookie(
                 const.COOKIE_SESSIONID,
@@ -1177,7 +1188,7 @@ class BaseHandler(MetaBaseHandler):
             session.workwx_user = ObjectDict()
         else:
             session.workwx_user = yield self.user_ps.get_wxuser_unionid_wechat_id(
-                userid=workwx_userid, wechat_id=self._wechat.company_id)
+                userid=workwx_userid, wechat_id=self._workwx.company_id)
 
         if not self._session_id:
             self._session_id = self._make_new_session_id(
@@ -1190,7 +1201,7 @@ class BaseHandler(MetaBaseHandler):
 
         if self.is_platform:
             self._pass_session.save_ent_sessions(
-                self._session_id, session, self._wechat.id)
+                self._session_id, session, self._workwx.id)
 
         yield self._add_sysuser_to_session(session, self._session_id)
         session.sc_cookie_id = self._sc_cookie_id
