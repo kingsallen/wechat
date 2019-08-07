@@ -159,14 +159,6 @@ class EmployeePageService(PageService):
         data.conf = ObjectDict()
         data.binding_success_message = conf.bindSuccessMessage or ''
 
-        # todo 公众号信息，已有接口，这个其实是重复的代码
-        data.wechat.subscribed = True if not in_wechat or current_user.wxuser.is_subscribe or current_user.wechat.type == 0 else False
-        data.wechat.qrcode = yield get_temporary_qrcode(
-            wechat=current_user.wechat,
-            scene_id=int('11110000000000000000000000000000', base=2) + int(const.QRCODE_BIND)
-        )
-        data.wechat.name = current_user.wechat.name
-
         data.mate_num = mate_num
         data.conf.reward = reward
         # 国际化补填信息的名称

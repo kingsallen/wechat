@@ -234,7 +234,9 @@ class PositionHandler(BaseHandler):
     def _add_sensor_track(self, last_employee_user_id, depth):
 
         # 判断来源
-        if self.params.source == const.FANS_RECOMMEND:
+        if self.params.scan_from == const.SCAN_FROM:
+            origin = const.SA_ORIGIN_PC_REFERRAL
+        elif self.params.source == const.FANS_RECOMMEND:
             origin = const.SA_ORIGIN_FANS_RECOMMEND
         elif last_employee_user_id:
             origin = const.SA_ORIGIN_EMPLOYEE_SHARE
@@ -297,6 +299,9 @@ class PositionHandler(BaseHandler):
             self.current_user.sysuser.id,
             position_info.company_id
         )
+
+        escape = ["pid", "keywords", "cities", "candidate_source", "employment_type", "salary", "department",
+                  "occupations", "custom", "degree", "page_from", "page_size", "scan_from"]
         if is_valid_employee:
             forward_id = re.sub('-', '', str(uuid.uuid1()))
             link = self.make_url(
@@ -304,18 +309,14 @@ class PositionHandler(BaseHandler):
                 self.params,
                 recom=self.position_ps._make_recom(self.current_user.sysuser.id),
                 forward_id=forward_id,
-                escape=["pid", "keywords", "cities", "candidate_source",
-                        "employment_type", "salary", "department", "occupations",
-                        "custom", "degree", "page_from", "page_size"]
+                escape=escape
             )
         else:
             link = self.make_url(
                 path.POSITION_PATH.format(position_info.id),
                 self.params,
                 recom=self.position_ps._make_recom(self.current_user.sysuser.id),
-                escape=["pid", "keywords", "cities", "candidate_source",
-                        "employment_type", "salary", "department", "occupations",
-                        "custom", "degree", "page_from", "page_size"]
+                escape=escape
             )
 
         self.params.share = ObjectDict({

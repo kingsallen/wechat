@@ -299,6 +299,18 @@ class EmployeeBindHandler(BaseHandler):
             locale=self.locale
         )
 
+        # todo 公众号信息，已有接口，这个其实是重复的代码，后续考虑去掉
+        scene_id = int('11110000000000000000000000000000', base=2) + (int(
+            const.QRCODE_PC_REFERRAL) if self.params.scan_from == const.SCAN_FROM else int(
+            const.QRCODE_BIND))
+
+        wechat = yield self.wechat_ps.get_wechat_info(
+            self.current_user,
+            scene_id=scene_id,
+            in_wechat=self.in_wechat
+        )
+        data.update(wechat)
+
         # 是否需要弹出 隐私协议 窗口
         res_privacy, data_privacy = yield self.privacy_ps.if_privacy_agreement_window(
             self.current_user.sysuser.id)
