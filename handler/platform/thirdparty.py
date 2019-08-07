@@ -32,18 +32,6 @@ class JoywokOauthHandler(MetaBaseHandler):
             next_url = self.make_url(path.POSITION_LIST, self.params, host=self.host)
             self.redirect(next_url)
             return
-
-        url = self._work_oauth_service.get_oauth_code_base_url()
-        self.logger.debug("workwx_oauth_redirect_url: {}".format(url))
-        self.redirect(url)
-
-        # 初始化 企业微信 oauth service
-        company = yield self.company_ps.get_company(conds={'id': self._wechat.company_id}, need_conf=True)
-        if self.in_workwx:
-            self._workwx = yield self.workwx_ps.get_workwx(company.id, company.hraccount_id)
-            self._work_oauth_service = WorkWXOauth2Service(
-                self._workwx, self.fullurl())
-
         headers = ObjectDict({"Referer": self.request.full_url()})
         res = yield self.joywok_ps.get_joywok_info(appid=settings['joywok_appid'], method=const.JMIS_SIGNATURE, headers=headers)
         client_env = ObjectDict({
@@ -149,6 +137,18 @@ class WorkWXOauthHandler(MetaBaseHandler):
             next_url = self.make_url(path.POSITION_LIST, self.params, host=self.host)
             self.redirect(next_url)
             return
+
+        url = self._work_oauth_service.get_oauth_code_base_url()
+        self.logger.debug("workwx_oauth_redirect_url: {}".format(url))
+        self.redirect(url)
+
+        # 初始化 企业微信 oauth service
+        company = yield self.company_ps.get_company(conds={'id': self._wechat.company_id}, need_conf=True)
+        if self.in_workwx:
+            self._workwx = yield self.workwx_ps.get_workwx(company.id, company.hraccount_id)
+            self._work_oauth_service = WorkWXOauth2Service(
+                self._workwx, self.fullurl())
+
         headers = ObjectDict({"Referer": self.request.full_url()})
         res = yield self.joywok_ps.get_joywok_info(appid=settings['joywok_appid'], method=const.JMIS_SIGNATURE, headers=headers)
         client_env = ObjectDict({
