@@ -55,3 +55,13 @@ class WorkWXPageService(PageService):
         })
         ret = yield self.workwx_ds.get_workwx(params)
         return ret
+
+    @gen.coroutine
+    def bind_workwx_qxuser(self, sysuser_id, workwx_userid, company_id):
+        params = ObjectDict({
+            "sysuser_id": sysuser_id,
+            "workwx_userid": workwx_userid,
+            "companyId": company_id
+        })
+        ret = yield self.workwx_ds.bind_workwx_qxuser(params)
+        return ret

@@ -25,3 +25,9 @@ class WorkWXDataService(DataService):
     def get_workwx(self, params):
         ret = yield http_get(path.COMPANY_GET_WORKWX, jdata=params)
         raise gen.Return(ret)
+
+    @gen.coroutine
+    def bind_workwx_qxuser(self, params):
+        ret = yield http_post_v2(user.INFRA_USER_BIND_WORKWX_QXUSER, user_service, params)
+        raise gen.Return(ret)
+

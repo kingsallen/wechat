@@ -332,6 +332,13 @@ class BaseHandler(MetaBaseHandler):
                 else:
                     self.logger.debug("来自 workwx 的 code 无效")
                 yield self._build_workwx_session(workwx_userinfo)
+                if workwx_userinfo.mobile:
+                    sysuser = yield self.user_ps.get_user_user({
+                        "username": workwx_userinfo.mobile
+                    })
+                    if sysuser:
+                        yield self.workwx_ds.bind_workwx_qxuser(sysuser.id, workwx_userinfo.userid, self._wechat.company_id)
+
 
             else:
                 # pc端授权
