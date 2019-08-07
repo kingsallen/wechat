@@ -485,6 +485,7 @@ class BaseHandler(MetaBaseHandler):
         )
         """
         # 创建 user_workwx
+        self._workwx_userid = workwx_userinfo.userid
         is_create_success = yield self.workwx_ps.create_workwx_user(
             workwx_userinfo,
             company_id=self._wechat.company_id,
