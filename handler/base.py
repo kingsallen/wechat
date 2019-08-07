@@ -1186,7 +1186,6 @@ class BaseHandler(MetaBaseHandler):
 
         yield self._add_company_info_to_session(session)
         if self.is_platform and self.params.recom:
-
             yield self._add_recom_to_session(session)
 
         self.current_user = session
