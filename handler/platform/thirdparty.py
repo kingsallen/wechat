@@ -14,6 +14,7 @@ from handler.metabase import MetaBaseHandler
 from util.common.decorator import handle_response, check_env, authenticated
 from util.tool.dict_tool import ObjectDict
 from util.tool.str_tool import to_str
+from oauth.wechat import WeChatOauth2Service, WeChatOauthError, JsApi, WorkWXOauth2Service
 
 
 class JoywokOauthHandler(MetaBaseHandler):
@@ -31,6 +32,18 @@ class JoywokOauthHandler(MetaBaseHandler):
             next_url = self.make_url(path.POSITION_LIST, self.params, host=self.host)
             self.redirect(next_url)
             return
+
+        url = self._work_oauth_service.get_oauth_code_base_url()
+        self.logger.debug("workwx_oauth_redirect_url: {}".format(url))
+        self.redirect(url)
+
+        # 初始化 企业微信 oauth service
+        company = yield self.company_ps.get_company(conds={'id': self._wechat.company_id}, need_conf=True)
+        if self.in_workwx:
+            self._workwx = yield self.workwx_ps.get_workwx(company.id, company.hraccount_id)
+            self._work_oauth_service = WorkWXOauth2Service(
+                self._workwx, self.fullurl())
+
         headers = ObjectDict({"Referer": self.request.full_url()})
         res = yield self.joywok_ps.get_joywok_info(appid=settings['joywok_appid'], method=const.JMIS_SIGNATURE, headers=headers)
         client_env = ObjectDict({
@@ -117,3 +130,62 @@ class JoywokAutoAuthHandler(BaseHandler):
     def get(self):
         """joywok转发到微信端的关注提示页"""
         self.render_page(template_name="joywok/forward-weixin.html", data=ObjectDict())
+
+
+
+
+class WorkWXOauthHandler(MetaBaseHandler):
+
+    @handle_response
+    @check_env(4)
+    @gen.coroutine
+    def get(self):
+        """更新joywok的授权信息，及获取joywok用户信息"""
+        # 获取登录状态，已登录跳转到职位列表页
+        is_oauth = yield self._get_session()
+        if is_oauth:
+            wechat = yield self.wechat_ps.get_wechat(conds={"company_id": const.MAIDANGLAO_COMPANY_ID})
+            self.params.update(wechat_signature=wechat.signature)
+            next_url = self.make_url(path.POSITION_LIST, self.params, host=self.host)
+            self.redirect(next_url)
+            return
+        headers = ObjectDict({"Referer": self.request.full_url()})
+        res = yield self.joywok_ps.get_joywok_info(appid=settings['joywok_appid'], method=const.JMIS_SIGNATURE, headers=headers)
+        client_env = ObjectDict({
+            "name": self._client_env,
+            "args": ObjectDict({
+                "appid": res.app_id,
+                "signature": res.signature,
+                "timestamp": res.timestamp,
+                "nonceStr": res.nonce,
+                "corpid": res.corp_id,
+                "redirect_url": res.redirect_url
+            })
+        })
+        self.namespace = {"client_env": client_env,
+                          "params": self.params}
+        self.render_page("joywok/entry.html", data=ObjectDict())
+
+    @gen.coroutine
+    def _get_session(self):
+        # 获取session
+        self._session_id = to_str(
+            self.get_secure_cookie(
+                const.COOKIE_SESSIONID))
+
+        is_oauth = yield self._get_session_by_wechat_id(self._session_id)
+        return is_oauth
+
+    @gen.coroutine
+    def _get_session_by_wechat_id(self, session_id, wechat_id=const.MAIDANGLAO_WECHAT_ID):
+        """尝试获取 session"""
+
+        key = const.SESSION_USER.format(session_id, wechat_id)
+        value = self.redis.get(key)
+        self.logger.debug(
+            "_get_joywok_session_by_wechat_id redis wechat_id:{} session: {}, key: {}".format(
+                wechat_id, value, key))
+        if value:
+            raise gen.Return(True)
+
+        raise gen.Return(False)
