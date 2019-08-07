@@ -49,7 +49,6 @@ class BaseHandler(MetaBaseHandler):
 
         # 构建 session 过程中会缓存一份当前公众号信息
         self._wechat = None
-        self._workwx = None
         self._qx_wechat = None
         self._unionid = None
         self._wxuser = None
@@ -265,9 +264,11 @@ class BaseHandler(MetaBaseHandler):
 
         # 初始化 企业微信 oauth service
         company = yield self.company_ps.get_company(conds={'id': self._wechat.company_id}, need_conf=True)
-        self._workwx = yield self.workwx_ps.get_workwx(company.id, company.hraccount_id)
-        self._work_oauth_service = WorkWXOauth2Service(
-            self._workwx, self.fullurl())
+        if self.in_workwx:
+            workwx = yield self.workwx_ps.get_workwx(company.id, company.hraccount_id)
+            self._wechat = workwx
+            self._work_oauth_service = WorkWXOauth2Service(
+                self._wechat, self.fullurl())
 
         self._pass_session = PassportCache()
 
@@ -662,7 +663,7 @@ class BaseHandler(MetaBaseHandler):
         if self._session_id:
             if self.is_platform or self.is_help:
                 # 判断是否可以通过 session，直接获得用户信息，这样就不用跳授权页面
-                workwx_ok = yield self._get_session_by_wechat_id(self._session_id, self._wechat.id)
+                workwx_ok = yield self._get_session_by_wechat_id(self._session_id, self._workwx.id)
                 ok = yield self._get_session_by_wechat_id(self._session_id, self._wechat.id)
                 if not ok:
                     ok = yield self._get_session_by_wechat_id(self._session_id, self.settings['qx_wechat_id'])
@@ -1100,3 +1101,60 @@ class BaseHandler(MetaBaseHandler):
         else:
             display_locale = None
         return display_locale
+
+    @gen.coroutine
+    def _get_session_by_workwx_id(self, session_id, workwx_id):
+        """尝试获取 session"""
+
+        key = const.SESSION_USER.format(session_id, workwx_id)
+        value = self.redis.get(key)
+        self.logger.debug(
+            "_get_session_by_workwx_id redis workwx_id:{} session: {}, key: {}".format(
+                workwx_id, value, key))
+        if value:
+            # 如果有 value， 返回该 value 作为 self.current_user
+            session = ObjectDict(value)
+            self._workwx_userid = session.qxuser.unionid
+            self._workwx_user = session.workwx_user
+            yield self._build_session_by_workwx_userid(self._workwx_userid)
+            raise gen.Return(True)
+
+        raise gen.Return(False)
+
+    @gen.coroutine
+    def _build_session_by_workwx_userid(self, workwx_userid):
+        """从 unionid 构建 session"""
+
+        session = ObjectDict()
+        # session_id = to_str(self.get_secure_cookie(const.COOKIE_SESSIONID))
+        if not _workwx_userid:
+            # 非微信环境, 忽略 wxuser, qxuser
+            session.workwx_user = ObjectDict()
+        else:
+            session.workwx_user = yield self.user_ps.get_wxuser_unionid_wechat_id(
+                unionid=unionid, wechat_id=self._workwx.id)
+
+        if not self._session_id:
+            self._session_id = self._make_new_session_id(
+                session.workwx_user.userid)
+            self.set_secure_cookie(
+                const.COOKIE_SESSIONID,
+                self._session_id,
+                httponly=True,
+                domain=settings['root_host'])
+
+        if self.is_platform:
+            self._pass_session.save_ent_sessions(
+                self._session_id, session, self._wechat.id)
+
+        yield self._add_sysuser_to_session(session, self._session_id)
+        session.sc_cookie_id = self._sc_cookie_id
+
+        session.workwx = self._workwx
+        self._add_jsapi_to_wechat(session.wechat)
+
+        yield self._add_company_info_to_session(session)
+        if self.is_platform and self.params.recom:
+            yield self._add_recom_to_session(session)
+
+        self.current_user = session
