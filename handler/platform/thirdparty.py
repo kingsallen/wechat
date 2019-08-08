@@ -242,9 +242,6 @@ class WorkWXOauthHandler(MetaBaseHandler):
             "address": "广州市海珠区新港中路",
         )
         """
-        #企业微信主页:职位列表页 和 5s跳转页面
-        workwx_home_url = self.make_url(path.POSITION_LIST, self.params, host=self.host)
-        workwx_fivesec_url = self.make_url(path.WOKWX_FIVESEC_PAGE, self.params)  # 如果没有关注公众号, 跳转微信
         # 通过userid查询 这个企业微信成员 是不是已经存在
         workwx_user_record = yield self.workwx_ds.get_workwx_user(self._wechat.company_id, workwx_userinfo.userid)
         # 企业微信成员 已经存在
@@ -262,40 +259,59 @@ class WorkWXOauthHandler(MetaBaseHandler):
             else:
                 sysuser = None
 
-            if sysuser:
-                is_valid_employee = yield self.employee_ps.is_valid_employee(
-                    sysuser.id,
-                    workwx_user_record.company_id
-                )
-                if is_valid_employee: #如果是有效员工，不需要从企业微信跳转到微信,直接访问企业微信主页
-                    self.redirect(workwx_home_url)
-                    return
-                  #如果不是有效员工，先去判断是否关注了公众号
-                is_subscribe = yield self.position_ds.get_hr_wx_user(sysuser.unionid, self._wechat.id)
-                if is_subscribe:
-                    yield self.workwx_ps.employee_bind(sysuser.id, workwx_user_record.company_id)  #如果已经关注公众号，无需跳转微信，可生成员工信息之后访问主页
-                    self.redirect(workwx_home_url)
-                    return
+            yield self._is_valid_employee(sysuser, workwx_userinfo.userid)
 
-                self.redirect(workwx_fivesec_url)
+        else:
+
+            is_create_success = yield self.workwx_ps.create_workwx_user(
+                workwx_userinfo,
+                company_id=self._wechat.company_id,
+                workwx_userid=workwx_userinfo.userid)
+
+            if is_create_success:
+                if workwx_userinfo.mobile:
+                    sysuser = yield self.user_ps.get_user_user({
+                        "username": workwx_userinfo.mobile
+                    })
+                    if sysuser:  # 绑定仟寻用户和企业微信
+                        bind_res = yield self.workwx_ds.bind_workwx_qxuser(sysuser.id, workwx_userinfo.userid, workwx_userinfo.company_id)
+                    yield self._is_valid_employee(sysuser, workwx_userinfo.userid)
+
+
+
+
+    @gen.coroutine
+    def _employee_bind(self, sysuser_id,company_id):
+        """员工认证"""
+        yield self.workwx_ps.employee_bind(sysuser_id, company_id)
+
+    @gen.coroutine
+    def _is_valid_employee(self, sysuser, workwx_userid):
+        """员工认证"""
+        # 企业微信主页:职位列表页 和 5s跳转页面
+        workwx_home_url = self.make_url(path.POSITION_LIST, self.params, host=self.host)
+        workwx_fivesec_url = self.make_url(path.WOKWX_FIVESEC_PAGE, self.params) + "&workwx_userid={}&company_id={}".format(workwx_userid,self._wechat.company_id)  # 如果没有关注公众号, 跳转微信
+        if sysuser:
+            is_valid_employee = yield self.employee_ps.is_valid_employee(
+                sysuser.id,
+                self._wechat.company_id
+            )
+            if is_valid_employee:  # 如果是有效员工，不需要从企业微信跳转到微信,直接访问企业微信主页
+                self.redirect(workwx_home_url)
+                return
+            # 如果不是有效员工，先去判断是否关注了公众号
+            is_subscribe = yield self.position_ds.get_hr_wx_user(sysuser.unionid, self._wechat.id)
+            if is_subscribe:
+                yield self._employee_bind(sysuser.id, self._wechat.company_id)  # 如果已经关注公众号，无需跳转微信，可生成员工信息之后访问主页
+                self.redirect(workwx_home_url)
                 return
 
-            else:
+            self.redirect(workwx_fivesec_url)
+            return
 
-        is_create_success = yield self.workwx_ps.create_workwx_user(
-            workwx_userinfo,
-            company_id=self._wechat.company_id,
-            workwx_userid=workwx_userinfo.userid)
-
-        if is_create_success:
-            self._log_customs.update(new_user=const.YES)
-
-        self.logger.debug("[_handle_workwx_user_info]workwx_user_id: {}".format(workwx_user_id))
-
-        workwx_user = yield self.workwx_ps.get_workwx_user({
-            "company_id": self._wechat.company_id,
-            "workwx_userid": workwx_userinfo.userid  # 保证查找正常的 user record
-        })
+        else:
+            self.redirect(workwx_fivesec_url)
+            return
 
 
     @gen.coroutine
@@ -324,7 +340,7 @@ class FiveSecSkipWXHandler(MetaBaseHandler):
         """企业微信5s跳转页"""
         component_access_token = BaseHandler.component_access_token
         wechat = yield self._get_current_wechat()
-        redirect_url = ""
+        redirect_url = self.make_url(path.WECHAT_QRCODE_PAGE, self.params)
         # 初始化 oauth service
         wx_oauth_service = WeChatOauth2Service(wechat, redirect_url, component_access_token)
 
@@ -356,4 +372,16 @@ class WechatQrcodeHandler(BaseHandler):
     @authenticated
     @gen.coroutine
     def get(self):
+        workwx_userid = self.params.workwx_userid
+        company_id = self.params.company_id
+        #绑定企业微信成员和仟寻用户
+        bind_res = yield self.workwx_ds.bind_workwx_qxuser(self.current_user.sysuser.id, workwx_userid, company_id)
+        is_valid_employee = yield self.employee_ps.is_valid_employee(
+            self.current_user.sysuser.id,
+            company_id
+        )
+
+        #@@@@@@下面代码是否写在扫码事件里面
+        if not is_valid_employee:  # 如果不是有效员工，需要需要生成员工信息
+            yield self._employee_bind(self.current_user.sysuser.id, company_id)  # 如果已经关注公众号，无需跳转微信，可生成员工信息之后访问主页
         self.render_page(template_name="adjunct/wxwork-qrcode.html", data=ObjectDict())

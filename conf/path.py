@@ -84,6 +84,8 @@ JOYWOK_AUTO_AUTH = "/thirdparty/automatic/auth"
 
 WOKWX_FIVESEC_PAGE = "/workwx/fivesec-skipwx"
 
+WECHAT_QRCODE_PAGE = "/wechat/qrcode"
+
 # ============================ 微信端Path结束 ============================
 
 
