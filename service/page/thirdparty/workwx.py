@@ -8,7 +8,7 @@ from util.common import ObjectDict
 
 
 
-class WorkWXPageService(PageService):
+class WorkwxPageService(PageService):
 
     def __init__(self):
         super().__init__()
