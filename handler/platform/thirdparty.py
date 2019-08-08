@@ -14,7 +14,7 @@ from handler.metabase import MetaBaseHandler
 from util.common.decorator import handle_response, check_env, authenticated
 from util.tool.dict_tool import ObjectDict
 from util.tool.str_tool import to_str
-from oauth.wechat import WeChatOauthError, JsApi, WorkWXOauth2Service
+from oauth.wechat import WeChatOauthError, JsApi, WorkWXOauth2Service, WeChatOauth2Service
 from util.common.decorator import check_signature
 
 
@@ -242,8 +242,9 @@ class WorkWXOauthHandler(MetaBaseHandler):
             "address": "广州市海珠区新港中路",
         )
         """
-        #企业微信主页:职位列表页
-        workwx_page = self.make_url(path.POSITION_LIST, self.params, host=self.host)
+        #企业微信主页:职位列表页 和 5s跳转页面
+        workwx_home_url = self.make_url(path.POSITION_LIST, self.params, host=self.host)
+        workwx_fivesec_url = self.make_url(path.WOKWX_FIVESEC_PAGE, self.params)  # 如果没有关注公众号, 跳转微信
         # 通过userid查询 这个企业微信成员 是不是已经存在
         workwx_user_record = yield self.workwx_ds.get_workwx_user(self._wechat.company_id, workwx_userinfo.userid)
         # 企业微信成员 已经存在
@@ -267,15 +268,17 @@ class WorkWXOauthHandler(MetaBaseHandler):
                     workwx_user_record.company_id
                 )
                 if is_valid_employee: #如果是有效员工，不需要从企业微信跳转到微信,直接访问企业微信主页
-                    self.redirect(workwx_page)
+                    self.redirect(workwx_home_url)
                     return
                   #如果不是有效员工，先去判断是否关注了公众号
                 is_subscribe = yield self.position_ds.get_hr_wx_user(sysuser.unionid, self._wechat.id)
                 if is_subscribe:
                     yield self.workwx_ps.employee_bind(sysuser.id, workwx_user_record.company_id)  #如果已经关注公众号，无需跳转微信，可生成员工信息之后访问主页
-                    self.redirect(workwx_page)
+                    self.redirect(workwx_home_url)
                     return
-                否则跳转微信
+
+                yield self.redirect(workwx_fivesec_url)
+
             else:
 
         is_create_success = yield self.workwx_ps.create_workwx_user(
@@ -308,3 +311,38 @@ class WorkWXOauthHandler(MetaBaseHandler):
         self.send_json_success(data={
             "next_url": next_url
         })
+
+
+class FiveSecSkipWXHandler(MetaBaseHandler):
+
+    @handle_response
+    @check_env(4)
+    @check_signature
+    @gen.coroutine
+    def get(self):
+        """企业微信5s跳转页"""
+        component_access_token = BaseHandler.component_access_token
+        wechat = yield self._get_current_wechat()
+        redirect_url = ""
+        # 初始化 oauth service
+        wx_oauth_service = WeChatOauth2Service(wechat, redirect_url, component_access_token)
+
+        # if self.in_workwx:
+        #     self._oauth_service.redirect_url += "&workwx_userid={}&company_id=".format(self._workwx_userid,
+        #                                                                                self._wechat.company_id)
+        wx_oauth_url = wx_oauth_service.get_oauth_code_userinfo_url()
+        self.logger.debug("from_workwx_to_qx_oauth_url: {}".format(wx_oauth_url))
+        self.render_page(template_name="adjunct/wxwork-bind-redirect.html", data=ObjectDict({"redirect_link": wx_oauth_url}))
+
+    @gen.coroutine
+    def _get_current_wechat(self):
+
+        signature = self.params['wechat_signature']
+        wechat = yield self.wechat_ps.get_wechat(conds={
+            "signature": signature
+        })
+        if not wechat:
+            self.write_error(http_code=404)
+            return
+
+        raise gen.Return(wechat)

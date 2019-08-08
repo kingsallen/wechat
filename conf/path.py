@@ -82,6 +82,8 @@ JOYWOK_HOME_PAGE = "/joywork"
 
 JOYWOK_AUTO_AUTH = "/thirdparty/automatic/auth"
 
+WOKWX_FIVESEC_PAGE = "/workwx/fivesec-skipwx"
+
 # ============================ 微信端Path结束 ============================
 
 
