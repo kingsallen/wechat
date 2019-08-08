@@ -4,7 +4,7 @@
 import tornado.gen as gen
 import conf.path as path
 from service.data.base import DataService
-from util.tool.http_tool import http_get, http_post_v2, http_get_v2
+from util.tool.http_tool import http_get, http_post_v2, http_get_v2, http_post
 from conf.newinfra_service_conf.user import user
 from conf.newinfra_service_conf.service_info import user_service
 
@@ -31,3 +31,7 @@ class WorkWXDataService(DataService):
         ret = yield http_post_v2(user.INFRA_USER_BIND_WORKWX_QXUSER, user_service, params)
         raise gen.Return(ret)
 
+    @gen.coroutine
+    def employee_bind(self, params):
+        ret = yield http_post(path.INFRA_USER_EMPLOYEE_BIND, jdata=params)
+        raise gen.Return(ret)
