@@ -589,6 +589,10 @@ class BaseHandler(MetaBaseHandler):
                 url = self.make_url(path.JOYWOK_HOME_PAGE)
                 yield self.redirect(url)
 
+            if self._client_env == const.CLIENT_WORKWX:
+                url = self.make_url(path.WOKWX_OAUTH_PAGE, self.params)
+                yield self.redirect(url)
+
         if need_oauth:
             if self.in_wechat and not self._unionid:
                 # unionid 不存在，则进行仟寻授权
