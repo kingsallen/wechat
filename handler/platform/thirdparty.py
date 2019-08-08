@@ -14,7 +14,8 @@ from handler.metabase import MetaBaseHandler
 from util.common.decorator import handle_response, check_env, authenticated
 from util.tool.dict_tool import ObjectDict
 from util.tool.str_tool import to_str
-from oauth.wechat import WeChatOauth2Service, WeChatOauthError, JsApi, WorkWXOauth2Service
+from oauth.wechat import WeChatOauthError, JsApi, WorkWXOauth2Service
+from util.common.decorator import check_signature
 
 
 class JoywokOauthHandler(MetaBaseHandler):
@@ -124,6 +125,15 @@ class JoywokAutoAuthHandler(BaseHandler):
 
 class WorkWXOauthHandler(MetaBaseHandler):
 
+    def __init__(self, application, request, **kwargs):
+        super(BaseHandler, self).__init__(application, request, **kwargs)
+
+        # 构建 session 过程中会缓存一份当前企业微信信息
+        self._workwx = None
+        self._wechat = None
+        # 处理 oauth 的 service, 会在使用时初始化
+        self._work_oauth_service = None
+
     @handle_response
     @check_env(4)
     @check_signature
@@ -132,6 +142,7 @@ class WorkWXOauthHandler(MetaBaseHandler):
         """更新joywok的授权信息，及获取joywok用户信息"""
         # 获取登录状态，已登录跳转到职位列表页
         # 初始化 企业微信 oauth service
+        self._wechat = yield self._get_current_wechat()
         company = yield self.company_ps.get_company(conds={'id': self._wechat.company_id}, need_conf=True)
         self._workwx = yield self.workwx_ps.get_workwx(company.id, company.hraccount_id)
         self._work_oauth_service = WorkWXOauth2Service(
@@ -147,16 +158,10 @@ class WorkWXOauthHandler(MetaBaseHandler):
             else:
                 self.logger.debug("来自 workwx 的 code 无效")
             yield self._build_workwx_session(workwx_userinfo)
-            if workwx_userinfo.mobile:
-                sysuser = yield self.user_ps.get_user_user({
-                    "username": workwx_userinfo.mobile
-                })
-                if sysuser:
-                    yield self.workwx_ds.bind_workwx_qxuser(sysuser.id, workwx_userinfo.userid, self._wechat.company_id)
+
 
         is_oauth = yield self._get_session()
         if is_oauth:
-            wechat = yield self._get_current_wechat()
             # self.params.update(wechat_signature=wechat.signature)
             next_url = self.make_url(path.POSITION_LIST, self.params, host=self.host)
             self.redirect(next_url)
@@ -167,22 +172,6 @@ class WorkWXOauthHandler(MetaBaseHandler):
         self.redirect(url)
 
 
-        headers = ObjectDict({"Referer": self.request.full_url()})
-        res = yield self.joywok_ps.get_joywok_info(appid=settings['joywok_appid'], method=const.JMIS_SIGNATURE, headers=headers)
-        client_env = ObjectDict({
-            "name": self._client_env,
-            "args": ObjectDict({
-                "appid": res.app_id,
-                "signature": res.signature,
-                "timestamp": res.timestamp,
-                "nonceStr": res.nonce,
-                "corpid": res.corp_id,
-                "redirect_url": res.redirect_url
-            })
-        })
-        self.namespace = {"client_env": client_env,
-                          "params": self.params}
-        self.render_page("joywok/entry.html", data=ObjectDict())
 
     @gen.coroutine
     def _get_session(self):
@@ -253,21 +242,40 @@ class WorkWXOauthHandler(MetaBaseHandler):
             "address": "广州市海珠区新港中路",
         )
         """
-        # 创建 user_workwx
-        self._workwx_userid = workwx_userinfo.userid
-
+        #企业微信主页:职位列表页
+        workwx_page = self.make_url(path.POSITION_LIST, self.params, host=self.host)
         # 查询 这个 userid 是不是已经存在
         workwx_user_record = yield self.workwx_ds.get_workwx_user(self._wechat.company_id, workwx_userinfo.userid)
         # 如果存在
         if workwx_user_record:
-            is_valid_employee = yield self.employee_ps.is_valid_employee(
-                workwx_user_record.sysuser_id,
-                workwx_user_record.company_id
-            )
-            if is_valid_employee:
-                self.workwx_skip_wx = False  #不需要从企业微信跳转到微信
+            if workwx_user_record.sysuser_id >= 0:
+                sysuser = yield self.user_ps.get_user_user({
+                    "id": workwx_user_record.sysuser_id
+                })
+            elif workwx_userinfo.mobile:  #用mobile匹配user_user的username，如果存在，绑定仟寻用户和企业微信
+                sysuser = yield self.user_ps.get_user_user({
+                    "username": workwx_userinfo.mobile
+                })
+                if sysuser: #绑定仟寻用户和企业微信
+                    bind_res = yield self.workwx_ds.bind_workwx_qxuser(sysuser.id, workwx_userinfo.userid, workwx_userinfo.company_id)
             else:
-                is_subscribe = yield self.position_ds.get_hr_wx_user(unionid, self._wechat.id) #self.user_ds.get_wxuser_sysuser_id_wechat_id
+                sysuser = None
+
+            if sysuser:
+                is_valid_employee = yield self.employee_ps.is_valid_employee(
+                    workwx_user_record.sysuser_id,
+                    workwx_user_record.company_id
+                )
+                if is_valid_employee: #如果是有效员工，不需要从企业微信跳转到微信,直接访问企业微信主页
+                    self.redirect(workwx_page)
+                    return
+                  #如果不是有效员工，先去判断是否关注了公众号
+                is_subscribe = yield self.position_ds.get_hr_wx_user(sysuser.unionid, self._wechat.id)
+                if is_subscribe：
+
+                    self.redirect(workwx_page)
+                    return
+            else:
 
         is_create_success = yield self.workwx_ps.create_workwx_user(
             workwx_userinfo,
@@ -284,27 +292,6 @@ class WorkWXOauthHandler(MetaBaseHandler):
             "workwx_userid": workwx_userinfo.userid  # 保证查找正常的 user record
         })
 
-        # 神策数据关联：如果用户已绑定手机号，对用户做注册
-        if bool(user.username.isdigit()):
-            self.logger.debug("[sensors_signup_oauth]ret_user_id: {}, origin_user_id: {}".format(user_id,
-                                                                                                 self._sc_cookie_id))
-            self.sa.track_signup(user_id, self._sc_cookie_id or user_id)
-
-        self.track('cWxAuth', properties={'origin': source}, distinct_id=user_id,
-                   is_login_id=True if bool(user.username.isdigit()) else False)
-        # 设置用户首次授权时间
-        self.profile_set(profiles={'first_oauth_time': user.register_time}, distinct_id=user_id, is_login_id=True,
-                         once=True)
-
-        # 创建 qx 的 user_wx_user
-        yield self.user_ps.create_qx_wxuser_by_userinfo(userinfo, user_id)
-
-        # 静默授权时同步将用户信息，更新到qxuser和user_user
-        yield self._sync_userinfo(self._unionid, userinfo)
-
-        if not self._authable(self._wechat.type):
-            # 该企业号是订阅号 则无法获得当前 wxuser 信息, 无需静默授权
-            self._wxuser = ObjectDict()
 
     @gen.coroutine
     def _build_workwx_session(self, workwx_userinfo):
