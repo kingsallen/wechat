@@ -275,6 +275,7 @@ class WorkWXOauthHandler(MetaBaseHandler):
                     yield self.workwx_ps.employee_bind(sysuser.id, workwx_user_record.company_id)  #如果已经关注公众号，无需跳转微信，可生成员工信息之后访问主页
                     self.redirect(workwx_page)
                     return
+                否则跳转微信
             else:
 
         is_create_success = yield self.workwx_ps.create_workwx_user(
