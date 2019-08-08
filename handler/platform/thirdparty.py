@@ -171,7 +171,12 @@ class WorkWXOauthHandler(MetaBaseHandler):
         self.logger.debug("workwx_oauth_redirect_url: {}".format(url))
         self.redirect(url)
 
+    @gen.coroutine
+    def _build_workwx_session(self, workwx_userinfo):
 
+        session_id = self.make_new_session_id(workwx_userinfo.userid + '_' + workwx_userinfo.company_id)
+        self.set_secure_cookie(const.COOKIE_SESSIONID, session_id, httponly=True, domain=settings['root_host'])
+        self.redis.set(session_id, workwx_userinfo, ttl=60 * 60 * 24 * 7)
 
     @gen.coroutine
     def _get_session(self):
@@ -306,18 +311,6 @@ class WorkWXOauthHandler(MetaBaseHandler):
             self.redirect(workwx_fivesec_url)
             return
 
-
-    @gen.coroutine
-    def _build_workwx_session(self, workwx_userinfo):
-        wechat = yield self.wechat_ps.get_wechat(conds={
-            "company_id":
-        })
-        session_id = self.make_new_session_id(workwx_userinfo.userid + '_' + workwx_userinfo.company_id)
-        self.set_secure_cookie(const.COOKIE_SESSIONID, session_id, httponly=True, domain=settings['root_host'])
-
-        next_url = self.make_url(path.POSITION_LIST,
-                                 self.params,
-                                 host=self.host)
 
 
 class FiveSecSkipWXHandler(MetaBaseHandler):
