@@ -244,9 +244,9 @@ class WorkWXOauthHandler(MetaBaseHandler):
         """
         #企业微信主页:职位列表页
         workwx_page = self.make_url(path.POSITION_LIST, self.params, host=self.host)
-        # 查询 这个 userid 是不是已经存在
+        # 通过userid查询 这个企业微信成员 是不是已经存在
         workwx_user_record = yield self.workwx_ds.get_workwx_user(self._wechat.company_id, workwx_userinfo.userid)
-        # 如果存在
+        # 企业微信成员 已经存在
         if workwx_user_record:
             if workwx_user_record.sysuser_id >= 0:
                 sysuser = yield self.user_ps.get_user_user({
