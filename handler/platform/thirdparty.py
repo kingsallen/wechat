@@ -382,6 +382,6 @@ class WechatQrcodeHandler(BaseHandler):
         )
 
         #@@@@@@下面代码是否写在扫码事件里面
-        if not is_valid_employee:  # 如果不是有效员工，需要需要生成员工信息
-            yield self._employee_bind(self.current_user.sysuser.id, company_id)  # 如果已经关注公众号，无需跳转微信，可生成员工信息之后访问主页
+        # if not is_valid_employee:  # 如果不是有效员工，需要需要生成员工信息
+        #     yield self._employee_bind(self.current_user.sysuser.id, company_id)  # 如果已经关注公众号，无需跳转微信，可生成员工信息之后访问主页
         self.render_page(template_name="adjunct/wxwork-qrcode.html", data=ObjectDict())
