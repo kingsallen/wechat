@@ -278,13 +278,6 @@ class WorkWXOauthHandler(MetaBaseHandler):
                     yield self._is_valid_employee(sysuser, workwx_userinfo.userid)
 
 
-
-
-    @gen.coroutine
-    def _employee_bind(self, sysuser_id,company_id):
-        """员工认证"""
-        yield self.workwx_ps.employee_bind(sysuser_id, company_id)
-
     @gen.coroutine
     def _is_valid_employee(self, sysuser, workwx_userid):
         """员工认证"""
@@ -302,7 +295,7 @@ class WorkWXOauthHandler(MetaBaseHandler):
             # 如果不是有效员工，先去判断是否关注了公众号
             is_subscribe = yield self.position_ds.get_hr_wx_user(sysuser.unionid, self._wechat.id)
             if is_subscribe:
-                yield self._employee_bind(sysuser.id, self._wechat.company_id)  # 如果已经关注公众号，无需跳转微信，可生成员工信息之后访问主页
+                yield self.workwx_ps.employee_bind(sysuser.id, self._wechat.company_id)  # 如果已经关注公众号，无需跳转微信，可生成员工信息之后访问主页
                 self.redirect(workwx_home_url)
                 return
 
@@ -321,13 +314,10 @@ class WorkWXOauthHandler(MetaBaseHandler):
         })
         session_id = self.make_new_session_id(workwx_userinfo.userid + '_' + workwx_userinfo.company_id)
         self.set_secure_cookie(const.COOKIE_SESSIONID, session_id, httponly=True, domain=settings['root_host'])
-        self.params.update(wechat_signature=wechat.signature)
+
         next_url = self.make_url(path.POSITION_LIST,
                                  self.params,
                                  host=self.host)
-        self.send_json_success(data={
-            "next_url": next_url
-        })
 
 
 class FiveSecSkipWXHandler(MetaBaseHandler):
@@ -383,5 +373,5 @@ class WechatQrcodeHandler(BaseHandler):
 
         #@@@@@@下面代码是否写在扫码事件里面
         # if not is_valid_employee:  # 如果不是有效员工，需要需要生成员工信息
-        #     yield self._employee_bind(self.current_user.sysuser.id, company_id)  # 如果已经关注公众号，无需跳转微信，可生成员工信息之后访问主页
+        #     yield self.workwx_ps.employee_bind(self.current_user.sysuser.id, company_id)  # 如果已经关注公众号，无需跳转微信，可生成员工信息之后访问主页
         self.render_page(template_name="adjunct/wxwork-qrcode.html", data=ObjectDict())
