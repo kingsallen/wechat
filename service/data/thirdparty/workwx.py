@@ -9,7 +9,7 @@ from conf.newinfra_service_conf.user import user
 from conf.newinfra_service_conf.service_info import user_service
 
 
-class WorkWXDataService(DataService):
+class WorkwxDataService(DataService):
 
     @gen.coroutine
     def create_workwx_user(self, params):
