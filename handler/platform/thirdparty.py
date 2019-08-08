@@ -278,6 +278,7 @@ class WorkWXOauthHandler(MetaBaseHandler):
                     return
 
                 self.redirect(workwx_fivesec_url)
+                return
 
             else:
 
@@ -346,3 +347,13 @@ class FiveSecSkipWXHandler(MetaBaseHandler):
             return
 
         raise gen.Return(wechat)
+
+
+
+class WechatQrcodeHandler(BaseHandler):
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def get(self):
+        self.render_page(template_name="adjunct/wxwork-qrcode.html", data=ObjectDict())

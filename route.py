@@ -221,6 +221,7 @@ platform_routes = [
     (r"/thirdparty/automatic/auth",                  handler.platform.thirdparty.JoywokAutoAuthHandler,         {"event": "joywok_auto_bind_page"}),
     (r"/workwx",                                     handler.platform.thirdparty.WorkWXOauthHandler,            {"event": "workwx_oauth"}),
     (r'/workwx/fivesec-skipwx',                      handler.platform.thirdparty.FiveSecSkipWXHandler,          {"event": "workwx_fivesec_skipwx"}),
+    (r'/wechat/qrcode',                              handler.platform.thirdparty.WechatQrcodeHandler,           {"event": "wechat_qrcode"}),
 
     # 各大公司的自定义配置
     (r"/custom/emailapply/?",                        handler.platform.customize.CustomizeEmailApplyHandler,     {"event": "customize_emailapply"}),
