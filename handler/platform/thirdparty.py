@@ -277,7 +277,7 @@ class WorkWXOauthHandler(MetaBaseHandler):
                     self.redirect(workwx_home_url)
                     return
 
-                yield self.redirect(workwx_fivesec_url)
+                self.redirect(workwx_fivesec_url)
 
             else:
 
