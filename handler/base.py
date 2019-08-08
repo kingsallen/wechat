@@ -15,7 +15,7 @@ import conf.path as path
 import conf.wechat as wx_const
 from cache.user.passport_session import PassportCache
 from handler.metabase import MetaBaseHandler
-from oauth.wechat import WeChatOauth2Service, WeChatOauthError, JsApi, WorkWXOauth2Service
+from oauth.wechat import WeChatOauth2Service, WeChatOauthError, JsApi
 from setting import settings
 from util.common import ObjectDict
 from util.common.cipher import decode_id
@@ -50,18 +50,13 @@ class BaseHandler(MetaBaseHandler):
         # 构建 session 过程中会缓存一份当前公众号信息
         self._wechat = None
         self._qx_wechat = None
-        self._workwx = None
         self._unionid = None
-        self._workwx_userid = None
         self._wxuser = None
         self._session_id = None
         # 处理 oauth 的 service, 会在使用时初始化
         self._oauth_service = None
-        self._work_oauth_service = None
         self._pass_session = None
         self._sc_cookie_id = None  # 神策设备ID
-        # 是否需要从企业微信跳转到微信
-        self.workwx_skip_wx = True
 
     @property
     def component_access_token(self):
@@ -266,13 +261,6 @@ class BaseHandler(MetaBaseHandler):
         self._oauth_service = WeChatOauth2Service(
             self._wechat, self.fullurl(), self.component_access_token)
 
-        # 初始化 企业微信 oauth service
-        company = yield self.company_ps.get_company(conds={'id': self._wechat.company_id}, need_conf=True)
-        if self.in_workwx:
-            self._workwx = yield self.workwx_ps.get_workwx(company.id, company.hraccount_id)
-            self._work_oauth_service = WorkWXOauth2Service(
-                self._workwx, self.fullurl())
-
         self._pass_session = PassportCache()
 
         # 如果有 code，说明刚刚从微信 oauth 回来
@@ -284,6 +272,8 @@ class BaseHandler(MetaBaseHandler):
             "[prepare]code:{}, state:{}, request_url:{} ".format(
                 code, state, self.request.uri))
         # 预设神策分析全局属性
+        conds = {'id': self._wechat.company_id}
+        company = yield self.company_ps.get_company(conds=conds, need_conf=True)
         self.sa.register_super_properties(ObjectDict({"companyId": company.id,
                                                       "companyName": company.abbreviation}))
 
@@ -292,16 +282,16 @@ class BaseHandler(MetaBaseHandler):
         # 添加joywok js config等环境变量
         yield self._get_client_env_config()
 
-        # 用户同意授权
-        if code and self._verify_code(code):
-            # 保存 code 进 cookie
-            self.set_cookie(
-                const.COOKIE_CODE,
-                to_str(code),
-                expires_days=1,
-                httponly=True)
+        if self.in_wechat:
+            # 用户同意授权
+            if code and self._verify_code(code):
+                # 保存 code 进 cookie
+                self.set_cookie(
+                    const.COOKIE_CODE,
+                    to_str(code),
+                    expires_days=1,
+                    httponly=True)
 
-            if self.in_wechat:
                 # 来自 qx 的授权, 获得 userinfo
                 if state == wx_const.WX_OAUTH_DEFAULT_STATE:
                     self.logger.debug("来自 qx 的授权, 获得 userinfo")
@@ -325,41 +315,23 @@ class BaseHandler(MetaBaseHandler):
                     else:
                         self.logger.debug("来自企业号的 code 无效")
 
-            elif self.in_workwx:
-                self.logger.debug("来自 workwx 的授权, 获得 userinfo")
-                workwx_userinfo = yield self._get_user_info_workwx(code)
-                if workwx_userinfo:
-                    self.logger.debug("来自 workwx 的授权, 获得 userinfo:{}".format(workwx_userinfo))
-                    yield self._handle_user_info_workwx(workwx_userinfo)
+            elif state:  # 用户拒绝授权
+                # TODO 拒绝授权用户，是否让其继续操作? or return
+                pass
+        else:
+            # pc端授权
+            if code and self._verify_code(code):
+                self.set_cookie(
+                    const.COOKIE_CODE,
+                    to_str(code),
+                    expires_days=1,
+                    httponly=True)
+                userinfo = yield self._get_user_info_pc(code)
+                if userinfo:
+                    self.logger.debug("来自 pc 的授权, 获得 userinfo:{}".format(userinfo))
+                    yield self._handle_user_info(userinfo)
                 else:
-                    self.logger.debug("来自 workwx 的 code 无效")
-                yield self._build_workwx_session(workwx_userinfo)
-                if workwx_userinfo.mobile:
-                    sysuser = yield self.user_ps.get_user_user({
-                        "username": workwx_userinfo.mobile
-                    })
-                    if sysuser:
-                        yield self.workwx_ds.bind_workwx_qxuser(sysuser.id, workwx_userinfo.userid, self._wechat.company_id)
-
-
-            else:
-                # pc端授权
-                if code and self._verify_code(code):
-                    self.set_cookie(
-                        const.COOKIE_CODE,
-                        to_str(code),
-                        expires_days=1,
-                        httponly=True)
-                    userinfo = yield self._get_user_info_pc(code)
-                    if userinfo:
-                        self.logger.debug("来自 pc 的授权, 获得 userinfo:{}".format(userinfo))
-                        yield self._handle_user_info(userinfo)
-                    else:
-                        self.logger.debug("来自 pc 的 code 无效")
-
-        elif state:  # 用户拒绝授权
-            # TODO 拒绝授权用户，是否让其继续操作? or return
-            pass
+                    self.logger.debug("来自 pc 的 code 无效")
 
         # 构造并拼装 session
         yield self._fetch_session()
@@ -458,83 +430,6 @@ class BaseHandler(MetaBaseHandler):
         self.track('cWxAuth', properties={'origin': source}, distinct_id=user_id, is_login_id=True if bool(user.username.isdigit()) else False)
         # 设置用户首次授权时间
         self.profile_set(profiles={'first_oauth_time': user.register_time}, distinct_id=user_id, is_login_id=True, once=True)
-
-        # 创建 qx 的 user_wx_user
-        yield self.user_ps.create_qx_wxuser_by_userinfo(userinfo, user_id)
-
-        # 静默授权时同步将用户信息，更新到qxuser和user_user
-        yield self._sync_userinfo(self._unionid, userinfo)
-
-        if not self._authable(self._wechat.type):
-            # 该企业号是订阅号 则无法获得当前 wxuser 信息, 无需静默授权
-            self._wxuser = ObjectDict()
-
-    @gen.coroutine
-    def _handle_user_info_workwx(self, workwx_userinfo):
-        """
-        根据 userId 创建 user_workwx 如果存在则不创建， 返回 wxuser_id
-        创建 员工user_employee，绑定刚刚创建的 user_id
-
-        userinfo 结构：
-        ObjectDict(
-            "userid": "zhangsan",
-            "name": "李四",
-            "department": [1, 2],
-            "order": [1, 2],
-            "position": "后台工程师",
-            "mobile": "15913215421",
-            "gender": "1",
-            "email": "zhangsan@gzdev.com",
-            "is_leader_in_dept": [1, 0],
-            "avatar": "http://wx.qlogo.cn/mmopen/ajNVdqHZLLA3WJ6DSZUfiakYe37PKnQhBIeOQBO4czqrnZDS79FH5Wm5m4X69TBicnHFlhiafvDwklOpZeXYQQ2icg/0",
-            "telephone": "020-123456",
-            "enable": 1,
-            "alias": "jackzhang",
-            "address": "广州市海珠区新港中路",
-        )
-        """
-        # 创建 user_workwx
-        self._workwx_userid = workwx_userinfo.userid
-
-        # 查询 这个 userid 是不是已经存在
-        workwx_user_record = yield self.workwx_ds.get_workwx_user(self._wechat.company_id, workwx_userinfo.userid)
-        # 如果存在
-        if workwx_user_record:
-            is_valid_employee = yield self.employee_ps.is_valid_employee(
-                workwx_user_record.sysuser_id,
-                workwx_user_record.company_id
-            )
-            if is_valid_employee:
-                self.workwx_skip_wx = False  #不需要从企业微信跳转到微信
-            else:
-                is_subscribe = yield self.position_ds.get_hr_wx_user(unionid, self._wechat.id) #self.user_ds.get_wxuser_sysuser_id_wechat_id
-
-        is_create_success = yield self.workwx_ps.create_workwx_user(
-            workwx_userinfo,
-            company_id=self._wechat.company_id,
-            workwx_userid=workwx_userinfo.userid)
-
-        if is_create_success:
-            self._log_customs.update(new_user=const.YES)
-
-        self.logger.debug("[_handle_workwx_user_info]workwx_user_id: {}".format(workwx_user_id))
-
-        workwx_user = yield self.workwx_ps.get_workwx_user({
-            "company_id": self._wechat.company_id,
-            "workwx_userid": workwx_userinfo.userid  # 保证查找正常的 user record
-        })
-
-        # 神策数据关联：如果用户已绑定手机号，对用户做注册
-        if bool(user.username.isdigit()):
-            self.logger.debug("[sensors_signup_oauth]ret_user_id: {}, origin_user_id: {}".format(user_id,
-                                                                                                 self._sc_cookie_id))
-            self.sa.track_signup(user_id, self._sc_cookie_id or user_id)
-
-        self.track('cWxAuth', properties={'origin': source}, distinct_id=user_id,
-                   is_login_id=True if bool(user.username.isdigit()) else False)
-        # 设置用户首次授权时间
-        self.profile_set(profiles={'first_oauth_time': user.register_time}, distinct_id=user_id, is_login_id=True,
-                         once=True)
 
         # 创建 qx 的 user_wx_user
         yield self.user_ps.create_qx_wxuser_by_userinfo(userinfo, user_id)
@@ -660,14 +555,6 @@ class BaseHandler(MetaBaseHandler):
             raise gen.Return(None)
 
     @gen.coroutine
-    def _get_user_info_workwx(self, code):
-        try:
-            userinfo = yield self._work_oauth_service.get_userinfo_by_code(code)
-            raise gen.Return(userinfo)
-        except WeChatOauthError as e:
-            raise gen.Return(None)
-
-    @gen.coroutine
     def _get_user_openid(self, code):
         self._oauth_service.wechat = self._wechat
         try:
@@ -685,10 +572,7 @@ class BaseHandler(MetaBaseHandler):
             self.get_secure_cookie(
                 const.COOKIE_SESSIONID))
 
-        workwx_ok = False
         if self._session_id:
-            if self.in_workwx:
-                workwx_ok = yield self._get_session_by_workwx_id(self._session_id, self._workwx.id)
             if self.is_platform or self.is_help:
                 # 判断是否可以通过 session，直接获得用户信息，这样就不用跳授权页面
                 ok = yield self._get_session_by_wechat_id(self._session_id, self._wechat.id)
@@ -705,20 +589,12 @@ class BaseHandler(MetaBaseHandler):
                 url = self.make_url(path.JOYWOK_HOME_PAGE)
                 yield self.redirect(url)
 
-        if self.in_workwx and self.request.method in ("GET", "HEAD") \
-            and not self.request.uri.startswith("/api/") and not workwx_ok:
-            url = self._work_oauth_service.get_oauth_code_base_url()
-            self.logger.debug("workwx_oauth_redirect_url: {}".format(url))
-            self.redirect(url)
-
-        if need_oauth and self.workwx_skip_wx:
-            if (self.in_wechat or self.in_workwx) and not self._unionid:
+        if need_oauth:
+            if self.in_wechat and not self._unionid:
                 # unionid 不存在，则进行仟寻授权
                 self._oauth_service.wechat = self._qx_wechat
                 # 仟寻授权需要重定向到仟寻appid对应的域名
                 self._get_oauth_redirect_url()
-                if self.in_workwx:
-                    self._oauth_service.redirect_url += "&workwx_userid={}&company_id=".format(self._workwx_userid,self._wechat.company_id)
                 url = self._oauth_service.get_oauth_code_userinfo_url()
                 self.logger.debug("qx_oauth_redirect_url: {}".format(url))
                 self.redirect(url)
@@ -1132,85 +1008,3 @@ class BaseHandler(MetaBaseHandler):
         else:
             display_locale = None
         return display_locale
-
-    @gen.coroutine
-    def _build_workwx_session(self):
-        """用户确认向仟寻授权后的处理，构建 session"""
-
-        self.logger.debug("_build_workwx_session start")
-
-        session = ObjectDict()
-        session.wechat = self._wechat
-
-        # 该 session 只做首次仟寻登录查找各关联帐号所用(微信环境内)
-        if self._workwx_userid:
-            # 只对微信 oauth 用户创建qx session
-            session.workwx_user = yield self.workwx_ps.get_workwx_user(self._workwx.company_id, self._workwx_userid)
-            self._session_id = self._make_new_session_id(session.workwx_user.userid)
-            self.logger.info("session_id:{}-----workwx_userid:{}".format(self._session_id, self._workwx_userid))
-            self.set_secure_cookie(
-                const.COOKIE_SESSIONID,
-                self._session_id,
-                httponly=True,
-                domain=settings['root_host']
-            )
-
-        # 重置 wxuser，qxuser，构建完整的 session
-        self.workwx_user = ObjectDict()
-        yield self._build_session_by_workwx_userid(self._workwx_userid)
-
-    @gen.coroutine
-    def _get_session_by_workwx_id(self, session_id, workwx_id):
-        """尝试获取 session"""
-
-        key = const.SESSION_USER.format(session_id, workwx_id)
-        value = self.redis.get(key)
-        self.logger.debug(
-            "_get_session_by_workwx_id redis workwx_id:{} session: {}, key: {}".format(
-                workwx_id, value, key))
-        if value:
-            # 如果有 value， 返回该 value 作为 self.current_user
-            session = ObjectDict(value)
-            self._workwx_userid = session.workwx_user.userid
-            self._workwx_user = session.workwx_user
-            yield self._build_session_by_workwx_userid(self._workwx_userid)
-            raise gen.Return(True)
-
-        raise gen.Return(False)
-
-    @gen.coroutine
-    def _build_session_by_workwx_userid(self, workwx_userid):
-        """从 unionid 构建 session"""
-
-        session = ObjectDict()
-        # session_id = to_str(self.get_secure_cookie(const.COOKIE_SESSIONID))
-        if not workwx_userid:
-            session.workwx_user = ObjectDict()
-        else:
-            session.workwx_user = yield self.user_ps.get_wxuser_unionid_wechat_id(
-                userid=workwx_userid, wechat_id=self._workwx.company_id)
-
-        if not self._session_id:
-            self._session_id = self._make_new_session_id(
-                session.workwx_user.userid)
-            self.set_secure_cookie(
-                const.COOKIE_SESSIONID,
-                self._session_id,
-                httponly=True,
-                domain=settings['root_host'])
-
-        if self.is_platform:
-            self._pass_session.save_ent_sessions(
-                self._session_id, session, self._workwx.id)
-
-        yield self._add_sysuser_to_session(session, self._session_id)
-        session.sc_cookie_id = self._sc_cookie_id
-
-        session.workwx = self._workwx
-        self._add_jsapi_to_wechat(session.wechat)
-
-        yield self._add_company_info_to_session(session)
-        if self.is_platform and self.params.recom:
-            yield self._add_recom_to_session(session)
-
-        self.current_user = session
