@@ -333,8 +333,13 @@ class BaseHandler(MetaBaseHandler):
                 else:
                     self.logger.debug("来自 pc 的 code 无效")
 
+
+        if self.in_workwx:
+            url = self.make_url(path.WOKWX_OAUTH_PAGE, self.params)
+            yield self.redirect(url)
+        else:
         # 构造并拼装 session
-        yield self._fetch_session()
+            yield self._fetch_session()
         if self.request.connection.stream.closed():
             return
 
@@ -587,10 +592,6 @@ class BaseHandler(MetaBaseHandler):
             need_oauth = True
             if self._client_env == const.CLIENT_JOYWOK:
                 url = self.make_url(path.JOYWOK_HOME_PAGE)
-                yield self.redirect(url)
-
-            if self._client_env == const.CLIENT_WORKWX:
-                url = self.make_url(path.WOKWX_OAUTH_PAGE, self.params)
                 yield self.redirect(url)
 
         if need_oauth:
