@@ -252,7 +252,7 @@ class WorkWXOauthHandler(MetaBaseHandler):
         workwx_user_record = yield self.workwx_ps.get_workwx_user(self._wechat.company_id, workwx_userinfo.userid)
         # 企业微信成员 已经存在
         if workwx_user_record:
-            if workwx_user_record.sysuser_id >= 0:
+            if int(workwx_user_record.sysuser_id) >= 0:
                 sysuser = yield self.user_ps.get_user_user({
                     "id": workwx_user_record.sysuser_id
                 })
