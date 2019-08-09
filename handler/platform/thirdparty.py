@@ -124,10 +124,10 @@ class JoywokAutoAuthHandler(BaseHandler):
 
 
 
-class WorkWXOauthHandler(MetaBaseHandler):
+class WorkwxOauthHandler(MetaBaseHandler):
 
     def __init__(self, application, request, **kwargs):
-        super(WorkWXOauthHandler, self).__init__(application, request, **kwargs)
+        super(WorkwxOauthHandler, self).__init__(application, request, **kwargs)
 
         # 构建 session 过程中会缓存一份当前企业微信信息
         self._workwx = None
