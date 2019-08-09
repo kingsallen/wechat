@@ -190,14 +190,12 @@ class WorkWXOauthHandler(MetaBaseHandler):
         return is_oauth
 
     @gen.coroutine
-    def _get_session_by_wechat_id(self, session_id, wechat_id=const.MAIDANGLAO_WECHAT_ID):
+    def _get_session_by_wechat_id(self, session_id):
         """尝试获取 session"""
 
-        key = const.SESSION_USER.format(session_id, wechat_id)
+        key = const.SESSION_USER.format(session_id, self._wechat.id)
         value = self.redis.get(key)
-        self.logger.debug(
-            "_get_workwx_session_by_wechat_id redis wechat_id:{} session: {}, key: {}".format(
-                wechat_id, value, key))
+        self.logger.debug("_get_workwx_session_by_wechat_id redis wechat_id:{} session: {}, key: {}".format(self._wechat.id, value, key))
         if value:
             raise gen.Return(True)
 
