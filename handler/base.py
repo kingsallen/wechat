@@ -333,13 +333,8 @@ class BaseHandler(MetaBaseHandler):
                 else:
                     self.logger.debug("来自 pc 的 code 无效")
 
-
-        if self.in_workwx:
-            url = self.make_url(path.WOKWX_OAUTH_PAGE, self.params)
-            yield self.redirect(url)
-        else:
         # 构造并拼装 session
-            yield self._fetch_session()
+        yield self._fetch_session()
         if self.request.connection.stream.closed():
             return
 
