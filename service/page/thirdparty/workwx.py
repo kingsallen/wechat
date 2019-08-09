@@ -56,7 +56,7 @@ class WorkwxPageService(PageService):
             "hraccountId": hraccount_id
         })
         ret = yield self.workwx_ds.get_workwx(params)
-        return ret
+        return ret.data
 
     @gen.coroutine
     def bind_workwx_qxuser(self, sysuser_id, workwx_userid, company_id):
