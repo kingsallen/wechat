@@ -196,7 +196,7 @@ class WorkWXOauthHandler(MetaBaseHandler):
         key = const.SESSION_USER.format(session_id, wechat_id)
         value = self.redis.get(key)
         self.logger.debug(
-            "_get_joywok_session_by_wechat_id redis wechat_id:{} session: {}, key: {}".format(
+            "_get_workwx_session_by_wechat_id redis wechat_id:{} session: {}, key: {}".format(
                 wechat_id, value, key))
         if value:
             raise gen.Return(True)
