@@ -124,10 +124,10 @@ class JoywokAutoAuthHandler(BaseHandler):
 
 
 
-class WorkwxOauthHandler(MetaBaseHandler):
+class WorkWXOauthHandler(MetaBaseHandler):
 
     def __init__(self, application, request, **kwargs):
-        super(WorkwxOauthHandler, self).__init__(application, request, **kwargs)
+        super(WorkWXOauthHandler, self).__init__(application, request, **kwargs)
 
         # 构建 session 过程中会缓存一份当前企业微信信息
         self._workwx = None
@@ -249,7 +249,7 @@ class WorkwxOauthHandler(MetaBaseHandler):
         )
         """
         # 通过userid查询 这个企业微信成员 是不是已经存在
-        workwx_user_record = yield self.workwx_ds.get_workwx_user(self._wechat.company_id, workwx_userinfo.userid)
+        workwx_user_record = yield self.workwx_ps.get_workwx_user(self._wechat.company_id, workwx_userinfo.userid)
         # 企业微信成员 已经存在
         if workwx_user_record:
             if workwx_user_record.sysuser_id >= 0:
@@ -261,7 +261,7 @@ class WorkwxOauthHandler(MetaBaseHandler):
                     "username": workwx_userinfo.mobile
                 })
                 if sysuser: #绑定仟寻用户和企业微信
-                    bind_res = yield self.workwx_ds.bind_workwx_qxuser(sysuser.id, workwx_userinfo.userid, workwx_userinfo.company_id)
+                    bind_res = yield self.workwx_ps.bind_workwx_qxuser(sysuser.id, workwx_userinfo.userid, workwx_userinfo.company_id)
             else:
                 sysuser = None
 
@@ -280,7 +280,7 @@ class WorkwxOauthHandler(MetaBaseHandler):
                         "username": workwx_userinfo.mobile
                     })
                     if sysuser:  # 绑定仟寻用户和企业微信
-                        bind_res = yield self.workwx_ds.bind_workwx_qxuser(sysuser.id, workwx_userinfo.userid, workwx_userinfo.company_id)
+                        bind_res = yield self.workwx_ps.bind_workwx_qxuser(sysuser.id, workwx_userinfo.userid, workwx_userinfo.company_id)
                     yield self._is_valid_employee(sysuser, workwx_userinfo.userid)
 
 
@@ -299,7 +299,7 @@ class WorkwxOauthHandler(MetaBaseHandler):
                 self.redirect(workwx_home_url)
                 return
             # 如果不是有效员工，先去判断是否关注了公众号
-            is_subscribe = yield self.position_ds.get_hr_wx_user(sysuser.unionid, self._wechat.id)
+            is_subscribe = yield self.position_ps.get_hr_wx_user(sysuser.unionid, self._wechat.id)
             if is_subscribe:
                 yield self.workwx_ps.employee_bind(sysuser.id, self._wechat.company_id)  # 如果已经关注公众号，无需跳转微信，可生成员工信息之后访问主页
                 self.redirect(workwx_home_url)
@@ -379,7 +379,7 @@ class WechatQrcodeHandler(BaseHandler):
         workwx_userid = self.params.workwx_userid
         company_id = self.params.company_id
         #绑定企业微信成员和仟寻用户
-        bind_res = yield self.workwx_ds.bind_workwx_qxuser(self.current_user.sysuser.id, workwx_userid, company_id)
+        bind_res = yield self.workwx_ps.bind_workwx_qxuser(self.current_user.sysuser.id, workwx_userid, company_id)
         is_valid_employee = yield self.employee_ps.is_valid_employee(
             self.current_user.sysuser.id,
             company_id
