@@ -276,6 +276,11 @@ class WorkWXOauthHandler(MetaBaseHandler):
                     sysuser = yield self.user_ps.get_user_user({
                         "username": workwx_userinfo.mobile
                     })
+                else:
+                    sysuser = None
+            else:
+                sysuser = None
+
 
         if sysuser:
             session_id = self.make_new_session_id(sysuser.id)
