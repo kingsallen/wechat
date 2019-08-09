@@ -263,7 +263,6 @@ class WorkWXOauthHandler(MetaBaseHandler):
                 })
             else:
                 sysuser = None
-
         else:
             workwx_sysuser_id = 0
             is_create_success = yield self.workwx_ps.create_workwx_user(
@@ -280,7 +279,6 @@ class WorkWXOauthHandler(MetaBaseHandler):
                     sysuser = None
             else:
                 sysuser = None
-
 
         if sysuser:
             session_id = self.make_new_session_id(sysuser.id)
