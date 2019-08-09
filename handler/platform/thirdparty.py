@@ -175,7 +175,7 @@ class WorkWXOauthHandler(MetaBaseHandler):
     @gen.coroutine
     def _build_workwx_session(self, workwx_userinfo):
 
-        session_id = self.make_new_session_id(workwx_userinfo.userid + '_' + workwx_userinfo.company_id)
+        session_id = self.make_new_session_id(str(workwx_userinfo.userid) + '_' + str(workwx_userinfo.company_id))
         self.set_secure_cookie(const.COOKIE_SESSIONID, session_id, httponly=True, domain=settings['root_host'])
         self.redis.set(session_id, workwx_userinfo, ttl=60 * 60 * 24 * 7)
 
