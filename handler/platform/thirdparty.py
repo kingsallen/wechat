@@ -16,6 +16,7 @@ from util.tool.dict_tool import ObjectDict
 from util.tool.str_tool import to_str
 from oauth.wechat import WeChatOauthError, JsApi, WorkWXOauth2Service, WeChatOauth2Service
 from util.common.decorator import check_signature
+from util.tool.url_tool import url_subtract_query, make_url
 
 
 class JoywokOauthHandler(MetaBaseHandler):
@@ -146,7 +147,7 @@ class WorkWXOauthHandler(MetaBaseHandler):
         company = yield self.company_ps.get_company(conds={'id': self._wechat.company_id}, need_conf=True)
         self._workwx = yield self.workwx_ps.get_workwx(company.id, company.hraccount_id)
         self._work_oauth_service = WorkWXOauth2Service(
-            self._workwx, self.request.full_url())
+            self._workwx, self.fullurl())
 
         code = self.params.get("code")
         if code:
@@ -311,6 +312,26 @@ class WorkWXOauthHandler(MetaBaseHandler):
             self.redirect(workwx_fivesec_url)
             return
 
+    def fullurl(self, encode=True):
+        """
+        获取当前 url， 默认删除 query 中的 code 和 state。
+
+        和 oauth 有关的 参数会影响 prepare 方法
+        :param encode: False，不会 Encode，主要用在生成 jdsdk signature 时使用
+        :return:
+        """
+
+        full_url = to_str(self.request.full_url())
+
+        if not self.host in self.request.full_url():
+            full_url = full_url.replace(self.settings.m_host, self.host)
+
+        # if not self.domain in self.request.full_url():
+        #     full_url = full_url.replace(self.settings.m_domain, self.domain)
+
+        if not encode:
+            return full_url
+        return url_subtract_query(full_url, ['code', 'state'])
 
 
 class FiveSecSkipWXHandler(MetaBaseHandler):
