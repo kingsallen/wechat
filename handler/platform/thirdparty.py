@@ -405,6 +405,7 @@ class WechatQrcodeHandler(BaseHandler):
             yield self.workwx_ps.bind_workwx_qxuser(self.current_user.sysuser.id, workwx_userid, company_id)
 
         #@@@@@@下面代码是否写在扫码事件里面
+        #先判断是否是有效员工，需要判断的原因：如果以前是有效员工，因为取消关注导致不是有效员工的情况，在扫码之后会自动成为有效员工，这时候不需要再生产员工信息
         # is_valid_employee = yield self.employee_ps.is_valid_employee(
         #     self.current_user.sysuser.id,
         #     company_id
