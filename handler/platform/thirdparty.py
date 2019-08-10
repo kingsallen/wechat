@@ -429,6 +429,7 @@ class WechatQrcodeHandler(BaseHandler):
         #如果已经绑定过(以前访问绑定过),无需再绑定
         if int(workwx_user_record.sysuser_id) > 0:
            # ？？？？？？？？
+           pass
         else:
             #否则，绑定企业微信成员和仟寻用户
             yield self.workwx_ps.bind_workwx_qxuser(self.current_user.sysuser.id, workwx_userid, company_id)
