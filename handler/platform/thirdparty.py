@@ -398,9 +398,6 @@ class FiveSecSkipWXHandler(MetaBaseHandler):
         # 初始化 oauth service
         wx_oauth_service = WeChatOauth2Service(wechat, redirect_url, component_access_token)
 
-        # if self.in_workwx:
-        #     self._oauth_service.redirect_url += "&workwx_userid={}&company_id=".format(self._workwx_userid,
-        #                                                                                self._wechat.company_id)
         wx_oauth_url = wx_oauth_service.get_oauth_code_userinfo_url()
         self.logger.debug("from_workwx_to_qx_oauth_url: {}".format(wx_oauth_url))
         self.render_page(template_name="adjunct/wxwork-bind-redirect.html", data=ObjectDict({"redirect_link": wx_oauth_url}))
