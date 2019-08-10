@@ -276,7 +276,8 @@ class WorkWXOauthHandler(MetaBaseHandler):
                 else:
                     sysuser = None
             else:
-                sysuser = None
+                return
+                # raise MyException("创建企业微信成员信息失败")
 
         yield self._is_valid_employee(sysuser, workwx_sysuser_id, workwx_userinfo.userid)
 
