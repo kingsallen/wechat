@@ -352,7 +352,8 @@ class BaseHandler(MetaBaseHandler):
                     yield self.workwx_ps.employee_bind(self.current_user.sysuser.unionid, self._wechat.company_id)
                 else:
                     #如果没有关注公众号，跳转微信
-                    workwx_fivesec_url = self.make_url(path.WOKWX_FIVESEC_PAGE, self.params) + "&workwx_userid={}&company_id={}".format(workwx_userid, self._wechat.company_id)
+                    workwx_user_record = yield self.workwx_ps.get_workwx_user_by_sysuser_id(self.current_user.sysuser.id)
+                    workwx_fivesec_url = self.make_url(path.WOKWX_FIVESEC_PAGE, self.params) + "&workwx_userid={}&company_id={}".format(workwx_user_record.userid, self._wechat.company_id)
                     self.redirect(workwx_fivesec_url)
                     return
 
