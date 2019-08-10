@@ -177,62 +177,62 @@ class WorkWXOauthHandler(MetaBaseHandler):
     #     self.set_secure_cookie(const.COOKIE_SESSIONID, session_id, httponly=True, domain=settings['root_host'])
     #     self.redis.set(session_id, workwx_userinfo, ttl=60 * 60 * 24 * 7)
 
-    @gen.coroutine
-    def _session_sysuser_is_valid_employee(self, sysuser, workwx_userid):
-        # 企业微信主页:职位列表页 和 5s跳转页面
-        workwx_home_url = self.make_url(path.POSITION_LIST, self.params, host=self.host)
-        workwx_fivesec_url = self.make_url(path.WOKWX_FIVESEC_PAGE, self.params) + "&workwx_userid={}&company_id={}".format(workwx_userid, self._wechat.company_id)
-        is_valid_employee = yield self.employee_ps.is_valid_employee(
-            sysuser.id,
-            self._wechat.company_id
-        )
-        # 如果是有效员工，不需要从企业微信跳转到微信,直接访问企业微信主页
-        if is_valid_employee:
-            self.redirect(workwx_home_url)
-            return
-        # 如果不是有效员工，先去判断是否关注了公众号
-        is_subscribe = yield self.position_ps.get_hr_wx_user(sysuser.unionid, self._wechat.id)
-        if is_subscribe:
-            # 如果已经关注公众号，无需跳转微信，可生成员工信息之后访问主页
-            yield self.workwx_ps.employee_bind(sysuser.id, self._wechat.company_id)
-            self.redirect(workwx_home_url)
-            return
-        # 如果没有关注公众号，跳转微信
-        self.redirect(workwx_fivesec_url)
-        return
+    # @gen.coroutine
+    # def _session_sysuser_is_valid_employee(self, sysuser, workwx_userid):
+    #     # 企业微信主页:职位列表页 和 5s跳转页面
+    #     workwx_home_url = self.make_url(path.POSITION_LIST, self.params, host=self.host)
+    #     workwx_fivesec_url = self.make_url(path.WOKWX_FIVESEC_PAGE, self.params) + "&workwx_userid={}&company_id={}".format(workwx_userid, self._wechat.company_id)
+    #     is_valid_employee = yield self.employee_ps.is_valid_employee(
+    #         sysuser.id,
+    #         self._wechat.company_id
+    #     )
+    #     # 如果是有效员工，不需要从企业微信跳转到微信,直接访问企业微信主页
+    #     if is_valid_employee:
+    #         self.redirect(workwx_home_url)
+    #         return
+    #     # 如果不是有效员工，先去判断是否关注了公众号
+    #     is_subscribe = yield self.position_ps.get_hr_wx_user(sysuser.unionid, self._wechat.id)
+    #     if is_subscribe:
+    #         # 如果已经关注公众号，无需跳转微信，可生成员工信息之后访问主页
+    #         yield self.workwx_ps.employee_bind(sysuser.id, self._wechat.company_id)
+    #         self.redirect(workwx_home_url)
+    #         return
+    #     # 如果没有关注公众号，跳转微信
+    #     self.redirect(workwx_fivesec_url)
+    #     return
 
-    @gen.coroutine
-    def _get_session(self):
-        # 获取session
-        self._session_id = to_str(
-            self.get_secure_cookie(
-                const.COOKIE_SESSIONID))
+    # @gen.coroutine
+    # def _get_session(self):
+    #     # 获取session
+    #     self._session_id = to_str(
+    #         self.get_secure_cookie(
+    #             const.COOKIE_SESSIONID))
+    #
+    #     is_oauth = yield self._get_session_by_wechat_id(self._session_id)
+    #     return is_oauth
+    #
+    # @gen.coroutine
+    # def _get_session_by_wechat_id(self, session_id):
+    #     """尝试获取 session"""
+    #
+    #     key = const.SESSION_USER.format(session_id, self._wechat.id)
+    #     value = self.redis.get(key)
+    #     self.logger.debug("_get_workwx_session_by_wechat_id redis wechat_id:{} session: {}, key: {}".format(self._wechat.id, value, key))
+    #     sysuser = yield self._get_sysuser_by_session_id(session_id)
+    #     if value and sysuser:
+    #         raise gen.Return(sysuser, True)
+    #
+    #     raise gen.Return(sysuser, False)
 
-        is_oauth = yield self._get_session_by_wechat_id(self._session_id)
-        return is_oauth
-
-    @gen.coroutine
-    def _get_session_by_wechat_id(self, session_id):
-        """尝试获取 session"""
-
-        key = const.SESSION_USER.format(session_id, self._wechat.id)
-        value = self.redis.get(key)
-        self.logger.debug("_get_workwx_session_by_wechat_id redis wechat_id:{} session: {}, key: {}".format(self._wechat.id, value, key))
-        sysuser = yield self._get_sysuser_by_session_id(session_id)
-        if value and sysuser:
-            raise gen.Return(sysuser, True)
-
-        raise gen.Return(sysuser, False)
-
-    @gen.coroutine
-    def _get_sysuser_by_session_id(self, session_id):
-        """拼装 session 中的 sysuser"""
-
-        user_id = match_session_id(session_id)
-        sysuser = yield self.user_ps.get_user_user({
-            "id": user_id
-        })
-        return sysuser
+    # @gen.coroutine
+    # def _get_sysuser_by_session_id(self, session_id):
+    #     """拼装 session 中的 sysuser"""
+    #
+    #     user_id = match_session_id(session_id)
+    #     sysuser = yield self.user_ps.get_user_user({
+    #         "id": user_id
+    #     })
+    #     return sysuser
 
     @gen.coroutine
     def _get_current_wechat(self):
