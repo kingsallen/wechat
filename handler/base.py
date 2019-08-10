@@ -353,9 +353,14 @@ class BaseHandler(MetaBaseHandler):
                 else:
                     #如果没有关注公众号，跳转微信
                     workwx_user_record = yield self.workwx_ps.get_workwx_user_by_sysuser_id(self.current_user.sysuser.id)
-                    workwx_fivesec_url = self.make_url(path.WOKWX_FIVESEC_PAGE, self.params) + "&workwx_userid={}&company_id={}".format(workwx_user_record.userid, self._wechat.company_id)
-                    self.redirect(workwx_fivesec_url)
-                    return
+                    if workwx_user_record:
+                        workwx_fivesec_url = self.make_url(path.WOKWX_FIVESEC_PAGE, self.params) + "&workwx_userid={}&company_id={}".format(workwx_user_record.userid, self._wechat.company_id)
+                        self.redirect(workwx_fivesec_url)
+                        return
+                    else:
+                        url = self.make_url(path.WOKWX_OAUTH_PAGE, self.params)
+                        yield self.redirect(url)
+                        return
 
         # 设置神策用户属性
         if self.current_user.employee:
