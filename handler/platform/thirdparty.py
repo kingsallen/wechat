@@ -248,6 +248,7 @@ class WorkWXOauthHandler(MetaBaseHandler):
         """
         # 通过userid查询 这个企业微信成员 是不是已经存在
         workwx_user_record = yield self.workwx_ps.get_workwx_user(self._wechat.company_id, workwx_userinfo.userid)
+        workwx_sysuser_id = 0
         # 企业微信成员 已经存在
         if workwx_user_record:
             workwx_sysuser_id = int(workwx_user_record.sysuser_id)
@@ -255,31 +256,32 @@ class WorkWXOauthHandler(MetaBaseHandler):
                 sysuser = yield self.user_ps.get_user_user({
                     "id": workwx_user_record.sysuser_id
                 })
-            elif workwx_userinfo.mobile:  #用mobile匹配user_user的username，如果存在，绑定仟寻用户和企业微信
-                sysuser = yield self.user_ps.get_user_user({
-                    "username": workwx_userinfo.mobile
-                })
             else:
-                sysuser = None
+                sysuser = yield self._get_sysuser_by_mobile(workwx_userinfo)
         else:
-            workwx_sysuser_id = 0
             is_create_success = yield self.workwx_ps.create_workwx_user(
                 workwx_userinfo,
                 company_id=self._wechat.company_id,
                 workwx_userid=workwx_userinfo.userid)
 
             if is_create_success:
-                if workwx_userinfo.mobile:
-                    sysuser = yield self.user_ps.get_user_user({
-                        "username": workwx_userinfo.mobile
-                    })
-                else:
-                    sysuser = None
+                sysuser = yield self._get_sysuser_by_mobile(workwx_userinfo)
             else:
                 return
                 # raise MyException("创建企业微信成员信息失败")
 
         yield self._is_valid_employee(sysuser, workwx_sysuser_id, workwx_userinfo.userid)
+
+    # 用mobile匹配user_user的username，如果存在，绑定仟寻用户和企业微信
+    @gen.coroutine
+    def _get_sysuser_by_mobile(self, workwx_userinfo):
+        if workwx_userinfo.mobile:
+            sysuser = yield self.user_ps.get_user_user({
+                "username": workwx_userinfo.mobile
+            })
+        else:
+            sysuser = None
+        return sysuser
 
     #绑定企业微信用户和仟寻用户、保存session 这两个操作 必须在不跳转微信(直接跳转position页面)的情况下执行；在跳转微信的情况下很可能微信
     @gen.coroutine
