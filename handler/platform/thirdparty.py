@@ -269,7 +269,6 @@ class WorkWXOauthHandler(MetaBaseHandler):
             else:
                 return
                 # raise MyException("创建企业微信成员信息失败")
-
         yield self._is_valid_employee(sysuser, workwx_sysuser_id, workwx_userinfo.userid)
 
     # 用mobile匹配user_user的username，如果存在，绑定仟寻用户和企业微信
