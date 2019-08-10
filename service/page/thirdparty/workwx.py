@@ -40,10 +40,19 @@ class WorkwxPageService(PageService):
 
     @gen.coroutine
     def get_workwx_user(self, company_id, workwx_userid):
-        """获取企业微信成员信息"""
+        """通过userid获取企业微信成员信息"""
         params = ObjectDict({
             "company_id": company_id,
             "work_wechat_userid": workwx_userid
+        })
+        ret = yield self.workwx_ds.get_workwx_user(params)
+        return ret.data
+
+    @gen.coroutine
+    def get_workwx_user_by_sysuser_id(self, sysuser_id):
+        """通过sysuser_id获取企业微信成员信息"""
+        params = ObjectDict({
+            "sysuser_id": sysuser_id
         })
         ret = yield self.workwx_ds.get_workwx_user(params)
         return ret.data

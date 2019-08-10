@@ -16,7 +16,8 @@ from util.tool.dict_tool import ObjectDict
 from util.tool.str_tool import to_str
 from oauth.wechat import WeChatOauthError, JsApi, WorkWXOauth2Service, WeChatOauth2Service
 from util.common.decorator import check_signature
-from util.tool.url_tool import url_subtract_query, make_url
+from util.tool.url_tool import url_subtract_query
+from util.tool.str_tool import to_str, match_session_id
 
 
 class JoywokOauthHandler(MetaBaseHandler):
@@ -160,24 +161,45 @@ class WorkWXOauthHandler(MetaBaseHandler):
                 self.logger.debug("来自 workwx 的 code 无效")
             # yield self._build_workwx_session(workwx_userinfo)
 
-
-        is_oauth = yield self._get_session()
-        if is_oauth:
-            # self.params.update(wechat_signature=wechat.signature)
-            next_url = self.make_url(path.POSITION_LIST, self.params, host=self.host)
-            self.redirect(next_url)
-            return
+        # sysuser, is_oauth = yield self._get_session()
+        # if is_oauth:
+        #     workwx_user_record = yield self.workwx_ps.get_workwx_user_by_sysuser_id(sysuser.id)
+        #     yield self._session_sysuser_is_valid_employee(sysuser, workwx_user_record.userid)
+        #     return
 
         url = self._work_oauth_service.get_oauth_code_base_url()
         self.logger.debug("workwx_oauth_redirect_url: {}".format(url))
         self.redirect(url)
+    # @gen.coroutine
+    # def _build_workwx_session(self, workwx_userinfo):
+    #
+    #     session_id = self.make_new_session_id(str(workwx_userinfo.userid) + '_' + str(workwx_userinfo.company_id))
+    #     self.set_secure_cookie(const.COOKIE_SESSIONID, session_id, httponly=True, domain=settings['root_host'])
+    #     self.redis.set(session_id, workwx_userinfo, ttl=60 * 60 * 24 * 7)
 
     @gen.coroutine
-    def _build_workwx_session(self, workwx_userinfo):
-
-        session_id = self.make_new_session_id(str(workwx_userinfo.userid) + '_' + str(workwx_userinfo.company_id))
-        self.set_secure_cookie(const.COOKIE_SESSIONID, session_id, httponly=True, domain=settings['root_host'])
-        self.redis.set(session_id, workwx_userinfo, ttl=60 * 60 * 24 * 7)
+    def _session_sysuser_is_valid_employee(self, sysuser, workwx_userid):
+        # 企业微信主页:职位列表页 和 5s跳转页面
+        workwx_home_url = self.make_url(path.POSITION_LIST, self.params, host=self.host)
+        workwx_fivesec_url = self.make_url(path.WOKWX_FIVESEC_PAGE, self.params) + "&workwx_userid={}&company_id={}".format(workwx_userid, self._wechat.company_id)
+        is_valid_employee = yield self.employee_ps.is_valid_employee(
+            sysuser.id,
+            self._wechat.company_id
+        )
+        # 如果是有效员工，不需要从企业微信跳转到微信,直接访问企业微信主页
+        if is_valid_employee:
+            self.redirect(workwx_home_url)
+            return
+        # 如果不是有效员工，先去判断是否关注了公众号
+        is_subscribe = yield self.position_ps.get_hr_wx_user(sysuser.unionid, self._wechat.id)
+        if is_subscribe:
+            # 如果已经关注公众号，无需跳转微信，可生成员工信息之后访问主页
+            yield self.workwx_ps.employee_bind(sysuser.id, self._wechat.company_id)
+            self.redirect(workwx_home_url)
+            return
+        # 如果没有关注公众号，跳转微信
+        self.redirect(workwx_fivesec_url)
+        return
 
     @gen.coroutine
     def _get_session(self):
@@ -196,10 +218,21 @@ class WorkWXOauthHandler(MetaBaseHandler):
         key = const.SESSION_USER.format(session_id, self._wechat.id)
         value = self.redis.get(key)
         self.logger.debug("_get_workwx_session_by_wechat_id redis wechat_id:{} session: {}, key: {}".format(self._wechat.id, value, key))
-        if value:
-            raise gen.Return(True)
+        sysuser = yield self._get_sysuser_by_session_id(session_id)
+        if value and sysuser:
+            raise gen.Return(sysuser, True)
 
-        raise gen.Return(False)
+        raise gen.Return(sysuser, False)
+
+    @gen.coroutine
+    def _get_sysuser_by_session_id(self, session_id):
+        """拼装 session 中的 sysuser"""
+
+        user_id = match_session_id(session_id)
+        sysuser = yield self.user_ps.get_user_user({
+            "id": user_id
+        })
+        return sysuser
 
     @gen.coroutine
     def _get_current_wechat(self):
@@ -285,9 +318,8 @@ class WorkWXOauthHandler(MetaBaseHandler):
     #绑定企业微信用户和仟寻用户、保存session 这两个操作 必须在不跳转微信(直接跳转position页面)的情况下执行；在跳转微信的情况下很可能微信
     @gen.coroutine
     def _is_valid_employee(self, sysuser, workwx_sysuser_id, workwx_userid):
-        """员工认证"""
         #5s跳转页面
-        workwx_fivesec_url = self.make_url(path.WOKWX_FIVESEC_PAGE, self.params) + "&workwx_userid={}&company_id={}".format(workwx_userid,self._wechat.company_id)  # 如果没有关注公众号, 跳转微信
+        workwx_fivesec_url = self.make_url(path.WOKWX_FIVESEC_PAGE, self.params) + "&workwx_userid={}&company_id={}".format(workwx_userid,self._wechat.company_id)
         if sysuser:
             # 判断是否是有效员工
             is_valid_employee = yield self.employee_ps.is_valid_employee(
