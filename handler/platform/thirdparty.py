@@ -141,8 +141,7 @@ class WorkWXOauthHandler(MetaBaseHandler):
     @check_signature
     @gen.coroutine
     def get(self):
-        """更新joywok的授权信息，及获取joywok用户信息"""
-        # 获取登录状态，已登录跳转到职位列表页
+        """更新workwx的授权信息，及获取workwx用户信息"""
         # 初始化 企业微信 oauth service
         self._wechat = yield self._get_current_wechat()
         company = yield self.company_ps.get_company(conds={'id': self._wechat.company_id}, need_conf=True)
