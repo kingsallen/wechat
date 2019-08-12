@@ -368,8 +368,11 @@ class WorkWXOauth2Service(object):
         department_names = []
         for department_id in department_ids:
             ret = yield http_get(wx_const.WORKWX_OAUTH_GET_DEPARTMENT % (self._access_token, department_id), infra=False)
+            departments = ret.get("department")
             if ret.errcode:
                 raise WeChatOauthError("_get_departments_by_deptids: {}".format(ret.errmsg))
             else:
-                department_names.append(ret.get("department")[0])
+                for department_info in departments:
+                    if department_info.get("parentid") == department_id:
+                        department_names.append(department_info.get("name"))
         raise gen.Return(department_names)
