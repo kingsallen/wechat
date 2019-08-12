@@ -32,10 +32,8 @@ class WorkwxPageService(PageService):
         # 如果不存在，创建 user_workwx 记录，返回 user_id
         workwx_userinfo.update({"company_id": company_id})
         workwx_userinfo.update({"work_wechat_userid": workwx_userinfo.userid})
-        params = ObjectDict({
-            "workwx_userinfo": workwx_userinfo
-        })
-        create_workwx = yield self.workwx_ds.create_workwx_user(params)
+
+        create_workwx = yield self.workwx_ds.create_workwx_user(ObjectDict(workwx_userinfo))
         if create_workwx.code != const.NEWINFRA_API_SUCCESS:
             raise MyException("创建企业微信成员信息失败")
         else:
