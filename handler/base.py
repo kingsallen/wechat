@@ -15,7 +15,7 @@ import conf.path as path
 import conf.wechat as wx_const
 from cache.user.passport_session import PassportCache
 from handler.metabase import MetaBaseHandler
-from oauth.wechat import WeChatOauth2Service, WeChatOauthError, JsApi
+from oauth.wechat import WeChatOauth2Service, WeChatOauthError, JsApi, WorkWXOauth2Service
 from setting import settings
 from util.common import ObjectDict
 from util.common.cipher import decode_id
@@ -263,6 +263,12 @@ class BaseHandler(MetaBaseHandler):
 
         self._pass_session = PassportCache()
 
+        conds = {'id': self._wechat.company_id}
+        company = yield self.company_ps.get_company(conds=conds, need_conf=True)
+        self._workwx = yield self.workwx_ps.get_workwx(company.id, company.hraccount_id)
+        self._work_oauth_service = WorkWXOauth2Service(
+            self._workwx, self.fullurl())
+
         # 如果有 code，说明刚刚从微信 oauth 回来
         code = self.params.get("code")
         state = self.params.get("state")
@@ -272,8 +278,6 @@ class BaseHandler(MetaBaseHandler):
             "[prepare]code:{}, state:{}, request_url:{} ".format(
                 code, state, self.request.uri))
         # 预设神策分析全局属性
-        conds = {'id': self._wechat.company_id}
-        company = yield self.company_ps.get_company(conds=conds, need_conf=True)
         self.sa.register_super_properties(ObjectDict({"companyId": company.id,
                                                       "companyName": company.abbreviation}))
 
@@ -282,16 +286,16 @@ class BaseHandler(MetaBaseHandler):
         # 添加joywok js config等环境变量
         yield self._get_client_env_config()
 
-        if self.in_wechat:
-            # 用户同意授权
-            if code and self._verify_code(code):
-                # 保存 code 进 cookie
-                self.set_cookie(
-                    const.COOKIE_CODE,
-                    to_str(code),
-                    expires_days=1,
-                    httponly=True)
+        # 用户同意授权
+        if code and self._verify_code(code):
+            # 保存 code 进 cookie
+            self.set_cookie(
+                const.COOKIE_CODE,
+                to_str(code),
+                expires_days=1,
+                httponly=True)
 
+            if self.in_wechat:
                 # 来自 qx 的授权, 获得 userinfo
                 if state == wx_const.WX_OAUTH_DEFAULT_STATE:
                     self.logger.debug("来自 qx 的授权, 获得 userinfo")
@@ -315,23 +319,26 @@ class BaseHandler(MetaBaseHandler):
                     else:
                         self.logger.debug("来自企业号的 code 无效")
 
-            elif state:  # 用户拒绝授权
-                # TODO 拒绝授权用户，是否让其继续操作? or return
-                pass
-        else:
-            # pc端授权
-            if code and self._verify_code(code):
-                self.set_cookie(
-                    const.COOKIE_CODE,
-                    to_str(code),
-                    expires_days=1,
-                    httponly=True)
-                userinfo = yield self._get_user_info_pc(code)
-                if userinfo:
-                    self.logger.debug("来自 pc 的授权, 获得 userinfo:{}".format(userinfo))
-                    yield self._handle_user_info(userinfo)
+            elif self.in_workwx:
+                self.logger.debug("来自 workwx 的授权, 获得 code: {}".format(code))
+                workwx_userinfo = yield self._get_user_info_workwx(code)
+                if workwx_userinfo:
+                    self.logger.debug("来自 workwx 的授权, 获得 workwx_userinfo:{}".format(workwx_userinfo))
+                    yield self._handle_user_info_workwx(workwx_userinfo)
                 else:
-                    self.logger.debug("来自 pc 的 code 无效")
+                    self.logger.debug("来自 workwx 的 code 无效")
+
+            else:
+                # pc端授权
+                    userinfo = yield self._get_user_info_pc(code)
+                    if userinfo:
+                        self.logger.debug("来自 pc 的授权, 获得 userinfo:{}".format(userinfo))
+                        yield self._handle_user_info(userinfo)
+                    else:
+                        self.logger.debug("来自 pc 的 code 无效")
+        elif state:  # 用户拒绝授权
+            # TODO 拒绝授权用户，是否让其继续操作? or return
+            pass
 
         # 构造并拼装 session
         yield self._fetch_session()
@@ -607,8 +614,11 @@ class BaseHandler(MetaBaseHandler):
                 url = self.make_url(path.JOYWOK_HOME_PAGE)
                 yield self.redirect(url)
             elif self._client_env == const.CLIENT_WORKWX:
-                url = self.make_url(path.WOKWX_OAUTH_PAGE, self.params)
-                yield self.redirect(url)
+                # url = self.make_url(path.WOKWX_OAUTH_PAGE, self.params)
+                url = self._work_oauth_service.get_oauth_code_base_url()
+                self.logger.debug("workwx_oauth_redirect_url: {}".format(url))
+                self.redirect(url)
+                return
 
         if need_oauth:
             if self.in_wechat and not self._unionid:
