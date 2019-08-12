@@ -55,7 +55,7 @@ class WorkwxPageService(PageService):
             "company_id": company_id,
             "sysuser_id": sysuser_id
         })
-        ret = yield self.workwx_ds.get_workwx_user(params)
+        ret = yield self.workwx_ds.get_workwx_user_by_sysuser_id(params)
         return ret.data
 
     @gen.coroutine
