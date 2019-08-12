@@ -297,11 +297,7 @@ class WorkWXOauthHandler(MetaBaseHandler):
                 company_id=self._wechat.company_id,
                 workwx_userid=workwx_userinfo.userid)
 
-            if is_create_success:
-                sysuser = yield self._get_sysuser_by_mobile(workwx_userinfo)
-            else:
-                return
-                # raise MyException("创建企业微信成员信息失败")
+            sysuser = yield self._get_sysuser_by_mobile(workwx_userinfo)
         yield self._is_valid_employee(sysuser, workwx_sysuser_id, workwx_userinfo.userid)
 
     # 用mobile匹配user_user的username，如果存在，绑定仟寻用户和企业微信
