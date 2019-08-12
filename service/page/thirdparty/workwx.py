@@ -5,6 +5,7 @@ from tornado import gen
 import conf.common as const
 from service.page.base import PageService
 from util.common import ObjectDict
+from util.common.exception import MyException
 
 
 
@@ -27,16 +28,18 @@ class WorkwxPageService(PageService):
 
         # 如果存在，返回 userid
         if workwx_user_record:
-            res = True
+            return True
+        # 如果不存在，创建 user_workwx 记录，返回 user_id
+        workwx_userinfo.update({"company_id": company_id})
+        params = ObjectDict({
+            "workwx_userinfo": workwx_userinfo
+        })
+        create_workwx = yield self.workwx_ds.create_workwx_user(params)
+        if create_workwx.code != const.NEWINFRA_API_SUCCESS:
+            raise MyException("创建企业微信成员信息失败")
         else:
-            # 如果不存在，创建 user_workwx 记录，返回 user_id
-            workwx_userinfo.update({"company_id": company_id})
-            params = ObjectDict({
-                "workwx_userinfo": workwx_userinfo
-            })
-            create_workwx = yield self.workwx_ds.create_workwx_user(params)
-            res = create_workwx.get('data')
-        return res
+            return create_workwx.get('data')
+
 
     @gen.coroutine
     def get_workwx_user(self, company_id, workwx_userid):
