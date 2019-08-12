@@ -373,6 +373,6 @@ class WorkWXOauth2Service(object):
                 raise WeChatOauthError("_get_departments_by_deptids: {}".format(ret.errmsg))
             else:
                 for department_info in departments:
-                    if department_info.get("parentid") == department_id:
+                    if department_info.get("id") == department_id:
                         department_names.append(department_info.get("name"))
         raise gen.Return(department_names)
