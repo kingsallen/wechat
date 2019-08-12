@@ -31,6 +31,7 @@ class WorkwxPageService(PageService):
             return True
         # 如果不存在，创建 user_workwx 记录，返回 user_id
         workwx_userinfo.update({"company_id": company_id})
+        workwx_userinfo.update({"work_wechat_userid": workwx_userinfo.userid})
         params = ObjectDict({
             "workwx_userinfo": workwx_userinfo
         })
