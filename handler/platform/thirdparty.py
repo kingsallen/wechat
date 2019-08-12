@@ -170,6 +170,7 @@ class WorkWXOauthHandler(MetaBaseHandler):
         url = self._work_oauth_service.get_oauth_code_base_url()
         self.logger.debug("workwx_oauth_redirect_url: {}".format(url))
         self.redirect(url)
+
     # @gen.coroutine
     # def _build_workwx_session(self, workwx_userinfo):
     #
