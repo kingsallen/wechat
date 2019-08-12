@@ -49,9 +49,10 @@ class WorkwxPageService(PageService):
         return ret.data
 
     @gen.coroutine
-    def get_workwx_user_by_sysuser_id(self, sysuser_id):
+    def get_workwx_user_by_sysuser_id(self, sysuser_id, company_id):
         """通过sysuser_id获取企业微信成员信息"""
         params = ObjectDict({
+            "company_id": company_id,
             "sysuser_id": sysuser_id
         })
         ret = yield self.workwx_ds.get_workwx_user(params)

@@ -13,12 +13,17 @@ class WorkwxDataService(DataService):
 
     @gen.coroutine
     def create_workwx_user(self, params):
-        ret = yield http_put_v2(user.INFRA_USER_WORKWX_USER, user_service, params)
+        ret = yield http_put_v2(user.INFRA_GET_WORKWX_USER, user_service, params)
         raise gen.Return(ret)
 
     @gen.coroutine
     def get_workwx_user(self, params):
-        ret = yield http_get_v2(user.INFRA_USER_WORKWX_USER, user_service, params)
+        ret = yield http_get_v2(user.INFRA_GET_WORKWX_USER, user_service, params)
+        raise gen.Return(ret)
+
+    @gen.coroutine
+    def get_workwx_user_by_sysuser_id(self, params):
+        ret = yield http_get_v2(user.INFRA_GET_WORKWX_USER_BY_SYSUSER_ID, user_service, params)
         raise gen.Return(ret)
 
     @gen.coroutine
