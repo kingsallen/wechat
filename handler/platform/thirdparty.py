@@ -152,7 +152,7 @@ class WorkWXOauthHandler(MetaBaseHandler):
 
         code = self.params.get("code")
         if code:
-            self.logger.debug("来自 workwx 的授权, 获得 workwx_userinfo")
+            self.logger.debug("来自 workwx 的授权, 获得 code: {}".format(code))
             workwx_userinfo = yield self._get_user_info_workwx(code)
             if workwx_userinfo:
                 self.logger.debug("来自 workwx 的授权, 获得 workwx_userinfo:{}".format(workwx_userinfo))
