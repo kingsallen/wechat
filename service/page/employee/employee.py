@@ -246,6 +246,8 @@ class EmployeePageService(PageService):
                 _make_questions_conf()
             elif employee.authMethod == const.USER_EMPLOYEE_AUTH_METHOD.WORKWX:
                 data.type = self.FE_BIND_TYPE_WORKWX
+                employee_cert_conf = yield self.employee_ps.get_employee_cert_config(current_user.company.id, self.current_user.company.hraccount_id)
+                data.status = 1 if employee_cert_conf else 0
                 _make_questions_conf()
             else:
                 assert False  # should not be here
@@ -289,6 +291,8 @@ class EmployeePageService(PageService):
                 _make_questions_conf()
             elif conf.authMode == const.EMPLOYEE_BIND_AUTH_MODE.WORKWX:
                 data.type = self.FE_BIND_TYPE_WORKWX
+                employee_cert_conf = yield self.employee_ps.get_employee_cert_config(current_user.company.id,self.current_user.company.hraccount_id)
+                data.status = 1 if employee_cert_conf else 0
                 _make_questions_conf()
             else:
                 raise ValueError('invalid authMode')
@@ -1138,3 +1142,16 @@ class EmployeePageService(PageService):
                     "referral_id": item.get('referral_id'),
                 })
         return data
+
+    @gen.coroutine
+    def get_employee_cert_config(self, company_id, hraccount_id, filter_current=True):
+        """获取员工认证配置"""
+        res = yield self.infra_employee_ds.get_employee_cert_config(company_id, hraccount_id)
+        data = res.get('data')
+        # 这里过滤掉其他公司的配置信息
+        if filter_current and data:
+            confs = data['hrEmployeeCertConf']
+            fil = filter(lambda x: x['companyId'] == company_id, confs)
+            current_com_conf = fil[0] if fil else {}
+            data['hrEmployeeCertConf'] = current_com_conf
+        raise gen.Return(res)

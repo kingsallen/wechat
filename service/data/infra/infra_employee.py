@@ -458,7 +458,16 @@ class InfraEmployeeDataService(DataService):
         ret = yield http_post_v2(employee.NEWINFRA_EMPLOYEE_SUBSCRIBE_PREFERENCE, employee_service, params)
         return ret
 
-
+    @gen.coroutine
+    def get_employee_cert_config(self, company_id, hraccount_id):
+        """提交员工订阅偏好的信息"""
+        params = {
+            "company_id": company_id,
+            "hraccount_id": hraccount_id,
+            "type": 3
+        }
+        ret = yield http_get(path.INFRA_GET_EMPLOYEE_CERT_CONFIG, params)
+        return ret
 
 
 
