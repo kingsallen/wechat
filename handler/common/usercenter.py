@@ -227,7 +227,9 @@ class ApplyRecordsHandler(BaseHandler):
 
         else:
             # 查看申请记录列表
-            res = yield self.usercenter_ps.get_applied_applications(self.current_user.sysuser.id, self.current_user.company.id)
+            page_no = self.params.page_no if self.params.page_no else 1
+            page_size = self.params.page_size if self.params.page_size else 50
+            res = yield self.usercenter_ps.get_applied_applications(self.current_user.sysuser.id, self.current_user.company.id, page_no, page_size)
             self.send_json_success(data=ObjectDict(
                 records=res
             ))
