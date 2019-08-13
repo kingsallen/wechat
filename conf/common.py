@@ -662,14 +662,16 @@ EMPLOYEE_BIND_AUTH_MODE = ObjectDict(
     CUSTOM=2,
     EMAIL_OR_CUSTOM=4,
     QUESTION=5,
-    EMAIL_OR_QUESTION=6
+    EMAIL_OR_QUESTION=6,
+    WORKWX=7
 )
 
 # user_employee.auth_method 的数据库枚举值
 USER_EMPLOYEE_AUTH_METHOD = ObjectDict(
     EMAIL=0,
     CUSTOM=1,
-    QUESTION=2
+    QUESTION=2,
+    WORKWX=3
 )
 
 # 员工认证状态码

@@ -25,6 +25,7 @@ class EmployeePageService(PageService):
     FE_BIND_TYPE_CUSTOM = 'custom'
     FE_BIND_TYPE_EMAIL = 'email'
     FE_BIND_TYPE_QUESTION = 'question'
+    FE_BIND_TYPE_WORKWX = 'workwx'
 
     BIND_AUTH_MODE = ObjectDict({
         FE_BIND_TYPE_EMAIL: 0,
@@ -243,6 +244,9 @@ class EmployeePageService(PageService):
             elif employee.authMethod == const.USER_EMPLOYEE_AUTH_METHOD.QUESTION:
                 data.type = self.FE_BIND_TYPE_QUESTION
                 _make_questions_conf()
+            elif employee.authMethod == const.USER_EMPLOYEE_AUTH_METHOD.WORKWX:
+                data.type = self.FE_BIND_TYPE_WORKWX
+                _make_questions_conf()
             else:
                 assert False  # should not be here
 
@@ -283,7 +287,9 @@ class EmployeePageService(PageService):
             elif conf.authMode == const.EMPLOYEE_BIND_AUTH_MODE.QUESTION:
                 data.type = self.FE_BIND_TYPE_QUESTION
                 _make_questions_conf()
-
+            elif conf.authMode == const.EMPLOYEE_BIND_AUTH_MODE.WORKWX:
+                data.type = self.FE_BIND_TYPE_WORKWX
+                _make_questions_conf()
             else:
                 raise ValueError('invalid authMode')
 
