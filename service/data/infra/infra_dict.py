@@ -78,15 +78,12 @@ class InfraDictDataService(DataService):
 
         return ret
 
+    @cache(ttl=60 * 60 * 5)
     @gen.coroutine
     def get_sms_country_codes(self, display_locale):
         """获取国家电话区号"""
 
-        if self.cached_sms_country_codes:
-            return self.cached_sms_country_codes
-
         countries_res = yield http_get(path.DICT_COUNTRY)
-
         result, data = unboxing(countries_res)
 
         res = []
@@ -101,9 +98,6 @@ class InfraDictDataService(DataService):
                 #updated by iris
                 to_append.icon_class = str(country['icon_class'])
                 res.append(to_append)
-
-        self.cached_sms_country_codes = res
-
         return res
 
     @gen.coroutine
