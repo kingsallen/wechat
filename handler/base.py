@@ -617,8 +617,7 @@ class BaseHandler(MetaBaseHandler):
                 # url = self.make_url(path.WOKWX_OAUTH_PAGE, self.params)
                 url = self._work_oauth_service.get_oauth_code_base_url()
                 self.logger.debug("workwx_oauth_redirect_url: {}".format(url))
-                self.redirect(url)
-                return
+                yield self.redirect(url)
 
         if need_oauth:
             if self.in_wechat and not self._unionid:
