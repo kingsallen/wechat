@@ -258,26 +258,28 @@ class EventPageService(PageService):
                     "disable":    const.OLD_YES,
                     "activation": const.OLD_YES
                 })
+            company = yield self.hr_company_ds.get_company({"id": current_user.wechat.company_id})
             if msg_record:
                 template = yield self.hr_wx_template_message_ds.get_wx_template(
                     conds={"id": msg_record.template_id})
                 template_id = template.sys_template_id
                 send_time = get_send_time_from_template_message_url(str(msg_record.url or ''))
                 try:
+                    properties = {
+                        "templateId": template_id,
+                        "sendTime": int(send_time),
+                        "isEmployee": bool(employee),
+                        "companyId": company.id or 0,
+                        "companyName": company.abbreviation or ''}
                     self.sa.track(distinct_id=current_user.wxuser.sysuser_id,
                                   event_name="receiveTemplateMessage",
-                                  properties={
-                                      "templateId": template_id,
-                                      "sendTime": int(send_time),
-                                      "isEmployee": bool(employee),
-                                      "companyId": current_user.wechat.company_id
-                                  },
+                                  properties=properties,
                                   is_login_id=True if (user_record.username and bool(user_record.username.isdigit())) else False)
                     self.logger.debug(
                         '[sensors_track] distinct_id:{}, event_name: {}, properties: {}, is_login_id: {}'.format(
                             current_user.wxuser.sysuser_id,
                             "receiveTemplateMessage",
-                            {"templateId": template_id, "sendTime": send_time},
+                            properties,
                             True if bool(user_record.username.isdigit()) else False))
                 except Exception as e:
                     self.logger.error(
