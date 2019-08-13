@@ -10,7 +10,7 @@ from service.page.base import PageService
 from setting import settings
 from util.common import ObjectDict
 from util.tool.date_tool import str_2_date
-from util.tool.http_tool import http_post
+from util.tool.http_tool import http_post, http_get
 from util.tool.str_tool import gen_salary
 from util.tool.url_tool import make_static_url
 from util.common.decorator import log_time
@@ -294,6 +294,13 @@ class ChatPageService(PageService):
             position_list.append(tmp_position.get(pid))
 
         raise gen.Return(position_list)
+
+    @gen.coroutine
+    def get_fast_entry(self, company_id):
+        uri = 'company/{company_id}/fastentry/config'.format(company_id=company_id)
+        route = '{host}{uri}'.format(host=settings['chatbot_host'], uri=uri)
+        result = yield http_get(route=route, jdata=None, infra=False, timeout=1)
+        raise gen.Return(result)
 
     @gen.coroutine
     def get_chatbot_reply(self, message, user_id, hr_id, position_id, flag, social, campus, create_new_context,
