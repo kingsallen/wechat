@@ -23,5 +23,5 @@ class PrivacyPageService(PageService):
     @gen.coroutine
     def if_agree_privacy(self, user_id, status):
         """是否同意 隐私协议"""
-        result, data = yield self.infra_privacy_ds.if_agree_privacy(user_id, status)
-        return result, data
+        result = yield self.infra_privacy_ds.if_agree_privacy(user_id, status)
+        return result
