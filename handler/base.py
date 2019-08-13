@@ -265,9 +265,9 @@ class BaseHandler(MetaBaseHandler):
 
         conds = {'id': self._wechat.company_id}
         company = yield self.company_ps.get_company(conds=conds, need_conf=True)
-        # self._workwx = yield self.workwx_ps.get_workwx(company.id, company.hraccount_id)
-        # self._work_oauth_service = WorkWXOauth2Service(
-        #     self._workwx, self.fullurl())
+        self._workwx = yield self.workwx_ps.get_workwx(company.id, company.hraccount_id)
+        self._work_oauth_service = WorkWXOauth2Service(
+            self._workwx, self.fullurl())
 
         # 如果有 code，说明刚刚从微信 oauth 回来
         code = self.params.get("code")
@@ -319,14 +319,14 @@ class BaseHandler(MetaBaseHandler):
                     else:
                         self.logger.debug("来自企业号的 code 无效")
 
-            # elif self.in_workwx:
-            #     self.logger.debug("来自 workwx 的授权, 获得 code: {}".format(code))
-            #     workwx_userinfo = yield self._get_user_info_workwx(code)
-            #     if workwx_userinfo:
-            #         self.logger.debug("来自 workwx 的授权, 获得 workwx_userinfo:{}".format(workwx_userinfo))
-            #         yield self._handle_user_info_workwx(workwx_userinfo)
-            #     else:
-            #         self.logger.debug("来自 workwx 的 code 无效")
+            elif self.in_workwx:
+                self.logger.debug("来自 workwx 的授权, 获得 code: {}".format(code))
+                workwx_userinfo = yield self._get_user_info_workwx(code)
+                if workwx_userinfo:
+                    self.logger.debug("来自 workwx 的授权, 获得 workwx_userinfo:{}".format(workwx_userinfo))
+                    yield self._handle_user_info_workwx(workwx_userinfo)
+                else:
+                    self.logger.debug("来自 workwx 的 code 无效")
 
             else:
                 # pc端授权
@@ -614,10 +614,11 @@ class BaseHandler(MetaBaseHandler):
                 url = self.make_url(path.JOYWOK_HOME_PAGE)
                 yield self.redirect(url)
             elif self._client_env == const.CLIENT_WORKWX:
-                url = self.make_url(path.WOKWX_OAUTH_PAGE, self.params)
-                # url = self._work_oauth_service.get_oauth_code_base_url()
-                # self.logger.debug("workwx_oauth_redirect_url: {}".format(url))
-                yield self.redirect(url)
+                # url = self.make_url(path.WOKWX_OAUTH_PAGE, self.params)
+                url = self._work_oauth_service.get_oauth_code_base_url()
+                self.logger.debug("workwx_oauth_redirect_url: {}".format(url))
+                self.redirect(url)
+                return
 
         if need_oauth:
             if self.in_wechat and not self._unionid:
