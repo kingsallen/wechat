@@ -309,7 +309,7 @@ class EmployeeBindHandler(BaseHandler):
             scene_id=scene_id,
             in_wechat=self.in_wechat
         )
-        data.update(wechat)
+        data.update(wechat=wechat)
 
         # 是否需要弹出 隐私协议 窗口
         res_privacy, data_privacy = yield self.privacy_ps.if_privacy_agreement_window(

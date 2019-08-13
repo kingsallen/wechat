@@ -150,7 +150,6 @@ class EmployeePageService(PageService):
         data.binding_tips_title = auth_tips_info.tips_title_ename if locale.code == const.LOCALE_ENGLISH else auth_tips_info.tips_title
         data.custom_title = auth_tips_info.title_ename or const.PAGE_EN_VERIFICATION if locale.code == const.LOCALE_ENGLISH else auth_tips_info.title or const.PAGE_VERIFICATION
 
-        data.wechat = ObjectDict()
         data.name = current_user.sysuser.name
         data.headimg = current_user.sysuser.headimg
         data.mobile = current_user.sysuser.mobile or ''
