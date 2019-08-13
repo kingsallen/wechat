@@ -25,7 +25,7 @@ class EmployeePageService(PageService):
     FE_BIND_TYPE_CUSTOM = 'custom'
     FE_BIND_TYPE_EMAIL = 'email'
     FE_BIND_TYPE_QUESTION = 'question'
-    FE_BIND_TYPE_WORKWX = 'workwx'
+    FE_BIND_TYPE_WORKWX = 'wechatWork'
 
     BIND_AUTH_MODE = ObjectDict({
         FE_BIND_TYPE_EMAIL: 0,
