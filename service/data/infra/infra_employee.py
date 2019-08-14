@@ -462,8 +462,8 @@ class InfraEmployeeDataService(DataService):
     def get_employee_cert_config(self, company_id, hraccount_id):
         """提交员工订阅偏好的信息"""
         params = {
-            "company_id": company_id,
-            "hraccount_id": hraccount_id,
+            "companyId": company_id,
+            "hraccountId": hraccount_id,
             "type": 3
         }
         ret = yield http_get(path.INFRA_GET_EMPLOYEE_CERT_CONFIG, params)
