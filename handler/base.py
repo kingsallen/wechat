@@ -618,8 +618,6 @@ class BaseHandler(MetaBaseHandler):
                 # url = self._work_oauth_service.get_oauth_code_base_url()
                 # self.logger.debug("workwx_oauth_redirect_url: {}".format(url))
                 self.redirect(url)
-                if self.request.connection.stream.closed():
-                    return
                 return
 
         if need_oauth:
