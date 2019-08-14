@@ -246,7 +246,7 @@ class EmployeePageService(PageService):
                 _make_questions_conf()
             elif employee.authMethod == const.USER_EMPLOYEE_AUTH_METHOD.WORKWX:
                 data.type = self.FE_BIND_TYPE_WORKWX
-                employee_cert_conf = yield self.employee_ps.get_employee_cert_config(current_user.company.id, self.current_user.company.hraccount_id)
+                employee_cert_conf = yield self.get_employee_cert_config(current_user.company.id, self.current_user.company.hraccount_id)
                 data.status = 1 if employee_cert_conf else 0
                 _make_questions_conf()
             else:
@@ -291,7 +291,7 @@ class EmployeePageService(PageService):
                 _make_questions_conf()
             elif conf.authMode == const.EMPLOYEE_BIND_AUTH_MODE.WORKWX:
                 data.type = self.FE_BIND_TYPE_WORKWX
-                employee_cert_conf = yield self.employee_ps.get_employee_cert_config(current_user.company.id,self.current_user.company.hraccount_id)
+                employee_cert_conf = yield self.get_employee_cert_config(current_user.company.id,self.current_user.company.hraccount_id)
                 data.status = 1 if employee_cert_conf else 0
                 _make_questions_conf()
             else:
