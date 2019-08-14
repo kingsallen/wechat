@@ -352,21 +352,27 @@ class BaseHandler(MetaBaseHandler):
             company_name = ''
             #企业微信判断有效员工
             if self.in_workwx:
-                is_subscribe = yield self.position_ps.get_hr_wx_user(self.current_user.sysuser.unionid, self._wechat.id)
-                if is_subscribe:
-                    # 如果已经关注公众号，无需跳转微信，可生成员工信息之后访问主页
-                    yield self.workwx_ps.employee_bind(self.current_user.sysuser.unionid, self._wechat.company_id)
-                else:
-                    #如果没有关注公众号，跳转微信
-                    workwx_user_record = yield self.workwx_ps.get_workwx_user_by_sysuser_id(self.current_user.sysuser.id, self._wechat.company_id)
-                    if workwx_user_record:
-                        workwx_fivesec_url = self.make_url(path.WOKWX_FIVESEC_PAGE, self.params) + "&workwx_userid={}&company_id={}".format(workwx_user_record.userid, self._wechat.company_id)
-                        self.redirect(workwx_fivesec_url)
-                        return
+                if self.current_user.sysuser:
+                    is_subscribe = yield self.position_ps.get_hr_wx_user(self.current_user.sysuser.unionid, self._wechat.id)
+                    if is_subscribe:
+                        # 如果已经关注公众号，无需跳转微信，可生成员工信息之后访问主页
+                        yield self.workwx_ps.employee_bind(self.current_user.sysuser.unionid, self._wechat.company_id)
                     else:
-                        url = self.make_url(path.WOKWX_OAUTH_PAGE, self.params)
-                        yield self.redirect(url)
-                        return
+                        #如果没有关注公众号，跳转微信
+                        workwx_user_record = yield self.workwx_ps.get_workwx_user_by_sysuser_id(self.current_user.sysuser.id, self._wechat.company_id)
+                        if workwx_user_record:
+                            workwx_fivesec_url = self.make_url(path.WOKWX_FIVESEC_PAGE, self.params) + "&workwx_userid={}&company_id={}".format(workwx_user_record.userid, self._wechat.company_id)
+                            self.redirect(workwx_fivesec_url)
+                            return
+                        else:
+                            url = self.make_url(path.WOKWX_OAUTH_PAGE, self.params)
+                            yield self.redirect(url)
+                            return
+                else:
+                    url = self.make_url(path.WOKWX_OAUTH_PAGE, self.params)
+                    yield self.redirect(url)
+                    return
+
 
         _, profile = yield self.profile_ps.has_profile(self.current_user.sysuser.id if self.current_user.sysuser else 0)
         profiles = {
@@ -608,9 +614,11 @@ class BaseHandler(MetaBaseHandler):
                 yield self.redirect(url)
             elif self._client_env == const.CLIENT_WORKWX:
                 url = self.make_url(path.WOKWX_OAUTH_PAGE, self.params)
+                self.logger.debug("workwx_oauth_redirect_url: {}".format(url))
                 # url = self._work_oauth_service.get_oauth_code_base_url()
                 # self.logger.debug("workwx_oauth_redirect_url: {}".format(url))
-                yield self.redirect(url)
+                self.redirect(url)
+                return
 
         if need_oauth:
             if self.in_wechat and not self._unionid:
