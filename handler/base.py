@@ -620,6 +620,7 @@ class BaseHandler(MetaBaseHandler):
                 self.redirect(url)
                 if self.request.connection.stream.closed():
                     return
+                return
 
         if need_oauth:
             if self.in_wechat and not self._unionid:
