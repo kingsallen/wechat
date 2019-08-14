@@ -420,7 +420,7 @@ class ChatHandler(BaseHandler):
         })
         self.logger.debug("get_environ get jssdk config:{}".format(config))
 
-        get_fast_entry = self.chat_ps.get_fast_entry(self.current_user.company.id)
+        get_fast_entry = yield self.chat_ps.get_fast_entry(self.current_user.company.id)
 
         self.current_user.wechat.jsapi = config
 
