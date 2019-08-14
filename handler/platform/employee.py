@@ -223,7 +223,7 @@ class EmployeeUnbindHandler(BaseHandler):
                 employee.id,
                 self.current_user.company.id,
                 self.current_user.sysuser.id,
-                1
+                bytes(1)
             )
             if result:
                 self.send_json_success()
