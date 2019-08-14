@@ -510,10 +510,10 @@ class EmployeePageService(PageService):
         return result
 
     @gen.coroutine
-    def unbind(self, employee_id, company_id, user_id):
+    def unbind(self, employee_id, company_id, user_id, activation_change):
         """员工解绑"""
         ret = yield self.thrift_employee_ds.unbind(
-            employee_id, company_id, user_id)
+            employee_id, company_id, user_id, activation_change)
         return ret.success, ret.message
 
     @gen.coroutine
