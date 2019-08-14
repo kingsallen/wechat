@@ -146,6 +146,9 @@ class EmployeePageService(PageService):
         """
 
         data = ObjectDict()
+        #认证配置开启状态
+        employee_cert_conf = yield self.get_employee_cert_config(current_user.company.id, current_user.company.hraccount_id)
+        data.status = 1 if employee_cert_conf else 0
         # 员工认证自定义文案
         data.binding_message = auth_tips_info.description_ename if locale.code == const.LOCALE_ENGLISH else auth_tips_info.description
         data.binding_tips_title = auth_tips_info.tips_title_ename if locale.code == const.LOCALE_ENGLISH else auth_tips_info.tips_title
