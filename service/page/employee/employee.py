@@ -1171,7 +1171,7 @@ class EmployeePageService(PageService):
         :param params:
         :return:
         """
-        ret = yield self.infra_employee_ds.get_employee_cert_config(company_id)
+        ret = yield self.infra_employee_ds.get_switch_workwx(company_id)
         if int(ret.get('status')) == 0:
             return ret.get('data')
         else:
