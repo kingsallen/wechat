@@ -1152,6 +1152,10 @@ class EmployeePageService(PageService):
         if filter_current and data:
             confs = data['hrEmployeeCertConf']
             fil = filter(lambda x: x['companyId'] == company_id, confs)
-            current_com_conf = fil[0] if fil else {}
+            try:
+                current_com_conf = fil.__next__()
+            except Exception:
+                current_com_conf = {}
+            # current_com_conf = fil[0] if fil else {}
             data['hrEmployeeCertConf'] = current_com_conf
         raise gen.Return(res)
