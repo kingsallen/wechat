@@ -469,6 +469,12 @@ class InfraEmployeeDataService(DataService):
         ret = yield http_get(path.INFRA_GET_EMPLOYEE_CERT_CONFIG, params)
         return ret
 
-
-
-
+    @gen.coroutine
+    def get_switch_workwx(self, company_id):
+        """
+        企业微信-OMS开关
+        :param params:
+        :return:
+        """
+        ret = yield http_get(path.INFRA_OMS_SWITCH_WORKWX.format(company_id))
+        return ret

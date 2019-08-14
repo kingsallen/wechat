@@ -19,6 +19,7 @@ from util.tool.str_tool import gen_salary, gen_experience_v2
 from util.wechat.core import get_temporary_qrcode
 from util.common.mq import unread_praise_publisher
 from util.common.decorator import log_time
+from util.common.exception import InfraOperationError
 
 
 class EmployeePageService(PageService):
@@ -148,7 +149,7 @@ class EmployeePageService(PageService):
         data = ObjectDict()
         #认证配置开启状态
         employee_cert_conf = yield self.get_employee_cert_config(current_user.company.id, current_user.company.hraccount_id)
-        data.status = 1 if employee_cert_conf else 0
+        data.status = 1 if employee_cert_conf else 2
         # 员工认证自定义文案
         data.binding_message = auth_tips_info.description_ename if locale.code == const.LOCALE_ENGLISH else auth_tips_info.description
         data.binding_tips_title = auth_tips_info.tips_title_ename if locale.code == const.LOCALE_ENGLISH else auth_tips_info.tips_title
@@ -249,8 +250,8 @@ class EmployeePageService(PageService):
                 _make_questions_conf()
             elif employee.authMethod == const.USER_EMPLOYEE_AUTH_METHOD.WORKWX:
                 data.type = self.FE_BIND_TYPE_WORKWX
-                employee_cert_conf = yield self.get_employee_cert_config(current_user.company.id, current_user.company.hraccount_id)
-                data.status = 1 if employee_cert_conf else 0
+                oms_status = yield self.get_switch_workwx(current_user.company.id)
+                data.status = data.status if oms_status else 3
                 _make_questions_conf()
             else:
                 assert False  # should not be here
@@ -294,8 +295,8 @@ class EmployeePageService(PageService):
                 _make_questions_conf()
             elif conf.authMode == const.EMPLOYEE_BIND_AUTH_MODE.WORKWX:
                 data.type = self.FE_BIND_TYPE_WORKWX
-                employee_cert_conf = yield self.get_employee_cert_config(current_user.company.id, current_user.company.hraccount_id)
-                data.status = 1 if employee_cert_conf else 0
+                oms_status = yield self.get_switch_workwx(current_user.company.id)
+                data.status = data.status if oms_status else 3
                 _make_questions_conf()
             else:
                 raise ValueError('invalid authMode')
@@ -1162,3 +1163,16 @@ class EmployeePageService(PageService):
             # current_com_conf = fil[0] if fil else {}
             data['hrEmployeeCertConf'] = current_com_conf
         raise gen.Return(res)
+
+    @gen.coroutine
+    def get_switch_workwx(self, company_id):
+        """
+        企业微信-OMS开关
+        :param params:
+        :return:
+        """
+        ret = yield self.infra_employee_ds.get_employee_cert_config(company_id)
+        if int(ret.get('status')) == 0:
+            return ret.get('data')
+        else:
+            raise InfraOperationError(ret.get('message'))
