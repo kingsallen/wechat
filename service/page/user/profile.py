@@ -1219,25 +1219,27 @@ class ProfilePageService(PageService):
         # }
         # 获取最佳东方导入开关
         need_profile_upload = [570004]  # 现在为沙盒的
-        importer = ObjectDict(profile_import_51job=make_url(path.RESUME_URL, params, m='authorization', way=const.RESUME_WAY_51JOB),
-                              profile_import_zhilian=make_url(path.RESUME_URL, params, m='authorization', way=const.RESUME_WAY_ZHILIAN),
-                              # profile_import_zhilian=None,
-                              # set later.
-                              profile_import_liepin=None,
-                              profile_import_linkedin=make_url(path.RESUME_URL, params, m='authorization', way=const.RESUME_WAY_LINKEDIN),
-                              # profile_import_linkedin=None,
-                              # set later.
-                              profile_import_maimai=None,
-                              # set later
-                              profile_import_veryeast=None,
-                              # set later
-                              profile_resume_upload=None,
-                              # set later
-                              profile_email=None,
-                              profile_create_30s=make_url(path.PROFILE_NEW, params, m='authorization', way=const.RESUME_WAY_30S),
-                              profile_import_pc=True,
-                              # set later
-                              profile_custom_url=None)
+        importer = ObjectDict(
+            profile_import_51job=None,
+            # profile_import_51job=make_url(path.RESUME_URL, params, m='authorization', way=const.RESUME_WAY_51JOB),
+            profile_import_zhilian=make_url(path.RESUME_URL, params, m='authorization', way=const.RESUME_WAY_ZHILIAN),
+            # profile_import_zhilian=None,
+            # set later.
+            profile_import_liepin=None,
+            profile_import_linkedin=make_url(path.RESUME_URL, params, m='authorization', way=const.RESUME_WAY_LINKEDIN),
+            # profile_import_linkedin=None,
+            # set later.
+            profile_import_maimai=None,
+            # set later
+            profile_import_veryeast=None,
+            # set later
+            profile_resume_upload=None,
+            # set later
+            profile_email=None,
+            profile_create_30s=make_url(path.PROFILE_NEW, params, m='authorization', way=const.RESUME_WAY_30S),
+            profile_import_pc=True,
+            # set later
+            profile_custom_url=None)
         if company.conf_veryeast_switch == 1:
             importer.update(profile_import_veryeast=make_url(path.RESUME_URL, params, m='authorization', way=const.RESUME_WAY_VERYEAST))
         importer.update(profile_resume_upload=make_url(path.RESUME_UPLOAD, params))
