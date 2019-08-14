@@ -57,6 +57,8 @@ class BaseHandler(MetaBaseHandler):
         self._oauth_service = None
         self._pass_session = None
         self._sc_cookie_id = None  # 神策设备ID
+        #企业微信-员工认证 跳转标记
+        self._WORKWX_REDIRECT = False
 
     @property
     def component_access_token(self):
@@ -335,6 +337,8 @@ class BaseHandler(MetaBaseHandler):
 
         # 构造并拼装 session
         yield self._fetch_session()
+        if self._WORKWX_REDIRECT:
+            return
         if self.request.connection.stream.closed():
             return
 
@@ -618,6 +622,7 @@ class BaseHandler(MetaBaseHandler):
                 # url = self._work_oauth_service.get_oauth_code_base_url()
                 # self.logger.debug("workwx_oauth_redirect_url: {}".format(url))
                 self.redirect(url)
+                self._WORKWX_REDIRECT = True
                 return
 
         if need_oauth:
