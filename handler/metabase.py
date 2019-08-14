@@ -521,7 +521,7 @@ class MetaBaseHandler(AtomHandler):
             appid=self.app_id,
             http_code=self.get_status(),
             opt_time="%.2f" % ((time.time() - self._start_time) * 1000),
-            duration_time=(time.time() - self._start_time) * 1000,
+            response_time=(time.time() - self._start_time) * 1000,
             useragent=request.headers.get('User-Agent'),
             referer=request.headers.get('Referer'),
             remote_ip=self.remote_ip,
