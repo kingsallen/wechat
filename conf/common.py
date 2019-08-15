@@ -735,7 +735,7 @@ FROM_LIEPIN = 2
 LIEPIN_SCENE_KEY_FMT = 'liepin_auth_scene_params:{sysuser_id}'
 LIEPIN_SCENE_KEY_TTL = 30 * 24 * 60 * 60
 
-# Mars公司id
+# Mars公司wechat_id
 MARS_ID = 345
 
 # 积分排行榜
@@ -774,6 +774,7 @@ TEMPORARY_CODE_STR_SCENE = "{}_{}"
 
 # 临时二维码字符串参数的场景值
 STR_SCENE_JOYWOK = "JOYWOK"
+STR_SCENE_MRAS_WELCOME = "PCAPPLICATION"
 
 # mq相关常量
 EXCHANGE_TYPE = 'topic'

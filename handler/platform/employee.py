@@ -124,7 +124,7 @@ class AwardsLadderHandler(BaseHandler):
 class WechatSubInfoHandler(BaseHandler):
     """
     获取微信信息
-    字符类型的自定义参数的格式为{场景值(大写)}_{自定义字符串}，场景值必须为大写英文字母
+    字符类型的自定义参数的格式为{场景值(大写)}_{自定义字符串}，场景值必须为大写英文字母（不包含数字、下划线、空格等特殊字符）
     int类型 scene_id规范为：32位二进制, 5位type + 27位自定义编号(比如hrid, userid)。见 https://wiki.moseeker.com/weixin.md
     """
 
