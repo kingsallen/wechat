@@ -397,10 +397,13 @@ class FiveSecSkipWXHandler(MetaBaseHandler):
     def get(self):
         """企业微信5s跳转页"""
         component_access_token = BaseHandler.component_access_token
-        wechat = yield self._get_current_wechat()
+        # wechat = yield self._get_current_wechat()
+        qx_wechat = yield self._get_current_wechat(qx=True)
+        if not self._wechat:
+            self._wechat = self._qx_wechat
         redirect_url = self.make_url(path.WECHAT_QRCODE_PAGE, self.params)
         # 初始化 oauth service
-        wx_oauth_service = WeChatOauth2Service(wechat, redirect_url, component_access_token)
+        wx_oauth_service = WeChatOauth2Service(qx_wechat, redirect_url, component_access_token)
         wx_oauth_url = wx_oauth_service.get_oauth_code_userinfo_url()
         self.logger.debug("from_workwx_to_qx_oauth_url: {}".format(wx_oauth_url))
         client_env = ObjectDict({"name": self._client_env})
@@ -408,9 +411,11 @@ class FiveSecSkipWXHandler(MetaBaseHandler):
         self.render_page(template_name="adjunct/wxwork-bind-redirect.html", data=ObjectDict({"redirect_link": wx_oauth_url}))
 
     @gen.coroutine
-    def _get_current_wechat(self):
-
-        signature = self.params['wechat_signature']
+    def _get_current_wechat(self, qx=False):
+        if qx:
+            signature = self.settings['qx_signature']
+        else:
+            signature = self.params['wechat_signature']
         wechat = yield self.wechat_ps.get_wechat(conds={
             "signature": signature
         })
