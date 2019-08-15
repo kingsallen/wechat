@@ -172,7 +172,8 @@ class EmployeePageService(PageService):
         # 国际化补填信息的名称
         if locale.code == const.LOCALE_ENGLISH:
             for f in custom_supply_field:
-                f['name'] = f.get("ename")
+                if f.get("ename"):
+                    f['name'] = f.get("ename")
 
         data.custom_supply_field = custom_supply_field
         data.custom_supply_info = custom_supply_info
