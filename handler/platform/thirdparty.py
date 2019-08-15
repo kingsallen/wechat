@@ -422,7 +422,7 @@ class FiveSecSkipWXHandler(MetaBaseHandler):
 
 
 
-class WechatQrcodeHandler(BaseHandler):
+class EmployeeQrcodeHandler(BaseHandler):
 
     @handle_response
     @authenticated
