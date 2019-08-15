@@ -373,6 +373,7 @@ class BaseHandler(MetaBaseHandler):
         self._wxuser = None
         self._qxuser = None
         self._session_id = None
+        self.sa.clear_super_properties()
 
         self.logger.debug("current_user:{}".format(self.current_user))
         self.logger.debug("+++++++++++++++++PREPARE OVER+++++++++++++++++++++")

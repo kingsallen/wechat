@@ -258,21 +258,28 @@ class EventPageService(PageService):
                     "disable":    const.OLD_YES,
                     "activation": const.OLD_YES
                 })
+            company = yield self.hr_company_ds.get_company({"id": current_user.wechat.company_id})
             if msg_record:
                 template = yield self.hr_wx_template_message_ds.get_wx_template(
                     conds={"id": msg_record.template_id})
                 template_id = template.sys_template_id
                 send_time = get_send_time_from_template_message_url(str(msg_record.url or ''))
                 try:
+                    properties = {
+                        "templateId": template_id,
+                        "sendTime": int(send_time),
+                        "isEmployee": bool(employee),
+                        "companyId": company.id or 0,
+                        "companyName": company.abbreviation or ''}
                     self.sa.track(distinct_id=current_user.wxuser.sysuser_id,
                                   event_name="receiveTemplateMessage",
-                                  properties={"templateId": template_id, "sendTime": int(send_time), "isEmployee": bool(employee)},
+                                  properties=properties,
                                   is_login_id=True if (user_record.username and bool(user_record.username.isdigit())) else False)
                     self.logger.debug(
                         '[sensors_track] distinct_id:{}, event_name: {}, properties: {}, is_login_id: {}'.format(
                             current_user.wxuser.sysuser_id,
                             "receiveTemplateMessage",
-                            {"templateId": template_id, "sendTime": send_time},
+                            properties,
                             True if bool(user_record.username.isdigit()) else False))
                 except Exception as e:
                     self.logger.error(
@@ -746,13 +753,16 @@ class EventPageService(PageService):
                 pattern_id = real_user_id
                 # 校验关注后是否自动恢复了员工身份。
                 user_ps = UserPageService()
-                self.sa.track(wxuser.sysuser_id, "subscribeWechat", properties={"sub_from": type, "scene_id": real_user_id}, is_login_id=True)
-                if pattern_id == const.QRCODE_BIND and wxuser.sysuser_id and wechat.company_id:
+                # 部分pattern_id数据看起来有问题，记录了用户id，先暂时dirty hack处理一下，
+                if pattern_id > const.QRCODE_OTHER:
+                    pattern_id = const.QRCODE_OTHER
+                self.sa.track(wxuser.sysuser_id, "subscribeWechat", properties={"sub_from": type, "scene_id": pattern_id}, is_login_id=True)
+                if pattern_id in (const.QRCODE_BIND, const.QRCODE_PC_REFERRAL) and wxuser.sysuser_id and wechat.company_id:
                     employee = yield user_ps.get_valid_employee_by_user_id(
                         user_id=wxuser.sysuser_id, company_id=wechat.company_id)
                 else:
                     employee = None
-                if not employee or pattern_id not in (const.QRCODE_BIND, const.QRCODE_SIDEBAR):
+                if not employee or pattern_id not in (const.QRCODE_BIND, const.QRCODE_SIDEBAR, const.QRCODE_PC_REFERRAL):
                     yield send_succession_message(wechat=wechat, open_id=msg.FromUserName, pattern_id=pattern_id)
 
             elif type == 16:

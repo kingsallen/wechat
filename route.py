@@ -169,6 +169,9 @@ common_routes = [
     (r"/api/resume/upload/complete",                 handler.common.resume.ResumeUploadResultHandler,           {"event": "resume_upload_complate"}),
     (r"/api/referral/upload/resume/info",            handler.common.resume.MiniappResumeUploadInfoHandler,      {"event": "resume_upload_info"}),
 
+    # 隐私协议
+    (r'/api/privacy/agree/?',                        handler.platform.privacy.PrivacyHandler,                   {"event": "api_privacy_agreement"}),
+    (r'/api/privacy/is_agree/?',                     handler.platform.privacy.IsAgreePrivacyHandler,            {"event": "api_is_agree_privacy"}),
 ]
 
 # 企业号的单独 routes，域名 platform.moseeker.com/m
@@ -285,8 +288,6 @@ platform_routes = [
     (r"/api/switch[\/]*([a-z_]+)*",                  handler.platform.switch.SwitchHandler,                     {"event": "switch_"}),
     (r"/api/func/relation_tags/?",                   handler.platform.referral.ReferralCommentTagsHandler,      {"event": "referral_comment_tags"}),
 
-    (r'/api/privacy/agree/?',                        handler.platform.privacy.PrivacyHandler,                   {"event": "api_privacy_agreement"}),
-    (r'/api/privacy/is_agree/?',                     handler.platform.privacy.IsAgreePrivacyHandler,            {"event": "api_is_agree_privacy"}),
     # 兼容老微信 url，进行302跳转
     (r"/.*",                                         handler.platform.compatible.CompatibleHandler,             {"event": "compatible"})
 

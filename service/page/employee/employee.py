@@ -150,7 +150,6 @@ class EmployeePageService(PageService):
         data.binding_tips_title = auth_tips_info.tips_title_ename if locale.code == const.LOCALE_ENGLISH else auth_tips_info.tips_title
         data.custom_title = auth_tips_info.title_ename or const.PAGE_EN_VERIFICATION if locale.code == const.LOCALE_ENGLISH else auth_tips_info.title or const.PAGE_VERIFICATION
 
-        data.wechat = ObjectDict()
         data.name = current_user.sysuser.name
         data.headimg = current_user.sysuser.headimg
         data.mobile = current_user.sysuser.mobile or ''
@@ -158,14 +157,6 @@ class EmployeePageService(PageService):
         data.is_valid_email = is_valid_email
         data.conf = ObjectDict()
         data.binding_success_message = conf.bindSuccessMessage or ''
-
-        # todo 公众号信息，已有接口，这个其实是重复的代码
-        data.wechat.subscribed = True if not in_wechat or current_user.wxuser.is_subscribe or current_user.wechat.type == 0 else False
-        data.wechat.qrcode = yield get_temporary_qrcode(
-            wechat=current_user.wechat,
-            scene_id=int('11110000000000000000000000000000', base=2) + int(const.QRCODE_BIND)
-        )
-        data.wechat.name = current_user.wechat.name
 
         data.mate_num = mate_num
         data.conf.reward = reward

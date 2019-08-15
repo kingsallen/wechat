@@ -392,7 +392,7 @@ def send_succession_message(wechat, open_id, pattern_id=99, position_id=0, messa
     :param position_id:
     :return:
     """
-    if pattern_id == const.QRCODE_BIND:
+    if pattern_id in (const.QRCODE_BIND, const.QRCODE_PC_REFERRAL):
         url = make_url(path.EMPLOYEE_VERIFY, host=settings["platform_host"], wechat_signature=wechat.get("signature"))
         content = '点击完成   <a href="{}">员工认证</a> \n更多积分奖励等你来~'.format(url)
     elif pattern_id == const.QRCODE_POLICY:
