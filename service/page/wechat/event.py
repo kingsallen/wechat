@@ -746,7 +746,14 @@ class EventPageService(PageService):
                 pattern_id = real_user_id
                 # 校验关注后是否自动恢复了员工身份。
                 user_ps = UserPageService()
-                if pattern_id == const.QRCODE_BIND and wxuser.sysuser_id and wechat.company_id:
+                if pattern_id == const.QRCODE_WORKWX_BIND: #企业微信员工认证
+                    # 先判断是否是有效员工，需要判断的原因：如果以前是有效员工，因为取消关注导致不是有效员工的情况，在扫码之后会自动成为有效员工，这时候不需要再生产员工信息
+                    is_valid_employee = yield self.employee_ps.is_valid_employee(
+                        user_id=wxuser.sysuser_id, company_id=wechat.company_id)
+                    if not is_valid_employee:  # 如果不是有效员工，需要需要生成员工信息
+                        yield self.workwx_ps.employee_bind(sysuser_id=wxuser.sysuser_id, company_id=wechat.company_id)  # 如果已经关注公众号，无需跳转微信，可生成员工信息之后访问主页
+
+                elif pattern_id == const.QRCODE_BIND and wxuser.sysuser_id and wechat.company_id:
                     employee = yield user_ps.get_valid_employee_by_user_id(
                         user_id=wxuser.sysuser_id, company_id=wechat.company_id)
                 else:

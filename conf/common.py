@@ -767,6 +767,7 @@ QRCODE_POSITION_INFO = 11  # 职位列表
 QRCODE_REFERRAL_CONFIRM = 12  # 用户认领推荐成功
 QRCODE_SCAN_REFERRAL = 13  # 浏览候选人推荐职位
 QRCODE_POSITION = 14  # 职位详情
+QRCODE_WORKWX_BIND = 17 #企业微信员工认证
 QRCODE_OTHER = 99  # 默认
 
 # 临时二维码字符串参数
