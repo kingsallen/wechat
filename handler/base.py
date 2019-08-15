@@ -359,7 +359,6 @@ class BaseHandler(MetaBaseHandler):
             user_role = 0
             company_id = 0
             company_name = ''
-            #企业微信判断有效员工
 
         _, profile = yield self.profile_ps.has_profile(self.current_user.sysuser.id if self.current_user.sysuser else 0)
         profiles = {
