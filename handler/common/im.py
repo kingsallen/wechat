@@ -479,6 +479,7 @@ class ChatHandler(BaseHandler):
         if not self.params.hr_id:
             self.send_json_error(message=msg.REQUEST_PARAM_ERROR)
             return
+
         self.hr_id = self.params.hr_id
         pid = self.params.pid or 0
         room_id = self.params.room_id or 0
@@ -745,8 +746,10 @@ class ChatHandler(BaseHandler):
             compound_content = bot_message.compound_content
             if bot_message.msg_type == '':
                 continue
+
             if msg_type in const.INTERACTIVE_MSG:
                 compound_content.update(disabled=True)  # 可交互类型消息入库后自动标记为不可操作
+
             if msg_type == "cards":
                 # 只在c端展示，并且不保存
                 if bot_message:
@@ -756,7 +759,7 @@ class ChatHandler(BaseHandler):
                         compoundContent=compound_content,
                         content=bot_message.content,
                         msgType=msg_type,
-                        speaker=const.CHAT_SPEAKER_HR,
+                        speaker=const.CHAT_SPEAKER_BOT,
                         cid=int(self.room_id),
                         pid=int(self.position_id),
                         createTime=curr_now_minute(),
@@ -776,7 +779,7 @@ class ChatHandler(BaseHandler):
             chat_params = ChatVO(
                 compoundContent=compoundContent,
                 content=bot_message.content,
-                speaker=const.CHAT_SPEAKER_HR,
+                speaker=const.CHAT_SPEAKER_BOT,
                 origin=const.ORIGIN_CHATBOT,
                 msgType=msg_type,
                 roomId=int(self.room_id),
@@ -793,7 +796,7 @@ class ChatHandler(BaseHandler):
                     content=bot_message.content,
                     stats=bot_message.stats,
                     msgType=msg_type,
-                    speaker=const.CHAT_SPEAKER_HR,
+                    speaker=const.CHAT_SPEAKER_BOT,
                     cid=int(self.room_id),
                     pid=int(self.position_id),
                     createTime=curr_now_minute(),

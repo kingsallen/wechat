@@ -9,11 +9,11 @@ import conf.common as const
 from service.page.base import PageService
 from setting import settings
 from util.common import ObjectDict
+from util.common.decorator import log_time
 from util.tool.date_tool import str_2_date
 from util.tool.http_tool import http_post, http_get
 from util.tool.str_tool import gen_salary
 from util.tool.url_tool import make_static_url
-from util.common.decorator import log_time
 
 
 class ChatPageService(PageService):
@@ -80,9 +80,10 @@ class ChatPageService(PageService):
     def get_chatroom(self, user_id, hr_id, company_id, position_id, room_id, qxuser, is_gamma, bot_enabled,
                      recom, is_employee):
         """进入聊天室"""
+        hr_info = ObjectDict()
+        mobot_info = ObjectDict(enabled=bot_enabled)
 
         ret = yield self.thrift_chat_ds.enter_chatroom(user_id, hr_id, position_id, room_id, is_gamma)
-        hr_info = ObjectDict()
         if ret.hr:
             hr_info = ObjectDict(
                 hr_id=ret.hr.hrId,
@@ -90,12 +91,12 @@ class ChatPageService(PageService):
                 hr_headimg=make_static_url(ret.hr.hrHeadImg or const.HR_HEADIMG),
                 deleted=ret.hr.isDelete
             )
-            if bot_enabled:
-                data = (yield self.infra_company_ds.get_company_mobot_image(company_id))['data']
-                if data['mobot_head_img']:
-                    hr_info['hr_headimg'] = data['mobot_head_img']
-                if data['mobot_name']:
-                    hr_info['hr_name'] = data['mobot_name']
+
+        mobot_conf_data = yield self.infra_company_ds.get_company_mobot_conf(company_id)
+        if mobot_conf_data.get('data'):
+            mobot_conf = mobot_conf_data.get('data')
+            mobot_info['name'] = mobot_conf['mobot_head_img'] or "小助手"
+            mobot_info['headimg'] = make_static_url(mobot_conf['mobot_head_img'] or const.HR_HEADIMG)
 
         user_info = ObjectDict()
         if ret.user:
@@ -119,6 +120,7 @@ class ChatPageService(PageService):
             )
         res = ObjectDict(
             hr=hr_info,
+            mobot=mobot_info,
             user=user_info,
             position=position_info,
             chat_debut=ret.chatDebut,
