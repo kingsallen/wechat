@@ -81,7 +81,7 @@ class ChatPageService(PageService):
                      recom, is_employee):
         """进入聊天室"""
         hr_info = ObjectDict()
-        mobot_info = ObjectDict(enabled=bot_enabled)
+        mobot_info = ObjectDict(enabled=bot_enabled, name='', headimg='')
 
         ret = yield self.thrift_chat_ds.enter_chatroom(user_id, hr_id, position_id, room_id, is_gamma)
         if ret.hr:
@@ -95,8 +95,8 @@ class ChatPageService(PageService):
         mobot_conf_data = yield self.infra_company_ds.get_company_mobot_conf(company_id)
         if mobot_conf_data.get('data'):
             mobot_conf = mobot_conf_data.get('data')
-            mobot_info['name'] = mobot_conf['mobot_head_img'] or "小助手"
-            mobot_info['headimg'] = make_static_url(mobot_conf['mobot_head_img'] or const.HR_HEADIMG)
+            mobot_info.name = mobot_conf['mobot_head_img'] or "小助手"
+            mobot_info.headimg = make_static_url(mobot_conf['mobot_head_img'] or const.HR_HEADIMG)
 
         user_info = ObjectDict()
         if ret.user:
