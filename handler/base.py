@@ -1040,7 +1040,7 @@ class BaseHandler(MetaBaseHandler):
                     self.current_user.sysuser.id, self._wechat.company_id)
                 if workwx_user_record:
                     workwx_fivesec_url = self.make_url(path.WOKWX_FIVESEC_PAGE,self.params) + "&workwx_userid={}&company_id={}".format(
-                        workwx_user_record.userid, self._wechat.company_id)
+                        workwx_user_record.sys_user_id, self._wechat.company_id)
                     self.redirect(workwx_fivesec_url)
                     return True
                 else:

@@ -167,7 +167,7 @@ class WorkWXOauthHandler(MetaBaseHandler):
         # sysuser, is_oauth = yield self._get_session()
         # if is_oauth:
         #     workwx_user_record = yield self.workwx_ps.get_workwx_user_by_sysuser_id(sysuser.id)
-        #     yield self._session_sysuser_is_valid_employee(sysuser, workwx_user_record.userid)
+        #     yield self._session_sysuser_is_valid_employee(sysuser, workwx_user_record.sys_user_id)
         #     return
 
         url = self._work_oauth_service.get_oauth_code_base_url()
