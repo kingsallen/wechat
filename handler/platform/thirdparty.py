@@ -434,7 +434,7 @@ class EmployeeQrcodeHandler(BaseHandler):
     def get(self):
         workwx_userid = self.params.workwx_userid
         company_id = self.params.company_id
-        workwx_user_record = yield self.workwx_ps.get_workwx_user(self._wechat.company_id, workwx_userid)
+        workwx_user_record = yield self.workwx_ps.get_workwx_user(self.current_user.wechat.company_id, workwx_userid)
         #如果已经绑定过(以前访问绑定过),无需再绑定
         if int(workwx_user_record.sysuser_id) > 0:
            # ？？？？？？？？
