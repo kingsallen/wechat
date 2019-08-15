@@ -346,7 +346,7 @@ class BaseHandler(MetaBaseHandler):
         yield self._update_joywok_employee_session()
         # 企业微信成员做员工认证
         if self.in_workwx:
-            is_redirect = yield self._is_employee_workwx(self.current_user)
+            is_redirect = yield self._is_employee_workwx()
             if is_redirect:
                 return
 
