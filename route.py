@@ -219,9 +219,9 @@ platform_routes = [
     (r'/referral/contact_result/?',                  handler.platform.referral.ReferralResultHandler,           {"event": "referral_contact_result"}),
     (r"/joywork",                                    handler.platform.thirdparty.JoywokOauthHandler,            {"event": "joywok_oauth"}),
     (r"/thirdparty/automatic/auth",                  handler.platform.thirdparty.JoywokAutoAuthHandler,         {"event": "joywok_auto_bind_page"}),
-    (r"/work-wechat",                                     handler.platform.thirdparty.WorkWXOauthHandler,            {"event": "workwx_oauth"}),
+    (r"/work-wechat",                                handler.platform.thirdparty.WorkWXOauthHandler,            {"event": "workwx_oauth"}),
     (r'/workwx/fivesec-skipwx',                      handler.platform.thirdparty.FiveSecSkipWXHandler,          {"event": "workwx_fivesec_skipwx"}),
-    (r'/wechat/qrcode',                              handler.platform.thirdparty.WechatQrcodeHandler,           {"event": "wechat_qrcode"}),
+    (r'/employee/qrcode',                            handler.platform.thirdparty.EmployeeQrcodeHandler,         {"event": "employee_qrcode"}),
 
     # 各大公司的自定义配置
     (r"/custom/emailapply/?",                        handler.platform.customize.CustomizeEmailApplyHandler,     {"event": "customize_emailapply"}),

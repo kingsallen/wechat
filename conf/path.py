@@ -86,7 +86,7 @@ WOKWX_OAUTH_PAGE = "/work-wechat"
 
 WOKWX_FIVESEC_PAGE = "/workwx/fivesec-skipwx"
 
-WECHAT_QRCODE_PAGE = "/wechat/qrcode"
+WECHAT_QRCODE_PAGE = "/employee/qrcode"
 
 # ============================ 微信端Path结束 ============================
 
