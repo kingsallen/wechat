@@ -2,6 +2,8 @@
 
 from tornado import gen
 
+import conf.common as const
+
 from handler.base import BaseHandler
 from util.common.decorator import handle_response, authenticated
 
@@ -30,13 +32,12 @@ class PrivacyHandler(BaseHandler):
         user_id = self.current_user.sysuser.id
         status = self.json_args.get('agree')
 
-        result, data = yield self.privacy_ps.if_agree_privacy(user_id, status)
+        result = yield self.privacy_ps.if_agree_privacy(user_id, status)
 
-        if result:
+        if result.status == const.API_SUCCESS:
             self.send_json_success()
         else:
-            self.send_json_error()
-
+            self.send_json_error(message=result.message)
 
 
 class IsAgreePrivacyHandler(BaseHandler):
