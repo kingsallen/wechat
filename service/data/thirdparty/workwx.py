@@ -37,6 +37,11 @@ class WorkwxDataService(DataService):
         raise gen.Return(ret)
 
     @gen.coroutine
-    def employee_bind(self, params):
+    def employee_bind(self, sysuser_id, company_id):
+        params = {
+            "userId": sysuser_id,
+            "companyId": company_id,
+            "type": 3
+        }
         ret = yield http_post(path.INFRA_USER_EMPLOYEE_BIND, jdata=params)
         raise gen.Return(ret)

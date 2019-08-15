@@ -84,10 +84,5 @@ class WorkwxPageService(PageService):
     @gen.coroutine
     def employee_bind(self, sysuser_id, company_id):
         """员工认证"""
-        params = ObjectDict({
-            "userId": sysuser_id,
-            "companyId": company_id,
-            "type": 3
-        })
-        ret = yield self.workwx_ds.employee_bind(params)
+        ret = yield self.workwx_ds.employee_bind(sysuser_id, company_id)
         return ret
