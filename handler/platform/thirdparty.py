@@ -399,8 +399,7 @@ class FiveSecSkipWXHandler(MetaBaseHandler):
         component_access_token = BaseHandler.component_access_token
         # wechat = yield self._get_current_wechat()
         qx_wechat = yield self._get_current_wechat(qx=True)
-        if not self._wechat:
-            self._wechat = self._qx_wechat
+
         redirect_url = self.make_url(path.WECHAT_QRCODE_PAGE, self.params)
         # 初始化 oauth service
         wx_oauth_service = WeChatOauth2Service(qx_wechat, redirect_url, component_access_token)
