@@ -438,8 +438,6 @@ class WechatQrcodeHandler(BaseHandler):
         else:
             #否则，绑定企业微信成员和仟寻用户
             yield self.workwx_ps.bind_workwx_qxuser(self.current_user.sysuser.id, workwx_userid, company_id)
-        client_env = ObjectDict({"name": self._client_env})
-        self.namespace = {"client_env": client_env}
         #@@@@@@下面代码是否写在扫码事件里面
         #先判断是否是有效员工，需要判断的原因：如果以前是有效员工，因为取消关注导致不是有效员工的情况，在扫码之后会自动成为有效员工，这时候不需要再生产员工信息
         # is_valid_employee = yield self.employee_ps.is_valid_employee(
