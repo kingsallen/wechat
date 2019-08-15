@@ -359,7 +359,6 @@ class BaseHandler(MetaBaseHandler):
             user_role = 0
             company_id = 0
             company_name = ''
-
         _, profile = yield self.profile_ps.has_profile(self.current_user.sysuser.id if self.current_user.sysuser else 0)
         profiles = {
             'user_role': user_role,
@@ -888,8 +887,6 @@ class BaseHandler(MetaBaseHandler):
             settings=self.settings
         )
         namespace.update(add_namespace)
-        client_env = ObjectDict({"name": self._client_env})
-        namespace.update({"client_env":client_env})
         return namespace
 
     def _set_access_time_cookie(self):
