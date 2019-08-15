@@ -476,7 +476,11 @@ class BaseHandler(MetaBaseHandler):
                     "corpid": res.corp_id,
                     "redirect_url": res.redirect_url})
             })
-        self.namespace = {"client_env": client_env}
+            self.namespace = {"client_env": client_env}
+        elif self._client_env == const.CLIENT_WORKWX:
+            self.namespace.update({"client_env": client_env})
+        else:
+            self.namespace = {"client_env": client_env}
 
     @gen.coroutine
     def _handle_ent_openid(self, openid, unionid):
