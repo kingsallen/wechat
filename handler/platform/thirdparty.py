@@ -291,7 +291,7 @@ class WorkWXOauthHandler(MetaBaseHandler):
             workwx_sysuser_id = 0 if workwx_user_record.sys_user_id == '' else int(workwx_user_record.sys_user_id)
             if workwx_sysuser_id > 0:
                 sysuser = yield self.user_ps.get_user_user({
-                    "id": workwx_user_record.sysuser_id
+                    "id": workwx_user_record.sys_user_id
                 })
             else:
                 sysuser = yield self._get_sysuser_by_mobile(workwx_userinfo)
@@ -436,7 +436,7 @@ class EmployeeQrcodeHandler(BaseHandler):
         company_id = self.params.company_id
         workwx_user_record = yield self.workwx_ps.get_workwx_user(self.current_user.wechat.company_id, workwx_userid)
         #如果已经绑定过(以前访问绑定过),无需再绑定
-        if int(workwx_user_record.sysuser_id) > 0:
+        if int(workwx_user_record.sys_user_id) > 0:
            # ？？？？？？？？
            pass
         else:
