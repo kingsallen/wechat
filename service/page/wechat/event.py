@@ -752,7 +752,7 @@ class EventPageService(PageService):
                         user_id=wxuser.sysuser_id, company_id=wechat.company_id)
                     if not is_valid_employee:  # 如果不是有效员工，需要需要生成员工信息
                         yield self.workwx_ds.employee_bind(sysuser_id=wxuser.sysuser_id, company_id=wechat.company_id)  # 如果已经关注公众号，无需跳转微信，可生成员工信息之后访问主页
-
+                    employee = None
                 elif pattern_id == const.QRCODE_BIND and wxuser.sysuser_id and wechat.company_id:
                     employee = yield user_ps.get_valid_employee_by_user_id(
                         user_id=wxuser.sysuser_id, company_id=wechat.company_id)
