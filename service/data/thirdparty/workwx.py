@@ -7,7 +7,8 @@ from service.data.base import DataService
 from util.tool.http_tool import http_get, http_post_v2, http_get_v2, http_post, http_put_v2, _v2_async_http_post
 from conf.newinfra_service_conf.user import user
 from conf.newinfra_service_conf.service_info import user_service
-from tornado.httputil import url_concat, HTTPHeaders
+from tornado.httputil import url_concat
+from setting import settings
 
 
 class WorkwxDataService(DataService):
@@ -35,7 +36,8 @@ class WorkwxDataService(DataService):
     @gen.coroutine
     def bind_workwx_qxuser(self, params):
         params.update({"appid": user_service.appid, "interfaceid": user_service.interfaceid}) #post请求参数写在url里面，不能写在body里面
-        route = url_concat(user.INFRA_USER_BIND_WORKWX_QXUSER, params)
+        path = "{0}/{1}{2}".format(settings['cloud'], user_service.service_name, user.INFRA_USER_BIND_WORKWX_QXUSER)
+        route = url_concat(path, params)
         ret = yield _v2_async_http_post(route)
         raise gen.Return(ret)
 
