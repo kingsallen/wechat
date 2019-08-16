@@ -145,7 +145,7 @@ class WorkWXOauthHandler(WorkwxHandler):
     def get(self):
         """更新workwx的授权信息，及获取workwx用户信息"""
         # 初始化 企业微信 oauth service
-        company = yield self.company_ps.get_company(conds={'id': self._wechat.company_id}, need_conf=True)
+        company = yield self.company_ps.get_company(conds={'id': self.current_user.wechat.company_id}, need_conf=True)
         self._workwx = yield self.workwx_ps.get_workwx(company.id, company.hraccount_id)
         self._work_oauth_service = WorkWXOauth2Service(
             self._workwx, self.fullurl())
@@ -270,7 +270,7 @@ class WorkWXOauthHandler(WorkwxHandler):
         )
         """
         # 通过userid查询 这个企业微信成员 是不是已经存在
-        workwx_user_record = yield self.workwx_ps.get_workwx_user(self._wechat.company_id, workwx_userinfo.userid)
+        workwx_user_record = yield self.workwx_ps.get_workwx_user(self.current_user.wechat.company_id, workwx_userinfo.userid)
         workwx_sysuser_id = 0
         # 企业微信成员 已经存在
         if workwx_user_record:
@@ -284,7 +284,7 @@ class WorkWXOauthHandler(WorkwxHandler):
         else:
             is_create_success = yield self.workwx_ps.create_workwx_user(
                 workwx_userinfo,
-                company_id=self._wechat.company_id,
+                company_id=self.current_user.wechat.company_id,
                 workwx_userid=workwx_userinfo.userid)
 
             sysuser = yield self._get_sysuser_by_mobile(workwx_userinfo)
@@ -309,7 +309,7 @@ class WorkWXOauthHandler(WorkwxHandler):
             # 判断是否是有效员工
             is_valid_employee = yield self.employee_ps.is_valid_employee(
                 sysuser.id,
-                self._wechat.company_id
+                self.current_user.wechat.company_id
             )
             # 如果是有效员工，不需要从企业微信跳转到微信,直接访问企业微信主页
             if is_valid_employee:
@@ -317,10 +317,10 @@ class WorkWXOauthHandler(WorkwxHandler):
                 self._WORKWX_REDIRECT = True
                 return
             # 如果不是有效员工，先去判断是否关注了公众号
-            is_subscribe = yield self.position_ps.get_hr_wx_user(sysuser.unionid, self._wechat.id)
+            is_subscribe = yield self.position_ps.get_hr_wx_user(sysuser.unionid, self.current_user.wechat.id)
             if is_subscribe:
                 # 如果已经关注公众号，无需跳转微信，可生成员工信息之后访问主页
-                yield self.workwx_ps.employee_bind(sysuser.id, self._wechat.company_id)
+                yield self.workwx_ps.employee_bind(sysuser.id, self.current_user.wechat.company_id)
                 yield self._redirect_workwx_home_url(sysuser, workwx_sysuser_id, workwx_userid)
                 self._WORKWX_REDIRECT = True
                 return
@@ -337,7 +337,7 @@ class WorkWXOauthHandler(WorkwxHandler):
         """# 企业微信5s跳转页面"""
 
         # 5s跳转页面
-        workwx_fivesec_url = self.make_url(path.WOKWX_FIVESEC_PAGE,self.params) + "&workwx_userid={}&company_id={}".format(workwx_userid, self._wechat.company_id)
+        workwx_fivesec_url = self.make_url(path.WOKWX_FIVESEC_PAGE,self.params) + "&workwx_userid={}&company_id={}".format(workwx_userid, self.current_user.wechat.company_id)
         # 企业微信二维码页面
         workwx_qrcode_url = self.make_url(path.WOKWX_QRCODE_PAGE, self.params)
         # 其他认证方式或者已经关闭oms开关，不是有效员工直接跳转到企业微信二维码页面
@@ -352,9 +352,9 @@ class WorkWXOauthHandler(WorkwxHandler):
     @gen.coroutine
     def _get_company_auth_mode(self, hraccount_id):
         """企业微信成员-获取公司设置的认证模式: 如果当前认证模式是7并且oms开关打开，返回true，否则返回false"""
-        cert_conf_info = yield self.employee_ps.get_employee_cert_config(self._wechat.company_id, hraccount_id)
+        cert_conf_info = yield self.employee_ps.get_employee_cert_config(self.current_user.wechat.company_id, hraccount_id)
         cert_conf = cert_conf_info.get('data')
-        oms_status = yield self.employee_ps.get_switch_workwx(self._wechat.company_id)
+        oms_status = yield self.employee_ps.get_switch_workwx(self.current_user.wechat.company_id)
         if cert_conf and int(cert_conf["hrEmployeeCertConf"]["authMode"]) == 7 and oms_status:
             return True
         else:
@@ -371,7 +371,7 @@ class WorkWXOauthHandler(WorkwxHandler):
         workwx_home_url = self.make_url(path.POSITION_LIST, self.params, host=self.host)
         if workwx_sysuser_id <= 0:
             # 绑定仟寻用户和企业微信: 如果需要跳转微信，不能企业微信做绑定，必须去微信做绑定(因为有可能通过mobile绑定的仟寻用户跟跳转的仟寻用户不是同一个人)；如果不跳微信需要在企业微信做绑定
-            yield self.workwx_ps.bind_workwx_qxuser(sysuser.id, workwx_userid, self._wechat.company_id)
+            yield self.workwx_ps.bind_workwx_qxuser(sysuser.id, workwx_userid, self.current_user.wechat.company_id)
         yield self._set_workwx_cookie(sysuser.id)
         self.redirect(workwx_home_url)
 
