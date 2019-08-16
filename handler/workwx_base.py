@@ -47,7 +47,7 @@ class WorkwxHandler(MetaBaseHandler):
         self._wechat = None
 
         self.logger.debug("current_user:{}".format(self.current_user))
-        self.logger.debug("+++++++++++++++++PREPARE OVER+++++++++++++++++++++")
+        self.logger.debug("+++++++++++++++WORKWX PREPARE OVER+++++++++++++++++++++")
 
     @gen.coroutine
     def _get_current_wechat(self, qx=False):
