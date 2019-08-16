@@ -1,6 +1,8 @@
 # coding=utf-8
 from util.tool.dict_tool import ObjectDict
 
+
+"""临时写法，请勿再使用这种写法，写到conf/newinfra_service_conf/service_info.py中"""
 redpacket_service = ObjectDict({
     "service": ObjectDict({
         "appid": "A11039",

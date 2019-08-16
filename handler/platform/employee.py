@@ -124,7 +124,7 @@ class AwardsLadderHandler(BaseHandler):
 class WechatSubInfoHandler(BaseHandler):
     """
     获取微信信息
-    字符类型的自定义参数的格式为{场景值(大写)}_{自定义字符串}，场景值必须为大写英文字母
+    字符类型的自定义参数的格式为{场景值(大写)}_{自定义字符串}，场景值必须为大写英文字母（不包含数字、下划线、空格等特殊字符）
     int类型 scene_id规范为：32位二进制, 5位type + 27位自定义编号(比如hrid, userid)。见 https://wiki.moseeker.com/weixin.md
     """
 
@@ -298,6 +298,18 @@ class EmployeeBindHandler(BaseHandler):
             in_wechat=self.in_wechat,
             locale=self.locale
         )
+
+        # todo 公众号信息，已有接口，这个其实是重复的代码，后续考虑去掉
+        scene_id = int('11110000000000000000000000000000', base=2) + (int(
+            const.QRCODE_PC_REFERRAL) if self.params.scan_from == const.SCAN_FROM else int(
+            const.QRCODE_BIND))
+
+        wechat = yield self.wechat_ps.get_wechat_info(
+            self.current_user,
+            scene_id=scene_id,
+            in_wechat=self.in_wechat
+        )
+        data.update(wechat=wechat)
 
         # 是否需要弹出 隐私协议 窗口
         res_privacy, data_privacy = yield self.privacy_ps.if_privacy_agreement_window(

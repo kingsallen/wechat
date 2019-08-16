@@ -392,7 +392,7 @@ def send_succession_message(wechat, open_id, pattern_id=99, position_id=0, messa
     :param position_id:
     :return:
     """
-    if pattern_id == const.QRCODE_BIND:
+    if pattern_id in (const.QRCODE_BIND, const.QRCODE_PC_REFERRAL):
         url = make_url(path.EMPLOYEE_VERIFY, host=settings["platform_host"], wechat_signature=wechat.get("signature"))
         content = '点击完成   <a href="{}">员工认证</a> \n更多积分奖励等你来~'.format(url)
     elif pattern_id == const.QRCODE_POLICY:
@@ -434,6 +434,8 @@ def send_succession_message(wechat, open_id, pattern_id=99, position_id=0, messa
     elif pattern_id == const.QRCODE_POSITION and position_id:
         url = make_url(path.POSITION_PATH.format(position_id), host=settings["platform_host"], wechat_signature=wechat.get("signature"))
         content = '您刚刚正在浏览职位，点击查阅<a href="{}">职位详情</a>'.format(url)
+    elif pattern_id == const.STR_SCENE_MRAS_WELCOME and wechat.id == const.MARS_ID:
+        content = 'Hi，欢迎参加玛氏2019秋季校招。您将在这里接收最新的投递进度消息推送，也可在“个人中心”自助查阅投递记录。'
     else:
         content = "欢迎关注：{}, 点击菜单栏发现更多精彩~".format(wechat.get("name"))
     if message:

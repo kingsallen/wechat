@@ -373,6 +373,7 @@ class BaseHandler(MetaBaseHandler):
         self._wxuser = None
         self._qxuser = None
         self._session_id = None
+        self.sa.clear_super_properties()
 
         self.logger.debug("current_user:{}".format(self.current_user))
         self.logger.debug("+++++++++++++++++PREPARE OVER+++++++++++++++++++++")
@@ -623,8 +624,9 @@ class BaseHandler(MetaBaseHandler):
             host_suffix = "/recruit"
         else:
             host_suffix = "/m"
-        self._oauth_service.redirect_url = "https://" + settings['multi_domain']['format'].format(
+        url = "https://" + settings['multi_domain']['format'].format(
             settings['multi_domain']['qx_appid']) + host_suffix + self.request.uri
+        self._oauth_service.redirect_url = url_subtract_query(url, ['code', 'state', 'appid'])
 
     @gen.coroutine
     def _build_session(self):
