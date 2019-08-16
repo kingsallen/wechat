@@ -7,6 +7,7 @@ from service.data.base import DataService
 from util.tool.http_tool import http_get, http_post_v2, http_get_v2, http_post, http_put_v2
 from conf.newinfra_service_conf.user import user
 from conf.newinfra_service_conf.service_info import user_service
+from tornado.httputil import url_concat, HTTPHeaders
 
 
 class WorkwxDataService(DataService):
@@ -33,7 +34,8 @@ class WorkwxDataService(DataService):
 
     @gen.coroutine
     def bind_workwx_qxuser(self, params):
-        ret = yield http_post_v2(user.INFRA_USER_BIND_WORKWX_QXUSER, user_service, params)
+        route = url_concat(user.INFRA_USER_BIND_WORKWX_QXUSER, params)
+        ret = yield http_post_v2(route, user_service)
         raise gen.Return(ret)
 
     @gen.coroutine
