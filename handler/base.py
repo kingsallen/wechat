@@ -1029,6 +1029,10 @@ class BaseHandler(MetaBaseHandler):
     @gen.coroutine
     def _is_employee_workwx(self):
         """企业微信成员-员工认证"""
+        # 企业微信授权页面
+        wokwx_oauth_url = self.make_url(path.WOKWX_OAUTH_PAGE, self.params)
+        # 企业微信二维码页面
+        workwx_qrcode_url = self.make_url(path.WOKWX_QRCODE_PAGE, self.params)
         if self.current_user.employee:
             return False
         else:
@@ -1039,19 +1043,33 @@ class BaseHandler(MetaBaseHandler):
                     yield self.workwx_ps.employee_bind(self.current_user.sysuser.id, self._wechat.company_id)
                 else:
                     # 如果没有关注公众号，跳转微信
-                    workwx_user_record = yield self.workwx_ps.get_workwx_user_by_sysuser_id(
-                        self.current_user.sysuser.id, self._wechat.company_id)
-                    if workwx_user_record:
-                        workwx_fivesec_url = self.make_url(path.WOKWX_FIVESEC_PAGE,self.params) + "&workwx_userid={}&company_id={}".format(
-                            workwx_user_record.work_wechat_userid, self._wechat.company_id)
-                        self.redirect(workwx_fivesec_url)
-                        return True
+                    workwx_auth_mode = yield self._get_company_auth_mode() #其他认证方式或者已经关闭oms开关，不是有效员工直接跳转到企业微信二维码页面
+                    if workwx_auth_mode:
+                        workwx_user_record = yield self.workwx_ps.get_workwx_user_by_sysuser_id(
+                            self.current_user.sysuser.id, self._wechat.company_id)
+                        if workwx_user_record:
+                            workwx_fivesec_url = self.make_url(path.WOKWX_FIVESEC_PAGE,self.params) + "&workwx_userid={}&company_id={}".format(
+                                workwx_user_record.work_wechat_userid, self._wechat.company_id)
+                            self.redirect(workwx_fivesec_url)
+                            return True
+                        else:
+                            yield self.redirect(wokwx_oauth_url)
+                            return True
                     else:
-                        url = self.make_url(path.WOKWX_OAUTH_PAGE, self.params)
-                        yield self.redirect(url)
+                        yield self.redirect(workwx_qrcode_url)
                         return True
                 return False
             else:
-                url = self.make_url(path.WOKWX_OAUTH_PAGE, self.params)
-                yield self.redirect(url)
+                yield self.redirect(wokwx_oauth_url)
                 return True
+
+    @gen.coroutine
+    def _get_company_auth_mode(self):
+        """企业微信成员-获取公司设置的认证模式: 如果当前认证模式是7并且oms开关打开，返回true，否则返回false"""
+        employee_cert_conf = yield self.employee_ps.get_employee_cert_config(self._wechat.company_id, self.current_user.company.hraccount_id)
+        oms_status = yield self.get_switch_workwx(self._wechat.company_id)
+        if employee_cert_conf and int(employee_cert_conf["hrEmployeeCertConf"]["authMode"]) == 7 and oms_status:
+            return True
+        else:
+            return False
+
