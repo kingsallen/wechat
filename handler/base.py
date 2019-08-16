@@ -1066,9 +1066,10 @@ class BaseHandler(MetaBaseHandler):
     @gen.coroutine
     def _get_company_auth_mode(self):
         """企业微信成员-获取公司设置的认证模式: 如果当前认证模式是7并且oms开关打开，返回true，否则返回false"""
-        employee_cert_conf = yield self.employee_ps.get_employee_cert_config(self._wechat.company_id, self.current_user.company.hraccount_id)
+        cert_conf_info = yield self.employee_ps.get_employee_cert_config(self._wechat.company_id, self.current_user.company.hraccount_id)
+        cert_conf = cert_conf_info.get('data')
         oms_status = yield self.employee_ps.get_switch_workwx(self._wechat.company_id)
-        if employee_cert_conf and int(employee_cert_conf["hrEmployeeCertConf"]["authMode"]) == 7 and oms_status:
+        if cert_conf and int(cert_conf["hrEmployeeCertConf"]["authMode"]) == 7 and oms_status:
             return True
         else:
             return False
