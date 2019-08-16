@@ -485,7 +485,7 @@ class WorkwxQrcodeHandler(MetaBaseHandler):
     def get(self):
         self.current_user = ObjectDict()
         wechat = yield self._get_current_wechat()
-        self.current_user.wechat = wechat
+        self.current_user.wechat = wechat  #前端用
         client_env = ObjectDict({"name": self._client_env})
         self.namespace = {"client_env": client_env}
         self.render_page(template_name="adjunct/wxwork-qrcode-simple.html", data=ObjectDict())
