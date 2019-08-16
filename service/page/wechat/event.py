@@ -746,6 +746,8 @@ class EventPageService(PageService):
                 pattern_id = real_user_id
                 # 校验关注后是否自动恢复了员工身份。
                 user_ps = UserPageService()
+
+                self.sa.track(wxuser.sysuser_id, "subscribeWechat", properties={"sub_from": type, "scene_id": real_user_id}, is_login_id=True)
                 if pattern_id == const.QRCODE_WORKWX_BIND: #企业微信员工认证
                     # 先判断是否是有效员工，需要判断的原因：如果以前是有效员工，因为取消关注导致不是有效员工的情况，在扫码之后会自动成为有效员工，这时候不需要再生产员工信息
                     is_valid_employee = yield self.infra_user_ds.is_valid_employee(
@@ -758,7 +760,7 @@ class EventPageService(PageService):
                         user_id=wxuser.sysuser_id, company_id=wechat.company_id)
                 else:
                     employee = None
-                if not employee or pattern_id != const.QRCODE_BIND:
+                if not employee or pattern_id not in (const.QRCODE_BIND, const.QRCODE_SIDEBAR):
                     yield send_succession_message(wechat=wechat, open_id=msg.FromUserName, pattern_id=pattern_id)
 
             elif type == 16:

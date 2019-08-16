@@ -663,14 +663,16 @@ EMPLOYEE_BIND_AUTH_MODE = ObjectDict(
     CUSTOM=2,
     EMAIL_OR_CUSTOM=4,
     QUESTION=5,
-    EMAIL_OR_QUESTION=6
+    EMAIL_OR_QUESTION=6,
+    WORKWX=7
 )
 
 # user_employee.auth_method 的数据库枚举值
 USER_EMPLOYEE_AUTH_METHOD = ObjectDict(
     EMAIL=0,
     CUSTOM=1,
-    QUESTION=2
+    QUESTION=2,
+    WORKWX=3
 )
 
 # 员工认证状态码
@@ -767,6 +769,7 @@ QRCODE_POSITION_INFO = 11  # 职位列表
 QRCODE_REFERRAL_CONFIRM = 12  # 用户认领推荐成功
 QRCODE_SCAN_REFERRAL = 13  # 浏览候选人推荐职位
 QRCODE_POSITION = 14  # 职位详情
+QRCODE_SIDEBAR = 15  # 侧边栏二维码
 QRCODE_WORKWX_BIND = 17 #企业微信员工认证
 QRCODE_OTHER = 99  # 默认
 

@@ -15,3 +15,12 @@ redpacket_service = ObjectDict({
                       CLOUD_RP_POSITION_SHARE_INFO='/v4/activity-position/position-scene')
 
 })
+
+position_service = ObjectDict({
+    "service": ObjectDict({
+        "appid": "A11009",
+        "interfaceid": "A11009001",
+        "service_name": "position"
+    }),
+    "api": ObjectDict(CLOUD_POSITION_GET_POSITIONLIST="/v4/list")
+})
