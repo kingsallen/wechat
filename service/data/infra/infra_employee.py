@@ -460,7 +460,7 @@ class InfraEmployeeDataService(DataService):
 
     @gen.coroutine
     def get_employee_cert_config(self, company_id, hraccount_id):
-        """提交员工订阅偏好的信息"""
+        """获取企业认证配置信息"""
         params = {
             "companyId": company_id,
             "hraccountId": hraccount_id,

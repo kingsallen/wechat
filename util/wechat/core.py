@@ -338,7 +338,7 @@ def get_qrcode(access_token, scene_str, action_name="QR_LIMIT_STR_SCENE"):
 def get_temporary_qrcode(wechat, scene_id, action_name="QR_SCENE"):
     """
     生成带场景值的临时二维码
-    :param scene_id：完整的场景值 (pattern_id  1：员工认证 2：内推政策 3：积分榜单 4：积分历史 5：推荐历史 6：候选人推荐 7：个人中心 8：我的 9：推荐人才简历 10：推荐人才关键信息 11：职位列表 12：用户认领推荐成功， 14：职位详情）
+    :param scene_id：完整的场景值 (pattern_id  1：员工认证 2：内推政策 3：积分榜单 4：积分历史 5：推荐历史 6：候选人推荐 7：个人中心 8：我的 9：推荐人才简历 10：推荐人才关键信息 11：职位列表 12：用户认领推荐成功， 14：职位详情 17: 企业微信员工认证）
     :param wechat
     :param action_name
     :return:

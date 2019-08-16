@@ -1149,7 +1149,7 @@ class EmployeePageService(PageService):
 
     @gen.coroutine
     def get_employee_cert_config(self, company_id, hraccount_id, filter_current=True):
-        """获取员工认证配置"""
+        """获取公司认证配置"""
         res = yield self.infra_employee_ds.get_employee_cert_config(company_id, hraccount_id)
         data = res.get('data')
         # 这里过滤掉其他公司的配置信息
