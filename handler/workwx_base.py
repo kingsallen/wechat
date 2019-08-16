@@ -32,6 +32,7 @@ class WorkwxHandler(MetaBaseHandler):
         self._wechat = yield self._get_current_wechat()
         session.wechat = self._wechat
         yield self._add_company_info_to_session(session)
+        session.sysuser = ObjectDict()
         self.current_user = session  #前端用
 
         client_env = ObjectDict({"name": self._client_env})
