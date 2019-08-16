@@ -414,8 +414,6 @@ class FiveSecSkipWXHandler(WorkwxHandler):
         wx_oauth_service = WeChatOauth2Service(qx_wechat, redirect_url, component_access_token)
         wx_oauth_url = wx_oauth_service.get_oauth_code_userinfo_url()
         self.logger.debug("from_workwx_to_qx_oauth_url: {}".format(wx_oauth_url))
-        client_env = ObjectDict({"name": self._client_env})
-        self.namespace = {"client_env": client_env}
         self.render_page(template_name="adjunct/wxwork-bind-redirect.html", data=ObjectDict({"redirect_link": wx_oauth_url}))
 
 
@@ -454,7 +452,5 @@ class WorkwxQrcodeHandler(WorkwxHandler):
     @gen.coroutine
     def get(self):
 
-        client_env = ObjectDict({"name": self._client_env})
-        self.namespace = {"client_env": client_env}
         self.render_page(template_name="adjunct/wxwork-qrcode-simple.html", data=ObjectDict())
 

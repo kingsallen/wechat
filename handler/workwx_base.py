@@ -1,29 +1,10 @@
 # coding=utf-8
 
-import json
-import os
-import re
-import time
-import traceback
-from hashlib import sha1
-from urllib.parse import unquote
 
 from tornado import gen, locale
-
-import conf.common as const
-import conf.path as path
-import conf.wechat as wx_const
-from cache.user.passport_session import PassportCache
 from handler.metabase import MetaBaseHandler
-from oauth.wechat import WeChatOauth2Service, WeChatOauthError, JsApi
-from setting import settings
 from util.common import ObjectDict
-from util.common.cipher import decode_id
 from util.common.decorator import check_signature
-from util.tool.date_tool import curr_now
-from util.tool.str_tool import to_str, from_hex, match_session_id, \
-    languge_code_from_ua
-from util.tool.url_tool import url_subtract_query, make_url
 
 
 class WorkwxHandler(MetaBaseHandler):
@@ -51,6 +32,9 @@ class WorkwxHandler(MetaBaseHandler):
         self._wechat = yield self._get_current_wechat()
         session.wechat = self._wechat
         self.current_user = session  #前端用
+
+        client_env = ObjectDict({"name": self._client_env})
+        self.namespace = {"client_env": client_env} #前端用
 
         # 内存优化
         self._wechat = None
