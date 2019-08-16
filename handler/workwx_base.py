@@ -5,6 +5,7 @@ from tornado import gen, locale
 from handler.metabase import MetaBaseHandler
 from util.common import ObjectDict
 from util.common.decorator import check_signature
+from oauth.wechat import WeChatOauth2Service, WeChatOauthError, JsApi
 
 
 class WorkwxHandler(MetaBaseHandler):
@@ -31,8 +32,11 @@ class WorkwxHandler(MetaBaseHandler):
         session = ObjectDict()
         self._wechat = yield self._get_current_wechat()
         session.wechat = self._wechat
+        session.wxuser = ObjectDict()
+        session.qxuser = ObjectDict()
         yield self._add_company_info_to_session(session)
         session.sysuser = ObjectDict()
+        # self._add_jsapi_to_wechat(session.wechat)
         self.current_user = session  #前端用
 
         client_env = ObjectDict({"name": self._client_env})
@@ -96,3 +100,9 @@ class WorkwxHandler(MetaBaseHandler):
             company.update({'theme': None})
 
         raise gen.Return(company)
+
+    def _add_jsapi_to_wechat(self, wechat):
+        """拼装 jsapi"""
+        wechat.jsapi = JsApi(
+            jsapi_ticket=wechat.jsapi_ticket,
+            url=self.fullurl(encode=False))
