@@ -157,7 +157,7 @@ class WorkWXOauthHandler(MetaBaseHandler):
             workwx_userinfo = yield self._get_user_info_workwx(code)
             if workwx_userinfo:
                 self.logger.debug("来自 workwx 的授权, 获得 workwx_userinfo:{}".format(workwx_userinfo))
-                yield self._handle_user_info_workwx(workwx_userinfo)
+                yield self._handle_user_info_workwx(workwx_userinfo, company.hraccount_id)
                 if self._WORKWX_REDIRECT:
                     return
             else:
@@ -260,7 +260,7 @@ class WorkWXOauthHandler(MetaBaseHandler):
             raise gen.Return(None)
 
     @gen.coroutine
-    def _handle_user_info_workwx(self, workwx_userinfo):
+    def _handle_user_info_workwx(self, workwx_userinfo, hraccount_id):
         """
         根据 userId 创建 user_workwx 如果存在则不创建， 返回 wxuser_id
         创建 员工user_employee，绑定刚刚创建的 user_id
@@ -302,7 +302,7 @@ class WorkWXOauthHandler(MetaBaseHandler):
                 workwx_userid=workwx_userinfo.userid)
 
             sysuser = yield self._get_sysuser_by_mobile(workwx_userinfo)
-        yield self._is_valid_employee(sysuser, workwx_sysuser_id, workwx_userinfo.userid)
+        yield self._is_valid_employee(sysuser, workwx_sysuser_id, workwx_userinfo.userid, hraccount_id)
 
     # 用mobile匹配user_user的username，如果存在，绑定仟寻用户和企业微信
     @gen.coroutine
@@ -317,13 +317,13 @@ class WorkWXOauthHandler(MetaBaseHandler):
 
     #绑定企业微信用户和仟寻用户、保存session 这两个操作 必须在不跳转微信(直接跳转position页面)的情况下执行；在跳转微信的情况下很可能微信
     @gen.coroutine
-    def _is_valid_employee(self, sysuser, workwx_sysuser_id, workwx_userid):
+    def _is_valid_employee(self, sysuser, workwx_sysuser_id, workwx_userid, hraccount_id):
         #5s跳转页面
         workwx_fivesec_url = self.make_url(path.WOKWX_FIVESEC_PAGE, self.params) + "&workwx_userid={}&company_id={}".format(workwx_userid,self._wechat.company_id)
         # 企业微信二维码页面
         workwx_qrcode_url = self.make_url(path.WOKWX_QRCODE_PAGE, self.params)
         # 其他认证方式或者已经关闭oms开关，不是有效员工直接跳转到企业微信二维码页面
-        workwx_auth_mode = yield self._get_company_auth_mode()
+        workwx_auth_mode = yield self._get_company_auth_mode(hraccount_id)
         if sysuser:
             # 判断是否是有效员工
             is_valid_employee = yield self.employee_ps.is_valid_employee(
@@ -362,9 +362,9 @@ class WorkWXOauthHandler(MetaBaseHandler):
             return
 
     @gen.coroutine
-    def _get_company_auth_mode(self):
+    def _get_company_auth_mode(self, hraccount_id):
         """企业微信成员-获取公司设置的认证模式: 如果当前认证模式是7并且oms开关打开，返回true，否则返回false"""
-        employee_cert_conf = yield self.employee_ps.get_employee_cert_config(self._wechat.company_id, self.current_user.company.hraccount_id)
+        employee_cert_conf = yield self.employee_ps.get_employee_cert_config(self._wechat.company_id, hraccount_id)
         oms_status = yield self.get_switch_workwx(self._wechat.company_id)
         if employee_cert_conf and int(employee_cert_conf["hrEmployeeCertConf"]["authMode"]) == 7 and oms_status:
             return True
