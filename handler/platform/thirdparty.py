@@ -483,6 +483,7 @@ class WorkwxQrcodeHandler(MetaBaseHandler):
     @check_signature
     @gen.coroutine
     def get(self):
+        self.current_user = ObjectDict()
         wechat = yield self._get_current_wechat()
         self.current_user.wechat = wechat
         client_env = ObjectDict({"name": self._client_env})
