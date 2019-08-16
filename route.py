@@ -222,6 +222,7 @@ platform_routes = [
     (r"/work-wechat",                                handler.platform.thirdparty.WorkWXOauthHandler,            {"event": "workwx_oauth"}),
     (r'/workwx/fivesec-skipwx',                      handler.platform.thirdparty.FiveSecSkipWXHandler,          {"event": "workwx_fivesec_skipwx"}),
     (r'/employee/qrcode',                            handler.platform.thirdparty.EmployeeQrcodeHandler,         {"event": "employee_qrcode"}),
+    (r'/workwx/qrcode',                              handler.platform.thirdparty.WorkwxQrcodeHandler,           {"event": "workwx_qrcode"}),
 
     # 各大公司的自定义配置
     (r"/custom/emailapply/?",                        handler.platform.customize.CustomizeEmailApplyHandler,     {"event": "customize_emailapply"}),

@@ -88,6 +88,8 @@ WOKWX_FIVESEC_PAGE = "/workwx/fivesec-skipwx"
 
 WECHAT_QRCODE_PAGE = "/employee/qrcode"
 
+WOKWX_QRCODE_PAGE = "/workwx/qrcode"
+
 # ============================ 微信端Path结束 ============================
 
 

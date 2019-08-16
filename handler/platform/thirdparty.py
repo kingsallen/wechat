@@ -425,7 +425,6 @@ class FiveSecSkipWXHandler(MetaBaseHandler):
         raise gen.Return(wechat)
 
 
-
 class EmployeeQrcodeHandler(BaseHandler):
 
     @handle_response
@@ -451,3 +450,16 @@ class EmployeeQrcodeHandler(BaseHandler):
         # if not is_valid_employee:  # 如果不是有效员工，需要需要生成员工信息
         #     yield self.workwx_ps.employee_bind(self.current_user.sysuser.id, company_id)  # 如果已经关注公众号，无需跳转微信，可生成员工信息之后访问主页
         self.render_page(template_name="adjunct/wxwork-qrcode.html", data=ObjectDict())
+
+
+class WorkwxQrcodeHandler(MetaBaseHandler):
+
+    @handle_response
+    @check_env(4)
+    @check_signature
+    @gen.coroutine
+    def get(self):
+
+        client_env = ObjectDict({"name": self._client_env})
+        self.namespace = {"client_env": client_env}
+        self.render_page(template_name="adjunct/wxwork-qrcode-simple.html", data=ObjectDict())
