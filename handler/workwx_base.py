@@ -31,6 +31,7 @@ class WorkwxHandler(MetaBaseHandler):
         session = ObjectDict()
         self._wechat = yield self._get_current_wechat()
         session.wechat = self._wechat
+        yield self._add_company_info_to_session(session)
         self.current_user = session  #前端用
 
         client_env = ObjectDict({"name": self._client_env})
@@ -56,3 +57,41 @@ class WorkwxHandler(MetaBaseHandler):
             return
 
         raise gen.Return(wechat)
+
+    @gen.coroutine
+    def _add_company_info_to_session(self, session):
+        """拼装 session 中的 company, employee
+        """
+
+        session.company = yield self._get_current_company(session.wechat.company_id)
+
+        # if session.sysuser.id and self.is_platform:
+        #     employee = yield self.user_ps.get_valid_employee_by_user_id(
+        #         user_id=session.sysuser.id, company_id=session.company.id)
+        #     session.employee = employee
+
+    @gen.coroutine
+    def _get_current_company(self, company_id):
+        """获得企业母公司信息"""
+
+        conds = {'id': company_id}
+        company = yield self.company_ps.get_company(conds=conds, need_conf=True)
+
+        # 配色处理，如果theme_id为5表示公司使用默认配置，不需要将原始配色信息传给前端
+        # 如果将theme_id为5的传给前端，会导致前端颜色无法正常显示默认颜色
+        if company.conf_theme_id != 5 and company.conf_theme_id:
+            theme = yield self.wechat_ps.get_wechat_theme(
+                {'id': company.conf_theme_id, 'disable': 0})
+            if theme:
+                company.update({
+                    'theme': [
+                        theme.background_color,
+                        theme.title_color,
+                        theme.button_color,
+                        theme.other_color
+                    ]
+                })
+        else:
+            company.update({'theme': None})
+
+        raise gen.Return(company)
