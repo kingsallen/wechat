@@ -11,6 +11,7 @@ import conf.path as path
 from setting import settings
 from handler.base import BaseHandler
 from handler.metabase import MetaBaseHandler
+from handler.workwx_base import WorkwxHandler
 from util.common.decorator import handle_response, check_env, authenticated
 from util.tool.dict_tool import ObjectDict
 from util.tool.str_tool import to_str
@@ -125,14 +126,13 @@ class JoywokAutoAuthHandler(BaseHandler):
 
 
 
-class WorkWXOauthHandler(MetaBaseHandler):
+class WorkWXOauthHandler(WorkwxHandler):
 
     def __init__(self, application, request, **kwargs):
         super(WorkWXOauthHandler, self).__init__(application, request, **kwargs)
 
         # 构建 session 过程中会缓存一份当前企业微信信息
         self._workwx = None
-        self._wechat = None
         # 处理 oauth 的 service, 会在使用时初始化
         self._work_oauth_service = None
         # 企业微信-员工认证 跳转标记
@@ -145,7 +145,6 @@ class WorkWXOauthHandler(MetaBaseHandler):
     def get(self):
         """更新workwx的授权信息，及获取workwx用户信息"""
         # 初始化 企业微信 oauth service
-        self._wechat = yield self._get_current_wechat()
         company = yield self.company_ps.get_company(conds={'id': self._wechat.company_id}, need_conf=True)
         self._workwx = yield self.workwx_ps.get_workwx(company.id, company.hraccount_id)
         self._work_oauth_service = WorkWXOauth2Service(
@@ -237,19 +236,6 @@ class WorkWXOauthHandler(MetaBaseHandler):
     #         "id": user_id
     #     })
     #     return sysuser
-
-    @gen.coroutine
-    def _get_current_wechat(self):
-
-        signature = self.params['wechat_signature']
-        wechat = yield self.wechat_ps.get_wechat(conds={
-            "signature": signature
-        })
-        if not wechat:
-            self.write_error(http_code=404)
-            return
-
-        raise gen.Return(wechat)
 
     @gen.coroutine
     def _get_user_info_workwx(self, code):
@@ -412,7 +398,7 @@ class WorkWXOauthHandler(MetaBaseHandler):
         return url_subtract_query(full_url, ['code', 'state'])
 
 
-class FiveSecSkipWXHandler(MetaBaseHandler):
+class FiveSecSkipWXHandler(WorkwxHandler):
 
     @handle_response
     @check_env(4)
@@ -421,7 +407,6 @@ class FiveSecSkipWXHandler(MetaBaseHandler):
     def get(self):
         """企业微信5s跳转页"""
         component_access_token = BaseHandler.component_access_token
-        # wechat = yield self._get_current_wechat()
         qx_wechat = yield self._get_current_wechat(qx=True)
 
         redirect_url = self.make_url(path.WECHAT_QRCODE_PAGE, self.params)
@@ -432,21 +417,6 @@ class FiveSecSkipWXHandler(MetaBaseHandler):
         client_env = ObjectDict({"name": self._client_env})
         self.namespace = {"client_env": client_env}
         self.render_page(template_name="adjunct/wxwork-bind-redirect.html", data=ObjectDict({"redirect_link": wx_oauth_url}))
-
-    @gen.coroutine
-    def _get_current_wechat(self, qx=False):
-        if qx:
-            signature = self.settings['qx_signature']
-        else:
-            signature = self.params['wechat_signature']
-        wechat = yield self.wechat_ps.get_wechat(conds={
-            "signature": signature
-        })
-        if not wechat:
-            self.write_error(http_code=404)
-            return
-
-        raise gen.Return(wechat)
 
 
 class EmployeeQrcodeHandler(BaseHandler):
@@ -476,27 +446,15 @@ class EmployeeQrcodeHandler(BaseHandler):
         self.render_page(template_name="adjunct/wxwork-qrcode.html", data=ObjectDict())
 
 
-class WorkwxQrcodeHandler(MetaBaseHandler):
+class WorkwxQrcodeHandler(WorkwxHandler):
 
     @handle_response
     @check_env(4)
     @check_signature
     @gen.coroutine
     def get(self):
-        self.current_user = ObjectDict()
-        wechat = yield self._get_current_wechat()
-        self.current_user.wechat = wechat  #前端用
+
         client_env = ObjectDict({"name": self._client_env})
         self.namespace = {"client_env": client_env}
         self.render_page(template_name="adjunct/wxwork-qrcode-simple.html", data=ObjectDict())
 
-    @gen.coroutine
-    def _get_current_wechat(self):
-
-        signature = self.params['wechat_signature']
-        wechat = yield self.wechat_ps.get_wechat(conds={
-            "signature": signature
-        })
-        if not wechat:
-            self.write_error(http_code=404)
-            return
