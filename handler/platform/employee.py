@@ -222,8 +222,7 @@ class EmployeeUnbindHandler(BaseHandler):
             result, message = yield self.employee_ps.unbind(
                 employee.id,
                 self.current_user.company.id,
-                self.current_user.sysuser.id,
-                bytes(1)
+                self.current_user.sysuser.id
             )
             if result:
                 self.send_json_success()

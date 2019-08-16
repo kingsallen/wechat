@@ -43,9 +43,9 @@ class ThriftEmployeeDataService(DataService):
         return ret
 
     @gen.coroutine
-    def unbind(self, employee_id, company_id, user_id, activation_change):
+    def unbind(self, employee_id, company_id, user_id):
         ret = yield self.employee_service_cilent.unbind(
-            employee_id, company_id, user_id, activation_change)
+            employee_id, company_id, user_id)
         return ret
 
     @gen.coroutine
