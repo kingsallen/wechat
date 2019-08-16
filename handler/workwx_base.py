@@ -5,8 +5,9 @@ from tornado import gen, locale
 from handler.metabase import MetaBaseHandler
 from util.common import ObjectDict
 from util.common.decorator import check_signature
-from oauth.wechat import WeChatOauth2Service, WeChatOauthError, JsApi
-
+from oauth.wechat import JsApi
+from util.tool.str_tool import to_str
+from util.tool.url_tool import url_subtract_query
 
 class WorkwxHandler(MetaBaseHandler):
     """Handler 基类, 仅供微信端网页调用
@@ -36,7 +37,7 @@ class WorkwxHandler(MetaBaseHandler):
         session.qxuser = ObjectDict()
         yield self._add_company_info_to_session(session)
         session.sysuser = ObjectDict()
-        # self._add_jsapi_to_wechat(session.wechat)
+        self._add_jsapi_to_wechat(session.wechat)
         self.current_user = session  #前端用
 
         client_env = ObjectDict({"name": self._client_env})
@@ -106,3 +107,24 @@ class WorkwxHandler(MetaBaseHandler):
         wechat.jsapi = JsApi(
             jsapi_ticket=wechat.jsapi_ticket,
             url=self.fullurl(encode=False))
+
+    def fullurl(self, encode=True):
+        """
+        获取当前 url， 默认删除 query 中的 code 和 state。
+
+        和 oauth 有关的 参数会影响 prepare 方法
+        :param encode: False，不会 Encode，主要用在生成 jdsdk signature 时使用
+        :return:
+        """
+
+        full_url = to_str(self.request.full_url())
+
+        if not self.host in self.request.full_url():
+            full_url = full_url.replace(self.settings.m_host, self.host)
+
+        # if not self.domain in self.request.full_url():
+        #     full_url = full_url.replace(self.settings.m_domain, self.domain)
+
+        if not encode:
+            return full_url
+        return url_subtract_query(full_url, ['code', 'state'])
