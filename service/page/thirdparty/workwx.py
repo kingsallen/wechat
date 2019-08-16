@@ -74,9 +74,9 @@ class WorkwxPageService(PageService):
     def bind_workwx_qxuser(self, sysuser_id, workwx_userid, company_id):
         """绑定企业微信成员和仟寻用户"""
         params = ObjectDict({
-            "sysuser_id": int(sysuser_id),
-            "workwx_userid": workwx_userid,
-            "company_id": int(company_id)
+            "sysuserId": int(sysuser_id),
+            "workwxUserid": workwx_userid,
+            "companyId": int(company_id)
         })
         ret = yield self.workwx_ds.bind_workwx_qxuser(params)
         return ret
