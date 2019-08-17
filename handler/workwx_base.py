@@ -37,8 +37,7 @@ class WorkwxHandler(MetaBaseHandler):
         session.qxuser = ObjectDict()
         yield self._add_company_info_to_session(session)
         session.sysuser = ObjectDict()
-        company = yield self.company_ps.get_company(conds={'id': session.wechat.company_id}, need_conf=True)
-        self._workwx = yield self.workwx_ps.get_workwx(company.id, company.hraccount_id)
+        self._workwx = yield self.workwx_ps.get_workwx(session.company.id, session.company.hraccount_id)
         session.workwx = self._workwx
         self._add_jsapi_to_wechat(session.wechat)
         self.current_user = session  #前端用

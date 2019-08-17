@@ -154,7 +154,7 @@ class WorkWXOauthHandler(WorkwxHandler):
             workwx_userinfo = yield self._get_user_info_workwx(code)
             if workwx_userinfo:
                 self.logger.debug("来自 workwx 的授权, 获得 workwx_userinfo:{}".format(workwx_userinfo))
-                yield self._handle_user_info_workwx(workwx_userinfo, company.hraccount_id)
+                yield self._handle_user_info_workwx(workwx_userinfo, self.current_user.company.hraccount_id)
                 if self._WORKWX_REDIRECT:
                     return
             else:
