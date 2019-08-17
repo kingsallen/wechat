@@ -131,8 +131,6 @@ class WorkWXOauthHandler(WorkwxHandler):
     def __init__(self, application, request, **kwargs):
         super(WorkWXOauthHandler, self).__init__(application, request, **kwargs)
 
-        # 构建 session 过程中会缓存一份当前企业微信信息
-        self._workwx = None
         # 处理 oauth 的 service, 会在使用时初始化
         self._work_oauth_service = None
         # 企业微信-员工认证 跳转标记
@@ -145,10 +143,10 @@ class WorkWXOauthHandler(WorkwxHandler):
     def get(self):
         """更新workwx的授权信息，及获取workwx用户信息"""
         # 初始化 企业微信 oauth service
-        company = yield self.company_ps.get_company(conds={'id': self.current_user.wechat.company_id}, need_conf=True)
-        self._workwx = yield self.workwx_ps.get_workwx(company.id, company.hraccount_id)
+        # company = yield self.company_ps.get_company(conds={'id': self.current_user.wechat.company_id}, need_conf=True)
+        # self._workwx = yield self.workwx_ps.get_workwx(company.id, company.hraccount_id)
         self._work_oauth_service = WorkWXOauth2Service(
-            self._workwx, self.fullurl())
+            self.current_user.workwx, self.fullurl())
 
         code = self.params.get("code")
         if code:
