@@ -162,8 +162,8 @@ class WorkwxHandler(MetaBaseHandler):
         # 重置 wxuser，qxuser，构建完整的 session
         self._workwx_user = ObjectDict()
         self._wxuser = ObjectDict()
-
-        yield self._build_session_by_unionid(self._sysuser)
+        if self._sysuser:
+            yield self._build_session_by_unionid(self._sysuser)
 
     @gen.coroutine
     def _get_session_by_wechat_id(self, session_id, wechat_id):
