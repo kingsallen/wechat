@@ -11,7 +11,6 @@ import conf.path as path
 from setting import settings
 from handler.base import BaseHandler
 from handler.metabase import MetaBaseHandler
-from handler.workwx_base import WorkwxHandler
 from util.common.decorator import handle_response, check_env, authenticated
 from util.tool.dict_tool import ObjectDict
 from util.tool.str_tool import to_str
