@@ -491,6 +491,11 @@ class WorkwxSubInfoHandler(MetaBaseHandler):
     @check_env(4)
     @gen.coroutine
     def get(self):
+        session = ObjectDict()
+        self._wechat = yield self._get_current_wechat()
+        session.wechat = self._wechat
+        self.current_user = session
+
         pattern_id = self.params.scene or 99
         str_scene = self.params.str_scene or ''  # 字符串类型的场景值
         str_code = self.params.str_code or ''  # 字符串类型的自定义参数
@@ -505,3 +510,18 @@ class WorkwxSubInfoHandler(MetaBaseHandler):
             wechat = yield self.wechat_ps.get_workwx_info(self.current_user, scene_id=scene_id)
         self.send_json_success(data=wechat)
         return
+
+    @gen.coroutine
+    def _get_current_wechat(self, qx=False):
+        if qx:
+            signature = self.settings['qx_signature']
+        else:
+            signature = self.params['wechat_signature']
+        wechat = yield self.wechat_ps.get_wechat(conds={
+            "signature": signature
+        })
+        if not wechat:
+            self.write_error(http_code=404)
+            return
+
+        raise gen.Return(wechat)
