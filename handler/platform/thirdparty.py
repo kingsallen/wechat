@@ -419,7 +419,7 @@ class WorkWXOauthHandler(MetaBaseHandler):
         return url_subtract_query(full_url, ['code', 'state'])
 
 
-class FiveSecSkipWXHandler(WorkwxHandler):
+class FiveSecSkipWXHandler(MetaBaseHandler):
 
     @handle_response
     @check_env(4)
@@ -434,6 +434,9 @@ class FiveSecSkipWXHandler(WorkwxHandler):
         # 初始化 oauth service
         wx_oauth_service = WeChatOauth2Service(qx_wechat, redirect_url, component_access_token)
         wx_oauth_url = wx_oauth_service.get_oauth_code_userinfo_url()
+
+        client_env = ObjectDict({"name": self._client_env})
+        self.namespace = {"client_env": client_env}
         self.logger.debug("from_workwx_to_qx_oauth_url: {}".format(wx_oauth_url))
         self.render_page(template_name="adjunct/wxwork-bind-redirect.html", data=ObjectDict({"redirect_link": wx_oauth_url}))
 
@@ -465,18 +468,19 @@ class EmployeeQrcodeHandler(BaseHandler):
         self.render_page(template_name="adjunct/wxwork-qrcode.html", data=ObjectDict())
 
 
-class WorkwxQrcodeHandler(WorkwxHandler):
+class WorkwxQrcodeHandler(MetaBaseHandler):
 
     @handle_response
     @check_env(4)
     @check_signature
     @gen.coroutine
     def get(self):
-
+        client_env = ObjectDict({"name": self._client_env})
+        self.namespace = {"client_env": client_env}
         self.render_page(template_name="adjunct/wxwork-qrcode-simple.html", data=ObjectDict())
 
 
-class WorkwxSubInfoHandler(WorkwxHandler):
+class WorkwxSubInfoHandler(MetaBaseHandler):
     """
     获取微信信息
     字符类型的自定义参数的格式为{场景值(大写)}_{自定义字符串}，场景值必须为大写英文字母
@@ -484,6 +488,7 @@ class WorkwxSubInfoHandler(WorkwxHandler):
     """
 
     @handle_response
+    @check_env(4)
     @gen.coroutine
     def get(self):
         pattern_id = self.params.scene or 99
