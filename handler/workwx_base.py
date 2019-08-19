@@ -285,7 +285,7 @@ class WorkwxHandler(MetaBaseHandler):
         """
         # 通过userid查询 这个企业微信成员 是不是已经存在
         self._workwx_userid = workwx_userinfo.userid
-        workwx_user_record = yield self.workwx_ps.get_workwx_user(self.current_user.wechat.company_id, workwx_userinfo.userid)
+        workwx_user_record = yield self.workwx_ps.get_workwx_user(self._wechat.company_id, workwx_userinfo.userid)
         workwx_sysuser_id = 0
         # 企业微信成员 已经存在
         if workwx_user_record:
@@ -299,7 +299,7 @@ class WorkwxHandler(MetaBaseHandler):
         else:
             is_create_success = yield self.workwx_ps.create_workwx_user(
                 workwx_userinfo,
-                company_id=self.current_user.wechat.company_id,
+                company_id=self._wechat.company_id,
                 workwx_userid=workwx_userinfo.userid)
 
             sysuser = yield self._get_sysuser_by_mobile(workwx_userinfo)
@@ -325,17 +325,17 @@ class WorkwxHandler(MetaBaseHandler):
             # 判断是否是有效员工
             is_valid_employee = yield self.employee_ps.is_valid_employee(
                 sysuser.id,
-                self.current_user.wechat.company_id
+                self._wechat.company_id
             )
             # 如果是有效员工，不需要从企业微信跳转到微信,直接访问企业微信主页
             if is_valid_employee:
                 yield self._bind_and_set_workwx_cookie(sysuser, workwx_sysuser_id, workwx_userid)
                 return sysuser
             # 如果不是有效员工，先去判断是否关注了公众号
-            is_subscribe = yield self.position_ps.get_hr_wx_user(sysuser.unionid, self.current_user.wechat.id)
+            is_subscribe = yield self.position_ps.get_hr_wx_user(sysuser.unionid, self_wechat.id)
             if is_subscribe:
                 # 如果已经关注公众号，无需跳转微信，可生成员工信息之后访问主页
-                yield self.workwx_ps.employee_bind(sysuser.id, self.current_user.wechat.company_id)
+                yield self.workwx_ps.employee_bind(sysuser.id, self._wechat.company_id)
                 yield self._bind_and_set_workwx_cookie(sysuser, workwx_sysuser_id, workwx_userid)
                 return sysuser
             # 如果没有关注公众号，跳转微信
@@ -356,7 +356,7 @@ class WorkwxHandler(MetaBaseHandler):
 
         if workwx_sysuser_id <= 0:
             # 绑定仟寻用户和企业微信: 如果需要跳转微信，不能企业微信做绑定，必须去微信做绑定(因为有可能通过mobile绑定的仟寻用户跟跳转的仟寻用户不是同一个人)；如果不跳微信需要在企业微信做绑定
-            yield self.workwx_ps.bind_workwx_qxuser(sysuser.id, workwx_userid, self.current_user.wechat.company_id)
+            yield self.workwx_ps.bind_workwx_qxuser(sysuser.id, workwx_userid, self._wechat.company_id)
         # yield self._set_workwx_cookie(sysuser.id)
 
 
