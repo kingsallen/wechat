@@ -103,7 +103,7 @@ class WorkwxHandler(MetaBaseHandler):
         self.logger.debug("workwx current_user:{}".format(self.current_user))
         self.logger.debug("+++++++++++++++WORKWX PREPARE OVER+++++++++++++++++++++")
 
-
+    @gen.coroutine
     def _fetch_session(self):
         """尝试获取 session 并创建 current_user，如果获取失败走 oauth 流程"""
         ok = False
