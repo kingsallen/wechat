@@ -331,17 +331,17 @@ class WorkwxHandler(MetaBaseHandler):
                 yield self._bind_and_set_workwx_cookie(sysuser, workwx_sysuser_id, workwx_userid)
                 return sysuser
             # 如果没有关注公众号，跳转微信
-            if workwx_sysuser_id > 0:  #如果在访问企业微信之前已经做过绑定(以前访问绑定过)，需要保存session，跳转微信之后无需再做绑定
-                yield self._set_workwx_cookie(sysuser.id)
+            # if workwx_sysuser_id > 0:  #如果在访问企业微信之前已经做过绑定(以前访问绑定过)，需要保存session，跳转微信之后无需再做绑定
+            #     yield self._set_workwx_cookie(sysuser.id)
             # 其他认证方式或者已经关闭oms开关，不是有效员工直接跳转到企业微信二维码页面
             return sysuser
         else:
             return None
 
-    @gen.coroutine
-    def _set_workwx_cookie(self, sysuser_id):
-        session_id = self.make_new_session_id(sysuser_id)
-        self.set_secure_cookie(const.COOKIE_SESSIONID, session_id, httponly=True, domain=settings['root_host'])
+    # @gen.coroutine
+    # def _set_workwx_cookie(self, sysuser_id):
+    #     session_id = self.make_new_session_id(sysuser_id)
+    #     self.set_secure_cookie(const.COOKIE_SESSIONID, session_id, httponly=True, domain=settings['root_host'])
 
     @gen.coroutine
     def _bind_and_set_workwx_cookie(self, sysuser, workwx_sysuser_id, workwx_userid):
@@ -349,7 +349,7 @@ class WorkwxHandler(MetaBaseHandler):
         if workwx_sysuser_id <= 0:
             # 绑定仟寻用户和企业微信: 如果需要跳转微信，不能企业微信做绑定，必须去微信做绑定(因为有可能通过mobile绑定的仟寻用户跟跳转的仟寻用户不是同一个人)；如果不跳微信需要在企业微信做绑定
             yield self.workwx_ps.bind_workwx_qxuser(sysuser.id, workwx_userid, self.current_user.wechat.company_id)
-        yield self._set_workwx_cookie(sysuser.id)
+        # yield self._set_workwx_cookie(sysuser.id)
 
 
     @gen.coroutine
