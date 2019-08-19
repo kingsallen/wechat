@@ -184,7 +184,8 @@ class WorkwxHandler(MetaBaseHandler):
             self._workwx_user = session.workwx_user
             self._workwx_userid = session.workwx_user.work_wechat_userid
             self._wxuser = session.wxuser
-            yield self._build_session_by_unionid(self._unionid)
+            if self._sysuser:
+                yield self._build_session_by_unionid(self._sysuser)
             raise gen.Return(True)
 
         raise gen.Return(False)
