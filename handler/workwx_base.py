@@ -199,7 +199,7 @@ class WorkwxHandler(MetaBaseHandler):
         else:
             session.workwx_user = yield self.workwx_ps.get_workwx_user(
                 self._wechat.company_id, self._workwx_userid)
-            session.wxuser = yield self.user_ps.self.get_wxuser_sysuser_id_wechat_id(
+            session.wxuser = yield self.user_ps.get_wxuser_sysuser_id_wechat_id(
                 sysuser_id=sysuser.id, wechat_id=self._wechat.id)
 
         if not self._session_id:
