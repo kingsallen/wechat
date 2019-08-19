@@ -109,7 +109,7 @@ class WorkwxHandler(MetaBaseHandler):
         ok = False
         self._session_id = to_str(
             self.get_secure_cookie(
-                const.COOKIE_SESSIONID))
+                const.COOKIE_WORKWX_SESSIONID))
 
         if self._session_id:
             if self.is_platform or self.is_help:
@@ -206,7 +206,7 @@ class WorkwxHandler(MetaBaseHandler):
             self._session_id = self._make_new_session_id(
                 sysuser.id)
             self.set_secure_cookie(
-                const.COOKIE_SESSIONID,
+                const.COOKIE_WORKWX_SESSIONID,
                 self._session_id,
                 httponly=True,
                 domain=settings['root_host'])
@@ -239,7 +239,7 @@ class WorkwxHandler(MetaBaseHandler):
             sysuser = yield self.user_ps.get_user_user({
                 "id": sysuser.parentid
             })
-            self.clear_cookie(name=const.COOKIE_SESSIONID)
+            self.clear_cookie(name=const.COOKIE_WORKWX_SESSIONID)
 
         if sysuser:
             sysuser = self.user_ps.adjust_sysuser(sysuser)
@@ -466,3 +466,22 @@ class WorkwxHandler(MetaBaseHandler):
         if not old:
             return True
         return str(old) != str(code)
+
+    def _make_new_session_id(self, user_id):
+        """创建新的 session_id
+
+        redis 中 session 的 key 的格式为 session_id_<wechat_id>
+        创建的 session_id 保证唯一
+        session_id 目前本身不做持久化，仅仅保存在 redis 中
+        后续是否需要做持久化待讨论
+        :return: session_id
+        """
+        while True:
+            session_id = const.SESSION_WORKWX_ID.format(
+                str(user_id),
+                sha1(os.urandom(24)).hexdigest())
+            record = self.redis.exists(session_id + "_*")
+            if record:
+                continue
+            else:
+                return session_id
