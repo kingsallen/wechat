@@ -778,7 +778,7 @@ class ProfilePageService(PageService):
         if expectedlocation:
             record.city_name = expectedlocation
         if position:
-            record.position_name = position
+            record.position = position
         if salary_code:
             record.salary_code = salary_code
         if worktype:
