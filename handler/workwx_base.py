@@ -449,3 +449,12 @@ class WorkwxHandler(MetaBaseHandler):
         client_env = ObjectDict({"name": self._client_env})
         namespace.update({"client_env": client_env}) #前端用
         return namespace
+
+    def _verify_code(self, code):
+        """检查 code 是不是之前使用过的"""
+
+        old = self.get_cookie(const.COOKIE_CODE)
+
+        if not old:
+            return True
+        return str(old) != str(code)
