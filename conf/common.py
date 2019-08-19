@@ -119,7 +119,6 @@ TO = "to"
 # ++++++++++REDIS KEYS++++++++
 SESSION_USER = "SESSION_USER_{0}_{1}"
 SESSION_ID = "{0}:{1}"
-SESSION_WORKWX_ID = "workwx_{0}:{1}"
 # hr帐号的 session key
 SESSION_USER_HR_ACCOUNT = 'user_hr_account_{}'
 # hr平台绑定微信后的 pub/sub key
@@ -144,7 +143,6 @@ JOYWOK_IDENTIFY_CODE = "joywok_identify_{}"
 # ++++++++++业务常量+++++++++++
 # Cookie name
 COOKIE_SESSIONID = "5MA8A989"
-COOKIE_WORKWX_SESSIONID = "5MB8A989"
 COOKIE_MVIEWERID = "mviewer_id"
 COOKIE_CODE = "JKKSDF89"
 COOKIE_DEBUG_AUTH = "cda"
