@@ -48,6 +48,7 @@ class WorkwxHandler(MetaBaseHandler):
         self._workwx_userid = None
         self._workwx_user = None
         self._wxuser = None
+        self._pass_session = None
 
     # PUBLIC API
     @check_signature
@@ -59,6 +60,8 @@ class WorkwxHandler(MetaBaseHandler):
         self._workwx = yield self.workwx_ps.get_workwx(company.id, company.hraccount_id)
         self._work_oauth_service = WorkWXOauth2Service(
             self._workwx, self.fullurl())
+
+        self._pass_session = PassportCache()
 
         # 如果有 code，说明刚刚从企业微信 oauth 回来
         code = self.params.get("code")
