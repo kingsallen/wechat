@@ -440,6 +440,21 @@ class FiveSecSkipWXHandler(MetaBaseHandler):
         self.logger.debug("from_workwx_to_qx_oauth_url: {}".format(wx_oauth_url))
         self.render_page(template_name="adjunct/wxwork-bind-redirect.html", data=ObjectDict({"redirect_link": wx_oauth_url}))
 
+    @gen.coroutine
+    def _get_current_wechat(self, qx=False):
+        if qx:
+            signature = self.settings['qx_signature']
+        else:
+            signature = self.params['wechat_signature']
+        wechat = yield self.wechat_ps.get_wechat(conds={
+            "signature": signature
+        })
+        if not wechat:
+            self.write_error(http_code=404)
+            return
+
+        raise gen.Return(wechat)
+
 
 class EmployeeQrcodeHandler(BaseHandler):
 
