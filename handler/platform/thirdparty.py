@@ -147,7 +147,7 @@ class WorkWXOauthHandler(MetaBaseHandler):
         self._wechat = yield self._get_current_wechat()
         session.wechat = self._wechat
         company = yield self.company_ps.get_company(conds={'id': self._wechat.company_id}, need_conf=True)
-        session.company = self.company
+        session.company = company
         self.current_user = session
 
         self._workwx = yield self.workwx_ps.get_workwx(company.id, company.hraccount_id)
