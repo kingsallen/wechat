@@ -496,12 +496,12 @@ class WorkwxSubInfoHandler(MetaBaseHandler):
         str_code = self.params.str_code or ''  # 字符串类型的自定义参数
         scene_code = const.TEMPORARY_CODE_STR_SCENE.format(str_scene, str_code)
         if str_code and str_scene:
-            wechat = yield self.wechat_ps.get_wechat_info(self.current_user, scene_id=scene_code, in_wechat=self.in_workwx, action_name="QR_STR_SCENE")
+            wechat = yield self.wechat_ps.get_workwx_info(self.current_user, scene_id=scene_code, action_name="QR_STR_SCENE")
         else:
             if int(pattern_id) == const.QRCODE_POSITION and self.params.pid:
                 scene_id = int('11111000000000000000000000000000', base=2) + int(self.params.pid)
             else:
                 scene_id = int('11110000000000000000000000000000', base=2) + int(pattern_id)
-            wechat = yield self.wechat_ps.get_wechat_info(self.current_user, scene_id=scene_id, in_wechat=self.in_workwx)
+            wechat = yield self.wechat_ps.get_workwx_info(self.current_user, scene_id=scene_id)
         self.send_json_success(data=wechat)
         return

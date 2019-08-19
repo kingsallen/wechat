@@ -58,6 +58,18 @@ class WechatPageService(PageService):
         return wechat
 
     @gen.coroutine
+    def get_workwx_info(self, current_user, scene_id, action_name="QR_SCENE"):
+        """
+        获取公众号相关信息
+        """
+        wechat = ObjectDict()
+        wechat.subscribed = False
+        wechat.qrcode = yield get_temporary_qrcode(wechat=current_user.wechat,
+                                                   scene_id=scene_id, action_name=action_name)
+        wechat.name = current_user.wechat.name
+        return wechat
+
+    @gen.coroutine
     def get_miniapp_code(self, scene_id):
         """
         获取小程序码
