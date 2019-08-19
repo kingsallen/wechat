@@ -332,7 +332,7 @@ class WorkwxHandler(MetaBaseHandler):
                 yield self._bind_and_set_workwx_cookie(sysuser, workwx_sysuser_id, workwx_userid)
                 return sysuser
             # 如果不是有效员工，先去判断是否关注了公众号
-            is_subscribe = yield self.position_ps.get_hr_wx_user(sysuser.unionid, self_wechat.id)
+            is_subscribe = yield self.position_ps.get_hr_wx_user(sysuser.unionid, self._wechat.id)
             if is_subscribe:
                 # 如果已经关注公众号，无需跳转微信，可生成员工信息之后访问主页
                 yield self.workwx_ps.employee_bind(sysuser.id, self._wechat.company_id)
