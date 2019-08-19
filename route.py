@@ -291,6 +291,8 @@ platform_routes = [
 
     (r'/api/privacy/agree/?',                        handler.platform.privacy.PrivacyHandler,                   {"event": "api_privacy_agreement"}),
     (r'/api/privacy/is_agree/?',                     handler.platform.privacy.IsAgreePrivacyHandler,            {"event": "api_is_agree_privacy"}),
+
+    (r"/api/func/workwx/?",                          handler.platform.thirdparty.WorkwxSubInfoHandler,            {"event": "workwx_sub_info"}),
     # 兼容老微信 url，进行302跳转
     (r"/.*",                                         handler.platform.compatible.CompatibleHandler,             {"event": "compatible"})
 
