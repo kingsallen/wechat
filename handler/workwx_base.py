@@ -252,6 +252,14 @@ class WorkwxHandler(MetaBaseHandler):
         return sysuser
 
     @gen.coroutine
+    def _get_user_info_workwx(self, code):
+        try:
+            userinfo = yield self._work_oauth_service.get_userinfo_by_code(code)
+            raise gen.Return(userinfo)
+        except WeChatOauthError as e:
+            raise gen.Return(None)
+
+    @gen.coroutine
     def _handle_user_info_workwx(self, workwx_userinfo):
         """
         根据 userId 创建 user_workwx 如果存在则不创建， 返回 wxuser_id
