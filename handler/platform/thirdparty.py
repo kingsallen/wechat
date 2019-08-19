@@ -126,7 +126,7 @@ class JoywokAutoAuthHandler(BaseHandler):
 
 
 
-class WorkWXOauthHandler(WorkwxHandler):
+class WorkWXOauthHandler(MetaBaseHandler):
 
     def __init__(self, application, request, **kwargs):
         super(WorkWXOauthHandler, self).__init__(application, request, **kwargs)
@@ -143,10 +143,18 @@ class WorkWXOauthHandler(WorkwxHandler):
     def get(self):
         """更新workwx的授权信息，及获取workwx用户信息"""
         # 初始化 企业微信 oauth service
-        # company = yield self.company_ps.get_company(conds={'id': self.current_user.wechat.company_id}, need_conf=True)
-        # self._workwx = yield self.workwx_ps.get_workwx(company.id, company.hraccount_id)
+        session = ObjectDict()
+        self._wechat = yield self._get_current_wechat()
+        session.wechat = self._wechat
+        company = yield self.company_ps.get_company(conds={'id': self.current_user.wechat.company_id}, need_conf=True)
+        session.company = self.company
+        self.current_user = session
+
+        self._workwx = yield self.workwx_ps.get_workwx(company.id, company.hraccount_id)
         self._work_oauth_service = WorkWXOauth2Service(
-            self.current_user.workwx, self.fullurl())
+            self._workwx, self.fullurl())
+        # self._work_oauth_service = WorkWXOauth2Service(
+        #     self.current_user.workwx, self.fullurl())
 
         code = self.params.get("code")
         if code:
@@ -170,6 +178,21 @@ class WorkWXOauthHandler(WorkwxHandler):
         url = self._work_oauth_service.get_oauth_code_base_url()
         self.logger.debug("workwx_oauth_redirect_url: {}".format(url))
         self.redirect(url)
+
+    @gen.coroutine
+    def _get_current_wechat(self, qx=False):
+        if qx:
+            signature = self.settings['qx_signature']
+        else:
+            signature = self.params['wechat_signature']
+        wechat = yield self.wechat_ps.get_wechat(conds={
+            "signature": signature
+        })
+        if not wechat:
+            self.write_error(http_code=404)
+            return
+
+        raise gen.Return(wechat)
 
     # @gen.coroutine
     # def _build_workwx_session(self, workwx_userinfo):
@@ -468,12 +491,12 @@ class WorkwxSubInfoHandler(WorkwxHandler):
         str_code = self.params.str_code or ''  # 字符串类型的自定义参数
         scene_code = const.TEMPORARY_CODE_STR_SCENE.format(str_scene, str_code)
         if str_code and str_scene:
-            wechat = yield self.wechat_ps.get_wechat_info(self.current_user, scene_id=scene_code, in_wechat=self.in_wechat, action_name="QR_STR_SCENE")
+            wechat = yield self.wechat_ps.get_wechat_info(self.current_user, scene_id=scene_code, in_wechat=self.in_workwx, action_name="QR_STR_SCENE")
         else:
             if int(pattern_id) == const.QRCODE_POSITION and self.params.pid:
                 scene_id = int('11111000000000000000000000000000', base=2) + int(self.params.pid)
             else:
                 scene_id = int('11110000000000000000000000000000', base=2) + int(pattern_id)
-            wechat = yield self.wechat_ps.get_wechat_info(self.current_user, scene_id=scene_id, in_wechat=self.in_wechat)
+            wechat = yield self.wechat_ps.get_wechat_info(self.current_user, scene_id=scene_id, in_wechat=self.in_workwx)
         self.send_json_success(data=wechat)
         return
