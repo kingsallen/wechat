@@ -130,6 +130,8 @@ class WorkWXOauthHandler(MetaBaseHandler):
 
         # 处理 oauth 的 service, 会在使用时初始化
         self._work_oauth_service = None
+        self._workwx = None
+        self._wechat = None
         # 企业微信-员工认证 跳转标记
         self._WORKWX_REDIRECT = False
 
@@ -150,8 +152,6 @@ class WorkWXOauthHandler(MetaBaseHandler):
         self._workwx = yield self.workwx_ps.get_workwx(company.id, company.hraccount_id)
         self._work_oauth_service = WorkWXOauth2Service(
             self._workwx, self.fullurl())
-        # self._work_oauth_service = WorkWXOauth2Service(
-        #     self.current_user.workwx, self.fullurl())
 
         code = self.params.get("code")
         if code:
@@ -172,9 +172,22 @@ class WorkWXOauthHandler(MetaBaseHandler):
         #     yield self._session_sysuser_is_valid_employee(sysuser, workwx_user_record.sys_user_id)
         #     return
 
+        self._get_workwx_oauth_redirect_url()
         url = self._work_oauth_service.get_oauth_code_base_url()
         self.logger.debug("workwx_oauth_redirect_url: {}".format(url))
         self.redirect(url)
+
+    def _get_workwx_oauth_redirect_url(self):
+        # 仟寻授权需要重定向到仟寻appid对应的域名
+        if self.is_help:
+            host_suffix = "/h"
+        elif self.is_qx:
+            host_suffix = "/recruit"
+        else:
+            host_suffix = "/m"
+        url = "https://" + settings['multi_domain']['format'].format(
+            settings['multi_domain']['qx_appid']) + host_suffix + self.request.uri
+        self._work_oauth_service.redirect_url = url_subtract_query(url, ['code', 'state', 'appid'])
 
     @gen.coroutine
     def _get_current_wechat(self, qx=False):
