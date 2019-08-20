@@ -617,7 +617,7 @@ class BaseHandler(MetaBaseHandler):
             if self._client_env == const.CLIENT_JOYWOK:
                 url = self.make_url(path.JOYWOK_HOME_PAGE)
                 yield self.redirect(url)
-            elif self._client_env == const.CLIENT_WORKWX:
+            elif self.in_workwx:
                 # url = self.make_url(path.WOKWX_OAUTH_PAGE, self.params)
                 # self.logger.debug("WOKWX_OAUTH_PAGE: {}".format(url))
                 self._get_workwx_oauth_redirect_url()
@@ -1058,8 +1058,6 @@ class BaseHandler(MetaBaseHandler):
     @gen.coroutine
     def _is_employee_workwx(self):
         """企业微信成员-员工认证"""
-        # 企业微信授权页面
-        wokwx_oauth_url = self.make_url(path.WOKWX_OAUTH_PAGE, self.params)
         # 企业微信二维码页面
         workwx_qrcode_url = self.make_url(path.WOKWX_QRCODE_PAGE, self.params)
         if self.current_user.employee:
@@ -1082,15 +1080,24 @@ class BaseHandler(MetaBaseHandler):
                             self.redirect(workwx_fivesec_url)
                             return True
                         else:
-                            yield self.redirect(wokwx_oauth_url)
+                            yield self._redirect_wokwx_oauth_url()
                             return True
                     else:
                         yield self.redirect(workwx_qrcode_url)
                         return True
                 return False
             else:
-                yield self.redirect(wokwx_oauth_url)
+                yield self._redirect_wokwx_oauth_url()
                 return True
+
+    @gen.coroutine
+    def _redirect_wokwx_oauth_url(self):
+        """# 企业微信页面"""
+        wokwx_oauth_url = self.fullurl()
+        # wokwx_oauth_url = self.make_url(path.WOKWX_OAUTH_PAGE, self.params)
+        self.clear_cookie(name=const.COOKIE_SESSIONID)
+        yield self.redirect(wokwx_oauth_url)
+        return
 
     @gen.coroutine
     def _get_company_auth_mode(self, before_fetch_session = True):
