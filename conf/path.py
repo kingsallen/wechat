@@ -83,8 +83,6 @@ JOYWOK_HOME_PAGE = "/joywork"
 
 JOYWOK_AUTO_AUTH = "/thirdparty/automatic/auth"
 
-# WOKWX_OAUTH_PAGE = "/work-wechat"
-
 WOKWX_FIVESEC_PAGE = "/workwx/fivesec-skipwx"
 
 WECHAT_QRCODE_PAGE = "/employee/qrcode"
