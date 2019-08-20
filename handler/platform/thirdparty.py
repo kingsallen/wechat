@@ -123,8 +123,6 @@ class JoywokAutoAuthHandler(BaseHandler):
         self.render_page(template_name="joywok/forward-weixin.html", data=ObjectDict())
 
 
-
-
 class WorkWXOauthHandler(MetaBaseHandler):
 
     def __init__(self, application, request, **kwargs):
@@ -397,7 +395,6 @@ class WorkWXOauthHandler(MetaBaseHandler):
         yield self._set_workwx_cookie(sysuser.id)
         self.redirect(workwx_home_url)
 
-
     def fullurl(self, encode=True):
         """
         获取当前 url， 默认删除 query 中的 code 和 state。
@@ -431,9 +428,9 @@ class FiveSecSkipWXHandler(MetaBaseHandler):
         component_access_token = BaseHandler.component_access_token
         qx_wechat = yield self._get_current_wechat(qx=True)
 
-        redirect_url = self.make_url(path.WECHAT_QRCODE_PAGE, self.params)
+        wechat_qrcode_url = self.make_url(path.WECHAT_QRCODE_PAGE, self.params)
         # 初始化 oauth service
-        wx_oauth_service = WeChatOauth2Service(qx_wechat, redirect_url, component_access_token)
+        wx_oauth_service = WeChatOauth2Service(qx_wechat, wechat_qrcode_url, component_access_token)
         wx_oauth_url = wx_oauth_service.get_oauth_code_userinfo_url()
 
         client_env = ObjectDict({"name": self._client_env})
@@ -473,25 +470,17 @@ class EmployeeQrcodeHandler(BaseHandler):
         else:
             yield self.workwx_ps.bind_workwx_qxuser(self.current_user.sysuser.id, workwx_userid, company_id)
         #如果已经关注公众号，说明已经做完员工认证，生成员工信息，跳转3s跳转页，再跳转到职位列表
-        if self.current_user.wxuser.is_subscribe:
-            is_valid_employee = yield self.employee_ps.is_valid_employee(
-                self.current_user.sysuser.id,
-                company_id
-            )
-            if not is_valid_employee:  # 如果不是有效员工，需要需要生成员工信息
-                yield self.workwx_ps.employee_bind(self.current_user.sysuser.id, company_id)
-
-            three_sec_wechat_url =  self.make_url(path.WECHAT_THREESEC_PAGE, self.params)
-            self.redirect(three_sec_wechat_url)
-            return
-        #@@@@@@下面代码是否写在扫码事件里面
-        #先判断是否是有效员工，需要判断的原因：如果以前是有效员工，因为取消关注导致不是有效员工的情况，在扫码之后会自动成为有效员工，这时候不需要再生成员工信息
-        # is_valid_employee = yield self.employee_ps.is_valid_employee(
-        #     self.current_user.sysuser.id,
-        #     company_id
-        # )
-        # if not is_valid_employee:  # 如果不是有效员工，需要需要生成员工信息
-        #     yield self.workwx_ps.employee_bind(self.current_user.sysuser.id, company_id)  # 如果已经关注公众号，无需跳转微信，可生成员工信息之后访问主页
+        # if self.current_user.wxuser.is_subscribe:
+        #     is_valid_employee = yield self.employee_ps.is_valid_employee(
+        #         self.current_user.sysuser.id,
+        #         company_id
+        #     )
+        #     if not is_valid_employee:  # 如果不是有效员工，需要需要生成员工信息
+        #         yield self.workwx_ps.employee_bind(self.current_user.sysuser.id, company_id)
+        #
+        #     three_sec_wechat_url =  self.make_url(path.WECHAT_THREESEC_PAGE, self.params)
+        #     self.redirect(three_sec_wechat_url)
+        #     return
         self.render_page(template_name="adjunct/wxwork-qrcode.html", data=ObjectDict())
 
 
@@ -535,9 +524,9 @@ class WorkwxSubInfoHandler(MetaBaseHandler):
     字符类型的自定义参数的格式为{场景值(大写)}_{自定义字符串}，场景值必须为大写英文字母
     int类型 scene_id规范为：32位二进制, 5位type + 27位自定义编号(比如hrid, userid)。见 https://wiki.moseeker.com/weixin.md
     """
-
     @handle_response
     @check_env(4)
+    @check_signature
     @gen.coroutine
     def get(self):
         session = ObjectDict()
@@ -574,3 +563,14 @@ class WorkwxSubInfoHandler(MetaBaseHandler):
             return
 
         raise gen.Return(wechat)
+
+
+class EmployeeThreesecSkipHandler(BaseHandler):
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def get(self):
+        """微信3s跳转职位列表页"""
+        position_list_url = self.make_url(path.POSITION_LIST, self.params)
+        self.render_page(template_name="adjunct/wxwork-bind-redirect.html", data=ObjectDict({"redirect_link": position_list_url}))

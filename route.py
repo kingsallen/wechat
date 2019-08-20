@@ -223,6 +223,7 @@ platform_routes = [
     (r'/workwx/fivesec-skipwx',                      handler.platform.thirdparty.FiveSecSkipWXHandler,          {"event": "workwx_fivesec_skipwx"}),
     (r'/employee/qrcode',                            handler.platform.thirdparty.EmployeeQrcodeHandler,         {"event": "employee_qrcode"}),
     (r'/workwx/qrcode',                              handler.platform.thirdparty.WorkwxQrcodeHandler,           {"event": "workwx_qrcode"}),
+    (r'/employee/threesec-skip',                     handler.platform.thirdparty.EmployeeThreesecSkipHandler,   {"event": "employee_threesec_skip"}),
 
     # 各大公司的自定义配置
     (r"/custom/emailapply/?",                        handler.platform.customize.CustomizeEmailApplyHandler,     {"event": "customize_emailapply"}),
