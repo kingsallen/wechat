@@ -738,7 +738,7 @@ FROM_LIEPIN = 2
 LIEPIN_SCENE_KEY_FMT = 'liepin_auth_scene_params:{sysuser_id}'
 LIEPIN_SCENE_KEY_TTL = 30 * 24 * 60 * 60
 
-# Mars公司id
+# Mars公司wechat_id
 MARS_ID = 345
 
 # 积分排行榜
@@ -770,6 +770,7 @@ QRCODE_REFERRAL_CONFIRM = 12  # 用户认领推荐成功
 QRCODE_SCAN_REFERRAL = 13  # 浏览候选人推荐职位
 QRCODE_POSITION = 14  # 职位详情
 QRCODE_SIDEBAR = 15  # 侧边栏二维码
+QRCODE_PC_REFERRAL = 16  # pc端扫码过来的员工认证
 QRCODE_WORKWX_BIND = 17 #企业微信员工认证
 QRCODE_OTHER = 99  # 默认
 
@@ -778,6 +779,10 @@ TEMPORARY_CODE_STR_SCENE = "{}_{}"
 
 # 临时二维码字符串参数的场景值
 STR_SCENE_JOYWOK = "JOYWOK"
+STR_SCENE_MRAS_WELCOME = "PCAPPLICATION"
+
+# 临时二维码的生成来源依据
+SCAN_FROM = 'pc_referral'
 
 # mq相关常量
 EXCHANGE_TYPE = 'topic'
@@ -833,6 +838,7 @@ SA_ORIGIN_RANKING_TEMPLATE = 4  # 推送排名榜单
 SA_ORIGIN_PORTAL = 5  # 员工portal
 SA_ORIGIN_APPLICATION_INVITE = 6  # 投递邀请
 SA_ORIGIN_PROMOTE = 7  # JD页补充简历
+SA_ORIGIN_PC_REFERRAL = 8  # pc引导会微信端参与员工内推
 
 # 请求jmis的方法
 JMIS_SIGNATURE = "getSignature"

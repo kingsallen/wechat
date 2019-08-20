@@ -37,7 +37,7 @@ class InfraPrivacyDataService(DataService):
             "status": status
         })
         ret = yield http_get(path.AGREE_PRIVACY, params)
-        return unboxing(ret)
+        return ret
 
     @gen.coroutine
     def insert_privacy_record(self, user_id):
