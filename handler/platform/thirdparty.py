@@ -577,6 +577,7 @@ class EmployeeThreesecSkipHandler(BaseHandler):
         if self.params.skip_wechat_qrcode:
             wechat_qrcode_url = self.make_url(path.WECHAT_QRCODE_PAGE, self.params)
             self.redirect(wechat_qrcode_url)
+            return
 
         position_list_url = self.make_url(path.POSITION_LIST, self.params)
         self.render_page(template_name="adjunct/wxwork-bind-redirect.html", data=ObjectDict({"redirect_link": position_list_url}))
