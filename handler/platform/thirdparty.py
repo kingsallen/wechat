@@ -581,5 +581,5 @@ class EmployeeThreesecSkipHandler(BaseHandler):
     def get(self):
         """微信3s跳转职位列表页"""
 
-        position_list_url = self.make_url(path.POSITION_LIST, self.params)
+        position_list_url = self.make_url(path.EMPLOYEE_PORTAL, self.params)
         self.render_page(template_name="adjunct/wxwork-verified-redirect.html", data=ObjectDict({"redirect_link": position_list_url}))
