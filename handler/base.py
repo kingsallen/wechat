@@ -600,7 +600,7 @@ class BaseHandler(MetaBaseHandler):
                 yield self.redirect(url)
             elif self._client_env == const.CLIENT_WORKWX:
                 url = self.make_url(path.WOKWX_OAUTH_PAGE, self.params)
-                self.logger.debug("workwx_oauth_redirect_url: {}".format(url))
+                self.logger.debug("WOKWX_OAUTH_PAGE: {}".format(url))
                 # url = self._work_oauth_service.get_oauth_code_base_url()
                 # self.logger.debug("workwx_oauth_redirect_url: {}".format(url))
                 self.redirect(url)

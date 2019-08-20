@@ -441,9 +441,7 @@ class FiveSecSkipWXHandler(MetaBaseHandler):
         component_access_token = BaseHandler.component_access_token
         qx_wechat = yield self._get_current_wechat(qx=True)
 
-        self.params.update({"skip_wechat_qrcode": True})
-        wechat_qrcode_url = self.make_url(path.WECHAT_THREESEC_PAGE, self.params)
-        # wechat_qrcode_url = self.make_url(path.WECHAT_QRCODE_PAGE, self.params)
+        wechat_qrcode_url = self.make_url(path.WECHAT_QRCODE_PAGE, self.params)
         # 初始化 oauth service
         wx_oauth_service = WeChatOauth2Service(qx_wechat, wechat_qrcode_url, component_access_token)
         wx_oauth_url = wx_oauth_service.get_oauth_code_userinfo_url()
@@ -587,10 +585,6 @@ class EmployeeThreesecSkipHandler(BaseHandler):
     @gen.coroutine
     def get(self):
         """微信3s跳转职位列表页"""
-        if self.params.skip_wechat_qrcode:
-            wechat_qrcode_url = self.make_url(path.WECHAT_QRCODE_PAGE, self.params)
-            self.redirect(wechat_qrcode_url)
-            return
 
         position_list_url = self.make_url(path.POSITION_LIST, self.params)
-        self.render_page(template_name="adjunct/wxwork-bind-redirect.html", data=ObjectDict({"redirect_link": position_list_url}))
+        self.render_page(template_name="adjunct/wxwork-verified-redirect.html", data=ObjectDict({"redirect_link": position_list_url}))
