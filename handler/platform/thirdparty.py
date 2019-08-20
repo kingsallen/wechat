@@ -470,17 +470,17 @@ class EmployeeQrcodeHandler(BaseHandler):
         else:
             yield self.workwx_ps.bind_workwx_qxuser(self.current_user.sysuser.id, workwx_userid, company_id)
         #如果已经关注公众号，说明已经做完员工认证，生成员工信息，跳转3s跳转页，再跳转到职位列表
-        # if self.current_user.wxuser.is_subscribe:
-        #     is_valid_employee = yield self.employee_ps.is_valid_employee(
-        #         self.current_user.sysuser.id,
-        #         company_id
-        #     )
-        #     if not is_valid_employee:  # 如果不是有效员工，需要需要生成员工信息
-        #         yield self.workwx_ps.employee_bind(self.current_user.sysuser.id, company_id)
-        #
-        #     three_sec_wechat_url =  self.make_url(path.WECHAT_THREESEC_PAGE, self.params)
-        #     self.redirect(three_sec_wechat_url)
-        #     return
+        if self.current_user.wxuser.is_subscribe:
+            is_valid_employee = yield self.employee_ps.is_valid_employee(
+                self.current_user.sysuser.id,
+                company_id
+            )
+            if not is_valid_employee:  # 如果不是有效员工，需要需要生成员工信息
+                yield self.workwx_ps.employee_bind(self.current_user.sysuser.id, company_id)
+
+            three_sec_wechat_url =  self.make_url(path.WECHAT_THREESEC_PAGE, self.params)
+            self.redirect(three_sec_wechat_url)
+            return
         self.render_page(template_name="adjunct/wxwork-qrcode.html", data=ObjectDict())
 
 
