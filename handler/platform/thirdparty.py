@@ -468,13 +468,24 @@ class EmployeeQrcodeHandler(BaseHandler):
         workwx_user_record = yield self.workwx_ps.get_workwx_user(self.current_user.wechat.company_id, workwx_userid)
         #如果已经绑定过(以前访问绑定过),无需再绑定
         if int(workwx_user_record.sys_user_id) > 0:
-           # ？？？？？？？？
+           # 如果workwx_user_record.sys_user_id跟self.current_user.sysuser.id不一致，说明当前用户不是绑定用户，需要弹出提示
            pass
         else:
-            #否则，绑定企业微信成员和仟寻用户
             yield self.workwx_ps.bind_workwx_qxuser(self.current_user.sysuser.id, workwx_userid, company_id)
+        #如果已经关注公众号，说明已经做完员工认证，生成员工信息，跳转3s跳转页，再跳转到职位列表
+        if self.current_user.wxuser.is_subscribe:
+            is_valid_employee = yield self.employee_ps.is_valid_employee(
+                self.current_user.sysuser.id,
+                company_id
+            )
+            if not is_valid_employee:  # 如果不是有效员工，需要需要生成员工信息
+                yield self.workwx_ps.employee_bind(self.current_user.sysuser.id, company_id)
+
+            three_sec_wechat_url =  self.make_url(path.WECHAT_THREESEC_PAGE, self.params)
+            self.redirect(three_sec_wechat_url)
+            return
         #@@@@@@下面代码是否写在扫码事件里面
-        #先判断是否是有效员工，需要判断的原因：如果以前是有效员工，因为取消关注导致不是有效员工的情况，在扫码之后会自动成为有效员工，这时候不需要再生产员工信息
+        #先判断是否是有效员工，需要判断的原因：如果以前是有效员工，因为取消关注导致不是有效员工的情况，在扫码之后会自动成为有效员工，这时候不需要再生成员工信息
         # is_valid_employee = yield self.employee_ps.is_valid_employee(
         #     self.current_user.sysuser.id,
         #     company_id

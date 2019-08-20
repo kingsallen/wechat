@@ -90,6 +90,8 @@ WECHAT_QRCODE_PAGE = "/employee/qrcode"
 
 WOKWX_QRCODE_PAGE = "/workwx/qrcode"
 
+WECHAT_THREESEC_PAGE = "/employee/threesec-skip"
+
 # ============================ 微信端Path结束 ============================
 
 
