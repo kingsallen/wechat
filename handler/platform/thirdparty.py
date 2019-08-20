@@ -179,14 +179,9 @@ class WorkWXOauthHandler(MetaBaseHandler):
 
     def _get_workwx_oauth_redirect_url(self):
         # 仟寻授权需要重定向到仟寻appid对应的域名
-        if self.is_help:
-            host_suffix = "/h"
-        elif self.is_qx:
-            host_suffix = "/recruit"
-        else:
-            host_suffix = "/m"
+        host_suffix = "/m"
         url = "https://" + settings['multi_domain']['format'].format(
-            settings['multi_domain']['qx_appid']) + host_suffix + self.request.uri
+            self._wechat.appid) + host_suffix + self.request.uri
         self._work_oauth_service.redirect_url = url_subtract_query(url, ['code', 'state', 'appid'])
 
     @gen.coroutine
