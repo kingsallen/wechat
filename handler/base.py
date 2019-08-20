@@ -1190,16 +1190,16 @@ class BaseHandler(MetaBaseHandler):
             )
             # 如果是有效员工，不需要从企业微信跳转到微信,直接访问企业微信主页
             if is_valid_employee:
-                yield self._redirect_workwx_home_url(sysuser, workwx_sysuser_id, workwx_userid)
-                self._WORKWX_REDIRECT = True
+                yield self._access_workwx_url(sysuser, workwx_sysuser_id, workwx_userid)
+                # self._WORKWX_REDIRECT = True
                 return
             # 如果不是有效员工，先去判断是否关注了公众号
             is_subscribe = yield self.position_ps.get_hr_wx_user(sysuser.unionid, self._wechat.id)
             if is_subscribe:
                 # 如果已经关注公众号，无需跳转微信，可生成员工信息之后访问主页
                 # yield self.workwx_ps.employee_bind(sysuser.id, self.current_user.wechat.company_id)
-                yield self._redirect_workwx_home_url(sysuser, workwx_sysuser_id, workwx_userid, bind_employee = True)
-                self._WORKWX_REDIRECT = True
+                yield self._access_workwx_url(sysuser, workwx_sysuser_id, workwx_userid, bind_employee = True)
+                # self._WORKWX_REDIRECT = True
                 return
             # 如果没有关注公众号，跳转微信
             if workwx_sysuser_id > 0:  #如果在访问企业微信之前已经做过绑定(以前访问绑定过)，需要保存session，跳转微信之后无需再做绑定
@@ -1233,13 +1233,11 @@ class BaseHandler(MetaBaseHandler):
         self.set_secure_cookie(const.COOKIE_SESSIONID, session_id, httponly=True, domain=settings['root_host'])
 
     @gen.coroutine
-    def _redirect_workwx_home_url(self, sysuser, workwx_sysuser_id, workwx_userid, bind_employee = False):
-        # 企业微信主页:职位列表页
-        workwx_home_url = self.make_url(path.POSITION_LIST, self.params, host=self.host)
+    def _access_workwx_url(self, sysuser, workwx_sysuser_id, workwx_userid, bind_employee = False):
+        # 访问企业微信页面
         if workwx_sysuser_id <= 0:
             # 绑定仟寻用户和企业微信: 如果需要跳转微信，不能企业微信做绑定，必须去微信做绑定(因为有可能通过mobile绑定的仟寻用户跟跳转的仟寻用户不是同一个人)；如果不跳微信需要在企业微信做绑定
             yield self.workwx_ps.bind_workwx_qxuser(sysuser.id, workwx_userid, self._wechat.company_id)
         if bind_employee:
             yield self.workwx_ps.employee_bind(sysuser.id, self._wechat.company_id)
         yield self._set_workwx_cookie(sysuser)
-        self.redirect(workwx_home_url)
