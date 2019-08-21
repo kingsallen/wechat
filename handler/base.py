@@ -759,7 +759,11 @@ class BaseHandler(MetaBaseHandler):
         session.sc_cookie_id = self._sc_cookie_id
 
         session.wechat = self._wechat
-        self._add_jsapi_to_wechat(session.wechat)
+        if self.in_workwx:
+            session.workwx = self._workwx
+            self._add_jsapi_to_wechat(session.workwx)
+        else:
+            self._add_jsapi_to_wechat(session.wechat)
 
         yield self._add_company_info_to_session(session)
         if self.is_platform and self.params.recom:
