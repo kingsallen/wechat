@@ -761,7 +761,7 @@ class BaseHandler(MetaBaseHandler):
         session.wechat = self._wechat
         self._add_jsapi_to_wechat(session.wechat)
         if self.in_workwx:
-            self._update_jsapi_to_workwx(session.wechat.jsapi, session.wechat)
+            self._update_jsapi_to_workwx(session.wechat)
 
         yield self._add_company_info_to_session(session)
         if self.is_platform and self.params.recom:
@@ -862,15 +862,15 @@ class BaseHandler(MetaBaseHandler):
             jsapi_ticket=wechat.jsapi_ticket,
             url=self.fullurl(encode=False))
 
-    def _update_jsapi_to_workwx(self, jsapi, wechat):
+    def _update_jsapi_to_workwx(self, wechat):
         """拼装企业微信的 jsapi"""
-        wechat.jsapi = ObjectDict({
+        config = ObjectDict({
             "beta": True,
             "debug": True,
             "appid": self._workwx.corpid,
-            "timestamp": jsapi.timestamp,
-            "nonceStr": jsapi.nonceStr,
-            "signature": jsapi.signature,
+            "timestamp": wechat.jsapi.timestamp,
+            "nonceStr": wechat.jsapi.nonceStr,
+            "signature": wechat.jsapi.signature,
             "jsApiList": [
                 "updateAppMessageShareData",
                 "updateTimelineShareData",
@@ -908,6 +908,7 @@ class BaseHandler(MetaBaseHandler):
                 "openCard"
             ]
         })
+        wechat.jsapi = config
 
     def _make_new_session_id(self, user_id):
         """创建新的 session_id
