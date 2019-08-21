@@ -760,6 +760,8 @@ class BaseHandler(MetaBaseHandler):
 
         session.wechat = self._wechat
         self._add_jsapi_to_wechat(session.wechat)
+        if self.in_workwx:
+            self._update_jsapi_to_workwx(session.wechat.jsapi, session.wechat)
 
         yield self._add_company_info_to_session(session)
         if self.is_platform and self.params.recom:
@@ -859,6 +861,53 @@ class BaseHandler(MetaBaseHandler):
         wechat.jsapi = JsApi(
             jsapi_ticket=wechat.jsapi_ticket,
             url=self.fullurl(encode=False))
+
+    def _update_jsapi_to_workwx(self, jsapi, wechat):
+        """拼装企业微信的 jsapi"""
+        wechat.jsapi = ObjectDict({
+            "beta": True,
+            "debug": True,
+            "appid": self._workwx.corpid,
+            "timestamp": jsapi.timestamp,
+            "nonceStr": jsapi.nonceStr,
+            "signature": jsapi.signature,
+            "jsApiList": [
+                "updateAppMessageShareData",
+                "updateTimelineShareData",
+                "onMenuShareWeibo",
+                "onMenuShareQZone",
+                "startRecord",
+                "stopRecord",
+                "onVoiceRecordEnd",
+                "playVoice",
+                "pauseVoice",
+                "stopVoice",
+                "onVoicePlayEnd",
+                "uploadVoice",
+                "downloadVoice",
+                "chooseImage",
+                "previewImage",
+                "uploadImage",
+                "downloadImage",
+                "translateVoice",
+                "getNetworkType",
+                "openLocation",
+                "getLocation",
+                "hideOptionMenu",
+                "showOptionMenu",
+                "hideMenuItems",
+                "showMenuItems",
+                "hideAllNonBaseMenuItem",
+                "showAllNonBaseMenuItem",
+                "closeWindow",
+                "scanQRCode",
+                "chooseWXPay",
+                "openProductSpecificView",
+                "addCard",
+                "chooseCard",
+                "openCard"
+            ]
+        })
 
     def _make_new_session_id(self, user_id):
         """创建新的 session_id
