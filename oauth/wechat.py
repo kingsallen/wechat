@@ -217,7 +217,7 @@ class JsApi(object):
         self.__dict__.update(self.sign.sign(url=url))
 
 
-class WorkWXOauth2Service(object):
+class WorkWXOauth2Service(WeChatOauth2Service):
     """ 企业微信 OAuth 2.0 实现
 
     refer to:
@@ -232,15 +232,6 @@ class WorkWXOauth2Service(object):
         # 缓存 access_token
         self._access_token = None
 
-    # PUBLIC API
-    def get_oauth_code_base_url(self):
-        """授权获取 code"""
-        return self._get_oauth_code_url(is_base=1)
-
-    def get_oauth_code_userinfo_url(self):
-        """授权获取 code,scope: 企业自建应用固定填写：snsapi_base"""
-        return self._get_oauth_code_url(is_base=0)
-
     def _get_oauth_code_url(self, is_base=1):
         """生成获取 code 的 url, oauth的url 跟微信是一样的
         """
@@ -251,15 +242,6 @@ class WorkWXOauth2Service(object):
             self.state)
         logger.debug("get_code_url: {0}".format(oauth_url))
         return oauth_url
-
-    # PROTECTED METHODS
-    @staticmethod
-    def _get_oauth_type(is_base):
-        """根据 is_base 生成 scope 字符串"""
-        if is_base:
-            return wx_const.SCOPE_BASE
-        else:
-            return wx_const.SCOPE_USERINFO
 
     @gen.coroutine
     def get_userinfo_by_code(self, code):
