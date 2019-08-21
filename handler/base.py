@@ -362,7 +362,6 @@ class BaseHandler(MetaBaseHandler):
         yield self._update_joywok_employee_session()
         # 企业微信成员做员工认证
         if self.in_workwx:
-            self._update_jsapi_to_workwx()
             is_redirect = yield self._is_employee_workwx()
             if is_redirect:
                 return
@@ -860,72 +859,6 @@ class BaseHandler(MetaBaseHandler):
         wechat.jsapi = JsApi(
             jsapi_ticket=wechat.jsapi_ticket,
             url=self.fullurl(encode=False))
-
-    def _update_jsapi_to_workwx(self):
-        """拼装企业微信的 jsapi"""
-        config = ObjectDict({
-            "beta": True,
-            "debug": True,
-            "appid": self._workwx.corpid,
-            "timestamp": self.current_user.wechat.jsapi.timestamp,
-            "nonceStr": self.current_user.wechat.jsapi.nonceStr,
-            "signature": self.current_user.wechat.jsapi.signature,
-            "jsApiList": [
-                "onMenuShareAppMessage",
-                "onMenuShareWechat",
-                "onMenuShareTimeline",
-                "startRecord",
-                "stopRecord",
-                "onVoiceRecordEnd",
-                "playVoice",
-                "pauseVoice",
-                "stopVoice",
-                "onVoicePlayEnd",
-                "uploadVoice",
-                "downloadVoice",
-                "chooseImage",
-                "previewImage",
-                "uploadImage",
-                "downloadImage",
-                "getLocalImgData",
-                "previewFile",
-                "getNetworkType",
-                "onNetworkStatusChange",
-                "openLocation",
-                "getLocation",
-                "startAutoLBS",
-                "stopAutoLBS",
-                "onLocationChange",
-                "onHistoryBack",
-                "hideOptionMenu",
-                "showOptionMenu",
-                "hideMenuItems",
-                "showMenuItems",
-                "hideAllNonBaseMenuItem",
-                "showAllNonBaseMenuItem",
-                "closeWindow",
-                "openDefaultBrowser",
-                "scanQRCode",
-                "selectEnterpriseContact",
-                "openEnterpriseChat",
-                "chooseInvoice",
-                "selectExternalContact",
-                "getCurExternalContact",
-                "openUserProfile",
-                "shareAppMessage",
-                "shareWechatMessage",
-                "startWifi",
-                "stopWifi",
-                "connectWifi",
-                "getWifiList",
-                "onGetWifiList",
-                "onWifiConnected",
-                "getConnectedWifi",
-                "setClipboardData",
-                "getClipboardData"
-            ]
-        })
-        self.current_user.wechat.jsapi = config
 
     def _make_new_session_id(self, user_id):
         """创建新的 session_id
