@@ -362,6 +362,7 @@ class BaseHandler(MetaBaseHandler):
         yield self._update_joywok_employee_session()
         # 企业微信成员做员工认证
         if self.in_workwx:
+            self._update_jsapi_to_workwx()
             is_redirect = yield self._is_employee_workwx()
             if is_redirect:
                 return
@@ -760,8 +761,6 @@ class BaseHandler(MetaBaseHandler):
 
         session.wechat = self._wechat
         self._add_jsapi_to_wechat(session.wechat)
-        if self.in_workwx:
-            self._update_jsapi_to_workwx(session.wechat)
 
         yield self._add_company_info_to_session(session)
         if self.is_platform and self.params.recom:
@@ -862,15 +861,15 @@ class BaseHandler(MetaBaseHandler):
             jsapi_ticket=wechat.jsapi_ticket,
             url=self.fullurl(encode=False))
 
-    def _update_jsapi_to_workwx(self, wechat):
+    def _update_jsapi_to_workwx(self):
         """拼装企业微信的 jsapi"""
         config = ObjectDict({
             "beta": True,
             "debug": True,
             "appid": self._workwx.corpid,
-            "timestamp": wechat.jsapi.timestamp,
-            "nonceStr": wechat.jsapi.nonceStr,
-            "signature": wechat.jsapi.signature,
+            "timestamp": self.current_user.wechat.jsapi.timestamp,
+            "nonceStr": self.current_user.wechat.jsapi.nonceStr,
+            "signature": self.current_user.wechat.jsapi.signature,
             "jsApiList": [
                 "updateAppMessageShareData",
                 "updateTimelineShareData",
@@ -908,7 +907,7 @@ class BaseHandler(MetaBaseHandler):
                 "openCard"
             ]
         })
-        wechat.jsapi = config
+        self.current_user.wechat.jsapi = config
 
     def _make_new_session_id(self, user_id):
         """创建新的 session_id
