@@ -1068,8 +1068,8 @@ class BaseHandler(MetaBaseHandler):
             return False
         else:
             if self.current_user.sysuser:
-                is_subscribe = yield self.position_ps.get_hr_wx_user(self.current_user.sysuser.unionid, self._wechat.id)
-                if is_subscribe:
+                # is_subscribe = yield self.position_ps.get_hr_wx_user(self.current_user.sysuser.unionid, self._wechat.id)
+                if self.current_user.wxuser.is_subscribe:
                     # 如果已经关注公众号，无需跳转微信，可生成员工信息之后访问主页
                     yield self.workwx_ps.employee_bind(self.current_user.sysuser.id, self._wechat.company_id)
                 else:
