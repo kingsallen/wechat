@@ -222,7 +222,7 @@ class WorkwxQrcodeHandler(MetaBaseHandler):
                 scene_id = int('11111000000000000000000000000000', base=2) + int(self.params.pid)
             else:
                 scene_id = int('11110000000000000000000000000000', base=2) + int(pattern_id)
-            wechat_info = yield self.wechat_ps.get_wechat_in_workwx(self.current_user, scene_id=scene_id)
+            wechat_info = yield self.wechat_ps.get_wechat_in_workwx(wechat, scene_id=scene_id)
         return wechat_info
 
     @gen.coroutine
