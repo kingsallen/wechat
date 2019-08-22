@@ -2,6 +2,7 @@
 
 import re
 from handler.base import BaseHandler
+from handler.metabase import MetaBaseHandler
 
 from tornado import gen
 from util.common.decorator import handle_response, authenticated
@@ -9,6 +10,16 @@ from util.common import ObjectDict
 import conf.common as const
 import conf.path as path
 from oauth.wechat import JsApi
+
+
+class WxWorkDomainVerifyHandler(MetaBaseHandler):
+
+    @gen.coroutine
+    def get(self, verify_content):
+        self.set_header('Content-Type', 'text/plain')
+        self.set_status(200)
+        self.write(verify_content)
+        return
 
 
 class IndexHandler(BaseHandler):

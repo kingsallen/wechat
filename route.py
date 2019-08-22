@@ -85,6 +85,7 @@ common_routes = [
     # 第三方授权方式
     (r"/wechat[\/]*([0-9a-z]+)*",                    handler.wechat.event.WechatThirdOauthHandler,              {"event": "wechat_thirdoauth"}),
     (r"/qr/permanent/([0-9]+)",                      handler.common.permanent_qr.PermanentQRHandler,            {"event": "permanent_qr"}),
+    (r"/WW_verify_([a-zA-Z]+)\.txt",                 handler.common.app.WxWorkDomainVerifyHandler,              {"event": "wx_work_domain_verify"}),
 
     # app forward 给前端，展示纯前端渲染的 SPA
     (r"/app/.*",                                     handler.common.app.IndexHandler,                           {"event": "app_"}),
