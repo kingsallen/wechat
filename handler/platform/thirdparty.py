@@ -170,11 +170,12 @@ class EmployeeQrcodeHandler(BaseHandler):
         company_id = self.params.company_id
         workwx_user_record = yield self.workwx_ps.get_workwx_user(self.current_user.wechat.company_id, workwx_userid)
         #如果已经绑定过(以前访问绑定过),无需再绑定
-        if int(workwx_user_record.sys_user_id) > 0:
-           # 如果workwx_user_record.sys_user_id跟self.current_user.sysuser.id不一致，说明当前用户不是绑定用户，需要弹出提示
-           pass
-        else:
-            yield self.workwx_ps.bind_workwx_qxuser(self.current_user.sysuser.id, workwx_userid, company_id)
+        # if int(workwx_user_record.sys_user_id) > 0:
+        #    # 如果workwx_user_record.sys_user_id跟self.current_user.sysuser.id不一致，说明当前用户不是绑定用户，需要弹出提示
+        #    pass
+        # else:
+        #     yield self.workwx_ps.bind_workwx_qxuser(self.current_user.sysuser.id, workwx_userid, company_id)
+        yield self.workwx_ps.bind_workwx_qxuser(self.current_user.sysuser.id, workwx_userid, company_id) #如果已经绑定过仟寻账号，则换绑
         #如果已经关注公众号，说明已经做完员工认证，生成员工信息，跳转3s跳转页，再跳转到职位列表
         if self.current_user.wxuser.is_subscribe:
             is_valid_employee = yield self.employee_ps.is_valid_employee(
