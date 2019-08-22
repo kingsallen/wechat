@@ -1205,9 +1205,9 @@ class BaseHandler(MetaBaseHandler):
                 yield self._access_workwx_url(sysuser, workwx_sysuser_id, workwx_userid, bind_employee = True)
                 # self._WORKWX_REDIRECT = True
                 return
-            # 如果没有关注公众号，跳转微信
-            if workwx_sysuser_id > 0:  #如果在访问企业微信之前已经做过绑定(以前访问绑定过)，需要保存session，跳转微信之后无需再做绑定
-                yield self._set_workwx_cookie(sysuser)
+            # 如果没有关注公众号，跳转微信 ,这里就算workwx_sysuser_id已经绑定过仟寻用户也不能缓存session_id到cookie，会导致去微信关注之后再回来企业微信存在session_id但是没有self._unionid，从而导致session.wxuser为{}
+            # if workwx_sysuser_id > 0:  #如果在访问企业微信之前已经做过绑定(以前访问绑定过)，需要保存session，跳转微信之后无需再做绑定
+            #     yield self._set_workwx_cookie(sysuser)
             # 其他认证方式或者已经关闭oms开关，不是有效员工直接跳转到企业微信二维码页面
             yield self._redirect_workwx_fivesec_ur(workwx_userid)
         else:
