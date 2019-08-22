@@ -206,7 +206,7 @@ class WorkwxQrcodeHandler(MetaBaseHandler):
 
         client_env = ObjectDict({"name": self._client_env})
         self.namespace = {"client_env": client_env}
-        self.render_page(template_name="adjunct/wxwork-qrcode-simple.html", data=ObjectDict({"data": self._get_wechat_info(self._wechat)}))
+        self.render_page(template_name="adjunct/wxwork-qrcode-simple.html", data=self._get_wechat_info(self._wechat))
 
     @gen.coroutine
     def _get_wechat_info(self, wechat):
