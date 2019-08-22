@@ -206,54 +206,23 @@ class WorkwxQrcodeHandler(MetaBaseHandler):
 
         client_env = ObjectDict({"name": self._client_env})
         self.namespace = {"client_env": client_env}
-        self.render_page(template_name="adjunct/wxwork-qrcode-simple.html", data=ObjectDict())
+        self.render_page(template_name="adjunct/wxwork-qrcode-simple.html", data=ObjectDict({"data": self._get_wechat_info(self._wechat)}))
 
     @gen.coroutine
-    def _get_current_wechat(self, qx=False):
-        if qx:
-            signature = self.settings['qx_signature']
-        else:
-            signature = self.params['wechat_signature']
-        wechat = yield self.wechat_ps.get_wechat(conds={
-            "signature": signature
-        })
-        if not wechat:
-            self.write_error(http_code=404)
-            return
-
-        raise gen.Return(wechat)
-
-
-class WorkwxSubInfoHandler(MetaBaseHandler):
-    """
-    获取微信信息
-    字符类型的自定义参数的格式为{场景值(大写)}_{自定义字符串}，场景值必须为大写英文字母
-    int类型 scene_id规范为：32位二进制, 5位type + 27位自定义编号(比如hrid, userid)。见 https://wiki.moseeker.com/weixin.md
-    """
-    @handle_response
-    @check_env(4)
-    @check_signature
-    @gen.coroutine
-    def get(self):
-        session = ObjectDict()
-        self._wechat = yield self._get_current_wechat()
-        session.wechat = self._wechat
-        self.current_user = session
-
+    def _get_wechat_info(self, wechat):
         pattern_id = self.params.scene or 99
         str_scene = self.params.str_scene or ''  # 字符串类型的场景值
         str_code = self.params.str_code or ''  # 字符串类型的自定义参数
         scene_code = const.TEMPORARY_CODE_STR_SCENE.format(str_scene, str_code)
         if str_code and str_scene:
-            wechat = yield self.wechat_ps.get_workwx_info(self.current_user, scene_id=scene_code, action_name="QR_STR_SCENE")
+            wechat_info = yield self.wechat_ps.get_wechat_in_workwx(wechat, scene_id=scene_code, action_name="QR_STR_SCENE")
         else:
             if int(pattern_id) == const.QRCODE_POSITION and self.params.pid:
                 scene_id = int('11111000000000000000000000000000', base=2) + int(self.params.pid)
             else:
                 scene_id = int('11110000000000000000000000000000', base=2) + int(pattern_id)
-            wechat = yield self.wechat_ps.get_workwx_info(self.current_user, scene_id=scene_id)
-        self.send_json_success(data=wechat)
-        return
+            wechat_info = yield self.wechat_ps.get_wechat_in_workwx(self.current_user, scene_id=scene_id)
+        return wechat_info
 
     @gen.coroutine
     def _get_current_wechat(self, qx=False):
@@ -269,6 +238,53 @@ class WorkwxSubInfoHandler(MetaBaseHandler):
             return
 
         raise gen.Return(wechat)
+
+
+# class WorkwxSubInfoHandler(MetaBaseHandler):
+#     """
+#     获取微信信息
+#     字符类型的自定义参数的格式为{场景值(大写)}_{自定义字符串}，场景值必须为大写英文字母
+#     int类型 scene_id规范为：32位二进制, 5位type + 27位自定义编号(比如hrid, userid)。见 https://wiki.moseeker.com/weixin.md
+#     """
+#     @handle_response
+#     @check_env(4)
+#     @check_signature
+#     @gen.coroutine
+#     def get(self):
+#         session = ObjectDict()
+#         self._wechat = yield self._get_current_wechat()
+#         session.wechat = self._wechat
+#         self.current_user = session
+#
+#         pattern_id = self.params.scene or 99
+#         str_scene = self.params.str_scene or ''  # 字符串类型的场景值
+#         str_code = self.params.str_code or ''  # 字符串类型的自定义参数
+#         scene_code = const.TEMPORARY_CODE_STR_SCENE.format(str_scene, str_code)
+#         if str_code and str_scene:
+#             wechat = yield self.wechat_ps.get_workwx_info(self.current_user, scene_id=scene_code, action_name="QR_STR_SCENE")
+#         else:
+#             if int(pattern_id) == const.QRCODE_POSITION and self.params.pid:
+#                 scene_id = int('11111000000000000000000000000000', base=2) + int(self.params.pid)
+#             else:
+#                 scene_id = int('11110000000000000000000000000000', base=2) + int(pattern_id)
+#             wechat = yield self.wechat_ps.get_workwx_info(self.current_user, scene_id=scene_id)
+#         self.send_json_success(data=wechat)
+#         return
+#
+#     @gen.coroutine
+#     def _get_current_wechat(self, qx=False):
+#         if qx:
+#             signature = self.settings['qx_signature']
+#         else:
+#             signature = self.params['wechat_signature']
+#         wechat = yield self.wechat_ps.get_wechat(conds={
+#             "signature": signature
+#         })
+#         if not wechat:
+#             self.write_error(http_code=404)
+#             return
+#
+#         raise gen.Return(wechat)
 
 
 class EmployeeThreesecSkipHandler(BaseHandler):

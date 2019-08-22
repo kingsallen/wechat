@@ -292,7 +292,7 @@ platform_routes = [
     (r"/api/switch[\/]*([a-z_]+)*",                  handler.platform.switch.SwitchHandler,                     {"event": "switch_"}),
     (r"/api/func/relation_tags/?",                   handler.platform.referral.ReferralCommentTagsHandler,      {"event": "referral_comment_tags"}),
 
-    (r"/api/func/workwx/?",                          handler.platform.thirdparty.WorkwxSubInfoHandler,            {"event": "workwx_sub_info"}),
+    # (r"/api/func/workwx/?",                          handler.platform.thirdparty.WorkwxSubInfoHandler,            {"event": "workwx_sub_info"}),
 
     # 兼容老微信 url，进行302跳转
     (r"/.*",                                         handler.platform.compatible.CompatibleHandler,             {"event": "compatible"})
