@@ -778,7 +778,7 @@ class ProfilePageService(PageService):
         if expectedlocation:
             record.city_name = expectedlocation
         if position:
-            record.position_name = position
+            record.position = position
         if salary_code:
             record.salary_code = salary_code
         if worktype:
@@ -1220,8 +1220,8 @@ class ProfilePageService(PageService):
         # 获取最佳东方导入开关
         need_profile_upload = [570004]  # 现在为沙盒的
         importer = ObjectDict(
-            profile_import_51job=None,
-            # profile_import_51job=make_url(path.RESUME_URL, params, m='authorization', way=const.RESUME_WAY_51JOB),
+            # profile_import_51job=None,
+            profile_import_51job=make_url(path.RESUME_URL, params, m='authorization', way=const.RESUME_WAY_51JOB),
             profile_import_zhilian=make_url(path.RESUME_URL, params, m='authorization', way=const.RESUME_WAY_ZHILIAN),
             # profile_import_zhilian=None,
             # set later.
