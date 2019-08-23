@@ -35,7 +35,7 @@ class WorkwxPageService(PageService):
 
         create_workwx = yield self.workwx_ds.create_workwx_user(ObjectDict(workwx_userinfo))
         if create_workwx.code != const.NEWINFRA_API_SUCCESS:
-            raise InfraOperationError(message=create_workwx.message)
+            raise InfraOperationError(create_workwx.message)
         return create_workwx.get('data')
 
 
@@ -78,9 +78,10 @@ class WorkwxPageService(PageService):
             "companyId": int(company_id)
         })
         ret = yield self.workwx_ds.bind_workwx_qxuser(params)
-        self.logger.debug("@@@@@@@@@@@ret:{}, code:{}".format(ret,ret.code))
+        self.logger.debug("@@@@@@@@@@@ 111 ret:{}, code: {}, message: {}, result:{}".format(ret,ret.code,ret.message,ret.code != const.NEWINFRA_API_SUCCESS))
         if ret.code != const.NEWINFRA_API_SUCCESS:
-            raise InfraOperationError(message=ret.message)
+            self.logger.debug("@@@@@@@@@@@ 222 ")
+            raise InfraOperationError(ret.message)
         return ret
 
     @gen.coroutine
