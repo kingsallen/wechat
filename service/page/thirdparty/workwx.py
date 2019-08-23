@@ -36,8 +36,7 @@ class WorkwxPageService(PageService):
         create_workwx = yield self.workwx_ds.create_workwx_user(ObjectDict(workwx_userinfo))
         if create_workwx.code != const.NEWINFRA_API_SUCCESS:
             raise InfraOperationError(message=create_workwx.message)
-        else:
-            return create_workwx.get('data')
+        return create_workwx.get('data')
 
 
     @gen.coroutine
@@ -81,8 +80,7 @@ class WorkwxPageService(PageService):
         ret = yield self.workwx_ds.bind_workwx_qxuser(params)
         if ret.code != const.NEWINFRA_API_SUCCESS:
             raise InfraOperationError(message=ret.message)
-        else:
-            return ret
+        return ret
 
     @gen.coroutine
     def employee_bind(self, sysuser_id, company_id):
