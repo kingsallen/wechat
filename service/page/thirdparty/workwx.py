@@ -78,6 +78,7 @@ class WorkwxPageService(PageService):
             "companyId": int(company_id)
         })
         ret = yield self.workwx_ds.bind_workwx_qxuser(params)
+        self.logger.debug("@@@@@@@@@@@ret:{}, code:{}".format(ret,ret.code))
         if ret.code != const.NEWINFRA_API_SUCCESS:
             raise InfraOperationError(message=ret.message)
         return ret
