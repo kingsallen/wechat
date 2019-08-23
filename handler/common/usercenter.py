@@ -10,6 +10,7 @@ from util.common.decorator import handle_response, verified_mobile_oneself, auth
 from util.tool.str_tool import email_validate, is_alphabet, is_chinese, password_crypt, password_validate
 from util.image.upload import QiniuUpload
 from util.common import ObjectDict
+from util.tool.file_tool import filetype
 
 
 class UsercenterHandler(BaseHandler):
@@ -397,6 +398,11 @@ class UploadHandler(BaseHandler):
 
         if vfile is None:
             self.send_json_error(message="上传参数错误")
+            return None
+
+        file_type = filetype(vfile)
+        if file_type is None:
+            self.send_json_error(message="上传文件类型不支持")
             return None
 
         upload_settings.update({
