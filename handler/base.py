@@ -1068,14 +1068,14 @@ class BaseHandler(MetaBaseHandler):
             return False
         else:
             if self.current_user.sysuser:
-                # is_subscribe = yield self.position_ps.get_hr_wx_user(self.current_user.sysuser.unionid, self._wechat.id)
-                if self.current_user.wxuser.is_subscribe:
-                    # 如果已经关注公众号，无需跳转微信，可生成员工信息之后访问主页
-                    yield self.workwx_ps.employee_bind(self.current_user.sysuser.id, self._wechat.company_id)
-                else:
-                    # 如果没有关注公众号，跳转微信
-                    workwx_auth_mode = yield self._get_company_auth_mode(before_fetch_session = False) #其他认证方式或者已经关闭oms开关，不是有效员工直接跳转到企业微信二维码页面
-                    if workwx_auth_mode:
+                workwx_auth_mode = yield self._get_company_auth_mode(before_fetch_session=False)  # 其他认证方式或者已经关闭oms开关，不是有效员工直接跳转到企业微信二维码页面
+                if workwx_auth_mode:
+                    # is_subscribe = yield self.position_ps.get_hr_wx_user(self.current_user.sysuser.unionid, self._wechat.id)
+                    if self.current_user.wxuser.is_subscribe:
+                        # 如果已经关注公众号，无需跳转微信，可生成员工信息之后访问主页
+                        yield self.workwx_ps.employee_bind(self.current_user.sysuser.id, self._wechat.company_id)
+                    else:
+                        # 如果没有关注公众号，跳转微信
                         workwx_user_record = yield self.workwx_ps.get_workwx_user_by_sysuser_id(
                             self.current_user.sysuser.id, self._wechat.company_id)
                         if workwx_user_record:
@@ -1086,10 +1086,11 @@ class BaseHandler(MetaBaseHandler):
                         else:
                             yield self._redirect_wokwx_oauth_url()
                             return True
-                    else:
-                        yield self.redirect(workwx_qrcode_url)
-                        return True
-                return False
+
+                    return False
+                else:
+                    yield self.redirect(workwx_qrcode_url)
+                    return True
             else:
                 yield self._redirect_wokwx_oauth_url()
                 return True
