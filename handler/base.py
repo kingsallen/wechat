@@ -1097,7 +1097,7 @@ class BaseHandler(MetaBaseHandler):
 
     @gen.coroutine
     def _redirect_wokwx_oauth_url(self):
-        """# 企业微信页面"""
+        """# 企业微信: 拿不到self.current_user.sysuser，清掉cookie,跳转当前页面重新企业微信授权获取相关数据"""
         wokwx_oauth_url = self.fullurl()
         # wokwx_oauth_url = self.make_url(path.WOKWX_OAUTH_PAGE, self.params)
         self.clear_cookie(name=const.COOKIE_SESSIONID)
