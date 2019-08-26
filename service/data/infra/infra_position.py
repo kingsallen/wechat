@@ -12,8 +12,9 @@ from util.common import ObjectDict
 from util.tool.http_tool import http_get, http_post, http_patch, http_get_rp, http_get_v2, http_get_clound, http_post_v2
 from util.tool import http_tool
 from util.common.decorator import cache_new
-from conf.newinfra_service_conf.service_info import position_service
+from conf.newinfra_service_conf.service_info import position_service, sharechain_service
 from conf.newinfra_service_conf.position import position
+from conf.newinfra_service_conf.sharechain import sharechain
 
 
 class InfraPositionDataService(DataService):
@@ -30,7 +31,7 @@ class InfraPositionDataService(DataService):
     @gen.coroutine
     def infra_get_share_position_list(self, share_id):
         """普通职位列表"""
-        ret = yield http_get_v2(position.POSITION_LIST_BY_IDS.format(share_id), position_service, timeout=30)
+        ret = yield http_get_v2(sharechain.POSITION_LIST_BY_IDS.format(share_id), position_service, timeout=30)
         return ret
 
     @gen.coroutine
@@ -220,7 +221,7 @@ class InfraPositionDataService(DataService):
     @gen.coroutine
     def infra_create_share_position_list(self, params):
         """保存批量分享的职位列表"""
-        ret = yield http_post_v2(position.SHARE_POSITION_LIST, position_service, params)
+        ret = yield http_post_v2(sharechain.SHARE_POSITION_LIST, position_service, params)
         return ret
 
 
