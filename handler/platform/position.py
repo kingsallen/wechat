@@ -991,8 +991,8 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
             # 批量分享职位列表
             start_count = (int(self.params.get("count", 0)) * const_platform.POSITION_LIST_PAGE_COUNT)
             infra_params.page_from = start_count
-            share_position_list = yield self.position_ps.get_share_position_list(share_id, infra_params)
-            position_list = share_position_list
+            position_list = yield self.position_ps.get_share_position_list(share_id, infra_params)
+            rp_position_list = list(self.__rp_position_generator(position_list))
 
         else:
             # 内推职位列表和普通职位列表
