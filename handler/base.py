@@ -1189,6 +1189,11 @@ class BaseHandler(MetaBaseHandler):
             sysuser = yield self.user_ps.get_user_user({
                 "username": workwx_userinfo.mobile
             })
+            if sysuser:
+                workwx_user_record = yield self.workwx_ps.get_workwx_user_by_sysuser_id(
+                    sysuser.id, self._wechat.company_id)
+                if workwx_user_record:
+                    sysuser = None
         else:
             sysuser = None
         return sysuser
