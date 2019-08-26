@@ -687,11 +687,8 @@ class PositionPageService(PageService):
         :return:
         """
         params = ObjectDict({
-            "item_form": {
-                "position_id": pids,
-                "user_id": user_id
-            }
-
+            "position_id": pids,
+            "user_id": user_id
         })
         ret = yield self.infra_position_ds.infra_create_share_position_list(params)
         return ret
