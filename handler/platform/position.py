@@ -1463,9 +1463,32 @@ class PositionShareInBulkHandler(BaseHandler):
             _, employee = self.user_ps.get_employee_info(self.current_user.recom.id, self.current_user.company.id)
             data = {
                 "employee_name": employee.cname,
+                "employee_icon": self.current_user.sysuser.headimg,
                 "is_referral": const.YES
             }
+        self.params.share = yield self._make_share()
         self.render_page(template_name="", data=data)
+
+    @gen.coroutine
+    def _make_share(self):
+        link = self.make_url(
+            path.POSITION_SHARE,
+            self.params,
+            recom=self.position_ps._make_recom(self.current_user.sysuser.id))
+        company_info = yield self.company_ps.get_company(
+            conds={"id": self.current_user.company.id}, need_conf=True)
+
+        cover = self.share_url(company_info.logo)
+        title = company_info.abbreviation + self.locale.translate('job_hotjobs')
+        description = self.locale.translate(msg.SHARE_DES_DEFAULT)
+
+        share_info = ObjectDict({
+            "cover": cover,
+            "title": title,
+            "description": description,
+            "link": link
+        })
+        return share_info
 
 
 class APIPositionShareInBulkHandler(BaseHandler):
