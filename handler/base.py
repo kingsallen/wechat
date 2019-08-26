@@ -253,6 +253,10 @@ class BaseHandler(MetaBaseHandler):
             self.redirect(to_uri)
             return
 
+        session_id = to_str(
+            self.get_secure_cookie(
+                const.COOKIE_SESSIONID))
+        self.logger.debug("$$$$$$ [prepare]session_id: {}".format(session_id))
         # 构建 session 之前先缓存一份 wechat
         self._wechat = yield self._get_current_wechat()
         if self.request.connection.stream.closed():
@@ -600,6 +604,7 @@ class BaseHandler(MetaBaseHandler):
         self._session_id = to_str(
             self.get_secure_cookie(
                 const.COOKIE_SESSIONID))
+        self.logger.debug("@@@@@[_fetch_session]_session_id: {}".format(self._session_id))
 
         if self._session_id:
             if self.is_platform or self.is_help:
@@ -1102,6 +1107,10 @@ class BaseHandler(MetaBaseHandler):
         wokwx_oauth_url = self.fullurl()
         # wokwx_oauth_url = self.make_url(path.WOKWX_OAUTH_PAGE, self.params)
         self.clear_cookie(name=const.COOKIE_SESSIONID)
+        session_id = to_str(
+            self.get_secure_cookie(
+                const.COOKIE_SESSIONID))
+        self.logger.debug("!!!!!!![_redirect_wokwx_oauth_url]session_id: {}".format(session_id))
         yield self.redirect(wokwx_oauth_url)
         return
 
