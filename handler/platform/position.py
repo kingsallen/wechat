@@ -1466,8 +1466,9 @@ class PositionShareInBulkHandler(BaseHandler):
                 "employee_icon": self.current_user.sysuser.headimg,
                 "is_referral": const.YES
             }
+
         self.params.share = yield self._make_share()
-        self.render_page(template_name="", data=data)
+        self.render_page(template_name="position/share.html", data=data)
 
     @gen.coroutine
     def _make_share(self):
