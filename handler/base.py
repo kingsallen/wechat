@@ -1066,7 +1066,7 @@ class BaseHandler(MetaBaseHandler):
         workwx_qrcode_url = self.make_url(path.WOKWX_QRCODE_PAGE, self.params)
         if self.current_user.sysuser:
             workwx_user_record = yield self.workwx_ps.get_workwx_user_by_sysuser_id(
-                self.current_user.sysuser.id, self._wechat.company_id)
+                self.current_user.sysuser.id, company_id = self._wechat.company_id)
             if workwx_user_record:
                 if self.current_user.employee:
                     return False
@@ -1182,7 +1182,7 @@ class BaseHandler(MetaBaseHandler):
             })
             if sysuser:  #通过手机号拿到的仟寻账号是否已经绑定其他企业微信账号，如果已经绑定过其他企业微信账号，这里不允许绑定
                 workwx_user_record = yield self.workwx_ps.get_workwx_user_by_sysuser_id(
-                    sysuser.id, self._wechat.company_id)
+                    sysuser.id)
                 if workwx_user_record:
                     sysuser = None
         else:
