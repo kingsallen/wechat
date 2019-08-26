@@ -1465,7 +1465,7 @@ class PositionShareInBulkHandler(BaseHandler):
                 "employee_name": employee.cname,
                 "is_referral": const.YES
             }
-        self.render_page(template_name="", data=data)
+        self.render_page(template_name="position/share.html", data=data)
 
 
 class APIPositionShareInBulkHandler(BaseHandler):
