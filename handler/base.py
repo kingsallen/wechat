@@ -843,7 +843,7 @@ class BaseHandler(MetaBaseHandler):
             sysuser = yield self.user_ps.get_user_user({
                 "id": sysuser.parentid
             })
-            self.clear_cookie(name=const.COOKIE_SESSIONID)
+            self.clear_cookie(name=const.COOKIE_SESSIONID, domain=settings['root_host'])
 
         if sysuser:
             sysuser = self.user_ps.adjust_sysuser(sysuser)
@@ -1106,7 +1106,7 @@ class BaseHandler(MetaBaseHandler):
         """# 企业微信: 拿不到self.current_user.sysuser，清掉cookie,跳转当前页面重新企业微信授权获取相关数据"""
         wokwx_oauth_url = self.fullurl()
         # wokwx_oauth_url = self.make_url(path.WOKWX_OAUTH_PAGE, self.params)
-        self.clear_cookie(name=const.COOKIE_SESSIONID)
+        self.clear_cookie(name=const.COOKIE_SESSIONID, domain=settings['root_host'])
         session_id = to_str(
             self.get_secure_cookie(
                 const.COOKIE_SESSIONID))
