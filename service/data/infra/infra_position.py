@@ -31,7 +31,7 @@ class InfraPositionDataService(DataService):
     @gen.coroutine
     def infra_get_share_position_list(self, share_id):
         """普通职位列表"""
-        ret = yield http_get_v2(sharechain.POSITION_LIST_BY_IDS.format(share_id), position_service, timeout=30)
+        ret = yield http_get_v2(sharechain.POSITION_LIST_BY_IDS.format(share_id), sharechain_service, timeout=30)
         return ret
 
     @gen.coroutine
@@ -221,7 +221,7 @@ class InfraPositionDataService(DataService):
     @gen.coroutine
     def infra_create_share_position_list(self, params):
         """保存批量分享的职位列表"""
-        ret = yield http_post_v2(sharechain.SHARE_POSITION_LIST, position_service, params)
+        ret = yield http_post_v2(sharechain.SHARE_POSITION_LIST, sharechain_service, params)
         return ret
 
 
