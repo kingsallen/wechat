@@ -1262,9 +1262,9 @@ class BaseHandler(MetaBaseHandler):
     @gen.coroutine
     def _access_workwx_url(self, sysuser, workwx_sysuser_id, workwx_userid, bind_employee = False):
         # 访问企业微信页面
+        if bind_employee:
+            yield self.workwx_ps.employee_bind(sysuser.id, self._wechat.company_id)
         if workwx_sysuser_id <= 0:
             # 绑定仟寻用户和企业微信: 如果需要跳转微信，不能企业微信做绑定，必须去微信做绑定(因为有可能通过mobile绑定的仟寻用户跟跳转的仟寻用户不是同一个人)；如果不跳微信需要在企业微信做绑定
             yield self.workwx_ps.bind_workwx_qxuser(sysuser.id, workwx_userid, self._wechat.company_id)
-        if bind_employee:
-            yield self.workwx_ps.employee_bind(sysuser.id, self._wechat.company_id)
         yield self._set_workwx_cookie(sysuser)
