@@ -336,6 +336,7 @@ class ApplicationPageService(PageService):
         resume_dict.works = works
         resume_dict.skills = skills
         resume_dict.credentials = credentials
+        resume_dict.language = language
 
         # profile other
         if profile.get('others', []):
