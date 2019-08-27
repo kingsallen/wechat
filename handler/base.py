@@ -24,6 +24,7 @@ from util.tool.date_tool import curr_now
 from util.tool.str_tool import to_str, from_hex, match_session_id, \
     languge_code_from_ua
 from util.tool.url_tool import url_subtract_query, make_url
+from util.common.exception import InfraOperationError
 
 
 class NoSignatureError(Exception):
@@ -1262,9 +1263,14 @@ class BaseHandler(MetaBaseHandler):
     @gen.coroutine
     def _access_workwx_url(self, sysuser, workwx_sysuser_id, workwx_userid, bind_employee = False):
         # 访问企业微信页面
-        if bind_employee:
-            yield self.workwx_ps.employee_bind(sysuser.id, self._wechat.company_id)
         if workwx_sysuser_id <= 0:
             # 绑定仟寻用户和企业微信: 如果需要跳转微信，不能企业微信做绑定，必须去微信做绑定(因为有可能通过mobile绑定的仟寻用户跟跳转的仟寻用户不是同一个人)；如果不跳微信需要在企业微信做绑定
             yield self.workwx_ps.bind_workwx_qxuser(sysuser.id, workwx_userid, self._wechat.company_id)
+        if bind_employee: #如果员工认证失败，需要解除绑定
+            try:
+                yield self.workwx_ps.employee_bind(sysuser.id, self._wechat.company_id)
+            except Exception as e:
+                yield self.workwx_ps.unbind_workwx_qxuser(sysuser.id, workwx_userid, self._wechat.company_id)
+                raise InfraOperationError(e)
+
         yield self._set_workwx_cookie(sysuser)

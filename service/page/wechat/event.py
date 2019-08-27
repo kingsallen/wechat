@@ -31,6 +31,7 @@ from util.tool.http_tool import http_post_cs_msg
 from util.wechat.core import get_wxuser, send_succession_message, get_test_access_token
 from util.common.mq import user_follow_wechat_publisher, user_unfollow_wechat_publisher
 from service.page.user.user import UserPageService
+from util.common.exception import InfraOperationError
 
 from setting import settings
 
@@ -814,12 +815,19 @@ class EventPageService(PageService):
                     self.logger.debug("[qrcode workwx -22] str_code: {}".format(str_code))
                 str_code = str_code.group(1) if str_code else ""
                 self.logger.debug("[qrcode workwx -33] str_code: {}".format(str_code))
+
+                workwx_user_record = yield self.workwx_ps.get_workwx_user(wechat.company_id, str_code)
+                if int(workwx_user_record.sys_user_id) <= 0:
+                    yield self.workwx_ds.bind_workwx_qxuser(wxuser.sysuser_id, str_code, wechat.company_id)
                 # 先判断是否是有效员工，需要判断的原因：如果以前是有效员工，因为取消关注导致不是有效员工的情况，在扫码之后会自动成为有效员工，这时候不需要再生产员工信息
                 is_valid_employee = yield self.infra_user_ds.is_valid_employee(
                     user_id=wxuser.sysuser_id, company_id=wechat.company_id)
                 if not is_valid_employee:  # 如果不是有效员工，需要需要生成员工信息
-                    yield self.workwx_ds.employee_bind(sysuser_id=wxuser.sysuser_id,company_id=wechat.company_id)  # 如果已经关注公众号，无需跳转微信，可生成员工信息之后访问主页
-                yield self.workwx_ds.bind_workwx_qxuser(wxuser.sysuser_id, str_code, wechat.company_id)
+                    try:
+                        yield self.workwx_ds.employee_bind(sysuser_id=wxuser.sysuser_id,company_id=wechat.company_id)  # 如果已经关注公众号，无需跳转微信，可生成员工信息之后访问主页
+                    except Exception as e:
+                        yield self.workwx_ps.unbind_workwx_qxuser(wxuser.sysuser_id, str_code, wechat.company_id)
+                        raise InfraOperationError(e)
 
                 send_succession_message(wechat=wechat, open_id=msg.FromUserName, pattern_id=str_scene)
             else:

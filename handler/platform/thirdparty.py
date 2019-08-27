@@ -18,7 +18,7 @@ from oauth.wechat import WeChatOauthError, JsApi, WorkWXOauth2Service, WeChatOau
 from util.common.decorator import check_signature
 from util.tool.url_tool import url_subtract_query
 from util.tool.str_tool import to_str, match_session_id
-from util.common.exception import MyException
+from util.common.exception import MyException, InfraOperationError
 
 
 class JoywokOauthHandler(MetaBaseHandler):
@@ -177,21 +177,23 @@ class EmployeeQrcodeHandler(BaseHandler):
             raise MyException("该企业微信号已绑定其他仟寻账号！")
         elif int(workwx_user_record.sys_user_id) <= 0 and sysuser_workwx_user:
             raise MyException("该微信号已绑定其他账号！")
+
         #如果已经关注公众号，说明已经做完员工认证，生成员工信息，跳转3s跳转页，再跳转到职位列表
         if self.current_user.wxuser.is_subscribe:
+            # 如果已经绑定过(以前访问绑定过),无需再绑定
+            if int(workwx_user_record.sys_user_id) <= 0:
+                yield self.workwx_ps.bind_workwx_qxuser(self.current_user.sysuser.id, workwx_userid, company_id)
+
             is_valid_employee = yield self.employee_ps.is_valid_employee(
                 self.current_user.sysuser.id,
                 company_id
             )
             if not is_valid_employee:  # 如果不是有效员工，需要需要生成员工信息
-                yield self.workwx_ps.employee_bind(self.current_user.sysuser.id, company_id)
-
-            # 如果已经绑定过(以前访问绑定过),无需再绑定
-            if int(workwx_user_record.sys_user_id) > 0:
-                # 如果workwx_user_record.sys_user_id跟self.current_user.sysuser.id不一致，说明当前用户不是绑定用户，需要弹出提示
-                pass
-            else:
-                yield self.workwx_ps.bind_workwx_qxuser(self.current_user.sysuser.id, workwx_userid, company_id)
+                try:
+                    yield self.workwx_ps.employee_bind(self.current_user.sysuser.id, company_id)
+                except Exception as e:
+                    yield self.workwx_ps.unbind_workwx_qxuser(self.current_user.sysuser.id, workwx_userid, self._wechat.company_id)
+                    raise InfraOperationError(e)
 
             three_sec_wechat_url =  self.make_url(path.WECHAT_THREESEC_PAGE, self.params)
             self.redirect(three_sec_wechat_url)

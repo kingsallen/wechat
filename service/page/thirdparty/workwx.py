@@ -76,6 +76,12 @@ class WorkwxPageService(PageService):
         return ret
 
     @gen.coroutine
+    def unbind_workwx_qxuser(self, sysuser_id, workwx_userid, company_id):
+        """解除绑定企业微信成员和仟寻用户"""
+        ret = yield self.workwx_ds.unbind_workwx_qxuser(sysuser_id, workwx_userid, company_id)
+        return ret
+
+    @gen.coroutine
     def employee_bind(self, sysuser_id, company_id):
         """员工认证"""
         ret = yield self.workwx_ds.employee_bind(sysuser_id, company_id)

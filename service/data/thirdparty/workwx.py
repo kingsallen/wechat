@@ -53,6 +53,23 @@ class WorkwxDataService(DataService):
         raise gen.Return(ret)
 
     @gen.coroutine
+    def unbind_workwx_qxuser(self, sysuser_id, workwx_userid, company_id):
+        params = {
+            "sysuserId": int(sysuser_id),
+            "workwxUserid": workwx_userid,
+            "companyId": int(company_id),
+            "appid": user_service.appid,
+            "interfaceid": user_service.interfaceid
+        }
+        # params.update({"appid": user_service.appid, "interfaceid": user_service.interfaceid})
+        path = "{0}/{1}{2}".format(settings['cloud'], user_service.service_name, user.INFRA_USER_UNBIND_WORKWX_QXUSER)
+        route = url_concat(path, params)  #post请求参数写在url里面，不能写在body里面
+        ret = yield _v2_async_http_post(route)
+        if ret.code != const.NEWINFRA_API_SUCCESS:
+            raise InfraOperationError(ret.message)
+        raise gen.Return(ret)
+
+    @gen.coroutine
     def employee_bind(self, sysuser_id, company_id):
         params = {
             "userId": sysuser_id,
