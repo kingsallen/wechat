@@ -222,18 +222,11 @@ class WorkwxQrcodeHandler(MetaBaseHandler):
 
     @gen.coroutine
     def _get_wechat_info(self, wechat):
-        pattern_id = self.params.scene or 99
-        str_scene = self.params.str_scene or ''  # 字符串类型的场景值
+        # str_scene = self.params.str_scene or ''  # 字符串类型的场景值
+        str_scene = "WORKWX"  # 字符串类型的场景值
         str_code = self.params.str_code or ''  # 字符串类型的自定义参数
         scene_code = const.TEMPORARY_CODE_STR_SCENE.format(str_scene, str_code)
-        if str_code and str_scene:
-            wechat_info = yield self.wechat_ps.get_wechat_in_workwx(wechat, scene_id=scene_code, action_name="QR_STR_SCENE")
-        else:
-            if int(pattern_id) == const.QRCODE_POSITION and self.params.pid:
-                scene_id = int('11111000000000000000000000000000', base=2) + int(self.params.pid)
-            else:
-                scene_id = int('11110000000000000000000000000000', base=2) + int(pattern_id)
-            wechat_info = yield self.wechat_ps.get_wechat_in_workwx(wechat, scene_id=scene_id)
+        wechat_info = yield self.wechat_ps.get_wechat_in_workwx(wechat, scene_id=scene_code, action_name="QR_STR_SCENE")
         return wechat_info
 
     @gen.coroutine
