@@ -816,7 +816,7 @@ class EventPageService(PageService):
                 str_code = str_code.group(1) if str_code else ""
                 self.logger.debug("[qrcode workwx -33] str_code: {}".format(str_code))
 
-                workwx_user_record = yield self.workwx_ps.get_workwx_user(wechat.company_id, str_code)
+                workwx_user_record = yield self.workwx_ds.get_workwx_user(wechat.company_id, str_code)
                 if int(workwx_user_record.sys_user_id) <= 0:
                     yield self.workwx_ds.bind_workwx_qxuser(wxuser.sysuser_id, str_code, wechat.company_id)
                 # 先判断是否是有效员工，需要判断的原因：如果以前是有效员工，因为取消关注导致不是有效员工的情况，在扫码之后会自动成为有效员工，这时候不需要再生产员工信息

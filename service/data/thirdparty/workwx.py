@@ -11,6 +11,7 @@ from tornado.httputil import url_concat
 from setting import settings
 import conf.common as const
 from util.common.exception import InfraOperationError
+from util.common import ObjectDict
 
 
 class WorkwxDataService(DataService):
@@ -21,9 +22,13 @@ class WorkwxDataService(DataService):
         raise gen.Return(ret)
 
     @gen.coroutine
-    def get_workwx_user(self, params):
+    def get_workwx_user(self, company_id, workwx_userid):
+        params = ObjectDict({
+            "company_id": company_id,
+            "work_wechat_userid": workwx_userid
+        })
         ret = yield http_get_v2(user.INFRA_GET_WORKWX_USER, user_service, params)
-        raise gen.Return(ret)
+        raise gen.Return(ret.data)
 
     @gen.coroutine
     def get_workwx_user_by_sysuser_id(self, params):
