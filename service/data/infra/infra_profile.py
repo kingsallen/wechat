@@ -604,7 +604,7 @@ class InfraProfileDataService(DataService):
     @gen.coroutine
     def delete_profile_works(self, record, profile_id):
         res = yield self.handle_profile_section(
-            {"id": record.id}, method="delete", section="works")
+            {"id": record['id']}, method="delete", section="works")
         return http_tool.unboxing(res)
 
     @gen.coroutine
@@ -677,7 +677,7 @@ class InfraProfileDataService(DataService):
     @gen.coroutine
     def delete_profile_intention(self, record):
         res = yield self.handle_profile_section(
-            {"id": record.id}, method="delete", section="intention")
+            {"id": record['id']}, method="delete", section="intention")
         return http_tool.unboxing(res)
 
     @gen.coroutine

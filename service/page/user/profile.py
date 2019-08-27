@@ -576,7 +576,7 @@ class ProfilePageService(PageService):
 
                 elif status == 'x':
                     yield self.delete_profile_education(
-                        {"id": params.eid}, profile_id=None)
+                        ObjectDict({"id": params.eid}), profile_id=None)
 
                 elif status == 'e':
                     params['id'] = params.eid
@@ -613,7 +613,7 @@ class ProfilePageService(PageService):
 
                 elif status == 'x':
                     yield self.delete_profile_workexp(
-                        {"id": params.wid}, profile_id=None)
+                        ObjectDict({"id": params.wid}), profile_id=None)
 
                 elif status == 'e':
                     params['id'] = params.wid
@@ -651,7 +651,7 @@ class ProfilePageService(PageService):
 
                 elif status == 'x':
                     yield self.delete_profile_projectexp(
-                        {"id": params.id}, profile_id=None)
+                        ObjectDict({"id": params.id}), profile_id=None)
 
                 elif status == 'e':
                     yield self.update_profile_projectexp(params, profile_id)
@@ -677,7 +677,7 @@ class ProfilePageService(PageService):
 
                 elif status == 'x':
                     yield self.delete_profile_language(
-                        {"id": params.pid}, profile_id=None)
+                        ObjectDict({"id": params.pid}), profile_id=None)
 
                 elif status == 'e':
                     params['id'] = params.pid
@@ -704,7 +704,7 @@ class ProfilePageService(PageService):
 
                 elif status == 'x':
                     yield self.delete_profile_awards(
-                        {"id": params.pid}, profile_id=None)
+                        ObjectDict({"id": params.pid}), profile_id=None)
 
                 elif status == 'e':
                     params['id'] = params.pid
@@ -730,7 +730,7 @@ class ProfilePageService(PageService):
 
             elif status == 'x':
                 yield self.delete_profile_skill(
-                    {"id": params.pid}, profile_id=None)
+                    ObjectDict({"id": params.pid}), profile_id=None)
 
             elif status == 'e':
                 params['id'] = params.pid
