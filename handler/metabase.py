@@ -110,6 +110,10 @@ class MetaBaseHandler(AtomHandler):
         return self._in_wechat == const.CLIENT_WECHAT
 
     @property
+    def in_workwx(self):
+        return self._in_wechat == const.CLIENT_WORKWX
+
+    @property
     def in_wechat_ios(self):
         return self.in_wechat and self._client_type == const.CLIENT_TYPE_IOS
 
@@ -559,6 +563,8 @@ class MetaBaseHandler(AtomHandler):
             wechat = const.CLIENT_JOYWOK
         elif "MicroMessenger" in useragent and 'wxwork' not in useragent and 'moseeker' not in useragent:
             wechat = const.CLIENT_WECHAT
+        elif "MicroMessenger" in useragent and 'wxwork' in useragent and 'moseeker' not in useragent:
+            wechat = const.CLIENT_WORKWX
 
         return wechat, mobile
 

@@ -338,7 +338,7 @@ def get_qrcode(access_token, scene_str, action_name="QR_LIMIT_STR_SCENE"):
 def get_temporary_qrcode(wechat, scene_id, action_name="QR_SCENE"):
     """
     生成带场景值的临时二维码
-    :param scene_id：完整的场景值 (pattern_id  1：员工认证 2：内推政策 3：积分榜单 4：积分历史 5：推荐历史 6：候选人推荐 7：个人中心 8：我的 9：推荐人才简历 10：推荐人才关键信息 11：职位列表 12：用户认领推荐成功， 14：职位详情）
+    :param scene_id：完整的场景值 (pattern_id  1：员工认证 2：内推政策 3：积分榜单 4：积分历史 5：推荐历史 6：候选人推荐 7：个人中心 8：我的 9：推荐人才简历 10：推荐人才关键信息 11：职位列表 12：用户认领推荐成功， 14：职位详情 17: 企业微信员工认证）
     :param wechat
     :param action_name
     :return:
@@ -436,6 +436,8 @@ def send_succession_message(wechat, open_id, pattern_id=99, position_id=0, messa
         content = '您刚刚正在浏览职位，点击查阅<a href="{}">职位详情</a>'.format(url)
     elif pattern_id == const.STR_SCENE_MRAS_WELCOME and wechat.id == const.MARS_ID:
         content = 'Hi，欢迎参加玛氏2019秋季校招。您将在这里接收最新的投递进度消息推送，也可在“个人中心”自助查阅投递记录。'
+    elif pattern_id == const.STR_SCENE_WORKWX:
+        content = '您已认证成功!'
     else:
         content = "欢迎关注：{}, 点击菜单栏发现更多精彩~".format(wechat.get("name"))
     if message:

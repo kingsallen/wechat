@@ -85,6 +85,7 @@ common_routes = [
     # 第三方授权方式
     (r"/wechat[\/]*([0-9a-z]+)*",                    handler.wechat.event.WechatThirdOauthHandler,              {"event": "wechat_thirdoauth"}),
     (r"/qr/permanent/([0-9]+)",                      handler.common.permanent_qr.PermanentQRHandler,            {"event": "permanent_qr"}),
+    (r"/WW_verify_([a-z0-9A-Z]+)\.txt",                 handler.common.app.WxWorkDomainVerifyHandler,              {"event": "wx_work_domain_verify"}),
 
     # app forward 给前端，展示纯前端渲染的 SPA
     (r"/app/.*",                                     handler.common.app.IndexHandler,                           {"event": "app_"}),
@@ -223,6 +224,10 @@ platform_routes = [
     (r'/referral/contact_result/?',                  handler.platform.referral.ReferralResultHandler,           {"event": "referral_contact_result"}),
     (r"/joywork",                                    handler.platform.thirdparty.JoywokOauthHandler,            {"event": "joywok_oauth"}),
     (r"/thirdparty/automatic/auth",                  handler.platform.thirdparty.JoywokAutoAuthHandler,         {"event": "joywok_auto_bind_page"}),
+    (r'/workwx/fivesec-skipwx',                      handler.platform.thirdparty.FiveSecSkipWXHandler,          {"event": "workwx_fivesec_skipwx"}),
+    (r'/employee/qrcode',                            handler.platform.thirdparty.EmployeeQrcodeHandler,         {"event": "employee_qrcode"}),
+    (r'/workwx/qrcode',                              handler.platform.thirdparty.WorkwxQrcodeHandler,           {"event": "workwx_qrcode"}),
+    (r'/employee/threesec-skip',                     handler.platform.thirdparty.EmployeeThreesecSkipHandler,   {"event": "employee_threesec_skip"}),
 
     # 各大公司的自定义配置
     (r"/custom/emailapply/?",                        handler.platform.customize.CustomizeEmailApplyHandler,     {"event": "customize_emailapply"}),
@@ -288,6 +293,8 @@ platform_routes = [
     (r'/api/referral/recom_positions/?',             handler.platform.user.ReferralRelatedPositionHandler,      {"event": "referral_related_positions"}),
     (r"/api/switch[\/]*([a-z_]+)*",                  handler.platform.switch.SwitchHandler,                     {"event": "switch_"}),
     (r"/api/func/relation_tags/?",                   handler.platform.referral.ReferralCommentTagsHandler,      {"event": "referral_comment_tags"}),
+
+    # (r"/api/func/workwx/?",                          handler.platform.thirdparty.WorkwxSubInfoHandler,            {"event": "workwx_sub_info"}),
 
     # 兼容老微信 url，进行302跳转
     (r"/.*",                                         handler.platform.compatible.CompatibleHandler,             {"event": "compatible"})

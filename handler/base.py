@@ -15,7 +15,7 @@ import conf.path as path
 import conf.wechat as wx_const
 from cache.user.passport_session import PassportCache
 from handler.metabase import MetaBaseHandler
-from oauth.wechat import WeChatOauth2Service, WeChatOauthError, JsApi
+from oauth.wechat import WeChatOauth2Service, WeChatOauthError, JsApi, WorkWXOauth2Service
 from setting import settings
 from util.common import ObjectDict
 from util.common.cipher import decode_id
@@ -24,6 +24,7 @@ from util.tool.date_tool import curr_now
 from util.tool.str_tool import to_str, from_hex, match_session_id, \
     languge_code_from_ua
 from util.tool.url_tool import url_subtract_query, make_url
+from util.common.exception import InfraOperationError
 
 
 class NoSignatureError(Exception):
@@ -49,14 +50,19 @@ class BaseHandler(MetaBaseHandler):
 
         # 构建 session 过程中会缓存一份当前公众号信息
         self._wechat = None
+        self._workwx = None
         self._qx_wechat = None
         self._unionid = None
         self._wxuser = None
         self._session_id = None
         # 处理 oauth 的 service, 会在使用时初始化
         self._oauth_service = None
+        self._work_oauth_service = None
         self._pass_session = None
+        self._company = None
         self._sc_cookie_id = None  # 神策设备ID
+        #企业微信-员工认证 跳转标记
+        self._WORKWX_REDIRECT = False
 
     @property
     def component_access_token(self):
@@ -261,6 +267,12 @@ class BaseHandler(MetaBaseHandler):
         self._oauth_service = WeChatOauth2Service(
             self._wechat, self.fullurl(), self.component_access_token)
 
+        conds = {'id': self._wechat.company_id}
+        self._company = yield self.company_ps.get_company(conds=conds, need_conf=True)
+        self._workwx = yield self.workwx_ps.get_workwx(self._company.id, self._company.hraccount_id)
+        self._work_oauth_service = WorkWXOauth2Service(
+            self._workwx, self.fullurl())
+
         self._pass_session = PassportCache()
 
         # 如果有 code，说明刚刚从微信 oauth 回来
@@ -272,26 +284,23 @@ class BaseHandler(MetaBaseHandler):
             "[prepare]code:{}, state:{}, request_url:{} ".format(
                 code, state, self.request.uri))
         # 预设神策分析全局属性
-        conds = {'id': self._wechat.company_id}
-        company = yield self.company_ps.get_company(conds=conds, need_conf=True)
-        self.sa.register_super_properties(ObjectDict({"companyId": company.id,
-                                                      "companyName": company.abbreviation}))
+        self.sa.register_super_properties(ObjectDict({"companyId": self._company.id,
+                                                      "companyName": self._company.abbreviation}))
 
         # 获取神策设备ID
         self._get_sc_cookie_id()
         # 添加joywok js config等环境变量
         yield self._get_client_env_config()
 
-        if self.in_wechat:
-            # 用户同意授权
-            if code and self._verify_code(code):
-                # 保存 code 进 cookie
-                self.set_cookie(
-                    const.COOKIE_CODE,
-                    to_str(code),
-                    expires_days=1,
-                    httponly=True)
-
+        # 用户同意授权
+        if code and self._verify_code(code):
+            # 保存 code 进 cookie
+            self.set_cookie(
+                const.COOKIE_CODE,
+                to_str(code),
+                expires_days=1,
+                httponly=True)
+            if self.in_wechat:
                 # 来自 qx 的授权, 获得 userinfo
                 if state == wx_const.WX_OAUTH_DEFAULT_STATE:
                     self.logger.debug("来自 qx 的授权, 获得 userinfo")
@@ -314,32 +323,49 @@ class BaseHandler(MetaBaseHandler):
                         self.logger.info("来自企业号的静默授权, openid:{}, _unionid:{}".format(openid, self._unionid))
                     else:
                         self.logger.debug("来自企业号的 code 无效")
-
-            elif state:  # 用户拒绝授权
-                # TODO 拒绝授权用户，是否让其继续操作? or return
-                pass
-        else:
-            # pc端授权
-            if code and self._verify_code(code):
-                self.set_cookie(
-                    const.COOKIE_CODE,
-                    to_str(code),
-                    expires_days=1,
-                    httponly=True)
-                userinfo = yield self._get_user_info_pc(code)
-                if userinfo:
-                    self.logger.debug("来自 pc 的授权, 获得 userinfo:{}".format(userinfo))
-                    yield self._handle_user_info(userinfo)
+            elif self.in_workwx:
+                self.logger.debug("来自 workwx 的授权, 获得 code: {}".format(code))
+                workwx_userinfo = yield self._get_user_info_workwx(code)
+                if workwx_userinfo:
+                    self.logger.debug("来自 workwx 的授权, 获得 workwx_userinfo:{}".format(workwx_userinfo))
+                    yield self._handle_user_info_workwx(workwx_userinfo)
+                    if self._WORKWX_REDIRECT:
+                        return
                 else:
-                    self.logger.debug("来自 pc 的 code 无效")
+                    self.logger.debug("来自 workwx 的 code 无效")
+            else:
+                # pc端授权
+                if code and self._verify_code(code):
+                    self.set_cookie(
+                        const.COOKIE_CODE,
+                        to_str(code),
+                        expires_days=1,
+                        httponly=True)
+                    userinfo = yield self._get_user_info_pc(code)
+                    if userinfo:
+                        self.logger.debug("来自 pc 的授权, 获得 userinfo:{}".format(userinfo))
+                        yield self._handle_user_info(userinfo)
+                    else:
+                        self.logger.debug("来自 pc 的 code 无效")
+
+        elif state:  # 用户拒绝授权
+            # TODO 拒绝授权用户，是否让其继续操作? or return
+            pass
 
         # 构造并拼装 session
         yield self._fetch_session()
+        if self._WORKWX_REDIRECT:
+            return
         if self.request.connection.stream.closed():
             return
 
         # joywok取消员工身份时，清除session，重新认证
         yield self._update_joywok_employee_session()
+        # 企业微信成员做员工认证
+        if self.in_workwx:
+            is_redirect = yield self._is_employee_workwx()
+            if is_redirect:
+                return
 
         # 设置神策用户属性
         if self.current_user.employee:
@@ -373,6 +399,9 @@ class BaseHandler(MetaBaseHandler):
         self._wxuser = None
         self._qxuser = None
         self._session_id = None
+        self._work_oauth_service = None
+        self._workwx = None
+        self._company = None
         self.sa.clear_super_properties()
 
         self.logger.debug("current_user:{}".format(self.current_user))
@@ -589,6 +618,15 @@ class BaseHandler(MetaBaseHandler):
             if self._client_env == const.CLIENT_JOYWOK:
                 url = self.make_url(path.JOYWOK_HOME_PAGE)
                 yield self.redirect(url)
+            elif self.in_workwx:
+                # url = self.make_url(path.WOKWX_OAUTH_PAGE, self.params)
+                # self.logger.debug("WOKWX_OAUTH_PAGE: {}".format(url))
+                self._get_workwx_oauth_redirect_url()
+                url = self._work_oauth_service.get_oauth_code_base_url()
+                self.logger.debug("workwx_oauth_redirect_url: {}".format(url))
+                self.redirect(url)
+                self._WORKWX_REDIRECT = True
+                return
 
         if need_oauth:
             if self.in_wechat and not self._unionid:
@@ -627,6 +665,13 @@ class BaseHandler(MetaBaseHandler):
         url = "https://" + settings['multi_domain']['format'].format(
             settings['multi_domain']['qx_appid']) + host_suffix + self.request.uri
         self._oauth_service.redirect_url = url_subtract_query(url, ['code', 'state', 'appid'])
+
+    def _get_workwx_oauth_redirect_url(self):
+        # 仟寻授权需要重定向到仟寻appid对应的域名
+        host_suffix = "/m"
+        url = "https://" + settings['multi_domain']['format'].format(
+            self._wechat.appid) + host_suffix + self.request.uri
+        self._work_oauth_service.redirect_url = url_subtract_query(url, ['code', 'state', 'appid'])
 
     @gen.coroutine
     def _build_session(self):
@@ -715,7 +760,11 @@ class BaseHandler(MetaBaseHandler):
         session.sc_cookie_id = self._sc_cookie_id
 
         session.wechat = self._wechat
-        self._add_jsapi_to_wechat(session.wechat)
+        if self.in_workwx:
+            session.workwx = self._workwx
+            self._add_jsapi_to_wechat(session.workwx)
+        else:
+            self._add_jsapi_to_wechat(session.wechat)
 
         yield self._add_company_info_to_session(session)
         if self.is_platform and self.params.recom:
@@ -790,7 +839,7 @@ class BaseHandler(MetaBaseHandler):
             sysuser = yield self.user_ps.get_user_user({
                 "id": sysuser.parentid
             })
-            self.clear_cookie(name=const.COOKIE_SESSIONID)
+            self.clear_cookie(name=const.COOKIE_SESSIONID, domain=settings['root_host'])
 
         if sysuser:
             sysuser = self.user_ps.adjust_sysuser(sysuser)
@@ -1010,3 +1059,218 @@ class BaseHandler(MetaBaseHandler):
         else:
             display_locale = None
         return display_locale
+
+    @gen.coroutine
+    def _is_employee_workwx(self):
+        """企业微信成员-员工认证"""
+        # 企业微信二维码页面
+        workwx_qrcode_url = self.make_url(path.WOKWX_QRCODE_PAGE, self.params)
+        if self.current_user.sysuser:
+            workwx_user_record = yield self.workwx_ps.get_workwx_user_by_sysuser_id(
+                self.current_user.sysuser.id, company_id = self._wechat.company_id)
+            if workwx_user_record:
+                if self.current_user.employee:
+                    return False
+                else:
+                    workwx_auth_mode = yield self._get_company_auth_mode(before_fetch_session=False)  # 其他认证方式或者已经关闭oms开关，不是有效员工直接跳转到企业微信二维码页面
+                    if workwx_auth_mode:
+                        # is_subscribe = yield self.position_ps.get_hr_wx_user(self.current_user.sysuser.unionid, self._wechat.id)
+                        if self.current_user.wxuser.is_subscribe:
+                            # 如果已经关注公众号，无需跳转微信，可生成员工信息之后访问主页
+                            yield self.workwx_ps.employee_bind(self.current_user.sysuser.id, self._wechat.company_id)
+                        else:
+                            # 如果没有关注公众号，跳转微信
+                            workwx_fivesec_url = self.make_url(path.WOKWX_FIVESEC_PAGE,self.params) + "&workwx_userid={}&company_id={}".format(
+                                workwx_user_record.work_wechat_userid, self._wechat.company_id)
+                            self.redirect(workwx_fivesec_url)
+                            return True
+
+                        return False
+                    else:
+                        yield self.redirect(workwx_qrcode_url)
+                        return True
+            else:
+                yield self._redirect_wokwx_oauth_url()
+                return True
+        else:
+            yield self._redirect_wokwx_oauth_url()
+            return True
+
+
+    @gen.coroutine
+    def _redirect_wokwx_oauth_url(self):
+        """# 企业微信: 拿不到self.current_user.sysuser，清掉cookie,跳转当前页面重新企业微信授权获取相关数据"""
+        wokwx_oauth_url = self.fullurl()
+        # wokwx_oauth_url = self.make_url(path.WOKWX_OAUTH_PAGE, self.params)
+        self.clear_cookie(name=const.COOKIE_SESSIONID, domain=settings['root_host'])
+        yield self.redirect(wokwx_oauth_url)
+        return
+
+    @gen.coroutine
+    def _get_company_auth_mode(self, before_fetch_session = True):
+        """企业微信成员-获取公司设置的认证模式: 如果当前认证模式是7并且oms开关打开，返回true，否则返回false"""
+        if before_fetch_session: #如果是在执行_fetch_session之前调用本方法，hraccount_id取self._company，这时候self.current_user还未构建；
+            hraccount_id = self._company.hraccount_id
+        else:
+            hraccount_id = self.current_user.company.hraccount_id
+        cert_conf_info = yield self.employee_ps.get_employee_cert_config(self._wechat.company_id, hraccount_id)
+        cert_conf = cert_conf_info.get('data')
+        oms_status = yield self.employee_ps.get_switch_workwx(self._wechat.company_id)
+        if cert_conf and int(cert_conf["hrEmployeeCertConf"]["authMode"]) == 7 and oms_status:
+            return True
+        else:
+            return False
+
+    @gen.coroutine
+    def _get_user_info_workwx(self, code):
+        try:
+            userinfo = yield self._work_oauth_service.get_userinfo_by_code(code)
+            raise gen.Return(userinfo)
+        except WeChatOauthError as e:
+            raise gen.Return(None)
+
+    @gen.coroutine
+    def _handle_user_info_workwx(self, workwx_userinfo):
+        """
+        根据 userId 创建 user_workwx 如果存在则不创建， 返回 wxuser_id
+        创建 员工user_employee，绑定刚刚创建的 user_id
+
+        userinfo 结构：
+        ObjectDict(
+            "userid": "zhangsan",
+            "name": "李四",
+            "department": [1, 2],
+            "order": [1, 2],
+            "position": "后台工程师",
+            "mobile": "15913215421",
+            "gender": "1",
+            "email": "zhangsan@gzdev.com",
+            "is_leader_in_dept": [1, 0],
+            "avatar": "http://wx.qlogo.cn/mmopen/ajNVdqHZLLA3WJ6DSZUfiakYe37PKnQhBIeOQBO4czqrnZDS79FH5Wm5m4X69TBicnHFlhiafvDwklOpZeXYQQ2icg/0",
+            "telephone": "020-123456",
+            "enable": 1,
+            "alias": "jackzhang",
+            "address": "广州市海珠区新港中路",
+        )
+        """
+        # 通过userid查询 这个企业微信成员 是不是已经存在
+        workwx_user_record = yield self.workwx_ps.get_workwx_user(self._wechat.company_id, workwx_userinfo.userid)
+        workwx_sysuser_id = 0
+        # 企业微信成员 已经存在
+        if workwx_user_record:
+            workwx_sysuser_id = 0 if workwx_user_record.sys_user_id == '' else int(workwx_user_record.sys_user_id)
+            if workwx_sysuser_id > 0:
+                sysuser = yield self.user_ps.get_user_user({
+                    "id": workwx_user_record.sys_user_id
+                })
+                if sysuser:
+                    is_valid_employee = yield self.employee_ps.is_valid_employee(
+                        sysuser.id,
+                        self._wechat.company_id
+                    )
+                    if is_valid_employee:
+                        yield self._set_workwx_cookie(sysuser)   #如果是员工，直接访问企业微信页面
+                        return
+            else:
+                sysuser = yield self._get_sysuser_by_mobile(workwx_userinfo)
+        else:
+            is_create_success = yield self.workwx_ps.create_workwx_user(
+                workwx_userinfo,
+                company_id=self._wechat.company_id,
+                workwx_userid=workwx_userinfo.userid)
+
+            sysuser = yield self._get_sysuser_by_mobile(workwx_userinfo)
+        yield self._is_valid_employee(sysuser, workwx_sysuser_id, workwx_userinfo.userid)
+
+    # 用mobile匹配user_user的username，如果存在，绑定仟寻用户和企业微信
+    @gen.coroutine
+    def _get_sysuser_by_mobile(self, workwx_userinfo):
+        if workwx_userinfo.mobile:
+            sysuser = yield self.user_ps.get_user_user({
+                "username": workwx_userinfo.mobile
+            })
+            if sysuser:  #通过手机号拿到的仟寻账号是否已经绑定其他企业微信账号，如果已经绑定过其他企业微信账号，这里不允许绑定
+                workwx_user_record = yield self.workwx_ps.get_workwx_user_by_sysuser_id(
+                    sysuser.id)
+                if workwx_user_record:
+                    sysuser = None
+        else:
+            sysuser = None
+        return sysuser
+
+    #绑定企业微信用户和仟寻用户、保存session 这两个操作 必须在不跳转微信(直接跳转position页面)的情况下执行；在跳转微信的情况下很可能微信
+    @gen.coroutine
+    def _is_valid_employee(self, sysuser, workwx_sysuser_id, workwx_userid):
+        # 企业微信二维码页面
+        workwx_qrcode_url = self.make_url(path.WOKWX_QRCODE_PAGE, self.params)
+        workwx_auth_mode = yield self._get_company_auth_mode()
+        if workwx_auth_mode:
+            if sysuser:
+                # 判断是否是有效员工
+                is_valid_employee = yield self.employee_ps.is_valid_employee(
+                    sysuser.id,
+                    self._wechat.company_id
+                )
+                # 如果是有效员工，不需要从企业微信跳转到微信,直接访问企业微信主页
+                if is_valid_employee:
+                    yield self._access_workwx_url(sysuser, workwx_sysuser_id, workwx_userid)
+                    # self._WORKWX_REDIRECT = True
+                    return
+                # 如果不是有效员工，先去判断是否关注了公众号
+                is_subscribe = yield self.position_ps.get_hr_wx_user(sysuser.unionid, self._wechat.id)
+                if is_subscribe:
+                    # 如果已经关注公众号，无需跳转微信，可生成员工信息之后访问主页
+                    # yield self.workwx_ps.employee_bind(sysuser.id, self.current_user.wechat.company_id)
+                    yield self._access_workwx_url(sysuser, workwx_sysuser_id, workwx_userid, bind_employee = True)
+                    # self._WORKWX_REDIRECT = True
+                    return
+                # 如果没有关注公众号，跳转微信 ,这里就算workwx_sysuser_id已经绑定过仟寻用户也不能缓存session_id到cookie，会导致去微信关注之后再回来企业微信存在session_id但是没有self._unionid，从而导致session.wxuser为{}
+                # if workwx_sysuser_id > 0:  #如果在访问企业微信之前已经做过绑定(以前访问绑定过)，需要保存session，跳转微信之后无需再做绑定
+                #     yield self._set_workwx_cookie(sysuser)
+                # 其他认证方式或者已经关闭oms开关，不是有效员工直接跳转到企业微信二维码页面
+                yield self._redirect_workwx_fivesec_ur(workwx_userid)
+            else:
+                yield self._redirect_workwx_fivesec_ur(workwx_userid)
+        else:
+            self.redirect(workwx_qrcode_url)
+            self._WORKWX_REDIRECT = True
+            return
+
+    @gen.coroutine
+    def _redirect_workwx_fivesec_ur(self, workwx_userid):
+        """# 企业微信5s跳转页面"""
+
+        # 5s跳转页面
+        workwx_fivesec_url = self.make_url(path.WOKWX_FIVESEC_PAGE,self.params) + "&workwx_userid={}&company_id={}".format(workwx_userid, self._wechat.company_id)
+        # # 企业微信二维码页面
+        # workwx_qrcode_url = self.make_url(path.WOKWX_QRCODE_PAGE, self.params)
+        # 其他认证方式或者已经关闭oms开关，不是有效员工直接跳转到企业微信二维码页面
+        # workwx_auth_mode = yield self._get_company_auth_mode()
+        # if workwx_auth_mode:
+        #     self.redirect(workwx_fivesec_url)
+        # else:
+        #     self.redirect(workwx_qrcode_url)
+        self.redirect(workwx_fivesec_url)
+        self._WORKWX_REDIRECT = True
+        return
+
+    @gen.coroutine
+    def _set_workwx_cookie(self, sysuser):
+        session_id = self.make_new_session_id(sysuser.id)
+        self._unionid = sysuser.unionid #构建session获取wxuser
+        self.set_secure_cookie(const.COOKIE_SESSIONID, session_id, httponly=True, domain=settings['root_host'])
+
+    @gen.coroutine
+    def _access_workwx_url(self, sysuser, workwx_sysuser_id, workwx_userid, bind_employee = False):
+        # 访问企业微信页面
+        if workwx_sysuser_id <= 0:
+            # 绑定仟寻用户和企业微信: 如果需要跳转微信，不能企业微信做绑定，必须去微信做绑定(因为有可能通过mobile绑定的仟寻用户跟跳转的仟寻用户不是同一个人)；如果不跳微信需要在企业微信做绑定
+            yield self.workwx_ps.bind_workwx_qxuser(sysuser.id, workwx_userid, self._wechat.company_id)
+        if bind_employee: #如果员工认证失败，需要解除绑定
+            try:
+                yield self.workwx_ps.employee_bind(sysuser.id, self._wechat.company_id)
+            except Exception as e:
+                yield self.workwx_ps.unbind_workwx_qxuser(sysuser.id, workwx_userid, self._wechat.company_id)
+                raise InfraOperationError(e)
+
+        yield self._set_workwx_cookie(sysuser)

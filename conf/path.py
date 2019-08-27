@@ -26,6 +26,7 @@ EMPLOYEE_REFERRAL_POLICY = "/employee/referral/policy"
 EMPOLYEE_LADDER = "/employee/ladder"
 EMPLOYEE_REWARDS_RECORD = '/app/employee/binding/rewards'
 EMPLOYEE_TEN_MIN_TMP = '/employee/referral/invite_cards'
+EMPLOYEE_PORTAL = '/usercenter/mine'
 
 PROFILE_CUSTOM_CV = '/profile/custom'
 REFERRAL_CONFIRM = "/referral/confirm"
@@ -82,6 +83,14 @@ JOYWOK_HOME_PAGE = "/joywork"
 
 JOYWOK_AUTO_AUTH = "/thirdparty/automatic/auth"
 
+WOKWX_FIVESEC_PAGE = "/workwx/fivesec-skipwx"
+
+WECHAT_QRCODE_PAGE = "/employee/qrcode"
+
+WOKWX_QRCODE_PAGE = "/workwx/qrcode"
+
+WECHAT_THREESEC_PAGE = "/employee/threesec-skip"
+
 # ============================ 微信端Path结束 ============================
 
 
@@ -110,6 +119,7 @@ INFRA_USER_APPLYRECORD = "v1/applications"
 INFRA_USER_EMPLOYEE_REFERRAL = "v1/referral/users/{}/employee-info"
 INFRA_USER_BONUS_LIST = "v1/referral/users/{}/bonus"
 INFRA_USER_CLAIM_BONUS = "v1/referral/wechat/employee/{}/bonus/claim"
+INFRA_USER_EMPLOYEE_BIND = 'user/employee/bind'
 
 
 # 申请服务
@@ -168,6 +178,7 @@ COMPANY_ALL = 'company/all'
 COMPANY = 'company'
 CREATE_COMPANY = 'api/hrcompany/add'
 ONLY_REFERRAL_REWARD = "/v1/referral/company/config/pointsflag"
+COMPANY_GET_WORKWX = '/hraccount/company/employeebindconf/workwx'
 
 # 字典服务
 DICT_CONSTANT = "dict/constant"
@@ -242,6 +253,8 @@ INFRA_IF_SEEK_CHECK = 'v1/referral/seek/check'
 REFERRAL_RADAR_EXPIRED = '/employee/referral/expired'
 INFRA_EMPLOYEE_CUSTOM_INFO = "/hraccount/employee/update"
 INFRA_RESEND_BIND_EMAIL = "/employee/resend/bind/email"
+INFRA_GET_EMPLOYEE_CERT_CONFIG = "/hraccount/company/hremployeecertconf"
+INFRA_OMS_SWITCH_WORKWX = "/api/company/switch/workwx/{}"
 
 # 积分商城服务
 EMPLOYEE_MALL = '/employee/mall/index'

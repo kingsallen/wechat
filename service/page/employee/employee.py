@@ -19,12 +19,14 @@ from util.tool.str_tool import gen_salary, gen_experience_v2
 from util.wechat.core import get_temporary_qrcode
 from util.common.mq import unread_praise_publisher
 from util.common.decorator import log_time
+from util.common.exception import InfraOperationError
 
 
 class EmployeePageService(PageService):
     FE_BIND_TYPE_CUSTOM = 'custom'
     FE_BIND_TYPE_EMAIL = 'email'
     FE_BIND_TYPE_QUESTION = 'question'
+    FE_BIND_TYPE_WORKWX = 'wechatWork'
 
     BIND_AUTH_MODE = ObjectDict({
         FE_BIND_TYPE_EMAIL: 0,
@@ -145,6 +147,9 @@ class EmployeePageService(PageService):
         """
 
         data = ObjectDict()
+        #认证配置开启状态
+        employee_cert_conf = yield self.get_employee_cert_config(current_user.company.id, current_user.company.hraccount_id)
+        data.status = 1 if employee_cert_conf else 2
         # 员工认证自定义文案
         data.binding_message = auth_tips_info.description_ename if locale.code == const.LOCALE_ENGLISH else auth_tips_info.description
         data.binding_tips_title = auth_tips_info.tips_title_ename if locale.code == const.LOCALE_ENGLISH else auth_tips_info.tips_title
@@ -235,6 +240,11 @@ class EmployeePageService(PageService):
             elif employee.authMethod == const.USER_EMPLOYEE_AUTH_METHOD.QUESTION:
                 data.type = self.FE_BIND_TYPE_QUESTION
                 _make_questions_conf()
+            elif employee.authMethod == const.USER_EMPLOYEE_AUTH_METHOD.WORKWX:
+                data.type = self.FE_BIND_TYPE_WORKWX
+                oms_status = yield self.get_switch_workwx(current_user.company.id)
+                data.status = data.status if oms_status else 3
+                _make_questions_conf()
             else:
                 assert False  # should not be here
 
@@ -275,7 +285,11 @@ class EmployeePageService(PageService):
             elif conf.authMode == const.EMPLOYEE_BIND_AUTH_MODE.QUESTION:
                 data.type = self.FE_BIND_TYPE_QUESTION
                 _make_questions_conf()
-
+            elif conf.authMode == const.EMPLOYEE_BIND_AUTH_MODE.WORKWX:
+                data.type = self.FE_BIND_TYPE_WORKWX
+                oms_status = yield self.get_switch_workwx(current_user.company.id)
+                data.status = data.status if oms_status else 3
+                _make_questions_conf()
             else:
                 raise ValueError('invalid authMode')
 
@@ -1124,3 +1138,33 @@ class EmployeePageService(PageService):
                     "referral_id": item.get('referral_id'),
                 })
         return data
+
+    @gen.coroutine
+    def get_employee_cert_config(self, company_id, hraccount_id, filter_current=True):
+        """获取公司认证配置"""
+        res = yield self.infra_employee_ds.get_employee_cert_config(company_id, hraccount_id)
+        data = res.get('data')
+        # 这里过滤掉其他公司的配置信息
+        if filter_current and data:
+            confs = data['hrEmployeeCertConf']
+            fil = filter(lambda x: x['companyId'] == company_id, confs)
+            try:
+                current_com_conf = fil.__next__()
+            except Exception:
+                current_com_conf = {}
+            # current_com_conf = fil[0] if fil else {}
+            data['hrEmployeeCertConf'] = current_com_conf
+        raise gen.Return(res)
+
+    @gen.coroutine
+    def get_switch_workwx(self, company_id):
+        """
+        企业微信-OMS开关
+        :param params:
+        :return:
+        """
+        ret = yield self.infra_employee_ds.get_switch_workwx(company_id)
+        if int(ret.get('status')) == 0:
+            return ret.get('data')
+        else:
+            raise InfraOperationError(ret.get('message'))
