@@ -758,14 +758,7 @@ class EventPageService(PageService):
                     pattern_id = const.QRCODE_OTHER
                 self.sa.track(wxuser.sysuser_id, "subscribeWechat", properties={"sub_from": type, "scene_id": pattern_id}, is_login_id=True)
 
-                if pattern_id == const.QRCODE_WORKWX_BIND: #企业微信员工认证
-                    # 先判断是否是有效员工，需要判断的原因：如果以前是有效员工，因为取消关注导致不是有效员工的情况，在扫码之后会自动成为有效员工，这时候不需要再生产员工信息
-                    is_valid_employee = yield self.infra_user_ds.is_valid_employee(
-                        user_id=wxuser.sysuser_id, company_id=wechat.company_id)
-                    if not is_valid_employee:  # 如果不是有效员工，需要需要生成员工信息
-                        yield self.workwx_ds.employee_bind(sysuser_id=wxuser.sysuser_id, company_id=wechat.company_id)  # 如果已经关注公众号，无需跳转微信，可生成员工信息之后访问主页
-                    employee = None
-                elif pattern_id in (const.QRCODE_BIND, const.QRCODE_PC_REFERRAL) and wxuser.sysuser_id and wechat.company_id:
+                if pattern_id in (const.QRCODE_BIND, const.QRCODE_PC_REFERRAL) and wxuser.sysuser_id and wechat.company_id:
                     employee = yield user_ps.get_valid_employee_by_user_id(
                         user_id=wxuser.sysuser_id, company_id=wechat.company_id)
                 else:
@@ -812,6 +805,23 @@ class EventPageService(PageService):
                             messages = res.message
 
                 send_succession_message(wechat=wechat, open_id=msg.FromUserName, message=messages)
+
+            elif str_scene == const.STR_SCENE_WORKWX:
+                str_code = re.match(r"qrscene_[A-Z]+_(\w{8}(-\w{4}){3}-\w{12})", msg.EventKey)
+                self.logger.debug("[qrcode workwx -11] str_code: {}".format(str_code))
+                if not str_code:
+                    str_code = re.match(r"[A-Z]+_(\w{8}(-\w{4}){3}-\w{12})", msg.EventKey)
+                    self.logger.debug("[qrcode workwx -22] str_code: {}".format(str_code))
+                str_code = str_code.group(1) if str_code else ""
+                self.logger.debug("[qrcode workwx -33] str_code: {}".format(str_code))
+                # 先判断是否是有效员工，需要判断的原因：如果以前是有效员工，因为取消关注导致不是有效员工的情况，在扫码之后会自动成为有效员工，这时候不需要再生产员工信息
+                is_valid_employee = yield self.infra_user_ds.is_valid_employee(
+                    user_id=wxuser.sysuser_id, company_id=wechat.company_id)
+                if not is_valid_employee:  # 如果不是有效员工，需要需要生成员工信息
+                    yield self.workwx_ds.employee_bind(sysuser_id=wxuser.sysuser_id,company_id=wechat.company_id)  # 如果已经关注公众号，无需跳转微信，可生成员工信息之后访问主页
+                yield self.workwx_ps.bind_workwx_qxuser(wxuser.sysuser_id, str_code, wechat.company_id)
+
+                send_succession_message(wechat=wechat, open_id=msg.FromUserName, pattern_id=str_scene)
             else:
                 send_succession_message(wechat=wechat, open_id=msg.FromUserName, pattern_id=str_scene)
 

@@ -86,4 +86,6 @@ class WorkwxPageService(PageService):
     def employee_bind(self, sysuser_id, company_id):
         """员工认证"""
         ret = yield self.workwx_ds.employee_bind(sysuser_id, company_id)
+        if ret.code != const.NEWINFRA_API_SUCCESS:
+            raise InfraOperationError(ret.message)
         return ret

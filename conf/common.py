@@ -771,7 +771,6 @@ QRCODE_SCAN_REFERRAL = 13  # 浏览候选人推荐职位
 QRCODE_POSITION = 14  # 职位详情
 QRCODE_SIDEBAR = 15  # 侧边栏二维码
 QRCODE_PC_REFERRAL = 16  # pc端扫码过来的员工认证
-QRCODE_WORKWX_BIND = 17 #企业微信员工认证
 QRCODE_OTHER = 99  # 默认
 
 # 临时二维码字符串参数
@@ -780,6 +779,7 @@ TEMPORARY_CODE_STR_SCENE = "{}_{}"
 # 临时二维码字符串参数的场景值
 STR_SCENE_JOYWOK = "JOYWOK"
 STR_SCENE_MRAS_WELCOME = "PCAPPLICATION"
+STR_SCENE_WORKWX = "WORKWX"
 
 # 临时二维码的生成来源依据
 SCAN_FROM = 'pc_referral'
