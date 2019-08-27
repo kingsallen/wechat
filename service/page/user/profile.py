@@ -756,7 +756,7 @@ class ProfilePageService(PageService):
 
             elif status == 'x':
                 yield self.delete_profile_cert(
-                    {"id": params.pid}, profile_id=None)
+                    ObjectDict({"id": params.pid}), profile_id=None)
 
             elif status == 'e':
                 params['id'] = params.pid
