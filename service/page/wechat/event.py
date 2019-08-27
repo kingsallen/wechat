@@ -808,7 +808,7 @@ class EventPageService(PageService):
 
             elif str_scene == const.STR_SCENE_WORKWX:
                 str_code = re.match(r"qrscene_[A-Z]+_(\w{8}(-\w{4}){3}-\w{12})", msg.EventKey)
-                self.logger.debug("[qrcode workwx -11] str_code: {}".format(str_code))
+                self.logger.debug("[qrcode workwx -11] EventKey: {}, str_scene:{}".format(msg.EventKey, str_scene))
                 if not str_code:
                     str_code = re.match(r"[A-Z]+_(\w{8}(-\w{4}){3}-\w{12})", msg.EventKey)
                     self.logger.debug("[qrcode workwx -22] str_code: {}".format(str_code))
