@@ -170,15 +170,13 @@ class EmployeeQrcodeHandler(BaseHandler):
         workwx_userid = self.params.workwx_userid
         company_id = self.params.company_id
         workwx_user_record = yield self.workwx_ps.get_workwx_user(self.current_user.wechat.company_id, workwx_userid)
-        # #如果已经绑定过(以前访问绑定过),无需再绑定
-        # if int(workwx_user_record.sys_user_id) > 0:
-        #    # 如果workwx_user_record.sys_user_id跟self.current_user.sysuser.id不一致，说明当前用户不是绑定用户，需要弹出提示
-        #    pass
-        # else:
-        #     yield self.workwx_ps.bind_workwx_qxuser(self.current_user.sysuser.id, workwx_userid, company_id)
+        sysuser_workwx_user = yield self.workwx_ps.get_workwx_user_by_sysuser_id(
+            self.current_user.sysuser.id, company_id=self.current_user.wechat.company_id)
 
-        if int(workwx_user_record.sys_user_id) > 0 and workwx_user_record.sys_user_id != self.sysuser.id:
-            raise MyException("企业微信已经绑定其他仟寻账号")
+        if int(workwx_user_record.sys_user_id) > 0 and workwx_user_record.sys_user_id != self.current_user.sysuser.id:
+            raise MyException("该企业微信号已绑定其他仟寻账号！")
+        elif int(workwx_user_record.sys_user_id) <= 0 and sysuser_workwx_user:
+            raise MyException("该微信号已绑定其他账号！")
         #如果已经关注公众号，说明已经做完员工认证，生成员工信息，跳转3s跳转页，再跳转到职位列表
         if self.current_user.wxuser.is_subscribe:
             is_valid_employee = yield self.employee_ps.is_valid_employee(
