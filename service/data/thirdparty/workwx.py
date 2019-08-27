@@ -77,6 +77,6 @@ class WorkwxDataService(DataService):
             "type": 3
         }
         ret = yield http_post(path.INFRA_USER_EMPLOYEE_BIND, jdata=params)
-        if ret.code != const.NEWINFRA_API_SUCCESS:
+        if int(ret.status) != const.API_SUCCESS:
             raise InfraOperationError(ret.message)
         raise gen.Return(ret)
