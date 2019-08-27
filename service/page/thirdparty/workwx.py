@@ -72,20 +72,11 @@ class WorkwxPageService(PageService):
     @gen.coroutine
     def bind_workwx_qxuser(self, sysuser_id, workwx_userid, company_id):
         """绑定企业微信成员和仟寻用户"""
-        params = ObjectDict({
-            "sysuserId": int(sysuser_id),
-            "workwxUserid": workwx_userid,
-            "companyId": int(company_id)
-        })
-        ret = yield self.workwx_ds.bind_workwx_qxuser(params)
-        if ret.code != const.NEWINFRA_API_SUCCESS:
-            raise InfraOperationError(ret.message)
+        ret = yield self.workwx_ds.bind_workwx_qxuser(sysuser_id, workwx_userid, company_id)
         return ret
 
     @gen.coroutine
     def employee_bind(self, sysuser_id, company_id):
         """员工认证"""
         ret = yield self.workwx_ds.employee_bind(sysuser_id, company_id)
-        if ret.code != const.NEWINFRA_API_SUCCESS:
-            raise InfraOperationError(ret.message)
         return ret

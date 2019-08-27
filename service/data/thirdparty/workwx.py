@@ -9,6 +9,8 @@ from conf.newinfra_service_conf.user import user
 from conf.newinfra_service_conf.service_info import user_service
 from tornado.httputil import url_concat
 from setting import settings
+import conf.common as const
+from util.common.exception import InfraOperationError
 
 
 class WorkwxDataService(DataService):
@@ -34,11 +36,20 @@ class WorkwxDataService(DataService):
         raise gen.Return(ret)
 
     @gen.coroutine
-    def bind_workwx_qxuser(self, params):
-        params.update({"appid": user_service.appid, "interfaceid": user_service.interfaceid}) #post请求参数写在url里面，不能写在body里面
+    def bind_workwx_qxuser(self, sysuser_id, workwx_userid, company_id):
+        params = {
+            "sysuserId": int(sysuser_id),
+            "workwxUserid": workwx_userid,
+            "companyId": int(company_id),
+            "appid": user_service.appid,
+            "interfaceid": user_service.interfaceid
+        }
+        # params.update({"appid": user_service.appid, "interfaceid": user_service.interfaceid})
         path = "{0}/{1}{2}".format(settings['cloud'], user_service.service_name, user.INFRA_USER_BIND_WORKWX_QXUSER)
-        route = url_concat(path, params)
+        route = url_concat(path, params)  #post请求参数写在url里面，不能写在body里面
         ret = yield _v2_async_http_post(route)
+        if ret.code != const.NEWINFRA_API_SUCCESS:
+            raise InfraOperationError(ret.message)
         raise gen.Return(ret)
 
     @gen.coroutine
@@ -49,4 +60,6 @@ class WorkwxDataService(DataService):
             "type": 3
         }
         ret = yield http_post(path.INFRA_USER_EMPLOYEE_BIND, jdata=params)
+        if ret.code != const.NEWINFRA_API_SUCCESS:
+            raise InfraOperationError(ret.message)
         raise gen.Return(ret)
