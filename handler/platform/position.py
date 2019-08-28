@@ -9,6 +9,7 @@ import conf.message as msg
 import conf.path as path
 import conf.platform as const_platform
 import conf.wechat as wx
+import conf.fe as fe
 from handler.base import BaseHandler
 from tests.dev_data.user_company_config import COMPANY_CONFIG
 from util.common import ObjectDict
@@ -1460,12 +1461,14 @@ class PositionShareInBulkHandler(BaseHandler):
         # 告诉前端是否是内推转发
         data = ObjectDict()
         if self.current_user.recom:
-            _, employee = yield self.employee_ps.get_employee_info(self.current_user.recom.id, self.current_user.company.id)
-            data = {
-                "employee_name": employee.cname,
-                "employee_icon": self.current_user.sysuser.headimg,
-                "is_referral": const.YES
-            }
+            infra_bind_status, employee = yield self.employee_ps.get_employee_info(self.current_user.recom.id, self.current_user.company.id)
+            fe_bind_status = self.employee_ps.convert_bind_status_from_thrift_to_fe(infra_bind_status)
+            if fe_bind_status == fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS:
+                data = {
+                    "employee_name": employee.cname,
+                    "employee_icon": self.current_user.recom.headimg,
+                    "is_referral": const.YES
+                }
 
         self.params.share = yield self._make_share()
         self.render_page(template_name="position/share.html", data=data)
