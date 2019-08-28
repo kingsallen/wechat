@@ -136,7 +136,7 @@
 "团队","团队","singular"
 "团队","团队","plural"
 
-"employee_binding_failure_email_occupied","该邮箱已被认证\n请使用其他邮箱"
+"employee_binding_failure_email_occupied","该邮箱已被认证请使用其他邮箱"
 
 "company_our_team_need","我们{}还需要"
 "company_other_text","其他{}"
