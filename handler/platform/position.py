@@ -1460,7 +1460,7 @@ class PositionShareInBulkHandler(BaseHandler):
         # 告诉前端是否是内推转发
         data = ObjectDict()
         if self.current_user.recom:
-            _, employee = self.user_ps.get_employee_info(self.current_user.recom.id, self.current_user.company.id)
+            _, employee = self.employee_ps.get_employee_info(self.current_user.recom.id, self.current_user.company.id)
             data = {
                 "employee_name": employee.cname,
                 "employee_icon": self.current_user.sysuser.headimg,
