@@ -140,8 +140,6 @@ class FiveSecSkipWXHandler(MetaBaseHandler):
         wx_oauth_service = WeChatOauth2Service(qx_wechat, wechat_qrcode_url, component_access_token)
         wx_oauth_url = wx_oauth_service.get_oauth_code_userinfo_url()
 
-        client_env = ObjectDict({"name": self._client_env})
-        self.namespace = {"client_env": client_env}
         self.logger.debug("from_workwx_to_qx_oauth_url: {}".format(wx_oauth_url))
         self.render_page(template_name="adjunct/wxwork-bind-redirect.html", data=ObjectDict({"redirect_link": wx_oauth_url}))
 
@@ -210,8 +208,6 @@ class WorkwxQrcodeHandler(MetaBaseHandler):
     def get(self):
         self._wechat = yield self._get_current_wechat()
 
-        client_env = ObjectDict({"name": self._client_env})
-        self.namespace = {"client_env": client_env}
         data = yield self._get_wechat_info(self._wechat)
         self.render_page(template_name="adjunct/wxwork-qrcode-simple.html", data=ObjectDict({"wechat": data}))
 
