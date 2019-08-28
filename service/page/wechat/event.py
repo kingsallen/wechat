@@ -809,12 +809,9 @@ class EventPageService(PageService):
 
             elif str_scene == const.STR_SCENE_WORKWX:
                 str_code = re.match(r"qrscene_WORKWX_(.+)", msg.EventKey)
-                self.logger.debug("[qrcode workwx -11] EventKey: {}, str_scene:{}".format(msg.EventKey, str_scene))
                 if not str_code:
                     str_code = re.match(r"WORKWX_(.+)", msg.EventKey)
-                    self.logger.debug("[qrcode workwx -22] str_code: {}".format(str_code))
                 str_code = str_code.group(1) if str_code else ""
-                self.logger.debug("[qrcode workwx -33] str_code: {}".format(str_code))
 
                 workwx_user_record = yield self.workwx_ds.get_workwx_user(wechat.company_id, str_code)
                 if int(workwx_user_record.sys_user_id) <= 0:

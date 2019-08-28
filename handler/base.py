@@ -619,8 +619,6 @@ class BaseHandler(MetaBaseHandler):
                 url = self.make_url(path.JOYWOK_HOME_PAGE)
                 yield self.redirect(url)
             elif self.in_workwx:
-                # url = self.make_url(path.WOKWX_OAUTH_PAGE, self.params)
-                # self.logger.debug("WOKWX_OAUTH_PAGE: {}".format(url))
                 self._get_workwx_oauth_redirect_url()
                 url = self._work_oauth_service.get_oauth_code_base_url()
                 self.logger.debug("workwx_oauth_redirect_url: {}".format(url))
@@ -1214,19 +1212,14 @@ class BaseHandler(MetaBaseHandler):
                 # 如果是有效员工，不需要从企业微信跳转到微信,直接访问企业微信主页
                 if is_valid_employee:
                     yield self._access_workwx_url(sysuser, workwx_sysuser_id, workwx_userid)
-                    # self._WORKWX_REDIRECT = True
                     return
                 # 如果不是有效员工，先去判断是否关注了公众号
                 is_subscribe = yield self.position_ps.get_hr_wx_user(sysuser.unionid, self._wechat.id)
                 if is_subscribe:
                     # 如果已经关注公众号，无需跳转微信，可生成员工信息之后访问主页
-                    # yield self.workwx_ps.employee_bind(sysuser.id, self.current_user.wechat.company_id)
                     yield self._access_workwx_url(sysuser, workwx_sysuser_id, workwx_userid, bind_employee = True)
-                    # self._WORKWX_REDIRECT = True
                     return
                 # 如果没有关注公众号，跳转微信 ,这里就算workwx_sysuser_id已经绑定过仟寻用户也不能缓存session_id到cookie，会导致去微信关注之后再回来企业微信存在session_id但是没有self._unionid，从而导致session.wxuser为{}
-                # if workwx_sysuser_id > 0:  #如果在访问企业微信之前已经做过绑定(以前访问绑定过)，需要保存session，跳转微信之后无需再做绑定
-                #     yield self._set_workwx_cookie(sysuser)
                 # 其他认证方式或者已经关闭oms开关，不是有效员工直接跳转到企业微信二维码页面
                 yield self._redirect_workwx_fivesec_ur(workwx_userid)
             else:
@@ -1242,14 +1235,6 @@ class BaseHandler(MetaBaseHandler):
 
         # 5s跳转页面
         workwx_fivesec_url = self.make_url(path.WOKWX_FIVESEC_PAGE,self.params) + "&workwx_userid={}&company_id={}".format(workwx_userid, self._wechat.company_id)
-        # # 企业微信二维码页面
-        # workwx_qrcode_url = self.make_url(path.WOKWX_QRCODE_PAGE, self.params)
-        # 其他认证方式或者已经关闭oms开关，不是有效员工直接跳转到企业微信二维码页面
-        # workwx_auth_mode = yield self._get_company_auth_mode()
-        # if workwx_auth_mode:
-        #     self.redirect(workwx_fivesec_url)
-        # else:
-        #     self.redirect(workwx_qrcode_url)
         self.redirect(workwx_fivesec_url)
         self._WORKWX_REDIRECT = True
         return
