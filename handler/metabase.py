@@ -271,6 +271,8 @@ class MetaBaseHandler(AtomHandler):
         )
         namespace.update(add_namespace)
         namespace.update(self._namespace)
+        client_env = ObjectDict({"name": self._client_env})
+        namespace.update({"client_env": client_env})
         return namespace
 
     def static_url(self, path, protocol='https'):
