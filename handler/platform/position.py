@@ -1500,6 +1500,7 @@ class APIPositionShareInBulkHandler(BaseHandler):
         pids = self.json_args.pids
         res = yield self.position_ps.create_share_position_list(pids, self.current_user.sysuser.id)
         if res.code == const.NEWINFRA_API_SUCCESS:
-            self.send_json_success(data={"share_id": res.data})
+            self.send_json_success(data={"share_id": res.data,
+                                         "recom": self.position_ps._make_recom(self.current_user.sysuser.id)})
         else:
             self.send_json_error(message=res.message)
