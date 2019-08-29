@@ -501,8 +501,8 @@ class BaseHandler(MetaBaseHandler):
                     "corpid": res.corp_id,
                     "redirect_url": res.redirect_url})
             })
-        elif self.in_work_wechat:
-            client_env.update({"jsapi": self._add_jsapi_to_workwx(self._workwx)})
+        # elif self.in_work_wechat:
+        #     client_env.update({"jsapi": self._add_jsapi_to_workwx(self._workwx)})
         self.namespace = {"client_env": client_env}
 
     @gen.coroutine
@@ -933,6 +933,15 @@ class BaseHandler(MetaBaseHandler):
             settings=self.settings
         )
         namespace.update(add_namespace)
+
+        if self.in_work_wechat:
+            signature = self.params['wechat_signature']
+            wechat = yield self.wechat_ps.get_wechat(conds={
+                "signature": signature
+            })
+            company = yield self.company_ps.get_company(conds={'id': wechat.company_id}, need_conf=True)
+            workwx = yield self.workwx_ps.get_workwx(company.id, company.hraccount_id)
+            namespace.client_env.update({"jsapi": self._add_jsapi_to_workwx(workwx)})
         return namespace
 
     def _set_access_time_cookie(self):
