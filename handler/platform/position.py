@@ -1175,7 +1175,6 @@ class PositionListHandler(PositionListInfraParamsMixin, BaseHandler):
     def get(self):
         """获取职位列表页"""
 
-        self.logger.debug("&&&&&&&&&&&& namespace:{}".format(self.namespace))
         infra_params = self.make_position_list_infra_params()
 
         # 校验一下可能出现的参数：
