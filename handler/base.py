@@ -274,6 +274,7 @@ class BaseHandler(MetaBaseHandler):
             self._workwx = yield self.workwx_ps.get_workwx(self._company.id, self._company.hraccount_id)
             self._work_oauth_service = WorkWXOauth2Service(
                 self._workwx, self.fullurl())
+            self.in_workwx = self.in_workwx and self._workwx
 
         self._pass_session = PassportCache()
 
