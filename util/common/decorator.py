@@ -360,8 +360,18 @@ def cover_no_weixin(func):
 
     @functools.wraps(func)
     @gen.coroutine
-    def wrapper(self, *args, **kwargs):
-        if not self.in_wechat and not self.in_workwx and 'moseeker' not in self.request.headers.get('User-Agent') and 'Joywok' not in self.request.headers.get('User-Agent'):
+    def wrapper(self, *args, **kwargs): #从微信转发过来的职位对应的公司在数据库中没有企业微信相关配置[self._workwx为空]
+        paths_for_noweixin = [path.POSITION_LIST, path.WECHAT_COMPANY, path.COMPANY_TEAM]
+        current_path = self.request.uri.split('?')[0]
+
+        signature = self.params['wechat_signature']
+        wechat = yield self.wechat_ps.get_wechat(conds={
+            "signature": signature
+        })
+        company = yield self.company_ps.get_company(conds={'id': wechat.company_id}, need_conf=True)
+        workwx = yield self.workwx_ps.get_workwx(company.id, company.hraccount_id)
+
+        if current_path not in paths_for_noweixin and not self.request.uri.startswith("/api/") and not self.in_wechat and not (self._in_wechat == const.CLIENT_WORKWX and workwx) and 'moseeker' not in self.request.headers.get('User-Agent') and 'Joywok' not in self.request.headers.get('User-Agent'):
             self.render(template_name="adjunct/not-weixin.html", http_code=416)
             return
         else:

@@ -31,7 +31,6 @@ from util.common.cipher import decode_id
 class PositionHandler(BaseHandler):
     @log_time
     @handle_response
-    @cover_no_weixin
     @NewJDStatusCheckerAddFlag()
     @authenticated
     @gen.coroutine
