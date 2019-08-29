@@ -335,6 +335,8 @@ class BaseHandler(MetaBaseHandler):
                         return
                 else:
                     self.logger.debug("来自 workwx 的 code 无效")
+                    self.render(template_name="adjunct/not-weixin.html", http_code=416)
+                    return
             else:
                 # pc端授权
                 if code and self._verify_code(code):
