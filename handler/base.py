@@ -325,7 +325,7 @@ class BaseHandler(MetaBaseHandler):
                         self.logger.info("来自企业号的静默授权, openid:{}, _unionid:{}".format(openid, self._unionid))
                     else:
                         self.logger.debug("来自企业号的 code 无效")
-            elif self.in_workwx(self._workwx):
+            elif self.in_workwx:
                 self.logger.debug("来自 workwx 的授权, 获得 code: {}".format(code))
                 workwx_userinfo = yield self._get_user_info_workwx(code)
                 if workwx_userinfo:
@@ -366,7 +366,7 @@ class BaseHandler(MetaBaseHandler):
         # joywok取消员工身份时，清除session，重新认证
         yield self._update_joywok_employee_session()
         # 企业微信成员做员工认证
-        if self.in_workwx(self._workwx):
+        if self.in_workwx:
             is_redirect = yield self._is_employee_workwx()
             if is_redirect:
                 return
@@ -622,7 +622,7 @@ class BaseHandler(MetaBaseHandler):
             if self._client_env == const.CLIENT_JOYWOK:
                 url = self.make_url(path.JOYWOK_HOME_PAGE)
                 yield self.redirect(url)
-            elif self.in_workwx(self._workwx):
+            elif self.in_workwx:
                 self._get_workwx_oauth_redirect_url()
                 url = self._work_oauth_service.get_oauth_code_base_url()
                 self.logger.debug("workwx_oauth_redirect_url: {}".format(url))
@@ -762,7 +762,7 @@ class BaseHandler(MetaBaseHandler):
         session.sc_cookie_id = self._sc_cookie_id
 
         session.wechat = self._wechat
-        if self.in_workwx(self._workwx): #从微信转发过来的职位对应的公司在数据库中没有企业微信相关配置
+        if self.in_workwx: #从微信转发过来的职位对应的公司在数据库中没有企业微信相关配置
             session.workwx = self._workwx
             self._add_jsapi_to_wechat(session.workwx)
         else:
