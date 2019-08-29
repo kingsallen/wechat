@@ -85,3 +85,10 @@ class WorkwxDataService(DataService):
         if int(ret.status) != const.API_SUCCESS:
             raise InfraOperationError(ret.message)
         raise gen.Return(ret)
+
+    @gen.coroutine
+    def refresh_workwx_access_token(self, company_id):
+        ret = yield http_post(path.INFRA_REFRESH_ACCESS_TOKEN.format(company_id))
+        if int(ret.status) != const.API_SUCCESS:
+            raise InfraOperationError(ret.message)
+        raise gen.Return(ret)

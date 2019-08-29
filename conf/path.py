@@ -120,6 +120,7 @@ INFRA_USER_EMPLOYEE_REFERRAL = "v1/referral/users/{}/employee-info"
 INFRA_USER_BONUS_LIST = "v1/referral/users/{}/bonus"
 INFRA_USER_CLAIM_BONUS = "v1/referral/wechat/employee/{}/bonus/claim"
 INFRA_USER_EMPLOYEE_BIND = 'user/employee/bind'
+INFRA_REFRESH_ACCESS_TOKEN = 'hraccount/company/refreshWorkWxToken/{}'
 
 
 # 申请服务

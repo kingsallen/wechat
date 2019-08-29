@@ -249,37 +249,13 @@ class WorkWXOauth2Service(WeChatOauth2Service):
         :param code:
         :return:
         """
-        access_token = yield self._get_access_token_by_corpid()
+        # access_token = yield self._get_access_token_by_corpid()
+        self._access_token = self.workwx.access_token
         user_id = yield self._get_userid_by_code(code)
         userinfo = yield self._get_userinfo_by_userid(user_id)
         department_names = yield self._get_departments_by_deptids(userinfo.get('department'))
         userinfo.update({"department_name_list": department_names})
         raise gen.Return(userinfo)
-
-    @gen.coroutine
-    def _get_access_token_by_corpid(self):
-        """调用企业微信 Oauth get access token 接口
-        :return:
-        when success
-        {
-           "errcode": 0,
-           "errmsg": "ok",
-           "access_token": "accesstoken000001",
-           "expires_in": 7200
-        }
-
-        when error
-        {"errcode":,"errmsg":"invalid code"}
-        """
-        url = wx_const.WORKWX_OAUTH_GET_ACCESS_TOKEN % (self.workwx.corpid, self.workwx.secret)
-        ret = yield http_get(url, infra=False)
-        logger.debug("_get_access_token_by_corpid: {0}".format(url))
-        if ret.errcode:
-            raise WeChatOauthError("get_openid_unionid_by_code: {}".format(ret.errmsg))
-        else:
-            # 缓存 access_token
-            self._access_token = ret.get('access_token')
-        raise gen.Return(ret.get('access_token'))
 
     @gen.coroutine
     def _get_userid_by_code(self, code):
@@ -327,10 +303,10 @@ class WorkWXOauth2Service(WeChatOauth2Service):
         """
         ret = yield http_get(wx_const.WORKWX_OAUTH_GET_USERINFO % (self._access_token, user_id), infra=False)
         if ret.errcode:
-            raise WeChatOauthError("_get_userinfo_by_userid: {}".format(ret.errmsg))
-        else:
-            if ret.avatar and "http:" in ret.avatar:
-                ret.avatar = ret.avatar.replace("http:", "https:", 1)
+            yield self.workwx_ps.refresh_workwx_access_token(self.workwx.company_id) #如果access_token失效，刷新access_token
+            ret = yield http_get(wx_const.WORKWX_OAUTH_GET_USERINFO % (self._access_token, user_id), infra=False)
+        if ret.avatar and "http:" in ret.avatar:
+            ret.avatar = ret.avatar.replace("http:", "https:", 1)
         raise gen.Return(ret)
 
     @gen.coroutine
