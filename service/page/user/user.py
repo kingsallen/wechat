@@ -672,3 +672,25 @@ class UserPageService(PageService):
         })
         ret = yield self.infra_user_ds.infra_auto_bind_employee(params)
         return ret
+
+    @gen.coroutine
+    def upload_file_server(self, file_data, file_name, sysuser_id, scene_id=1):
+        """
+        自定义简历模板：上传身份证组件
+        :param
+        :return fileId
+        """
+        ret = yield self.infra_user_ds.upload_file_server(
+            file_data, file_name, sysuser_id, scene_id)
+        return ret
+
+    @gen.coroutine
+    def get_custom_file(self, file_id, sysuser_id):
+        """
+        自定义简历模板：上传身份证组件
+        :param
+        :return fileId
+        """
+        ret = yield self.infra_user_ds.get_custom_file(
+            file_id, sysuser_id)
+        return ret

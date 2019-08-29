@@ -1369,3 +1369,11 @@ class ProfilePageService(PageService):
                 importer=importer
             )
         )
+
+    @gen.coroutine
+    def custom_parse_idcard(self, file_id, side, company_id, sysuser_id):
+        """
+        自定义简历模板：解析身份证正面照片
+        """
+        ret = yield self.infra_profile_ds.custom_parse_idcard(file_id, side, company_id, sysuser_id)
+        return ret
