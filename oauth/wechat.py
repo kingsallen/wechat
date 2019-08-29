@@ -273,7 +273,7 @@ class WorkWXOauth2Service(WeChatOauth2Service):
         {"errcode":40003,"errmsg":" invalid openid"}
         """
         ret = yield http_get(wx_const.WORKWX_OAUTH_GET_USERID % (self._access_token, code), infra=False)
-        if ret.errcode in ['42001', '40014']:
+        if int(ret.errcode) in [42001, 40014]:
             yield self._refresh_workwx_access_token(company)
             ret = yield http_get(wx_const.WORKWX_OAUTH_GET_USERID % (self._access_token, code), infra=False)
 
@@ -303,7 +303,7 @@ class WorkWXOauth2Service(WeChatOauth2Service):
         {"errcode":40003,"errmsg":" invalid openid"}
         """
         ret = yield http_get(wx_const.WORKWX_OAUTH_GET_USERINFO % (self._access_token, user_id), infra=False)
-        if ret.errcode in ['42001','40014']:
+        if int(ret.errcode) in [42001, 40014]:
             yield self._refresh_workwx_access_token(company)
             ret = yield http_get(wx_const.WORKWX_OAUTH_GET_USERINFO % (self._access_token, user_id), infra=False)
         if ret.avatar and "http:" in ret.avatar:
@@ -327,7 +327,7 @@ class WorkWXOauth2Service(WeChatOauth2Service):
         department_names = []
         for department_id in department_ids:
             ret = yield http_get(wx_const.WORKWX_OAUTH_GET_DEPARTMENT % (self._access_token, department_id), infra=False)
-            if ret.errcode in ['42001', '40014']:
+            if int(ret.errcode) in [42001, 40014]:
                 yield self._refresh_workwx_access_token(company)
                 ret = yield http_get(wx_const.WORKWX_OAUTH_GET_DEPARTMENT % (self._access_token, department_id),infra=False)
             departments = ret.get("department")
