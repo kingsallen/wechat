@@ -371,7 +371,7 @@ def cover_no_weixin(func):
         company = yield self.company_ps.get_company(conds={'id': wechat.company_id}, need_conf=True)
         workwx = yield self.workwx_ps.get_workwx(company.id, company.hraccount_id)
 
-        if current_path not in paths_for_noweixin and not self.in_wechat and not (self._in_wechat == const.CLIENT_WORKWX and workwx) and 'moseeker' not in self.request.headers.get('User-Agent') and 'Joywok' not in self.request.headers.get('User-Agent'):
+        if current_path not in paths_for_noweixin and not self.request.uri.startswith("/api/") and not self.in_wechat and not (self._in_wechat == const.CLIENT_WORKWX and workwx) and 'moseeker' not in self.request.headers.get('User-Agent') and 'Joywok' not in self.request.headers.get('User-Agent'):
             self.render(template_name="adjunct/not-weixin.html", http_code=416)
             return
         else:
