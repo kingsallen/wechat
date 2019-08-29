@@ -244,21 +244,21 @@ class WorkWXOauth2Service(WeChatOauth2Service):
         return oauth_url
 
     @gen.coroutine
-    def get_userinfo_by_code(self, code):
+    def get_userinfo_by_code(self, code, company):
         """根据 code 尝试获取 userinfo
         :param code:
         :return:
         """
         # access_token = yield self._get_access_token_by_corpid()
         self._access_token = self.workwx.access_token
-        user_id = yield self._get_userid_by_code(code)
-        userinfo = yield self._get_userinfo_by_userid(user_id)
-        department_names = yield self._get_departments_by_deptids(userinfo.get('department'))
+        user_id = yield self._get_userid_by_code(code, company)
+        userinfo = yield self._get_userinfo_by_userid(user_id, company)
+        department_names = yield self._get_departments_by_deptids(userinfo.get('department'), company)
         userinfo.update({"department_name_list": department_names})
         raise gen.Return(userinfo)
 
     @gen.coroutine
-    def _get_userid_by_code(self, code):
+    def _get_userid_by_code(self, code, company):
         """用 code和access_token 拉取UserId
         :return ObjectDict
         when success
@@ -273,13 +273,14 @@ class WorkWXOauth2Service(WeChatOauth2Service):
         {"errcode":40003,"errmsg":" invalid openid"}
         """
         ret = yield http_get(wx_const.WORKWX_OAUTH_GET_USERID % (self._access_token, code), infra=False)
-        if ret.errcode:
-            raise WeChatOauthError("_get_userid_by_code: {}".format(ret.errmsg))
-        else:
-            raise gen.Return(ret.get('UserId'))
+        if ret.errcode in ['42001', '40014']:
+            yield self._refresh_workwx_access_token(company)
+            ret = yield http_get(wx_const.WORKWX_OAUTH_GET_USERID % (self._access_token, code), infra=False)
+
+        raise gen.Return(ret.get('UserId'))
 
     @gen.coroutine
-    def _get_userinfo_by_userid(self, user_id):
+    def _get_userinfo_by_userid(self, user_id, company):
         """用 UserId 拉取用户信息
         :return ObjectDict
         when success
@@ -302,15 +303,15 @@ class WorkWXOauth2Service(WeChatOauth2Service):
         {"errcode":40003,"errmsg":" invalid openid"}
         """
         ret = yield http_get(wx_const.WORKWX_OAUTH_GET_USERINFO % (self._access_token, user_id), infra=False)
-        if ret.errcode:
-            yield self.workwx_ps.refresh_workwx_access_token(self.workwx.company_id) #如果access_token失效，刷新access_token
+        if ret.errcode in ['42001','40014']:
+            yield self._refresh_workwx_access_token(company)
             ret = yield http_get(wx_const.WORKWX_OAUTH_GET_USERINFO % (self._access_token, user_id), infra=False)
         if ret.avatar and "http:" in ret.avatar:
             ret.avatar = ret.avatar.replace("http:", "https:", 1)
         raise gen.Return(ret)
 
     @gen.coroutine
-    def _get_departments_by_deptids(self, department_ids):
+    def _get_departments_by_deptids(self, department_ids, company):
         """用 department_id 拉取部门名称
         :return ObjectDict
         when success
@@ -326,6 +327,9 @@ class WorkWXOauth2Service(WeChatOauth2Service):
         department_names = []
         for department_id in department_ids:
             ret = yield http_get(wx_const.WORKWX_OAUTH_GET_DEPARTMENT % (self._access_token, department_id), infra=False)
+            if ret.errcode in ['42001', '40014']:
+                yield self._refresh_workwx_access_token(company)
+                ret = yield http_get(wx_const.WORKWX_OAUTH_GET_DEPARTMENT % (self._access_token, department_id),infra=False)
             departments = ret.get("department")
             if ret.errcode:
                 raise WeChatOauthError("_get_departments_by_deptids: {}".format(ret.errmsg))
@@ -334,3 +338,10 @@ class WorkWXOauth2Service(WeChatOauth2Service):
                     if department_info.get("id") == department_id:
                         department_names.append(department_info.get("name"))
         raise gen.Return(department_names)
+
+    @gen.coroutine
+    def _refresh_workwx_access_token(self, company):
+
+        yield self.workwx_ps.refresh_workwx_access_token(self.workwx.company_id)  # 如果access_token失效，刷新access_token
+        self.workwx = yield self.workwx_ps.get_workwx(self.workwx.company_id, company.hraccount_id)
+        self._access_token = self.workwx.access_token

@@ -329,7 +329,7 @@ class BaseHandler(MetaBaseHandler):
                         self.logger.debug("来自企业号的 code 无效")
             elif self.in_work_wechat:
                 self.logger.debug("来自 workwx 的授权, 获得 code: {}".format(code))
-                workwx_userinfo = yield self._get_user_info_workwx(code)
+                workwx_userinfo = yield self._get_user_info_workwx(code, self._company)
                 if workwx_userinfo:
                     self.logger.debug("来自 workwx 的授权, 获得 workwx_userinfo:{}".format(workwx_userinfo))
                     yield self._handle_user_info_workwx(workwx_userinfo)
@@ -1134,9 +1134,9 @@ class BaseHandler(MetaBaseHandler):
             return False
 
     @gen.coroutine
-    def _get_user_info_workwx(self, code):
+    def _get_user_info_workwx(self, code, company):
         try:
-            userinfo = yield self._work_oauth_service.get_userinfo_by_code(code)
+            userinfo = yield self._work_oauth_service.get_userinfo_by_code(code, company)
             raise gen.Return(userinfo)
         except WeChatOauthError as e:
             raise gen.Return(None)
