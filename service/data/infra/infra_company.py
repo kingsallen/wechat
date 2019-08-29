@@ -119,8 +119,38 @@ class InfraCompanyDataService(DataService):
     def get_company_hr_info(self, params):
         """
         根据hrId获取HR信息
+
         :param params : {'hrId': 123}
         :return:
+        {
+            "code": "0",
+            "message": "操作成功",
+            "data": {
+                "id": 82752,
+                "companyId": 39978,
+                "mobile": "18365251623",
+                "email": "zangxi@moseeker.com",
+                "wxuserId": null,
+                "password": "e8374a97f36a5d57dd16060fc8d619b3b4283592",
+                "username": "沙盒测试主账号",
+                "accountType": 0,
+                "activation": 1,
+                "disable": 1,
+                "registerTime": "2016-07-20 14:31:05",
+                "registerIp": "182.92.169.77",
+                "lastLoginTime": "2019-08-29 14:38:42",
+                "lastLoginIp": "116.236.170.42",
+                "loginCount": 8698,
+                "source": 1,
+                "downloadToken": null,
+                "createTime": "2016-07-20 14:31:05",
+                "updateTime": "2019-08-29 15:00:08",
+                "headimgurl": "https://cdn-t.dqprism.com/upload/../../8d3156ba-62b6-4879-b5e7-ae2618126895.phpundefined",
+                "leaveToMobot": 0,
+                "remarkName": "",
+                "applicationPositionCountFlag": 0
+            }
+        }
         """
         ret = yield http_get_clound(api.company_service.api.CLOUD_GET_COMPANY_HR_INFO, api.company_service.service, params)
         return ret
