@@ -82,3 +82,9 @@ class WorkwxPageService(PageService):
         """员工认证"""
         ret = yield self.workwx_ds.employee_bind(sysuser_id, company_id)
         return ret
+
+    @gen.coroutine
+    def refresh_workwx_access_token(self, company_id):
+        """刷新access_token和jsapi_ticket"""
+        ret = yield self.workwx_ds.refresh_workwx_access_token(company_id)
+        return ret

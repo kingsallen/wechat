@@ -329,7 +329,7 @@ class BaseHandler(MetaBaseHandler):
                         self.logger.debug("来自企业号的 code 无效")
             elif self.in_work_wechat:
                 self.logger.debug("来自 workwx 的授权, 获得 code: {}".format(code))
-                workwx_userinfo = yield self._get_user_info_workwx(code)
+                workwx_userinfo = yield self._get_user_info_workwx(code, self._company)
                 if workwx_userinfo:
                     self.logger.debug("来自 workwx 的授权, 获得 workwx_userinfo:{}".format(workwx_userinfo))
                     yield self._handle_user_info_workwx(workwx_userinfo)
@@ -337,8 +337,8 @@ class BaseHandler(MetaBaseHandler):
                         return
                 else:
                     self.logger.debug("来自 workwx 的 code 无效")
-                    self.render(template_name="adjunct/not-weixin.html", http_code=416)
-                    return
+                    # self.render(template_name="adjunct/not-weixin.html", http_code=416)
+                    # return
             else:
                 # pc端授权
                 if code and self._verify_code(code):
@@ -501,6 +501,8 @@ class BaseHandler(MetaBaseHandler):
                     "corpid": res.corp_id,
                     "redirect_url": res.redirect_url})
             })
+        elif self.in_work_wechat:
+            client_env.update({"jsapi": self._add_jsapi_to_workwx(self._workwx)})
         self.namespace = {"client_env": client_env}
 
     @gen.coroutine
@@ -766,7 +768,7 @@ class BaseHandler(MetaBaseHandler):
         session.wechat = self._wechat
         if self.in_work_wechat: #从微信转发过来的职位对应的公司在数据库中没有企业微信相关配置
             session.workwx = self._workwx
-            self._add_jsapi_to_wechat(session.workwx)
+            # self._add_jsapi_to_wechat(session.workwx)
         else:
             self._add_jsapi_to_wechat(session.wechat)
 
@@ -869,6 +871,12 @@ class BaseHandler(MetaBaseHandler):
             jsapi_ticket=wechat.jsapi_ticket,
             url=self.fullurl(encode=False))
 
+    def _add_jsapi_to_workwx(self, workwx):
+        """拼装 jsapi"""
+        return JsApi(
+            jsapi_ticket=workwx.jsapi_ticket,
+            url=self.fullurl(encode=False))
+
     def _make_new_session_id(self, user_id):
         """创建新的 session_id
 
@@ -925,6 +933,7 @@ class BaseHandler(MetaBaseHandler):
             settings=self.settings
         )
         namespace.update(add_namespace)
+        namespace.update(self.namespace)
         return namespace
 
     def _set_access_time_cookie(self):
@@ -1126,9 +1135,9 @@ class BaseHandler(MetaBaseHandler):
             return False
 
     @gen.coroutine
-    def _get_user_info_workwx(self, code):
+    def _get_user_info_workwx(self, code, company):
         try:
-            userinfo = yield self._work_oauth_service.get_userinfo_by_code(code)
+            userinfo = yield self._work_oauth_service.get_userinfo_by_code(code, company)
             raise gen.Return(userinfo)
         except WeChatOauthError as e:
             raise gen.Return(None)

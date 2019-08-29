@@ -364,10 +364,16 @@ def cover_no_weixin(func):
         paths_for_noweixin = [path.POSITION_LIST, path.WECHAT_COMPANY, path.COMPANY_TEAM]
         current_path = self.request.uri.split('?')[0]
 
-        signature = self.params['wechat_signature']
-        wechat = yield self.wechat_ps.get_wechat(conds={
-            "signature": signature
-        })
+        if self.is_qx:
+            qx_appid = settings['multi_domain']['qx_appid']
+            wechat = yield self.wechat_ps.get_wechat(conds={
+                "appid": qx_appid
+            })
+        else:
+            signature = self.params['wechat_signature']
+            wechat = yield self.wechat_ps.get_wechat(conds={
+                "signature": signature
+            })
         company = yield self.company_ps.get_company(conds={'id': wechat.company_id}, need_conf=True)
         workwx = yield self.workwx_ps.get_workwx(company.id, company.hraccount_id)
 
