@@ -77,11 +77,11 @@ class ChatPageService(PageService):
             room['compoundContent'] = btn_content
 
     @gen.coroutine
-    def get_chatroom(self, user_id, hr_id, company_id, position_id, room_id, qxuser, is_gamma, bot_enabled,
+    def get_chatroom(self, user_id, hr_id, company_id, position_id, room_id, qxuser, is_gamma, mobot_enable,
                      recom, is_employee):
         """进入聊天室"""
         hr_info = ObjectDict()
-        mobot_info = ObjectDict(enabled=bot_enabled, name='', headimg='')
+        mobot_info = ObjectDict(enable=mobot_enable, name='', headimg='')
 
         ret = yield self.thrift_chat_ds.enter_chatroom(user_id, hr_id, position_id, room_id, is_gamma)
         if ret.hr:
@@ -126,7 +126,7 @@ class ChatPageService(PageService):
             chat_debut=ret.chatDebut,
             follow_qx=qxuser.is_subscribe == 1,
             room_id=ret.roomId,
-            show_position_info=(len(position_info) > 0 and not bot_enabled),
+            show_position_info=(len(position_info) > 0 and not mobot_enable),
             recom=recom,
             is_employee=is_employee
         )

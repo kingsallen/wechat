@@ -344,7 +344,7 @@ class ChatHandler(BaseHandler):
         self.user_id = 0
         self.position_id = 0
         self.flag = 0
-        self.bot_enabled = False
+        # self.bot_enabled = False 废弃全局变量，设置1次托管后，全局变量会一直为True，在设置HR不托管MoBot的时候导致数据状态不一致
 
     @handle_response
     @gen.coroutine
@@ -494,9 +494,7 @@ class ChatHandler(BaseHandler):
             (self.current_user.sysuser.id, self.params.hr_id, pid, room_id, self.current_user.qxuser, is_gamma)
         )
 
-        # 如果已经开启chatbot聊天，不需要发送职位给hr
-        if not self.bot_enabled:
-            yield self.get_bot_enabled()
+        mobot_enable = yield self.get_mobot_hosting_status(self.hr_id)
 
         user_hr_account = yield self.chat_ps.get_hr_info(self.hr_id)
         company_id = user_hr_account.company_id
@@ -511,7 +509,7 @@ class ChatHandler(BaseHandler):
                                               pid, room_id,
                                               self.current_user.qxuser,
                                               is_gamma,
-                                              self.bot_enabled,
+                                              mobot_enable,
                                               recom,
                                               is_employee)
 
@@ -626,8 +624,8 @@ class ChatHandler(BaseHandler):
         self.logger.debug('post_message  flag:{}'.format(self.flag))
         self.logger.debug('post_message  create_new_context:{}'.format(create_new_context))
 
-        if not self.bot_enabled:
-            yield self.get_bot_enabled()
+        mobot_enable = yield self.get_mobot_hosting_status(self.hr_id)
+        self.logger.debug('post_message mobot_enable:{}'.format(mobot_enable))
 
         self.chatroom_channel = const.CHAT_CHATROOM_CHANNEL.format(self.hr_id, self.user_id)
         self.hr_channel = const.CHAT_HR_CHANNEL.format(self.hr_id)
@@ -659,7 +657,7 @@ class ChatHandler(BaseHandler):
         self.logger.debug("publish chat by redis message_body:{}".format(message_body))
         self.redis_client.publish(self.hr_channel, message_body)
         try:
-            if self.bot_enabled and msg_type != "job":
+            if mobot_enable and msg_type != "job":
                 # 由于没有延迟的发送导致hr端轮训无法订阅到publish到redis的消息　所以这里做下延迟处理
                 # delay_robot = functools.partial(self._handle_chatbot_message, user_message)
                 # ioloop.IOLoop.current().call_later(1, delay_robot)
@@ -668,10 +666,10 @@ class ChatHandler(BaseHandler):
             self.logger.error(e)
 
         # 添加聊天对话埋点记录
-        self._add_sensor_track(msg_type, self.bot_enabled, content)
+        self._add_sensor_track(msg_type, mobot_enable, content)
 
-        # bot_enabled 提供前端控制 是否出loading状态
-        self.send_json_success(data={"bot_enabled": self.bot_enabled})
+        # mobot_enable 提供前端控制 是否出loading状态
+        self.send_json_success(data={"mobot_enable": mobot_enable})
 
     @handle_response
     @authenticated
@@ -692,14 +690,14 @@ class ChatHandler(BaseHandler):
 
         self.logger.debug('post_trigger  create_new_context:{}'.format(create_new_context))
 
-        if not self.bot_enabled:
-            yield self.get_bot_enabled()
+        mobot_enable = yield self.get_mobot_hosting_status(self.hr_id)
+        self.logger.debug('post_trigger mobot_enable:{}'.format(mobot_enable))
 
         self.chatroom_channel = const.CHAT_CHATROOM_CHANNEL.format(self.hr_id, self.user_id)
         self.hr_channel = const.CHAT_HR_CHANNEL.format(self.hr_id)
 
         try:
-            if self.bot_enabled and msg_type != "job":
+            if mobot_enable and msg_type != "job":
                 # 由于没有延迟的发送导致hr端轮训无法订阅到publish到redis的消息　所以这里做下延迟处理
                 # delay_robot = functools.partial(self._handle_chatbot_message, user_message)
                 # ioloop.IOLoop.current().call_later(1, delay_robot)
@@ -708,9 +706,10 @@ class ChatHandler(BaseHandler):
             self.logger.error(e)
 
         # 添加聊天对话埋点记录
-        self._add_sensor_track(msg_type, self.bot_enabled, content)
+        self._add_sensor_track(msg_type, mobot_enable, content)
 
-        self.send_json_success(data={"bot_enabled": self.bot_enabled})
+        # mobot_enable 提供前端控制 是否出loading状态
+        self.send_json_success(data={"mobot_enable": mobot_enable})
 
     @gen.coroutine
     def _handle_chatbot_message(self, user_message, create_new_context, from_textfield):
@@ -811,19 +810,15 @@ class ChatHandler(BaseHandler):
                 self.redis_client.publish(self.chatroom_channel, message_body)
 
     @gen.coroutine
-    def get_bot_enabled(self):
-
-        if not self.hr_id:
-            return
-
-        user_hr_account = yield self.chat_ps.get_hr_info(self.hr_id)
-
-        company_id = user_hr_account.company_id
-
-        if not company_id:
-            return
-
-        self.bot_enabled = user_hr_account.leave_to_mobot
+    def get_mobot_hosting_status(self, hr_id):
+        """
+        获取HR后台对MoBot的托管状态
+        :return: True 托管 False 未托管
+        """
+        user_hr_account = yield self.chat_ps.get_hr_info(hr_id)
+        # HR聊天是否托管给智能招聘助手，0 不托管，1 托管
+        # @cache(ttl=60) 有60s缓存
+        raise gen.Return(bool(user_hr_account.leave_to_mobot))
 
 
 class MobotHandler(BaseHandler):
