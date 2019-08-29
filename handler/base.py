@@ -758,7 +758,7 @@ class BaseHandler(MetaBaseHandler):
         session.sc_cookie_id = self._sc_cookie_id
 
         session.wechat = self._wechat
-        if self.in_workwx:
+        if self.in_workwx and self._workwx: #从微信转发过来的职位对应的公司在数据库中没有企业微信相关配置
             session.workwx = self._workwx
             self._add_jsapi_to_wechat(session.workwx)
         else:
