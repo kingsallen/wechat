@@ -933,9 +933,6 @@ class BaseHandler(MetaBaseHandler):
             settings=self.settings
         )
         namespace.update(add_namespace)
-        if self.in_work_wechat:
-            namespace.update({"jsapi": self._add_jsapi_to_workwx(self._workwx)})
-            self.logger.debug("@@@@@@@@@@@@@@@@@@@@@ namespace:{}".format(namespace))
         return namespace
 
     def _set_access_time_cookie(self):
