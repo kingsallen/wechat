@@ -399,6 +399,37 @@ class PositionPageService(PageService):
 
     @log_time
     @gen.coroutine
+    def get_share_position_list(self, share_id, params):
+        """分享职位列表"""
+
+        res = yield self.infra_position_ds.infra_get_share_position_list(share_id)
+
+        team_name_dict = yield self.get_teamid_names_dict(params.company_id)
+        position_list = []
+        if res.code == const.NEWINFRA_API_SUCCESS:
+            share_position_list = [ObjectDict(e) for e in res.data]
+            pids = [e.position.id for e in share_position_list]
+            pid_teamid_dict = yield self.get_pid_teamid_dict(params.company_id, pids)
+
+            for p in share_position_list:
+                position = ObjectDict()
+                position.update(**p.position)
+                position.update(in_hb=p.in_hb,
+                                company_name=p.company_name,
+                                company_abbr=p.company_abbr,
+                                city_ename=p.city_ename,
+                                team_name=p.team_name,
+                                total_bonus=p.total_bonus,
+                                city=p.city_name,
+                                total_num=len(share_position_list))
+                position.salary = gen_salary(position.salary_top, position.salary_bottom)
+                position.publish_date = jd_update_date(str_2_date(position.publish_date, self.constant.TIME_FORMAT))
+                position.team_name = team_name_dict.get(pid_teamid_dict.get(position.id, 0), '')
+                position_list.append(position)
+        return position_list
+
+    @log_time
+    @gen.coroutine
     def infra_get_position_list_rp_ext(self, position_list):
         """获取职位的红包信息"""
 
@@ -647,3 +678,17 @@ class PositionPageService(PageService):
         ret = yield self.infra_position_ds.send_ten_min_tmp(params)
         return ret
 
+    @gen.coroutine
+    def create_share_position_list(self, pids, user_id):
+        """
+        保存批量转发的职位列表信息
+        :param pids:
+        :param user_id:
+        :return:
+        """
+        params = ObjectDict({
+            "position_id": pids,
+            "user_id": user_id
+        })
+        ret = yield self.infra_position_ds.infra_create_share_position_list(params)
+        return ret

@@ -5,6 +5,7 @@
 # 企业号单独链接
 POSITION_PATH = '/position/{}'
 POSITION_LIST = '/position'
+POSITION_SHARE = "/position/share"
 POSITION_REFERRAL_LIST = '/position/recom'
 RED_PACKET_CARD = '/mobile/redpack'
 TEAM_PATH = '/company/team/{}'
