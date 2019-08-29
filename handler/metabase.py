@@ -109,7 +109,7 @@ class MetaBaseHandler(AtomHandler):
     def in_wechat(self):
         return self._in_wechat == const.CLIENT_WECHAT
 
-    # @property
+    @property
     def in_workwx(self, workwx):
         return self._in_wechat == const.CLIENT_WORKWX and workwx
 
