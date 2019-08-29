@@ -19,7 +19,7 @@ from oauth.wechat import WeChatOauth2Service, WeChatOauthError, JsApi, WorkWXOau
 from setting import settings
 from util.common import ObjectDict
 from util.common.cipher import decode_id
-from util.common.decorator import check_signature
+from util.common.decorator import check_signature, cover_no_weixin
 from util.tool.date_tool import curr_now
 from util.tool.str_tool import to_str, from_hex, match_session_id, \
     languge_code_from_ua
@@ -208,6 +208,7 @@ class BaseHandler(MetaBaseHandler):
 
     # PUBLIC API
     @check_signature
+    @cover_no_weixin
     @gen.coroutine
     def prepare(self):
         """用于生成 current_user"""
