@@ -494,7 +494,7 @@ class ChatHandler(BaseHandler):
             (self.current_user.sysuser.id, self.params.hr_id, pid, room_id, self.current_user.qxuser, is_gamma)
         )
 
-        mobot_enable = yield self.get_mobot_hosting_status(self.hr_id)
+        mobot_enable = yield self.chat_ps.get_mobot_hosting_status(self.hr_id)
 
         user_hr_account = yield self.chat_ps.get_hr_info(self.hr_id)
         company_id = user_hr_account.company_id
@@ -624,7 +624,7 @@ class ChatHandler(BaseHandler):
         self.logger.debug('post_message  flag:{}'.format(self.flag))
         self.logger.debug('post_message  create_new_context:{}'.format(create_new_context))
 
-        mobot_enable = yield self.get_mobot_hosting_status(self.hr_id)
+        mobot_enable = yield self.chat_ps.get_mobot_hosting_status(self.hr_id)
         self.logger.debug('post_message mobot_enable:{}'.format(mobot_enable))
 
         self.chatroom_channel = const.CHAT_CHATROOM_CHANNEL.format(self.hr_id, self.user_id)
@@ -690,7 +690,7 @@ class ChatHandler(BaseHandler):
 
         self.logger.debug('post_trigger  create_new_context:{}'.format(create_new_context))
 
-        mobot_enable = yield self.get_mobot_hosting_status(self.hr_id)
+        mobot_enable = yield self.chat_ps.get_mobot_hosting_status(self.hr_id)
         self.logger.debug('post_trigger mobot_enable:{}'.format(mobot_enable))
 
         self.chatroom_channel = const.CHAT_CHATROOM_CHANNEL.format(self.hr_id, self.user_id)
@@ -808,17 +808,6 @@ class ChatHandler(BaseHandler):
 
                 # 聊天室广播
                 self.redis_client.publish(self.chatroom_channel, message_body)
-
-    @gen.coroutine
-    def get_mobot_hosting_status(self, hr_id):
-        """
-        获取HR后台对MoBot的托管状态
-        :return: True 托管 False 未托管
-        """
-        user_hr_account = yield self.chat_ps.get_hr_info(hr_id)
-        # HR聊天是否托管给智能招聘助手，0 不托管，1 托管
-        # @cache(ttl=60) 有60s缓存
-        raise gen.Return(bool(user_hr_account.leave_to_mobot))
 
 
 class MobotHandler(BaseHandler):

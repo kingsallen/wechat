@@ -456,3 +456,20 @@ class ChatPageService(PageService):
         })
         ret = yield self.thrift_chat_ds.get_voice(params)
         return ret
+
+    @gen.coroutine
+    def get_mobot_hosting_status(self, hr_id):
+        """
+        获取HR后台对MoBot的托管状态
+        :return: True 托管 False 未托管
+        """
+        mobot_enable = False
+        params = {"hrId": hr_id}
+
+        hr_info = yield self.infra_company_ds.get_company_hr_info(params)
+        if hr_info.get('data'):
+            hr_info = hr_info.get('data')
+            # HR聊天是否托管给智能招聘助手，0 不托管，1 托管
+            mobot_enable = bool(hr_info['leaveToMobot'])
+
+        raise gen.Return(mobot_enable)
