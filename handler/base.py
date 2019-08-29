@@ -501,6 +501,8 @@ class BaseHandler(MetaBaseHandler):
                     "corpid": res.corp_id,
                     "redirect_url": res.redirect_url})
             })
+        elif self.in_work_wechat:
+            client_env.update({"jsapi": self._add_jsapi_to_workwx(self._workwx)})
         self.namespace = {"client_env": client_env}
 
     @gen.coroutine
@@ -766,7 +768,7 @@ class BaseHandler(MetaBaseHandler):
         session.wechat = self._wechat
         if self.in_work_wechat: #从微信转发过来的职位对应的公司在数据库中没有企业微信相关配置
             session.workwx = self._workwx
-            self._add_jsapi_to_wechat(session.workwx)
+            # self._add_jsapi_to_wechat(session.workwx)
         else:
             self._add_jsapi_to_wechat(session.wechat)
 
@@ -867,6 +869,12 @@ class BaseHandler(MetaBaseHandler):
         """拼装 jsapi"""
         wechat.jsapi = JsApi(
             jsapi_ticket=wechat.jsapi_ticket,
+            url=self.fullurl(encode=False))
+
+    def _add_jsapi_to_workwx(self, workwx):
+        """拼装 jsapi"""
+        return JsApi(
+            jsapi_ticket=workwx.jsapi_ticket,
             url=self.fullurl(encode=False))
 
     def _make_new_session_id(self, user_id):
