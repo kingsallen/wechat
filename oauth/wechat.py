@@ -332,12 +332,9 @@ class WorkWXOauth2Service(WeChatOauth2Service):
                 yield self._refresh_workwx_access_token(company)
                 ret = yield http_get(wx_const.WORKWX_OAUTH_GET_DEPARTMENT % (self._access_token, department_id),infra=False)
             departments = ret.get("department")
-            if ret.errcode:
-                raise WeChatOauthError("_get_departments_by_deptids: {}".format(ret.errmsg))
-            else:
-                for department_info in departments:
-                    if department_info.get("id") == department_id:
-                        department_names.append(department_info.get("name"))
+            for department_info in departments:
+                if department_info.get("id") == department_id:
+                    department_names.append(department_info.get("name"))
         raise gen.Return(department_names)
 
     @gen.coroutine
