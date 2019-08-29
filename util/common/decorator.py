@@ -361,7 +361,7 @@ def cover_no_weixin(func):
     @functools.wraps(func)
     @gen.coroutine
     def wrapper(self, *args, **kwargs): #从微信转发过来的职位对应的公司在数据库中没有企业微信相关配置[self._workwx为空]
-        if not self.in_wechat and (not self.in_workwx or not self.current_user.workwx) and 'moseeker' not in self.request.headers.get('User-Agent') and 'Joywok' not in self.request.headers.get('User-Agent'):
+        if not self.in_wechat and not self.in_workwx(self.current_user.workwx) and 'moseeker' not in self.request.headers.get('User-Agent') and 'Joywok' not in self.request.headers.get('User-Agent'):
             self.render(template_name="adjunct/not-weixin.html", http_code=416)
             return
         else:
