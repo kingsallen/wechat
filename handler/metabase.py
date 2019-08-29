@@ -111,7 +111,7 @@ class MetaBaseHandler(AtomHandler):
 
     # @property
     def in_workwx(self, workwx):
-        return workwx.corpid and self._in_wechat == const.CLIENT_WORKWX
+        return workwx and self._in_wechat == const.CLIENT_WORKWX
 
     @property
     def in_wechat_ios(self):
