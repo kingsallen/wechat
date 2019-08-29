@@ -10,6 +10,7 @@ from util.tool.http_tool import http_get
 
 from globals import logger
 from setting import settings
+from service.page.thirdparty.workwx import WorkwxPageService
 
 
 class WeChatOauthError(Exception):
@@ -342,6 +343,7 @@ class WorkWXOauth2Service(WeChatOauth2Service):
     @gen.coroutine
     def _refresh_workwx_access_token(self, company):
 
-        yield self.workwx_ps.refresh_workwx_access_token(self.workwx.company_id)  # 如果access_token失效，刷新access_token
-        self.workwx = yield self.workwx_ps.get_workwx(self.workwx.company_id, company.hraccount_id)
+        workwx_ps = WorkwxPageService()
+        yield workwx_ps.refresh_workwx_access_token(self.workwx.company_id)  # 如果access_token失效，刷新access_token
+        self.workwx = yield workwx_ps.get_workwx(self.workwx.company_id, company.hraccount_id)
         self._access_token = self.workwx.access_token
