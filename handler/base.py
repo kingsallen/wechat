@@ -330,15 +330,22 @@ class BaseHandler(MetaBaseHandler):
             elif self.in_work_wechat:
                 self.logger.debug("来自 workwx 的授权, 获得 code: {}".format(code))
                 workwx_userinfo = yield self._get_user_info_workwx(code, self._company)
-                if workwx_userinfo:
+                if workwx_userinfo == "referral-non-employee":
+                    paths_for_noweixin = [path.POSITION_LIST, path.WECHAT_COMPANY, path.COMPANY_TEAM]
+                    current_path = self.request.uri.split('?')[0]
+                    if current_path not in paths_for_noweixin and not self.request.uri.startswith("/api/"):
+                        self.render(template_name="adjunct/not-weixin.html", http_code=416)
+                        return
+                    self._workwx = None  #非员工免认证访问三个固定页面
+
+                elif workwx_userinfo:
                     self.logger.debug("来自 workwx 的授权, 获得 workwx_userinfo:{}".format(workwx_userinfo))
                     yield self._handle_user_info_workwx(workwx_userinfo)
                     if self._WORKWX_REDIRECT:
                         return
                 else:
                     self.logger.debug("来自 workwx 的 code 无效")
-                    # self.render(template_name="adjunct/not-weixin.html", http_code=416)
-                    # return
+
             else:
                 # pc端授权
                 if code and self._verify_code(code):

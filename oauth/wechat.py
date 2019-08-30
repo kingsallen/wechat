@@ -253,9 +253,13 @@ class WorkWXOauth2Service(WeChatOauth2Service):
         # access_token = yield self._get_access_token_by_corpid()
         self._access_token = self.workwx.access_token
         user_id = yield self._get_userid_by_code(code, company)
-        userinfo = yield self._get_userinfo_by_userid(user_id, company)
-        department_names = yield self._get_departments_by_deptids(userinfo.get('department'), company)
-        userinfo.update({"department_name_list": department_names})
+        if user_id.get('OpenId') and not user_id.get('UserId'):  # a企业员A工转发给B,B不是a企业员工，B可以访问三个页面，其他提醒去微信打开
+            userinfo = "referral-non-employee"
+        else:
+            user_id = user_id.get('UserId')
+            userinfo = yield self._get_userinfo_by_userid(user_id, company)
+            department_names = yield self._get_departments_by_deptids(userinfo.get('department'), company)
+            userinfo.update({"department_name_list": department_names})
         raise gen.Return(userinfo)
 
     @gen.coroutine
@@ -278,7 +282,7 @@ class WorkWXOauth2Service(WeChatOauth2Service):
             yield self._refresh_workwx_access_token(company)
             ret = yield http_get(wx_const.WORKWX_OAUTH_GET_USERID % (self._access_token, code), infra=False)
 
-        raise gen.Return(ret.get('UserId'))
+        raise gen.Return(ret)
 
     @gen.coroutine
     def _get_userinfo_by_userid(self, user_id, company):
