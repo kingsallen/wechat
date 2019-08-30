@@ -381,6 +381,7 @@ class ChatPageService(PageService):
         ret_message['compound_content'] = compoundContent
         ret_message['msg_type'] = msg_type
         ret_message['stats'] = stats
+
         if msg_type == "citySelect":
             max = ret_message['compound_content'].get("max")
             ret_message['compound_content'] = ObjectDict()  # 置空compoundContent
@@ -458,18 +459,29 @@ class ChatPageService(PageService):
         return ret
 
     @gen.coroutine
+    def get_company_hr_info(self, hr_id=0):
+        """
+        获取HR账号信息
+        """
+        hr_info_data = ObjectDict()
+
+        if hr_id == 0:
+            raise gen.Return(hr_info_data)
+
+        params = {"hrId": hr_id}
+        hr_info = yield self.infra_company_ds.get_company_hr_info(params)
+        if hr_info.get('data'):
+            hr_info_data = ObjectDict(hr_info.get('data'))
+
+        raise gen.Return(hr_info_data)
+
+    @gen.coroutine
     def get_mobot_hosting_status(self, hr_id):
         """
         获取HR后台对MoBot的托管状态
         :return: True 托管 False 未托管
         """
-        mobot_enable = False
-        params = {"hrId": hr_id}
-
-        hr_info = yield self.infra_company_ds.get_company_hr_info(params)
-        if hr_info.get('data'):
-            hr_info = hr_info.get('data')
-            # HR聊天是否托管给智能招聘助手，0 不托管，1 托管
-            mobot_enable = bool(hr_info['leaveToMobot'])
-
+        hr_info = yield self.get_company_hr_info(hr_id)
+        # HR聊天是否托管给智能招聘助手，0 不托管，1 托管
+        mobot_enable = bool(hr_info.leaveToMobot) if hr_info else False
         raise gen.Return(mobot_enable)

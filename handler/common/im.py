@@ -634,11 +634,13 @@ class ChatHandler(BaseHandler):
             msgType=msg_type,
             compoundContent=ujson.dumps(compoundContent),
             content=content,
+            speaker=const.CHAT_SPEAKER_USER,
             origin=const.ORIGIN_USER_OR_HR,
             roomId=int(self.room_id),
             positionId=int(self.position_id),
             serverId=server_id,
-            duration=int(duration)
+            duration=int(duration),
+            createTime=curr_now_minute()
         )
         self.logger.debug("save chat by alphadog chat_params:{}".format(chat_params))
         chat_id = yield self.chat_ps.save_chat(chat_params)
@@ -668,8 +670,34 @@ class ChatHandler(BaseHandler):
         # 添加聊天对话埋点记录
         self._add_sensor_track(msg_type, mobot_enable, content)
 
+        # HR未托管MoBot的文案提示，不保存历史记录
+        if not mobot_enable:
+            yield self._hr_message_reply_content()
+
         # mobot_enable 提供前端控制 是否出loading状态
         self.send_json_success(data={"mobot_enable": mobot_enable})
+
+    @gen.coroutine
+    def _hr_message_reply_content(self):
+        """
+        联系HR场景进入聊天室，HR收到消息后自动回复的文本内容, 不记录聊天历史记录
+        """
+        content = "已收到您的消息，请耐心等待HR小姐姐给您回复哦😘~！"
+
+        message_body = json_dumps(ObjectDict(
+            compoundContent="",
+            content=content,
+            stats=0,
+            msgType="html",
+            speaker=const.CHAT_SPEAKER_HR,
+            cid=int(self.room_id),
+            pid=int(self.position_id),
+            createTime=curr_now_minute()
+        ))
+        self.logger.debug("publish chat by redis message_body:{}".format(message_body))
+
+        # 聊天室广播
+        self.redis_client.publish(self.chatroom_channel, message_body)
 
     @handle_response
     @authenticated
@@ -708,8 +736,42 @@ class ChatHandler(BaseHandler):
         # 添加聊天对话埋点记录
         self._add_sensor_track(msg_type, mobot_enable, content)
 
+        # HR未托管MoBot的文案提示，不保存历史记录
+        if not mobot_enable:
+            yield self._hr_welcome_reply_content()
+
         # mobot_enable 提供前端控制 是否出loading状态
         self.send_json_success(data={"mobot_enable": mobot_enable})
+
+    @gen.coroutine
+    def _hr_welcome_reply_content(self):
+        """
+        联系HR场景进入聊天室，HR自动回复的文本内容, 不记录聊天历史记录
+        """
+        hr_info = yield self.chat_ps.get_company_hr_info(self.hr_id)
+        if hr_info and hr_info.username:
+            content = "您好，我是{company_name}的{hr_name}，关于职位和公司信息有任何问题请随时和我沟通。".format(
+                company_name=self.current_user.company.abbreviation or self.current_user.company.name,
+                hr_name=hr_info.username)
+        else:
+            content = "您好，我是{company_name}HR，关于职位和公司信息有任何问题请随时和我沟通。".format(
+                company_name=self.current_user.company.abbreviation or self.current_user.company.name)
+
+        message_body = json_dumps(ObjectDict(
+            compoundContent="",
+            content=content,
+            stats=0,
+            msgType="html",
+            speaker=const.CHAT_SPEAKER_HR,
+            cid=int(self.room_id),
+            pid=int(self.position_id),
+            createTime=curr_now_minute()
+        ))
+        self.logger.debug("publish chat by redis message_body:{}".format(message_body))
+
+        # 聊天室广播
+        self.redis_client.publish(self.chatroom_channel, message_body)
+
 
     @gen.coroutine
     def _handle_chatbot_message(self, user_message, create_new_context, from_textfield):
@@ -790,6 +852,7 @@ class ChatHandler(BaseHandler):
             if bot_message:
                 if msg_type in const.INTERACTIVE_MSG:
                     compound_content.update(disabled=False)  # 可交互类型消息发送给各端时需标记为可以操作
+
                 message_body = json_dumps(ObjectDict(
                     compoundContent=compound_content,
                     content=bot_message.content,
