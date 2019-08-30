@@ -374,7 +374,7 @@ class BaseHandler(MetaBaseHandler):
         # joywok取消员工身份时，清除session，重新认证
         yield self._update_joywok_employee_session()
         # 企业微信成员做员工认证
-        if self.in_workwx and self._workwx:  #非员工免认证访问三个固定页面会将self._workwx=None
+        if self.in_workwx and self._workwx and not self.request.uri.startswith("/api/"):  #非员工免认证访问三个固定页面会将self._workwx=None
             is_redirect = yield self._is_employee_workwx()
             if is_redirect:
                 return
