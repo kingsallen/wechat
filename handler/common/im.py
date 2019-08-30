@@ -427,7 +427,7 @@ class ChatHandler(BaseHandler):
         self.send_json_success(data=ObjectDict(
             locale_code=self.locale.code,
             user=self.current_user,
-            env=self.env,
+            env={"client_env": self._client_env},
             fast_entry=get_fast_entry.data,
             show_privacy_agreement=bool(data_privacy)
         ))
