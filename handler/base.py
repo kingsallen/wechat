@@ -329,6 +329,7 @@ class BaseHandler(MetaBaseHandler):
                 self.logger.debug("来自 workwx 的授权, 获得 code: {}".format(code))
                 workwx_userinfo = yield self._get_user_info_workwx(code, self._company)
                 if workwx_userinfo == "referral-non-employee":
+                    self.logger.debug("来自 workwx 的授权, 获得 workwx_userinfo:{}".format(workwx_userinfo))
                     paths_for_noweixin = [path.POSITION_LIST, path.WECHAT_COMPANY, path.COMPANY_TEAM]
                     current_path = self.request.uri.split('?')[0]
                     if current_path not in paths_for_noweixin and not self.request.uri.startswith("/api/"):
