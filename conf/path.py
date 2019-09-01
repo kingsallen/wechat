@@ -27,6 +27,7 @@ EMPOLYEE_LADDER = "/employee/ladder"
 EMPLOYEE_REWARDS_RECORD = '/app/employee/binding/rewards'
 EMPLOYEE_TEN_MIN_TMP = '/employee/referral/invite_cards'
 EMPLOYEE_PORTAL = '/usercenter/mine'
+EMPLOYEE_VERIFY_BYEMAIL = '/employee/bindemail'
 
 PROFILE_CUSTOM_CV = '/profile/custom'
 REFERRAL_CONFIRM = "/referral/confirm"

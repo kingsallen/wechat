@@ -361,7 +361,7 @@ def cover_no_weixin(func):
     @functools.wraps(func)
     @gen.coroutine
     def wrapper(self, *args, **kwargs): #从微信转发过来的职位对应的公司在数据库中没有企业微信相关配置[self._workwx为空]
-        paths_for_noweixin = [path.POSITION_LIST, path.WECHAT_COMPANY, path.COMPANY_TEAM]
+        paths_for_noweixin = [path.POSITION_LIST, path.WECHAT_COMPANY, path.COMPANY_TEAM, path.EMPLOYEE_VERIFY_BYEMAIL]
         current_path = self.request.uri.split('?')[0]
 
         if self.is_qx:
