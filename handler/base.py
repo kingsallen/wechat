@@ -295,6 +295,7 @@ class BaseHandler(MetaBaseHandler):
         yield self._get_client_env_config()
 
         # 用户同意授权
+        current_path = self.request.uri.split('?')[0]
         if code and self._verify_code(code):
             # 保存 code 进 cookie
             self.set_cookie(
@@ -330,9 +331,12 @@ class BaseHandler(MetaBaseHandler):
                 workwx_userinfo = yield self._get_user_info_workwx(code, self._company)
                 if workwx_userinfo == "referral-non-employee":
                     self.logger.debug("来自 workwx 的授权, 获得 workwx_userinfo:{}".format(workwx_userinfo))
-                    paths_for_noweixin = [path.POSITION_LIST, path.WECHAT_COMPANY, path.COMPANY_TEAM, path.EMPLOYEE_VERIFY_BYEMAIL]
-                    current_path = self.request.uri.split('?')[0]
-                    if current_path not in paths_for_noweixin and not self.request.uri.startswith("/api/"):
+                    paths_for_noweixin = [path.POSITION_LIST, path.WECHAT_COMPANY, path.COMPANY_TEAM,
+                                          path.EMPLOYEE_VERIFY_BYEMAIL, path.REFERRAL_UPLOAD_PC,
+                                          path.JOYWOK_HOME_PAGE, path.JOYWOK_AUTO_AUTH,
+                                          path.REFERRAL_UPLOAD_PCLOGIN, path.IMAGE_URL
+                                          ]
+                    if current_path not in paths_for_noweixin and not self.request.uri.startswith("/api/") and not self.request.uri.startswith("/pc/api/"):
                         self.render(template_name="adjunct/not-weixin.html", http_code=416)
                         return
                     self._workwx = None  #非员工免认证访问三个固定页面
@@ -374,7 +378,8 @@ class BaseHandler(MetaBaseHandler):
         # joywok取消员工身份时，清除session，重新认证
         yield self._update_joywok_employee_session()
         # 企业微信成员做员工认证
-        if self.in_workwx and self._workwx and not self.request.uri.startswith("/api/"):  #非员工免认证访问三个固定页面会将self._workwx=None
+        noworkwx_employee_paths = [path.IMAGE_URL]  #/image是模板文件里面的<img链接,在企业微信里面无需做企业员工认证
+        if self.in_workwx and self._workwx and not self.request.uri.startswith("/api/") and not self.request.uri.startswith("/pc/api/") and current_path not in noworkwx_employee_paths:  #非员工免认证访问三个固定页面会将self._workwx=None
             is_redirect = yield self._is_employee_workwx()
             if is_redirect:
                 return
