@@ -132,6 +132,7 @@ common_routes = [
     (r"/api/dict/country/?",                         handler.common.dictionary.DictCountryHandler,              {"event": "dict_country"}),
     (r"/api/dict/rocketmajor/?",                     handler.common.dictionary.DictRocketMajorHandler,          {"event": "dict_rocketmajor"}),
     (r"/api/dict/smscountrycode/?",                  handler.common.dictionary.DictSmsCountryCodeHandler,       {"event": "dict_smscountrycode"}),
+    (r"/api/dict/hopejobtree/?",                     handler.common.dictionary.DictHopeJobTreeHandler,          {"event": "dict_hopejobtree"}),
     (r"/api/dict/mainland/college/?",                handler.common.dictionary.DictMainlandCollegeHandler,      {"event": "dict_mainland_college"}),
     (r"/api/dict/overseas/college/?",                handler.common.dictionary.DictOverseasCollegeHandler,      {"event": "dict_overseas_college"}),
     (r"/api/profile/edit/?",                         handler.common.profile.ProfileSectionHandler,              {"event": "profile_section"}),
@@ -179,6 +180,7 @@ common_routes = [
 platform_routes = [
     (r"/position/(?P<position_id>\d+)",              handler.platform.position.PositionHandler,                 {"event": "position_info"}),
     (r"/position/?",                                 handler.platform.position.PositionListHandler,             {"event": "position_list"},      'position_list'),
+    (r"/position/share?",                            handler.platform.position.PositionShareInBulkHandler,      {"event": "share_position_list"}),
     (r"/start/?",                                    handler.platform.landing.LandingHandler,                   {"event": "start_landing"}),
     (r"/company/(\d+)",                              handler.platform.companyrelation.CompanyInfoRedirectHandler, {"event": "company_old_info"}, "old_company_info_page"),
     (r"/company",                                    handler.platform.companyrelation.CompanyHandler,           {"event": "company_info"},       "new_company_info_page"),
@@ -272,6 +274,8 @@ platform_routes = [
     (r"/api/employee/supply/info",                   handler.platform.employee.ApiEmployeeSupplyInfoHandler,    {"event": "api_employee_supply_info"}),
     (r"/api/employee/recom/subscribe",               handler.platform.employee.ApiEmployeeRecomSubscribeHandler,{"event": "api_employee_recom_subscribe"}),
     (r"/api/resend/bind/email",                      handler.platform.employee.ResendBindEmailHandler,          {"event": "resend_bind_email"}),
+
+    (r"/api/position/share?",                        handler.platform.position.APIPositionShareInBulkHandler,   {"event": "api_share_position_list"}),
 
     (r"/api/func/wechat/?",                          handler.platform.employee.WechatSubInfoHandler,            {"event": "wechat_sub_info"}),
     (r'/api/user/survey/?',                          handler.platform.user.APIUserSurveyHandler,                {"event": "user_survey_api"}),

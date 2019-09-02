@@ -92,7 +92,7 @@ class InfraCompanyDataService(DataService):
         return res
 
     @gen.coroutine
-    def get_company_mobot_image(self, company_id):
+    def get_company_mobot_conf(self, company_id):
         params = ObjectDict({
             "company_id": company_id,
         })

@@ -390,6 +390,7 @@ MSG_TYPE = {
     13: "uploadResume",
     14: "shareReport",
     15: "positionSubscribe",
+    16: "toHrHumanAnswer",
 }
 
 # 积分配置类型

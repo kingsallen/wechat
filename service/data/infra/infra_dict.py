@@ -13,9 +13,10 @@ import conf.path as path
 from service.data.base import DataService
 from util.common.decorator import cache
 from util.tool.dict_tool import sub_dict, rename_keys
-from util.tool.http_tool import http_get, unboxing
+from util.tool.http_tool import http_get, unboxing, http_get_v2
 from pypinyin import lazy_pinyin
-
+from conf.newinfra_service_conf.service_info import dict_service
+from conf.newinfra_service_conf.dictionary import dictionary
 
 class InfraDictDataService(DataService):
     cached_rocket_major = None
@@ -548,3 +549,21 @@ class InfraDictDataService(DataService):
         res_data = res.data
         returned_data = [{"zh": item['tag'], "en": item['tag_en']} for item in res_data]
         return returned_data
+
+    @gen.coroutine
+    def get_hope_job_tree(self, field_type):
+        """
+        根据不同的field_type[fileType =109=综合管理培训生项目  传510000 fileType =110=职能管理培训生项目 传520000]获取不同的岗位志愿
+        :param field_type: 字段类型
+        :return:
+        """
+        if int(field_type) == 109:
+            code_list = 510000
+        else:
+            code_list = 520000
+
+        params = ObjectDict({
+            'code_list': str(code_list)
+        })
+        res = yield http_get_v2(dictionary.NEWINFRA_DICT_HOPE_JOB_TREE, dict_service, params)
+        return res.data
