@@ -330,7 +330,7 @@ class BaseHandler(MetaBaseHandler):
                 workwx_userinfo = yield self._get_user_info_workwx(code, self._company)
                 if workwx_userinfo == "referral-non-employee":
                     self.logger.debug("来自 workwx 的授权, 获得 workwx_userinfo:{}".format(workwx_userinfo))
-                    paths_for_noweixin = [path.POSITION_LIST, path.WECHAT_COMPANY, path.COMPANY_TEAM]
+                    paths_for_noweixin = [path.POSITION_LIST, path.WECHAT_COMPANY, path.COMPANY_TEAM, path.EMPLOYEE_VERIFY_BYEMAIL]
                     current_path = self.request.uri.split('?')[0]
                     if current_path not in paths_for_noweixin and not self.request.uri.startswith("/api/"):
                         self.render(template_name="adjunct/not-weixin.html", http_code=416)
@@ -374,7 +374,7 @@ class BaseHandler(MetaBaseHandler):
         # joywok取消员工身份时，清除session，重新认证
         yield self._update_joywok_employee_session()
         # 企业微信成员做员工认证
-        if self.in_workwx and self._workwx:  #非员工免认证访问三个固定页面会将self._workwx=None
+        if self.in_workwx and self._workwx and not self.request.uri.startswith("/api/"):  #非员工免认证访问三个固定页面会将self._workwx=None
             is_redirect = yield self._is_employee_workwx()
             if is_redirect:
                 return
