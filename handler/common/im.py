@@ -368,20 +368,25 @@ class ChatHandler(BaseHandler):
         :return:
         """
 
+        appid = ''
         res_privacy, data_privacy = yield self.privacy_ps.if_privacy_agreement_window(
             self.current_user.sysuser.id)
 
         # data参数前端会被浏览器encode一次，js又会encodeURIComponent一次
         # 企业微信
         if self.in_workwx and self._workwx:
-            jsapi = JsApi(jsapi_ticket=self.current_user.workwx.jsapi_ticket, url=unquote(self.params.share_url))
+            appid = self.current_user.workwx.corpid
+            jsapi_ticket = self.current_user.workwx.jsapi_ticket
         # 微信
         else:
-            jsapi = JsApi(jsapi_ticket=self.current_user.wechat.jsapi_ticket, url=unquote(self.params.share_url))
+            appid = self.current_user.wechat.appid
+            jsapi_ticket = self.current_user.wechat.jsapi_ticket
+
+        jsapi = JsApi(jsapi_ticket=jsapi_ticket, url=unquote(self.params.share_url))
 
         config = ObjectDict({
                   "debug": False,
-                  "appid": self.current_user.wechat.appid,
+                  "appid": appid,
                   "timestamp": jsapi.timestamp,
                   "nonceStr": jsapi.nonceStr,
                   "signature": jsapi.signature,
