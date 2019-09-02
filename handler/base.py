@@ -378,7 +378,7 @@ class BaseHandler(MetaBaseHandler):
         # joywok取消员工身份时，清除session，重新认证
         yield self._update_joywok_employee_session()
         # 企业微信成员做员工认证
-        noworkwx_employee_paths = [path.IMAGE_URL]
+        noworkwx_employee_paths = [path.IMAGE_URL]  #/image是模板文件里面的<img链接,在企业微信里面无需做企业员工认证
         if self.in_workwx and self._workwx and not self.request.uri.startswith("/api/") and current_path not in noworkwx_employee_paths:  #非员工免认证访问三个固定页面会将self._workwx=None
             is_redirect = yield self._is_employee_workwx()
             if is_redirect:
