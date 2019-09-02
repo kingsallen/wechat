@@ -38,6 +38,7 @@ MINE = "/usercenter/mine"
 REFERRAL_PROFILE = "/employee/recom/profile"
 REFERRAL_CRUCIAL_INFO = "/referral/crucial/info"
 REFERRAL_SCAN = "/employee/recom/profile/pc"
+REFERRAL_UPLOAD_PCLOGIN = "/pc/upload/profile/login"
 
 # 聚合号单独链接
 GAMMA_HOME = '/enter'
