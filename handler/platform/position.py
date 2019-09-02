@@ -9,6 +9,7 @@ import conf.message as msg
 import conf.path as path
 import conf.platform as const_platform
 import conf.wechat as wx
+import conf.fe as fe
 from handler.base import BaseHandler
 from tests.dev_data.user_company_config import COMPANY_CONFIG
 from util.common import ObjectDict
@@ -31,7 +32,6 @@ from util.common.cipher import decode_id
 class PositionHandler(BaseHandler):
     @log_time
     @handle_response
-    @cover_no_weixin
     @NewJDStatusCheckerAddFlag()
     @authenticated
     @gen.coroutine
@@ -960,7 +960,11 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
         if self.params.is_referral and self.params.is_referral.isdigit():
             is_referral = int(self.params.is_referral)
 
-        if recom_push_id and hb_c and is_referral:
+        share_id = 0
+        if self.params.share_id and self.params.share_id.isdigit():
+            share_id = int(self.params.share_id)
+
+        if recom_push_id and hb_c and is_referral and share_id:
             raise MyException("错误的链接")
 
         if hb_c:
@@ -983,6 +987,13 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
             # 职位红包 #
             # 逻辑和职位列表页一样, 代码有重复, TODO: 优化
             rp_position_list = [p for p in position_list if p.in_hb]
+        elif share_id:
+            # 批量分享职位列表
+            start_count = (int(self.params.get("count", 0)) * const_platform.POSITION_LIST_PAGE_COUNT)
+            infra_params.page_from = start_count
+            position_list = yield self.position_ps.get_share_position_list(share_id, infra_params)
+            rp_position_list = list(self.__rp_position_generator(position_list))
+
         else:
             # 内推职位列表和普通职位列表
             position_list = yield self.position_ps.infra_get_position_list(infra_params)
@@ -1046,6 +1057,7 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
             position_ex["department"] = pos.department
             position_ex["province"] = pos.province
             position_ex["salary"] = pos.salary
+            position_ex['status'] = pos.status or 0
             position_ex["company_name"] = pos.company_name
             position_ex["salary_top"] = pos.salary_top
             position_ex["salary_bottom"] = pos.salary_bottom
@@ -1193,7 +1205,11 @@ class PositionListHandler(PositionListInfraParamsMixin, BaseHandler):
         if self.params.recom_push_id and self.params.recom_push_id.isdigit():
             recom_push_id = int(self.params.recom_push_id)
 
-        if recom_push_id and hb_c:
+        share_id = 0
+        if self.params.share_id and self.params.share_id.isdigit():
+            share_id = int(self.params.share_id)
+
+        if recom_push_id and hb_c and share_id:
             raise MyException("错误的链接")
 
         if hb_c:
@@ -1435,3 +1451,58 @@ class PositionSearchHistoryHandler(BaseHandler):
         else:
             self.send_json_error(message=res.message)
 
+
+class PositionShareInBulkHandler(BaseHandler):
+
+    @handle_response
+    @gen.coroutine
+    def get(self):
+        # 告诉前端是否是内推转发
+        data = ObjectDict()
+        if self.current_user.recom:
+            infra_bind_status, employee = yield self.employee_ps.get_employee_info(self.current_user.recom.id, self.current_user.company.id)
+            fe_bind_status = self.employee_ps.convert_bind_status_from_thrift_to_fe(infra_bind_status)
+            if fe_bind_status == fe.FE_EMPLOYEE_BIND_STATUS_SUCCESS:
+                data = {
+                    "employee_name": employee.cname,
+                    "employee_icon": self.current_user.recom.headimg,
+                    "is_referral": const.YES
+                }
+
+        self.params.share = yield self._make_share()
+        self.render_page(template_name="position/share.html", data=data)
+
+    @gen.coroutine
+    def _make_share(self):
+        link = self.make_url(
+            path.POSITION_SHARE,
+            self.params,
+            recom=self.position_ps._make_recom(self.current_user.sysuser.id))
+        company_info = yield self.company_ps.get_company(
+            conds={"id": self.current_user.company.id}, need_conf=True)
+
+        cover = self.share_url(company_info.logo)
+        title = company_info.abbreviation + self.locale.translate('job_hotjobs')
+        description = self.locale.translate(msg.SHARE_DES_DEFAULT)
+
+        share_info = ObjectDict({
+            "cover": cover,
+            "title": title,
+            "description": description,
+            "link": link
+        })
+        return share_info
+
+
+class APIPositionShareInBulkHandler(BaseHandler):
+    """保存批量分享的职位列表"""
+    @handle_response
+    @gen.coroutine
+    def post(self):
+        pids = self.json_args.pids
+        res = yield self.position_ps.create_share_position_list(pids, self.current_user.sysuser.id)
+        if res.code == const.NEWINFRA_API_SUCCESS:
+            self.send_json_success(data={"share_id": res.data,
+                                         "recom": self.position_ps._make_recom(self.current_user.sysuser.id)})
+        else:
+            self.send_json_error(message=res.message)

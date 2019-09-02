@@ -19,7 +19,7 @@ from oauth.wechat import WeChatOauth2Service, WeChatOauthError, JsApi, WorkWXOau
 from setting import settings
 from util.common import ObjectDict
 from util.common.cipher import decode_id
-from util.common.decorator import check_signature
+from util.common.decorator import check_signature, cover_no_weixin
 from util.tool.date_tool import curr_now
 from util.tool.str_tool import to_str, from_hex, match_session_id, \
     languge_code_from_ua
@@ -208,6 +208,7 @@ class BaseHandler(MetaBaseHandler):
 
     # PUBLIC API
     @check_signature
+    @cover_no_weixin
     @gen.coroutine
     def prepare(self):
         """用于生成 current_user"""
@@ -269,9 +270,10 @@ class BaseHandler(MetaBaseHandler):
 
         conds = {'id': self._wechat.company_id}
         self._company = yield self.company_ps.get_company(conds=conds, need_conf=True)
-        self._workwx = yield self.workwx_ps.get_workwx(self._company.id, self._company.hraccount_id)
-        self._work_oauth_service = WorkWXOauth2Service(
-            self._workwx, self.fullurl())
+        if self._in_wechat == const.CLIENT_WORKWX:
+            self._workwx = yield self.workwx_ps.get_workwx(self._company.id, self._company.hraccount_id)
+            self._work_oauth_service = WorkWXOauth2Service(
+                self._workwx, self.fullurl())
 
         self._pass_session = PassportCache()
 
@@ -293,6 +295,7 @@ class BaseHandler(MetaBaseHandler):
         yield self._get_client_env_config()
 
         # 用户同意授权
+        current_path = self.request.uri.split('?')[0]
         if code and self._verify_code(code):
             # 保存 code 进 cookie
             self.set_cookie(
@@ -323,16 +326,29 @@ class BaseHandler(MetaBaseHandler):
                         self.logger.info("来自企业号的静默授权, openid:{}, _unionid:{}".format(openid, self._unionid))
                     else:
                         self.logger.debug("来自企业号的 code 无效")
-            elif self.in_workwx:
+            elif self.in_workwx and self._workwx:
                 self.logger.debug("来自 workwx 的授权, 获得 code: {}".format(code))
-                workwx_userinfo = yield self._get_user_info_workwx(code)
-                if workwx_userinfo:
+                workwx_userinfo = yield self._get_user_info_workwx(code, self._company)
+                if workwx_userinfo == "referral-non-employee":
+                    self.logger.debug("来自 workwx 的授权, 获得 workwx_userinfo:{}".format(workwx_userinfo))
+                    paths_for_noweixin = [path.POSITION_LIST, path.WECHAT_COMPANY, path.COMPANY_TEAM,
+                                          path.EMPLOYEE_VERIFY_BYEMAIL, path.REFERRAL_UPLOAD_PC,
+                                          path.JOYWOK_HOME_PAGE, path.JOYWOK_AUTO_AUTH,
+                                          path.REFERRAL_UPLOAD_PCLOGIN, path.IMAGE_URL
+                                          ]
+                    if current_path not in paths_for_noweixin and not self.request.uri.startswith("/api/") and not self.request.uri.startswith("/pc/api/"):
+                        self.render(template_name="adjunct/not-weixin.html", http_code=416)
+                        return
+                    self._workwx = None  #非员工免认证访问三个固定页面
+
+                elif workwx_userinfo:
                     self.logger.debug("来自 workwx 的授权, 获得 workwx_userinfo:{}".format(workwx_userinfo))
                     yield self._handle_user_info_workwx(workwx_userinfo)
                     if self._WORKWX_REDIRECT:
                         return
                 else:
                     self.logger.debug("来自 workwx 的 code 无效")
+
             else:
                 # pc端授权
                 if code and self._verify_code(code):
@@ -362,7 +378,8 @@ class BaseHandler(MetaBaseHandler):
         # joywok取消员工身份时，清除session，重新认证
         yield self._update_joywok_employee_session()
         # 企业微信成员做员工认证
-        if self.in_workwx:
+        noworkwx_employee_paths = [path.IMAGE_URL]  #/image是模板文件里面的<img链接,在企业微信里面无需做企业员工认证
+        if self.in_workwx and self._workwx and not self.request.uri.startswith("/api/") and not self.request.uri.startswith("/pc/api/") and current_path not in noworkwx_employee_paths:  #非员工免认证访问三个固定页面会将self._workwx=None
             is_redirect = yield self._is_employee_workwx()
             if is_redirect:
                 return
@@ -495,6 +512,8 @@ class BaseHandler(MetaBaseHandler):
                     "corpid": res.corp_id,
                     "redirect_url": res.redirect_url})
             })
+        elif self.in_workwx and self._workwx:
+            client_env.update({"jsapi": self._add_jsapi_to_workwx(self._workwx)})
         self.namespace = {"client_env": client_env}
 
     @gen.coroutine
@@ -618,7 +637,7 @@ class BaseHandler(MetaBaseHandler):
             if self._client_env == const.CLIENT_JOYWOK:
                 url = self.make_url(path.JOYWOK_HOME_PAGE)
                 yield self.redirect(url)
-            elif self.in_workwx:
+            elif self.in_workwx and self._workwx:
                 self._get_workwx_oauth_redirect_url()
                 url = self._work_oauth_service.get_oauth_code_base_url()
                 self.logger.debug("workwx_oauth_redirect_url: {}".format(url))
@@ -758,9 +777,9 @@ class BaseHandler(MetaBaseHandler):
         session.sc_cookie_id = self._sc_cookie_id
 
         session.wechat = self._wechat
-        if self.in_workwx:
+        if self.in_workwx and self._workwx: #从微信转发过来的职位对应的公司在数据库中没有企业微信相关配置
             session.workwx = self._workwx
-            self._add_jsapi_to_wechat(session.workwx)
+            # self._add_jsapi_to_wechat(session.workwx)
         else:
             self._add_jsapi_to_wechat(session.wechat)
 
@@ -863,6 +882,12 @@ class BaseHandler(MetaBaseHandler):
             jsapi_ticket=wechat.jsapi_ticket,
             url=self.fullurl(encode=False))
 
+    def _add_jsapi_to_workwx(self, workwx):
+        """拼装 jsapi"""
+        return JsApi(
+            jsapi_ticket=workwx.jsapi_ticket,
+            url=self.fullurl(encode=False))
+
     def _make_new_session_id(self, user_id):
         """创建新的 session_id
 
@@ -919,6 +944,7 @@ class BaseHandler(MetaBaseHandler):
             settings=self.settings
         )
         namespace.update(add_namespace)
+        namespace.update(self.namespace)
         return namespace
 
     def _set_access_time_cookie(self):
@@ -1120,9 +1146,9 @@ class BaseHandler(MetaBaseHandler):
             return False
 
     @gen.coroutine
-    def _get_user_info_workwx(self, code):
+    def _get_user_info_workwx(self, code, company):
         try:
-            userinfo = yield self._work_oauth_service.get_userinfo_by_code(code)
+            userinfo = yield self._work_oauth_service.get_userinfo_by_code(code, company)
             raise gen.Return(userinfo)
         except WeChatOauthError as e:
             raise gen.Return(None)

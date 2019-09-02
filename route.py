@@ -180,6 +180,7 @@ common_routes = [
 platform_routes = [
     (r"/position/(?P<position_id>\d+)",              handler.platform.position.PositionHandler,                 {"event": "position_info"}),
     (r"/position/?",                                 handler.platform.position.PositionListHandler,             {"event": "position_list"},      'position_list'),
+    (r"/position/share?",                            handler.platform.position.PositionShareInBulkHandler,      {"event": "share_position_list"}),
     (r"/start/?",                                    handler.platform.landing.LandingHandler,                   {"event": "start_landing"}),
     (r"/company/(\d+)",                              handler.platform.companyrelation.CompanyInfoRedirectHandler, {"event": "company_old_info"}, "old_company_info_page"),
     (r"/company",                                    handler.platform.companyrelation.CompanyHandler,           {"event": "company_info"},       "new_company_info_page"),
@@ -274,6 +275,8 @@ platform_routes = [
     (r"/api/employee/recom/subscribe",               handler.platform.employee.ApiEmployeeRecomSubscribeHandler,{"event": "api_employee_recom_subscribe"}),
     (r"/api/resend/bind/email",                      handler.platform.employee.ResendBindEmailHandler,          {"event": "resend_bind_email"}),
 
+    (r"/api/position/share?",                        handler.platform.position.APIPositionShareInBulkHandler,   {"event": "api_share_position_list"}),
+
     (r"/api/func/wechat/?",                          handler.platform.employee.WechatSubInfoHandler,            {"event": "wechat_sub_info"}),
     (r'/api/user/survey/?',                          handler.platform.user.APIUserSurveyHandler,                {"event": "user_survey_api"}),
     (r'/api/position/recom/list/?',                  handler.platform.user.APIPositionRecomListHandler,         {"event": "position_ai-recomlist"}),
@@ -301,6 +304,7 @@ platform_routes = [
 
 ]
 platform_routes = common_routes + platform_routes
+# pc端、第三方应用等非微信环境需要访问的页面: common_routes：['/image']，platform_routes: ['/position'、'/company'、'/company/team'、'/employee/bindemail'、"/pc/upload/profile"、"/joywork"、"/thirdparty/automatic/auth"、"/pc/upload/profile/login"]
 
 
 # 聚合号的单独 routes, 域名 platform.moseeker.com/recruit

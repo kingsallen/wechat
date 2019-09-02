@@ -37,3 +37,9 @@ application_service = ObjectDict(
     interfaceid="A11017001",
     service_name="application"
 )
+
+sharechain_service = ObjectDict(
+    appid="A11051",
+    interfaceid="A11051001",
+    service_name="sharechain"
+)

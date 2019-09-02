@@ -5,6 +5,7 @@
 # 企业号单独链接
 POSITION_PATH = '/position/{}'
 POSITION_LIST = '/position'
+POSITION_SHARE = "/position/share"
 POSITION_REFERRAL_LIST = '/position/recom'
 RED_PACKET_CARD = '/mobile/redpack'
 TEAM_PATH = '/company/team/{}'
@@ -27,6 +28,7 @@ EMPOLYEE_LADDER = "/employee/ladder"
 EMPLOYEE_REWARDS_RECORD = '/app/employee/binding/rewards'
 EMPLOYEE_TEN_MIN_TMP = '/employee/referral/invite_cards'
 EMPLOYEE_PORTAL = '/usercenter/mine'
+EMPLOYEE_VERIFY_BYEMAIL = '/employee/bindemail'
 
 PROFILE_CUSTOM_CV = '/profile/custom'
 REFERRAL_CONFIRM = "/referral/confirm"
@@ -36,6 +38,7 @@ MINE = "/usercenter/mine"
 REFERRAL_PROFILE = "/employee/recom/profile"
 REFERRAL_CRUCIAL_INFO = "/referral/crucial/info"
 REFERRAL_SCAN = "/employee/recom/profile/pc"
+REFERRAL_UPLOAD_PCLOGIN = "/pc/upload/profile/login"
 
 # 聚合号单独链接
 GAMMA_HOME = '/enter'
@@ -120,6 +123,7 @@ INFRA_USER_EMPLOYEE_REFERRAL = "v1/referral/users/{}/employee-info"
 INFRA_USER_BONUS_LIST = "v1/referral/users/{}/bonus"
 INFRA_USER_CLAIM_BONUS = "v1/referral/wechat/employee/{}/bonus/claim"
 INFRA_USER_EMPLOYEE_BIND = 'user/employee/bind'
+INFRA_REFRESH_ACCESS_TOKEN = 'hraccount/company/refreshWorkWxToken/{}'
 
 
 # 申请服务
