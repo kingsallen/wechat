@@ -26,3 +26,13 @@ position_service = ObjectDict({
     }),
     "api": ObjectDict(CLOUD_POSITION_GET_POSITIONLIST="/v4/list")
 })
+
+
+company_service = ObjectDict({
+    "service": ObjectDict({
+        "appid": "A11007",
+        "interfaceid": "A11007001",
+        "service_name": "company"
+    }),
+    "api": ObjectDict(CLOUD_GET_COMPANY_HR_INFO="/v4/hr/info")
+})

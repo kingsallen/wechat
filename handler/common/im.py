@@ -344,7 +344,7 @@ class ChatHandler(BaseHandler):
         self.user_id = 0
         self.position_id = 0
         self.flag = 0
-        self.bot_enabled = False
+        # self.bot_enabled = False 废弃全局变量，设置1次托管后，全局变量会一直为True，在设置HR不托管MoBot的时候导致数据状态不一致
 
     @handle_response
     @gen.coroutine
@@ -368,16 +368,25 @@ class ChatHandler(BaseHandler):
         :return:
         """
 
+        appid = ''
         res_privacy, data_privacy = yield self.privacy_ps.if_privacy_agreement_window(
             self.current_user.sysuser.id)
 
         # data参数前端会被浏览器encode一次，js又会encodeURIComponent一次
-        jsapi = JsApi(jsapi_ticket=self.current_user.wechat.jsapi_ticket,
-                      url=unquote(self.params.share_url))
+        # 企业微信
+        if self.in_workwx and self._workwx:
+            appid = self.current_user.workwx.corpid
+            jsapi_ticket = self.current_user.workwx.jsapi_ticket
+        # 微信
+        else:
+            appid = self.current_user.wechat.appid
+            jsapi_ticket = self.current_user.wechat.jsapi_ticket
+
+        jsapi = JsApi(jsapi_ticket=jsapi_ticket, url=unquote(self.params.share_url))
 
         config = ObjectDict({
                   "debug": False,
-                  "appid": self.current_user.wechat.appid,
+                  "appid": appid,
                   "timestamp": jsapi.timestamp,
                   "nonceStr": jsapi.nonceStr,
                   "signature": jsapi.signature,
@@ -494,9 +503,7 @@ class ChatHandler(BaseHandler):
             (self.current_user.sysuser.id, self.params.hr_id, pid, room_id, self.current_user.qxuser, is_gamma)
         )
 
-        # 如果已经开启chatbot聊天，不需要发送职位给hr
-        if not self.bot_enabled:
-            yield self.get_bot_enabled()
+        mobot_enable = yield self.chat_ps.get_mobot_hosting_status(self.hr_id)
 
         user_hr_account = yield self.chat_ps.get_hr_info(self.hr_id)
         company_id = user_hr_account.company_id
@@ -511,7 +518,7 @@ class ChatHandler(BaseHandler):
                                               pid, room_id,
                                               self.current_user.qxuser,
                                               is_gamma,
-                                              self.bot_enabled,
+                                              mobot_enable,
                                               recom,
                                               is_employee)
 
@@ -626,8 +633,8 @@ class ChatHandler(BaseHandler):
         self.logger.debug('post_message  flag:{}'.format(self.flag))
         self.logger.debug('post_message  create_new_context:{}'.format(create_new_context))
 
-        if not self.bot_enabled:
-            yield self.get_bot_enabled()
+        mobot_enable = yield self.chat_ps.get_mobot_hosting_status(self.hr_id)
+        self.logger.debug('post_message mobot_enable:{}'.format(mobot_enable))
 
         self.chatroom_channel = const.CHAT_CHATROOM_CHANNEL.format(self.hr_id, self.user_id)
         self.hr_channel = const.CHAT_HR_CHANNEL.format(self.hr_id)
@@ -636,11 +643,13 @@ class ChatHandler(BaseHandler):
             msgType=msg_type,
             compoundContent=ujson.dumps(compoundContent),
             content=content,
+            speaker=const.CHAT_SPEAKER_USER,
             origin=const.ORIGIN_USER_OR_HR,
             roomId=int(self.room_id),
             positionId=int(self.position_id),
             serverId=server_id,
-            duration=int(duration)
+            duration=int(duration),
+            createTime=curr_now_minute()
         )
         self.logger.debug("save chat by alphadog chat_params:{}".format(chat_params))
         chat_id = yield self.chat_ps.save_chat(chat_params)
@@ -659,7 +668,7 @@ class ChatHandler(BaseHandler):
         self.logger.debug("publish chat by redis message_body:{}".format(message_body))
         self.redis_client.publish(self.hr_channel, message_body)
         try:
-            if self.bot_enabled and msg_type != "job":
+            if mobot_enable and msg_type != "job":
                 # 由于没有延迟的发送导致hr端轮训无法订阅到publish到redis的消息　所以这里做下延迟处理
                 # delay_robot = functools.partial(self._handle_chatbot_message, user_message)
                 # ioloop.IOLoop.current().call_later(1, delay_robot)
@@ -668,10 +677,36 @@ class ChatHandler(BaseHandler):
             self.logger.error(e)
 
         # 添加聊天对话埋点记录
-        self._add_sensor_track(msg_type, self.bot_enabled, content)
+        self._add_sensor_track(msg_type, mobot_enable, content)
 
-        # bot_enabled 提供前端控制 是否出loading状态
-        self.send_json_success(data={"bot_enabled": self.bot_enabled})
+        # HR未托管MoBot的文案提示，不保存历史记录
+        if not mobot_enable:
+            yield self._hr_message_reply_content()
+
+        # mobot_enable 提供前端控制 是否出loading状态
+        self.send_json_success(data={"mobot_enable": mobot_enable})
+
+    @gen.coroutine
+    def _hr_message_reply_content(self):
+        """
+        联系HR场景进入聊天室，HR收到消息后自动回复的文本内容, 不记录聊天历史记录
+        """
+        content = "已收到您的消息，请耐心等待HR小姐姐给您回复哦😘~！"
+
+        message_body = json_dumps(ObjectDict(
+            compoundContent="",
+            content=content,
+            stats=0,
+            msgType="html",
+            speaker=const.CHAT_SPEAKER_HR,
+            cid=int(self.room_id),
+            pid=int(self.position_id),
+            createTime=curr_now_minute()
+        ))
+        self.logger.debug("publish chat by redis message_body:{}".format(message_body))
+
+        # 聊天室广播
+        self.redis_client.publish(self.chatroom_channel, message_body)
 
     @handle_response
     @authenticated
@@ -692,14 +727,14 @@ class ChatHandler(BaseHandler):
 
         self.logger.debug('post_trigger  create_new_context:{}'.format(create_new_context))
 
-        if not self.bot_enabled:
-            yield self.get_bot_enabled()
+        mobot_enable = yield self.chat_ps.get_mobot_hosting_status(self.hr_id)
+        self.logger.debug('post_trigger mobot_enable:{}'.format(mobot_enable))
 
         self.chatroom_channel = const.CHAT_CHATROOM_CHANNEL.format(self.hr_id, self.user_id)
         self.hr_channel = const.CHAT_HR_CHANNEL.format(self.hr_id)
 
         try:
-            if self.bot_enabled and msg_type != "job":
+            if mobot_enable and msg_type != "job":
                 # 由于没有延迟的发送导致hr端轮训无法订阅到publish到redis的消息　所以这里做下延迟处理
                 # delay_robot = functools.partial(self._handle_chatbot_message, user_message)
                 # ioloop.IOLoop.current().call_later(1, delay_robot)
@@ -708,9 +743,44 @@ class ChatHandler(BaseHandler):
             self.logger.error(e)
 
         # 添加聊天对话埋点记录
-        self._add_sensor_track(msg_type, self.bot_enabled, content)
+        self._add_sensor_track(msg_type, mobot_enable, content)
 
-        self.send_json_success(data={"bot_enabled": self.bot_enabled})
+        # HR未托管MoBot的文案提示，不保存历史记录
+        if not mobot_enable:
+            yield self._hr_welcome_reply_content()
+
+        # mobot_enable 提供前端控制 是否出loading状态
+        self.send_json_success(data={"mobot_enable": mobot_enable})
+
+    @gen.coroutine
+    def _hr_welcome_reply_content(self):
+        """
+        联系HR场景进入聊天室，HR自动回复的文本内容, 不记录聊天历史记录
+        """
+        hr_info = yield self.chat_ps.get_company_hr_info(self.hr_id)
+        if hr_info and hr_info.username:
+            content = "您好，我是{company_name}的{hr_name}，关于职位和公司信息有任何问题请随时和我沟通。".format(
+                company_name=self.current_user.company.abbreviation or self.current_user.company.name,
+                hr_name=hr_info.username)
+        else:
+            content = "您好，我是{company_name}HR，关于职位和公司信息有任何问题请随时和我沟通。".format(
+                company_name=self.current_user.company.abbreviation or self.current_user.company.name)
+
+        message_body = json_dumps(ObjectDict(
+            compoundContent="",
+            content=content,
+            stats=0,
+            msgType="html",
+            speaker=const.CHAT_SPEAKER_HR,
+            cid=int(self.room_id),
+            pid=int(self.position_id),
+            createTime=curr_now_minute()
+        ))
+        self.logger.debug("publish chat by redis message_body:{}".format(message_body))
+
+        # 聊天室广播
+        self.redis_client.publish(self.chatroom_channel, message_body)
+
 
     @gen.coroutine
     def _handle_chatbot_message(self, user_message, create_new_context, from_textfield):
@@ -791,6 +861,7 @@ class ChatHandler(BaseHandler):
             if bot_message:
                 if msg_type in const.INTERACTIVE_MSG:
                     compound_content.update(disabled=False)  # 可交互类型消息发送给各端时需标记为可以操作
+
                 message_body = json_dumps(ObjectDict(
                     compoundContent=compound_content,
                     content=bot_message.content,
@@ -809,21 +880,6 @@ class ChatHandler(BaseHandler):
 
                 # 聊天室广播
                 self.redis_client.publish(self.chatroom_channel, message_body)
-
-    @gen.coroutine
-    def get_bot_enabled(self):
-
-        if not self.hr_id:
-            return
-
-        user_hr_account = yield self.chat_ps.get_hr_info(self.hr_id)
-
-        company_id = user_hr_account.company_id
-
-        if not company_id:
-            return
-
-        self.bot_enabled = user_hr_account.leave_to_mobot
 
 
 class MobotHandler(BaseHandler):
