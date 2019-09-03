@@ -473,7 +473,6 @@ class ChatPageService(PageService):
         params = {"hrId": hr_id}
         hr_info = yield self.infra_company_ds.get_company_hr_info(params)
         if hr_info.data:
-            logger.debug("get_company_hr_info hr_info:{}".format(hr_info.data))
             hr_info_data = ObjectDict(hr_info.data)
 
         raise gen.Return(hr_info_data)
@@ -485,8 +484,6 @@ class ChatPageService(PageService):
         :return: True 托管 False 未托管
         """
         hr_info = yield self.get_company_hr_info(hr_id)
-        logger.debug("get_mobot_hosting_status hr_info:{}".format(hr_info))
-
         # HR聊天是否托管给智能招聘助手，0 不托管，1 托管
         mobot_enable = bool(hr_info.leave_to_mobot) if hr_info else False
         raise gen.Return(mobot_enable)
