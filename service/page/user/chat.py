@@ -15,8 +15,6 @@ from util.tool.http_tool import http_post, http_get
 from util.tool.str_tool import gen_salary
 from util.tool.url_tool import make_static_url
 
-from globals import logger
-
 
 class ChatPageService(PageService):
     def __init__(self):
