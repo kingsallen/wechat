@@ -368,13 +368,14 @@ class ChatHandler(BaseHandler):
         :return:
         """
 
-        appid = ''
         res_privacy, data_privacy = yield self.privacy_ps.if_privacy_agreement_window(
             self.current_user.sysuser.id)
 
+        logger.debug("get_environ in_workwx: {}".format(self.in_workwx))
+
         # data参数前端会被浏览器encode一次，js又会encodeURIComponent一次
         # 企业微信
-        if self.in_workwx and self._workwx:
+        if self.in_workwx:
             appid = self.current_user.workwx.corpid
             jsapi_ticket = self.current_user.workwx.jsapi_ticket
         # 微信
