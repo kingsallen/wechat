@@ -266,7 +266,7 @@ class ChatPageService(PageService):
                 position.team = team_info.name
                 position.salary = position_info.salary
                 position.location = position_info.city
-                position.update = position_info.updateTime
+                position.update = position_info.update_time
                 position.id = position_info.id
                 position.imgUrl = banner
                 position.cover = make_static_url(company_info.logo)  # TODO 如果有红包或其他特殊场景的cover设置
@@ -470,8 +470,8 @@ class ChatPageService(PageService):
 
         params = {"hrId": hr_id}
         hr_info = yield self.infra_company_ds.get_company_hr_info(params)
-        if hr_info.get('data'):
-            hr_info_data = ObjectDict(hr_info.get('data'))
+        if hr_info.data:
+            hr_info_data = ObjectDict(hr_info.data)
 
         raise gen.Return(hr_info_data)
 
@@ -483,5 +483,5 @@ class ChatPageService(PageService):
         """
         hr_info = yield self.get_company_hr_info(hr_id)
         # HR聊天是否托管给智能招聘助手，0 不托管，1 托管
-        mobot_enable = bool(hr_info.leaveToMobot) if hr_info else False
+        mobot_enable = bool(hr_info.leave_to_mobot) if hr_info else False
         raise gen.Return(mobot_enable)
