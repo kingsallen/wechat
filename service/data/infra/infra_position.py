@@ -37,7 +37,7 @@ class InfraPositionDataService(DataService):
     def get_position_list_by_pids(self, params):
         """
         根据pids批量查询职位列表
-        :param params : {'pids': ''} pids:用,号分隔
+        :param params : {'pids': '1,2,3'} pids:用,号分隔
         :return:
         """
         ret = yield http_get_v2(position.POSITION_LIST_BY_PIDS, position_service, params)
