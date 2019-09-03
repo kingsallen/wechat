@@ -2,7 +2,6 @@
 
 import tornado.gen as gen
 
-import conf.alphacloud_api as api
 import conf.path as path
 from service.data.base import DataService
 from service.data.infra.framework.client.client import ServiceClientFactory
@@ -10,7 +9,10 @@ from thrift_gen.gen.common.struct.ttypes import BIZException
 from thrift_gen.gen.company.service.CompanyServices import \
     Client as CompanyServicesClient
 from util.tool.dict_tool import ObjectDict
-from util.tool.http_tool import http_get, unboxing, http_post, http_get_clound
+from util.tool.http_tool import http_get, unboxing, http_post, http_get_v2
+
+from conf.newinfra_service_conf.service_info import company_service
+from conf.newinfra_service_conf.company import company
 
 
 class InfraCompanyDataService(DataService):
@@ -152,5 +154,5 @@ class InfraCompanyDataService(DataService):
             }
         }
         """
-        ret = yield http_get_clound(api.company_service.api.CLOUD_GET_COMPANY_HR_INFO, api.company_service.service, params)
+        ret = yield http_get_v2(company.COMPANY_HR_INFO, company_service, params)
         return ret

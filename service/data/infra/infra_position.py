@@ -3,18 +3,17 @@
 import tornado.gen as gen
 from tornado.testing import AsyncTestCase, gen_test
 
-import conf.path as path
 import conf.alphacloud_api as api
+import conf.path as path
+from conf.newinfra_service_conf.position import position
+from conf.newinfra_service_conf.service_info import position_service, sharechain_service
+from conf.newinfra_service_conf.sharechain import sharechain
 from service.data.base import DataService
 from service.data.infra.framework.client.client import ServiceClientFactory
 from thrift_gen.gen.position.service.PositionServices import Client as PositionServiceClient
 from util.common import ObjectDict
-from util.tool.http_tool import http_get, http_post, http_patch, http_get_rp, http_get_v2, http_get_clound, http_post_v2
 from util.tool import http_tool
-from util.common.decorator import cache_new
-from conf.newinfra_service_conf.service_info import position_service, sharechain_service
-from conf.newinfra_service_conf.position import position
-from conf.newinfra_service_conf.sharechain import sharechain
+from util.tool.http_tool import http_get, http_post, http_patch, http_get_rp, http_get_v2, http_post_v2
 
 
 class InfraPositionDataService(DataService):
@@ -41,7 +40,7 @@ class InfraPositionDataService(DataService):
         :param params : {'pids': ''} pids:用,号分隔
         :return:
         """
-        ret = yield http_get_clound(api.position_service.api.CLOUD_POSITION_GET_POSITIONLIST, api.position_service.service, params)
+        ret = yield http_get_v2(position.POSITION_LIST_BY_PIDS, position_service, params)
         return ret
 
     @gen.coroutine
