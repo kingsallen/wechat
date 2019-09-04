@@ -118,8 +118,13 @@ class PositionPageService(PageService):
                 }
             }
         }
-        response = self.es.search(index='index', body=data)
-        result_list = response.hits.hits
+        # 防止因为es的不稳定导致的职位详情页无法访问的情况。
+        try:
+            response = self.es.search(index='index', body=data)
+            result_list = response.hits.hits
+        except Exception as e:
+            self.logger.error("position info es search error: {}".format(e))
+            result_list = []
         city = ""
         city_ename = ""
         if result_list:
