@@ -322,11 +322,13 @@ class EmployeeBindHandler(BaseHandler):
     @authenticated
     @gen.coroutine
     def post(self):
+        source = const.EMPLOYEE_SOURCE_MINIAPP if self._in_wechat == const.CLIENT_MINIAPP else 0
         result, payload = self.employee_ps.make_bind_params(
             self.current_user.sysuser.id,
             self.current_user.company.id,
             self.json_args,
-            self.params
+            self.params,
+            source
         )
 
         self.logger.debug(result)
