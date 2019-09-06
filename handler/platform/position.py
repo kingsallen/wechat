@@ -1114,7 +1114,7 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
                     if self.current_user.company.id == const.GELI_COMPANY_ID:
                         position_ex['suppress_apply']['suppress_apply_data']['position_url'] = const.GELI_POSITION_URL.format(p.jobnumber.split('_')[-1])
                     # 中外运定制，没有jobnumber的允许在我们公司投递
-                    elif p.company_id == const.SUPPRESS_APPLY_ZWY:
+                    elif self.current_user.company.id == const.SUPPRESS_APPLY_ZWY:
                         if p.jobnumber:
                             position_ex['suppress_apply']['suppress_apply_data']['position_url'] = const.ZWY_POSITION_URL.format(p.jobnumber)
                         else:
