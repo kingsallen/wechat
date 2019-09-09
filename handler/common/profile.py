@@ -1159,13 +1159,10 @@ class CustomParseIdcardHandler(BaseHandler):
         id_parse = yield self.profile_ps.custom_parse_idcard(file_id.fileId, side, self.current_user.wechat.company_id, self.current_user.sysuser.id)
         if id_parse.code == const.NEWINFRA_API_SUCCESS:
             data = id_parse.data
-            birth_stamp = time.mktime(time.strptime(data.get("birth"), "%Y%m%d"))
-            struct_birth = time.localtime(birth_stamp)
-            birth = time.strftime("%Y-%m-%d", struct_birth)
 
             idcard = {"name": data.get("name"),
                       "gender": data.get("gender"),
-                      "birth": birth,
+                      "birth": data.get("birth"),
                       "idnumber": data.get("id")
                       }
             data["idcard"] = idcard
