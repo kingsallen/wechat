@@ -9,7 +9,10 @@ from thrift_gen.gen.common.struct.ttypes import BIZException
 from thrift_gen.gen.company.service.CompanyServices import \
     Client as CompanyServicesClient
 from util.tool.dict_tool import ObjectDict
-from util.tool.http_tool import http_get, unboxing, http_post
+from util.tool.http_tool import http_get, unboxing, http_post, http_get_v2
+
+from conf.newinfra_service_conf.service_info import company_service
+from conf.newinfra_service_conf.company import company
 
 
 class InfraCompanyDataService(DataService):
@@ -113,3 +116,12 @@ class InfraCompanyDataService(DataService):
         })
         res = yield http_get(path.OMS_SWITCH, params)
         return res
+
+    @gen.coroutine
+    def get_company_hr_info(self, params):
+        """
+        根据hrId获取HR信息
+        :param params : {'hrId': 123}
+        """
+        ret = yield http_get_v2(company.COMPANY_HR_INFO, company_service, params)
+        return ret

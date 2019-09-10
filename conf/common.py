@@ -805,6 +805,12 @@ GELI_COMPANY_ID = 1730310
 GELI_WEBSITE = 'http://gree.zhiye.com'
 GELI_POSITION_URL = 'http://gree.zhiye.com/zpdetail/{}'
 
+# 中外运投递
+SUPPRESS_APPLY_ZWY = 2495737
+
+# 中外运的职位链接
+ZWY_POSITION_URL = "https://sinotrans.zhiye.com/zpdetail/{}"
+
 # 开启了员工内部转岗功能的公司
 TRANSFER_COMPANY_ID = [2052173, 601320]
 

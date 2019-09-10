@@ -28,6 +28,7 @@ EMPOLYEE_LADDER = "/employee/ladder"
 EMPLOYEE_REWARDS_RECORD = '/app/employee/binding/rewards'
 EMPLOYEE_TEN_MIN_TMP = '/employee/referral/invite_cards'
 EMPLOYEE_PORTAL = '/usercenter/mine'
+EMPLOYEE_VERIFY_BYEMAIL = '/employee/bindemail'
 
 PROFILE_CUSTOM_CV = '/profile/custom'
 REFERRAL_CONFIRM = "/referral/confirm"
@@ -37,6 +38,7 @@ MINE = "/usercenter/mine"
 REFERRAL_PROFILE = "/employee/recom/profile"
 REFERRAL_CRUCIAL_INFO = "/referral/crucial/info"
 REFERRAL_SCAN = "/employee/recom/profile/pc"
+REFERRAL_UPLOAD_PCLOGIN = "/pc/upload/profile/login"
 
 # 聚合号单独链接
 GAMMA_HOME = '/enter'

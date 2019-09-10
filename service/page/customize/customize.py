@@ -13,7 +13,7 @@ class CustomizePageService(PageService):
     """企业定制化相关内容"""
 
     # 诺华集团招聘
-    _SUPPRESS_APPLY_CIDS = [61153, 1730310]
+    _SUPPRESS_APPLY_CIDS = [61153, 1730310, 2495737]
 
     # 开启代理投递
     # e袋洗 & 仟寻测试
@@ -47,6 +47,11 @@ class CustomizePageService(PageService):
         else:
             if position_info.company_id == const.GELI_COMPANY_ID:
                 return True, {"position_url": const.GELI_POSITION_URL.format(position_info.jobnumber.split('_')[-1])}
+            elif position_info.company_id == const.SUPPRESS_APPLY_ZWY:
+                if position_info.jobnumber:
+                    return True, {"position_url": const.ZWY_POSITION_URL.format(position_info.jobnumber)}
+                else:
+                    return False, None
             return (True, {"custom_field": position_info.job_custom or "",
                            "job_number": position_info.jobnumber or ""})
 

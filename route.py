@@ -303,6 +303,7 @@ platform_routes = [
 
 ]
 platform_routes = common_routes + platform_routes
+# pc端、第三方应用等非微信环境需要访问的页面: common_routes：['/image']，platform_routes: ['/position'、'/company'、'/company/team'、'/employee/bindemail'、"/pc/upload/profile"、"/joywork"、"/thirdparty/automatic/auth"、"/pc/upload/profile/login"]
 
 
 # 聚合号的单独 routes, 域名 platform.moseeker.com/recruit
