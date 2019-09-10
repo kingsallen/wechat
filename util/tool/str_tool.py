@@ -89,9 +89,9 @@ def gen_experience(experience, experience_above):
     :return:
     """
 
-    if experience and experience_above:
+    if experience and experience != '0' and experience_above:
         return experience + const.EXPERIENCE_UNIT + const.POSITION_ABOVE
-    elif experience:
+    elif experience and experience != '0':
         return experience + const.EXPERIENCE_UNIT
     else:
         return ""
