@@ -271,7 +271,7 @@ class ProfileViewHandler(BaseHandler):
 
         profile_tpl = yield self.profile_ps.profile_to_tempalte(profile, self.locale)
 
-        other_key_name_mapping = yield self.profile_ps.get_others_key_name_mapping(locale=self.locale)
+        other_key_name_mapping = yield self.profile_ps.get_others_key_name_mapping(company_id=self.current_user.company.id, locale=self.locale)
 
         # 游客页不应该显示 other信息，求职意愿
         profile_tpl.other = ObjectDict()
@@ -316,7 +316,7 @@ class ProfileHandler(BaseHandler):
         profile_tpl = yield self.profile_ps.profile_to_tempalte(
             self.current_user.profile, self.locale)
 
-        other_key_name_mapping = yield self.profile_ps.get_others_key_name_mapping(select_all=True, locale=self.locale)
+        other_key_name_mapping = yield self.profile_ps.get_others_key_name_mapping(company_id=self.current_user.company.id, select_all=True, locale=self.locale)
 
         self.params.share = self._share(self.current_user.profile.profile.get("uuid"), profile_tpl)
         self.render_page(
@@ -358,6 +358,10 @@ class ProfileCustomHandler(BaseHandler):
 
         if has_profile:
             resume_dict = yield self.application_ps._generate_resume_cv(profile, custom_tpl)
+            if resume_dict.id_card_back:
+                resume_dict.id_card_back = ""
+            if resume_dict.id_card_front:
+                resume_dict.id_card_front = ""
         else:
             # 如果没有仟寻profile，对于已经验证手机号的用户，自定义模板需要默认填上验证手机号，即user_user的username字段
             resume_dict = ObjectDict({'mobile': str(self.current_user.sysuser.mobile) if self.current_user.sysuser.mobile else ''})
@@ -391,10 +395,10 @@ class ProfileCustomHandler(BaseHandler):
                         if field.get("field_name") == "name": #name固定是必填字段
                             field["required"] = 0
                             field["order"] = 1
-                        if field.get("field_name") in ["id_card", "gender", "birth", "idnumber", "id_card_front", "id_card_back"]:
+                        if field.get("field_name") in ["id_card", "gender", "birth", "idnumber", "id_card_front", "id_card_back", "id_card_addr"]:
                             field["required"] = idcards[i].get("required")
                             field["order"] = 1
-                        if field.get("field_name") in ["name", "idnumber", "gender", "birth"]:
+                        if field.get("field_name") in ["name", "idnumber", "gender", "birth", "id_card_addr"]:
                             field["parent_id"] = 0
                     cv_conf[i]["fields"] =  sorted(cv_conf[i].get("fields"), key=operator.itemgetter('order'))
             config = cv_conf
@@ -407,7 +411,7 @@ class ProfileCustomHandler(BaseHandler):
                             field["required"] = 0
                             field["parent_id"] = 0
                             field["order"] = 1
-                        if field.get("field_name") in ["idnumber", "gender", "birth"]:
+                        if field.get("field_name") in ["idnumber", "gender", "birth", "id_card_addr"]:
                             field["required"] = idcards[i].get("required")
                             field["parent_id"] = 0
                             field["order"] = 1
@@ -1156,16 +1160,23 @@ class CustomParseIdcardHandler(BaseHandler):
         file_name = self.params.file_name
         side = self.params.side
         file_id = yield self.user_ps.upload_file_server(file_data, file_name, self.current_user.sysuser.id, scene_id=1) # scene_id=1 ：身份证识别
-        id_parse = yield self.profile_ps.custom_parse_idcard(file_id.fileId, side, self.current_user.wechat.company_id, self.current_user.sysuser.id)
-        if id_parse.code == const.NEWINFRA_API_SUCCESS:
-            data = id_parse.data
-
-            idcard = {"name": data.get("name"),
-                      "gender": data.get("gender"),
-                      "birth": data.get("birth"),
-                      "idnumber": data.get("id")
-                      }
-            data["idcard"] = idcard
-            self.send_json_success(data=data)
+        if side == "face":
+            id_parse = yield self.profile_ps.custom_parse_idcard(file_id.fileId, side, self.current_user.wechat.company_id, self.current_user.sysuser.id)
+            if id_parse.code == const.NEWINFRA_API_SUCCESS:
+                data = id_parse.data
+                idcard = {"name": data.get("name"),
+                          "gender": data.get("gender"),
+                          "birth": data.get("birth"),
+                          "idnumber": data.get("id"),
+                          "id_card_addr": data.get("id_card_addr")
+                          }
+                data["idcard"] = idcard
+                self.send_json_success(data=data)
+            elif id_parse.code == "PE110002": #您今日上传身份证照已超过三次! [需要回填正面照片]
+                data = {"idcard": {}, "side": side, "id_photo_url": str(file_id.fileId)}
+                self.send_json_error(data=data, message=id_parse.message)
+            else:
+                self.send_json_error(message=id_parse.message)
         else:
-            self.send_json_error(message=id_parse.message)
+            data = {"idcard": {}, "side": side, "id_photo_url": str(file_id.fileId)}
+            self.send_json_success(data=data)

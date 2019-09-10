@@ -1177,7 +1177,7 @@ class ProfilePageService(PageService):
 
         else:
             target_keys = [c.field_name for c in custom_cv_tpls
-                           if not c.map]
+                           if not c.map and c.field_name != "id_card"]
 
         target = sub_dict(custom_cv, target_keys)
 
