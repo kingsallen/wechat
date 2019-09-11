@@ -610,6 +610,7 @@ class ChatHandler(BaseHandler):
         @:param pid int(11) 职位ID
         @:param hrId int(11) HRID
         @:param roomId int(11) 聊天室ID
+        @:param project_id int(11) MoPlan预约的项目ID
 
         :return:
         """
@@ -619,6 +620,7 @@ class ChatHandler(BaseHandler):
         self.hr_id = self.params.hrId
         self.position_id = self.params.get("pid") or 0
         self.flag = int(self.params.get("flag")) or None
+        self.project_id = self.params.get("project_id") or 0
 
         content = self.json_args.get("content") or ""
         compoundContent = self.json_args.get("compoundContent") or {}
@@ -628,6 +630,7 @@ class ChatHandler(BaseHandler):
         duration = self.json_args.get("duration") or 0
         create_new_context = self.json_args.get("create_new_context") or False
         from_textfield = self.json_args.get("from_textfield") or False
+
 
         self.logger.debug('post_message  flag:{}'.format(self.flag))
         self.logger.debug('post_message  create_new_context:{}'.format(create_new_context))
@@ -671,7 +674,7 @@ class ChatHandler(BaseHandler):
                 # 由于没有延迟的发送导致hr端轮训无法订阅到publish到redis的消息　所以这里做下延迟处理
                 # delay_robot = functools.partial(self._handle_chatbot_message, user_message)
                 # ioloop.IOLoop.current().call_later(1, delay_robot)
-                yield self._handle_chatbot_message(user_message, create_new_context, from_textfield)  # 直接调用方式
+                yield self._handle_chatbot_message(user_message, create_new_context, from_textfield, self.project_id)
         except Exception as e:
             self.logger.error(e)
 
@@ -716,6 +719,7 @@ class ChatHandler(BaseHandler):
         self.hr_id = self.params.hrId
         self.position_id = self.params.get("pid") or 0
         self.flag = self.params.get("flag") or 0
+        self.project_id = self.params.get("project_id") or 0
 
         content = self.json_args.get("content") or ""
         compoundContent = self.json_args.get("compoundContent") or {}
@@ -737,7 +741,7 @@ class ChatHandler(BaseHandler):
                 # 由于没有延迟的发送导致hr端轮训无法订阅到publish到redis的消息　所以这里做下延迟处理
                 # delay_robot = functools.partial(self._handle_chatbot_message, user_message)
                 # ioloop.IOLoop.current().call_later(1, delay_robot)
-                yield self._handle_chatbot_message(user_message, create_new_context, from_textfield)  # 直接调用方式
+                yield self._handle_chatbot_message(user_message, create_new_context, from_textfield, self.project_id)
         except Exception as e:
             self.logger.error(e)
 
@@ -782,7 +786,7 @@ class ChatHandler(BaseHandler):
 
 
     @gen.coroutine
-    def _handle_chatbot_message(self, user_message, create_new_context, from_textfield):
+    def _handle_chatbot_message(self, user_message, create_new_context, from_textfield, project_id):
         """处理 chatbot message
         获取消息 -> pub消息 -> 入库
         """
@@ -804,9 +808,10 @@ class ChatHandler(BaseHandler):
             create_new_context=create_new_context,
             from_textfield=from_textfield,
             social=social['data']['valid'],
-            campus=campus['data']['valid']
+            campus=campus['data']['valid'],
+            project_id=project_id
         )
-        self.logger.debug('_handle_chatbot_message  flag:{}'.format(self.flag))
+        self.logger.debug('_handle_chatbot_message  flag:{}, project_id:{}'.format(self.flag, project_id))
         self.logger.debug('_handle_chatbot_message  social_switch:{}'.format(social['data']['valid']))
         self.logger.debug('_handle_chatbot_message  campus_switch:{}'.format(campus['data']['valid']))
         self.logger.debug('_handle_chatbot_message  create_new_context{}'.format(create_new_context))
