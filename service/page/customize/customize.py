@@ -49,7 +49,7 @@ class CustomizePageService(PageService):
                 return True, {"position_url": const.GELI_POSITION_URL.format(position_info.jobnumber.split('_')[-1])}
             elif position_info.company_id == const.SUPPRESS_APPLY_ZWY:
                 if position_info.jobnumber:
-                    return True, {"position_url": const.ZWY_POSITION_URL.format(position_info.jobnumber)}
+                    return True, {"position_url": const.ZWY_POSITION_URL.format(position_info.jobnumber.split('_')[-1])}
                 else:
                     return False, None
             return (True, {"custom_field": position_info.job_custom or "",
