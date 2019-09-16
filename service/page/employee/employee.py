@@ -20,6 +20,10 @@ from util.wechat.core import get_temporary_qrcode
 from util.common.mq import unread_praise_publisher
 from util.common.decorator import log_time
 from util.common.exception import InfraOperationError
+from util.tool.dict_tool import objectdictify
+from util.tool.str_tool import json_hump2underline
+import ujson
+import ast
 
 
 class EmployeePageService(PageService):
@@ -779,7 +783,7 @@ class EmployeePageService(PageService):
         return is_employee
 
     @gen.coroutine
-    def update_recommend(self, employee_id, name, mobile, recom_reason, pid, type, relationship, recom_reason_text):
+    def update_recommend(self, employee_id, name, mobile, recom_reason, pid, type, relationship, recom_reason_text, email, family_name_pinyin, full_name_pinyin):
         params = ObjectDict({
             "name": name,
             "mobile": mobile,
@@ -787,14 +791,20 @@ class EmployeePageService(PageService):
             "position": pid,
             "referral_type": type,
             "relationship": relationship,
-            "recom_reason_text": recom_reason_text
+            "recom_reason_text": recom_reason_text,
+            "email": email,
+            "fields": { "familynamepinyin": family_name_pinyin,
+                        "fullnamepinyin": full_name_pinyin }
         })
         res = yield self.infra_user_ds.update_recommend(params, employee_id)
         return res
 
     @gen.coroutine
     def upload_recom_profile(self, file_name, file_data, employee_id):
-        res = yield self.infra_employee_ds.upload_recom_profile(file_name, file_data, employee_id)
+        ret = yield self.infra_employee_ds.upload_recom_profile(file_name, file_data, employee_id)
+        ret = json_hump2underline(str(ret), ptn = r"'\s*(\w+)\s*'\s*:")
+        ret = ast.literal_eval(ret)
+        res = objectdictify(ret)
         return res
 
     @gen.coroutine
