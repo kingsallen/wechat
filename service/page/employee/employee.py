@@ -295,17 +295,18 @@ class EmployeePageService(PageService):
 
         return data
 
-    def make_bind_params(self, user_id, company_id, json_args, params):
+    def make_bind_params(self, user_id, company_id, json_args, params, source):
         """
         构建员工绑定的参数集合
         :param user_id:
         :param company_id:
         :param json_args:
         :param params
+        :param source
         :return:
         """
         type = json_args.type
-        source = int(params.source) if params.source and params.source.isdigit() else 0
+        source = int(params.source) if params.source and params.source.isdigit() else source
 
         needed_keys = ['type', 'name', 'mobile', 'custom_supply_info']
 
@@ -492,11 +493,12 @@ class EmployeePageService(PageService):
         return result.data
 
     @gen.coroutine
-    def resend_bind_email(self, current_user):
+    def resend_bind_email(self, current_user, source):
         """重新发送认证邮件"""
         params = {
             "user_id": current_user.sysuser.id,
-            "company_id": current_user.company.id
+            "company_id": current_user.company.id,
+            "source": source
         }
         result = yield self.infra_employee_ds.infra_resend_bind_email(params)
         return result
