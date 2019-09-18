@@ -238,7 +238,8 @@ class ResendBindEmailHandler(BaseHandler):
     @handle_response
     @gen.coroutine
     def post(self):
-        res = yield self.employee_ps.resend_bind_email(self.current_user)
+        source = const.EMPLOYEE_SOURCE_MINIAPP if self._in_wechat == const.CLIENT_MINIAPP else 0
+        res = yield self.employee_ps.resend_bind_email(self.current_user, source)
         if res.status == const.API_SUCCESS:
             self.send_json_success()
         else:

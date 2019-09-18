@@ -493,11 +493,12 @@ class EmployeePageService(PageService):
         return result.data
 
     @gen.coroutine
-    def resend_bind_email(self, current_user):
+    def resend_bind_email(self, current_user, source):
         """重新发送认证邮件"""
         params = {
             "user_id": current_user.sysuser.id,
-            "company_id": current_user.company.id
+            "company_id": current_user.company.id,
+            "source": source
         }
         result = yield self.infra_employee_ds.infra_resend_bind_email(params)
         return result
