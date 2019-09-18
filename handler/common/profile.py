@@ -18,6 +18,9 @@ from util.tool.dict_tool import sub_dict, objectdictify
 from util.tool.str_tool import mobile_validate, split_phone_number
 from util.tool.json_tool import json_dumps
 from conf.locale_dict import CITY, CITY_REVERSE, INDUSTRY, INDUSTRY_REVERSE
+from util.common.exception import InfraOperationError
+import operator
+import time
 
 
 class ProfileNewHandler(BaseHandler):
@@ -268,7 +271,7 @@ class ProfileViewHandler(BaseHandler):
 
         profile_tpl = yield self.profile_ps.profile_to_tempalte(profile, self.locale)
 
-        other_key_name_mapping = yield self.profile_ps.get_others_key_name_mapping(locale=self.locale)
+        other_key_name_mapping = yield self.profile_ps.get_others_key_name_mapping(company_id=self.current_user.company.id, locale=self.locale)
 
         # 游客页不应该显示 other信息，求职意愿
         profile_tpl.other = ObjectDict()
@@ -313,7 +316,7 @@ class ProfileHandler(BaseHandler):
         profile_tpl = yield self.profile_ps.profile_to_tempalte(
             self.current_user.profile, self.locale)
 
-        other_key_name_mapping = yield self.profile_ps.get_others_key_name_mapping(select_all=True, locale=self.locale)
+        other_key_name_mapping = yield self.profile_ps.get_others_key_name_mapping(company_id=self.current_user.company.id, select_all=True, locale=self.locale)
 
         self.params.share = self._share(self.current_user.profile.profile.get("uuid"), profile_tpl)
         self.render_page(
@@ -355,20 +358,77 @@ class ProfileCustomHandler(BaseHandler):
 
         if has_profile:
             resume_dict = yield self.application_ps._generate_resume_cv(profile, custom_tpl)
+            if resume_dict.id_card_back:
+                resume_dict.id_card_back = ""
+            if resume_dict.id_card_front:
+                resume_dict.id_card_front = ""
         else:
             # 如果没有仟寻profile，对于已经验证手机号的用户，自定义模板需要默认填上验证手机号，即user_user的username字段
             resume_dict = ObjectDict({'mobile': str(self.current_user.sysuser.mobile) if self.current_user.sysuser.mobile else ''})
 
         json_config = yield self.application_ps.get_hr_app_cv_conf(
             position.app_cv_config_id, self.locale)
-        cv_conf = json_config.field_value
+        cv_conf = json.loads(json_config.field_value)
+        idcards = []
+        for conf in cv_conf:
+            idcard = {}
+            for field in conf.get("fields"):
+                if field.get("field_name") == "id_card":  # 如果有身份证组件，组件下的子字段的required需根据身份证组件做修改
+                    idcard = {"id": field.get('id'), "required": field.get('required')}
+                    break
+            idcards.append(idcard) #如果idcard是{}空，也追加进来
+
+        idcard_oms = yield self.company_ps.check_oms_switch_status(
+            self.current_user.company.id,
+            "身份证识别"
+        )
+        if idcard_oms.status != const.API_SUCCESS:
+            raise InfraOperationError(idcard_oms.message)
+
+        cv_fields = []
+        config = []
+        if idcard_oms.data.get('valid'):
+            for i in range(0, len(cv_conf)):
+                if idcards[i]:
+                    for field in cv_conf[i].get("fields"):
+                        field["order"] = 2
+                        if field.get("field_name") == "name": #name固定是必填字段
+                            field["required"] = 0
+                            field["order"] = 1
+                        if field.get("field_name") in ["id_card", "gender", "birth", "idnumber", "id_card_front", "id_card_back", "id_card_addr"]:
+                            field["required"] = idcards[i].get("required")
+                            field["order"] = 1
+                        if field.get("field_name") in ["name", "idnumber", "gender", "birth", "id_card_addr"]:
+                            field["parent_id"] = 0
+                    cv_conf[i]["fields"] =  sorted(cv_conf[i].get("fields"), key=operator.itemgetter('order'))
+            config = cv_conf
+        else:  # 如果oms关闭，去掉身份证照片
+            for i in range(0, len(cv_conf)):
+                if idcards[i]:
+                    for field in cv_conf[i].get("fields"):
+                        field["order"] = 2
+                        if field.get("field_name") == "name":  # name固定是必填字段
+                            field["required"] = 0
+                            field["parent_id"] = 0
+                            field["order"] = 1
+                        if field.get("field_name") in ["idnumber", "gender", "birth", "id_card_addr"]:
+                            field["required"] = idcards[i].get("required")
+                            field["parent_id"] = 0
+                            field["order"] = 1
+
+                        if field.get("field_name") in ["id_card", "id_card_front", "id_card_back"]:
+                            continue
+                        cv_fields.append(field)
+                    cv_fields = sorted(cv_fields, key=operator.itemgetter('order'))
+                    config.append({"fields": cv_fields, "title": cv_conf[i].get("title")})
+                else:
+                    config.append(cv_conf[i])
 
         self.render_page(
             template_name='profile/custom.html',
             data=dict(resume=resume_dict,
-                      # added by iris
                       has_profile=has_profile,
-                      config=json.loads(cv_conf)))
+                      config=config))
 
 
 class ProfileAPICustomCVHandler(BaseHandler):
@@ -1080,3 +1140,43 @@ class ProfileImportHandler(BaseHandler):
         user_id = self.current_user.sysuser.id
         result, show_privacy_agreement = yield self.privacy_ps.if_privacy_agreement_window(user_id)
         yield self.profile_ps.import_apply_profile(company,position,self.params,self.make_url,current_path,self.current_user,show_privacy_agreement,self.redirect,self.render_page)
+
+
+class CustomParseIdcardHandler(BaseHandler):
+    """自定义简历页: 身份证组件解析"""
+
+    @handle_response
+    @authenticated
+    @tornado.gen.coroutine
+    def post(self):
+
+        if len(self.request.files) == 0:
+            file_data = self.request.body
+            # file_name = self.get_argument("vfile")
+        else:
+            image = self.request.files["vfile"][0]
+            file_data = image["body"]
+            # file_name = image["filename"]
+        file_name = self.params.file_name
+        side = self.params.side
+        file_id = yield self.user_ps.upload_file_server(file_data, file_name, self.current_user.sysuser.id, scene_id=1) # scene_id=1 ：身份证识别
+        if side == "face":
+            id_parse = yield self.profile_ps.custom_parse_idcard(file_id.fileId, side, self.current_user.wechat.company_id, self.current_user.sysuser.id)
+            if id_parse.code == const.NEWINFRA_API_SUCCESS:
+                data = id_parse.data
+                idcard = {"name": data.get("name"),
+                          "gender": data.get("gender"),
+                          "birth": data.get("birth"),
+                          "idnumber": data.get("id"),
+                          "id_card_addr": data.get("id_card_addr")
+                          }
+                data["idcard"] = idcard
+                self.send_json_success(data=data)
+            elif id_parse.code == "PE110002": #您今日上传身份证照已超过三次! [需要回填正面照片]
+                data = {"idcard": {}, "side": side, "id_photo_url": str(file_id.fileId)}
+                self.send_json_error(data=data, message=id_parse.message)
+            else:
+                self.send_json_error(message=id_parse.message)
+        else:
+            data = {"idcard": {}, "side": side, "id_photo_url": str(file_id.fileId)}
+            self.send_json_success(data=data)
