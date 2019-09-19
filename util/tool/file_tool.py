@@ -42,7 +42,7 @@ def filetype(file_content=None, filename=None, tl=type_list()):
     for hcode in tl.keys():
         num_of_bytes = int(len(hcode) / 2)  # 需要读多少字节
         hbytes = struct.unpack_from("B" * num_of_bytes, content)  # 一个 "B"表示一个字节
-        f_hcode = str(bytes2hex(hbytes)).lower()
+        f_hcode = str(bytes2hex(hbytes)).upper()
         if f_hcode == hcode:
             ftype = tl[hcode]
             break
