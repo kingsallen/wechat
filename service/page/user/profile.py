@@ -1181,7 +1181,7 @@ class ProfilePageService(PageService):
 
         else:
             target_keys = [c.field_name for c in custom_cv_tpls
-                           if not c.map]
+                           if not c.map and c.field_name != "id_card"]
 
         target = sub_dict(custom_cv, target_keys)
 
@@ -1376,3 +1376,11 @@ class ProfilePageService(PageService):
                 importer=importer
             )
         )
+
+    @gen.coroutine
+    def custom_parse_idcard(self, file_id, side, company_id, sysuser_id):
+        """
+        自定义简历模板：解析身份证正面照片
+        """
+        ret = yield self.infra_profile_ds.custom_parse_idcard(file_id, side, company_id, sysuser_id)
+        return ret

@@ -11,6 +11,8 @@ from util.common import ObjectDict
 from requests.models import Request
 from setting import settings
 from globals import env
+from conf.newinfra_service_conf.parsing import parsing
+from conf.newinfra_service_conf.service_info import parsing_service
 
 
 class InfraProfileDataService(DataService):
@@ -822,3 +824,14 @@ class InfraProfileDataService(DataService):
         """获取上传助手小程序access_token"""
         res = yield http_tool.http_get('{}/{}'.format(settings['upload_resume_miniapp_url'], path.UPLOAD_MINIAPP_ACCESSTOKEN), params, infra=False)
         return res
+
+    @gen.coroutine
+    def custom_parse_idcard(self, file_id, side, company_id, sysuser_id):
+        params = ObjectDict({
+            "file_id": file_id,
+            "side": side,
+            "company_id": company_id,
+            "user_id": sysuser_id
+        })
+        ret = yield http_tool.http_post_v2(parsing.INFRA_CUSTOM_PARSE_IDCARD, parsing_service, params)
+        raise gen.Return(ret)

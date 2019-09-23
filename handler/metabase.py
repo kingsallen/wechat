@@ -107,7 +107,7 @@ class MetaBaseHandler(AtomHandler):
 
     @property
     def in_wechat(self):
-        return self._in_wechat == const.CLIENT_WECHAT
+        return self._in_wechat in (const.CLIENT_WECHAT, const.CLIENT_MINIAPP)
 
     @property
     def in_workwx(self):
@@ -563,10 +563,12 @@ class MetaBaseHandler(AtomHandler):
         # 判断网页所处环境
         if "Joywok" in useragent:
             wechat = const.CLIENT_JOYWOK
-        elif "MicroMessenger" in useragent and 'wxwork' not in useragent and 'moseeker' not in useragent:
-            wechat = const.CLIENT_WECHAT
         elif "MicroMessenger" in useragent and 'wxwork' in useragent and 'moseeker' not in useragent:
             wechat = const.CLIENT_WORKWX
+        elif "MicroMessenger" in useragent and 'miniProgram' in useragent and 'moseeker' not in useragent:
+            wechat = const.CLIENT_MINIAPP
+        elif "MicroMessenger" in useragent and 'moseeker' not in useragent:
+            wechat = const.CLIENT_WECHAT
 
         return wechat, mobile
 

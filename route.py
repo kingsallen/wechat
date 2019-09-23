@@ -165,6 +165,7 @@ common_routes = [
     (r"/api/collectlog",                             handler.common.logcollector.LogCollectorHandler,           {"event": "collect_log"}),
     (r"/api/captcha",                                handler.common.captcha.CaptchaHandler,                     {"event": "captcha"}),
     (r"/api/interview/statistics",                   handler.common.statistics.InterviewStatisticsHandler,      {"event": "interview_statistics"}),
+    (r"/api/custom/parse-idcard/?",                  handler.common.profile.CustomParseIdcardHandler,           {"event": "custom_parse_idcard"}),
 
     # 上传助手小程序
     (r"/api/miniapp/code",                           handler.common.miniapp.MiniappCodeHandler,                 {"event": "miniapp_code"}),
@@ -296,8 +297,6 @@ platform_routes = [
     (r'/api/referral/recom_positions/?',             handler.platform.user.ReferralRelatedPositionHandler,      {"event": "referral_related_positions"}),
     (r"/api/switch[\/]*([a-z_]+)*",                  handler.platform.switch.SwitchHandler,                     {"event": "switch_"}),
     (r"/api/func/relation_tags/?",                   handler.platform.referral.ReferralCommentTagsHandler,      {"event": "referral_comment_tags"}),
-
-    # (r"/api/func/workwx/?",                          handler.platform.thirdparty.WorkwxSubInfoHandler,            {"event": "workwx_sub_info"}),
 
     # 兼容老微信 url，进行302跳转
     (r"/.*",                                         handler.platform.compatible.CompatibleHandler,             {"event": "compatible"})
