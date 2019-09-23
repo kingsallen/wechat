@@ -44,13 +44,12 @@ class ApplicationHandler(BaseHandler):
             # -> formats of custom_cv_tpls is like:
             # [{"field_name1": "map1"}, {"field_name2": "map2"}]
 
-            result = yield self.application_ps.check_custom_cv_v2(
-                self.current_user.sysuser.id, position.id)
+            # result = yield self.application_ps.check_custom_cv_v2(
+            #     self.current_user.sysuser.id, position.id)
 
-            if not result:
-                self.redirect(self.make_url(path.PROFILE_CUSTOM_CV, self.params))
-
-                return
+            # if not result:
+            self.redirect(self.make_url(path.PROFILE_CUSTOM_CV, self.params))
+            return
 
         # 定制化需求
         # 直接投递
