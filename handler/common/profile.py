@@ -1,9 +1,7 @@
 # coding=utf-8
 
-import copy
 import json
 
-import tornado
 import tornado.gen
 from tornado.escape import json_decode
 
@@ -15,12 +13,12 @@ from util.common import ObjectDict
 from util.common.decorator import handle_response, check_and_apply_profile, \
     authenticated
 from util.tool.dict_tool import sub_dict, objectdictify
-from util.tool.str_tool import mobile_validate, split_phone_number
+from util.tool.file_tool import filetype
+from util.tool.str_tool import mobile_validate
 from util.tool.json_tool import json_dumps
 from conf.locale_dict import CITY, CITY_REVERSE, INDUSTRY, INDUSTRY_REVERSE
 from util.common.exception import InfraOperationError
 import operator
-import time
 
 
 class ProfileNewHandler(BaseHandler):
@@ -1157,9 +1155,14 @@ class CustomParseIdcardHandler(BaseHandler):
             image = self.request.files["vfile"][0]
             file_data = image["body"]
             # file_name = image["filename"]
+        file_type = filetype(file_content=file_data)
+        self.logger.debug("[_upload] file_type: {}".format(file_type))
+        if file_type == "unknown":
+            self.send_json_error(message="上传的文件类型不支持")
+            return
         file_name = self.params.file_name
         side = self.params.side
-        file_id = yield self.user_ps.upload_file_server(file_data, file_name, self.current_user.sysuser.id, scene_id=1) # scene_id=1 ：身份证识别
+        file_id = yield self.user_ps.upload_file_server(file_data, file_name, self.current_user.sysuser.id, scene_id=1)  # scene_id=1 ：身份证识别
         if side == "face":
             id_parse = yield self.profile_ps.custom_parse_idcard(file_id.fileId, side, self.current_user.wechat.company_id, self.current_user.sysuser.id)
             if id_parse.code == const.NEWINFRA_API_SUCCESS:
@@ -1172,7 +1175,7 @@ class CustomParseIdcardHandler(BaseHandler):
                           }
                 data["idcard"] = idcard
                 self.send_json_success(data=data)
-            elif id_parse.code == "PE110002": #您今日上传身份证照已超过三次! [需要回填正面照片]
+            elif id_parse.code == "PE110002":  # 您今日上传身份证照已超过三次! [需要回填正面照片]
                 data = {"idcard": {}, "side": side, "id_photo_url": str(file_id.fileId)}
                 self.send_json_error(data=data, message=id_parse.message)
             else:
