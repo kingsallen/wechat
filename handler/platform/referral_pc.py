@@ -17,6 +17,7 @@ class ReferralLoginHandler(MetaBaseHandler):
     @handle_response
     @gen.coroutine
     def get(self):
+        self.clear_cookie(name=const.COOKIE_SESSIONID, domain=settings['root_host'])
         appid = settings['open_app_id']
         scope = "snsapi_login"
         redirect_url = self.make_url(path.REFERRAL_UPLOAD_PC, self.params, host=settings['referral_host'], wechat_signature=settings['qx_signature'])
