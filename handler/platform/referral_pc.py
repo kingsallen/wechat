@@ -9,6 +9,7 @@ from util.common import ObjectDict
 from util.common.decorator import handle_response, authenticated
 from handler.platform.referral import ReferralProfileAPIHandler, EmployeeRecomProfileHandler
 from setting import settings
+from util.common.exception import InfraOperationError
 
 
 class ReferralLoginHandler(MetaBaseHandler):
@@ -45,9 +46,25 @@ class ReferralUploadHandler(BaseHandler):
             res = yield self.company_ps.get_only_referral_reward(self.current_user.company.id)
             reward = reward if not res.flag or (res.flag and position_info.is_referral) else 0
             relationship = yield self.dictionary_ps.get_referral_relationship(self.locale)
+
+            position_template = yield self.position_ps.get_position_template_by_pids(pid=pid)
+            if position_template.code != const.NEWINFRA_API_SUCCESS:
+                raise InfraOperationError(position_template.message)
+            fields = {}
+            for field in position_template.data.fields:
+                if field.get("field_name") == "fullnamepinyin":
+                    fields["pinyin_name"] = {"required": not int(field.get("required")),
+                                             "validate_re": field.get("validate_re")}
+                if field.get("field_name") == "familynamepinyin":
+                    fields["pinyin_surname"] = {"required": not int(field.get("required")),
+                                                "validate_re": field.get("validate_re")}
+                if field.get("field_name") == "email":
+                    fields["email"] = {"required": not int(field.get("required")),
+                                       "validate_re": field.get("validate_re")}
             data.update(
                 reward_point=reward,
-                consts=dict(relation=relationship)
+                consts=dict(relation=relationship),
+                fields = fields,
             )
             self.render_page(template_name="employee/pc-upload-resume.html", data=data)
         else:

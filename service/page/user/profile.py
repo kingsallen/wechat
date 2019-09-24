@@ -19,6 +19,10 @@ import conf.path as path
 import hashlib
 from urllib.parse import urlencode
 from util.common.cache import BaseRedis
+from util.tool.dict_tool import objectdictify
+from util.tool.str_tool import json_hump2underline
+import ujson
+import ast
 
 
 class ProfilePageService(PageService):
@@ -1205,7 +1209,10 @@ class ProfilePageService(PageService):
             "syncId": sync_id,
             "employeeId": employee_id
         }
-        res = yield self.infra_profile_ds.infra_referral_upload_resume_info(params)
+        ret = yield self.infra_profile_ds.infra_referral_upload_resume_info(params)
+        ret = json_hump2underline(str(ret), ptn=r"'\s*(\w+)\s*'\s*:")
+        ret = ast.literal_eval(ret)
+        res = objectdictify(ret)
         return res
 
     @gen.coroutine

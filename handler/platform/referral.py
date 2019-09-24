@@ -8,6 +8,8 @@ import conf.path as path
 from handler.base import BaseHandler
 from util.common import ObjectDict
 from util.common.decorator import handle_response, authenticated, check_employee_common
+from util.tool.str_tool import json_underline2hump, json_hump2underline
+from util.common.exception import InfraOperationError
 
 
 class ReferralProfileHandler(BaseHandler):
@@ -24,12 +26,25 @@ class ReferralProfileHandler(BaseHandler):
         data = yield self.company_ps.get_only_referral_reward(self.current_user.company.id)
         reward = reward if not data.flag or (data.flag and position_info.is_referral) else 0
 
+        position_template = yield self.position_ps.get_position_template_by_pids(pid=pid)
+        if position_template.code != const.NEWINFRA_API_SUCCESS:
+            raise InfraOperationError(position_template.message)
+        fields = {}
+        for field in position_template.data.fields:
+            if field.get("field_name") == "fullnamepinyin":
+                fields["pinyin_name"] = {"required": not int(field.get("required")), "validate_re": field.get("validate_re")}
+            if field.get("field_name") == "familynamepinyin":
+                fields["pinyin_surname"] = {"required": not int(field.get("required")), "validate_re": field.get("validate_re")}
+            if field.get("field_name") == "email":
+                fields["email"] = {"required": not int(field.get("required")), "validate_re": field.get("validate_re")}
+
         self.params.share = yield self._make_share()
         relationship = yield self.dictionary_ps.get_referral_relationship(self.locale)
         self.render_page(template_name="employee/mobile-upload-resume.html",
                          data=ObjectDict({
                              "points": reward,
                              "job_title": position_info.title,
+                             "fields": fields,
                              "upload_resume": self.locale.translate("referral_upload"),
                              "consts": dict(
                                  relation=relationship
@@ -75,6 +90,9 @@ class ReferralProfileAPIHandler(BaseHandler):
         recom_reason_text = self.json_args.comment
         pid = self.json_args.pid
         upload_from = self.json_args.upload_from or 0
+        email = self.json_args.email
+        family_name_pinyin = self.json_args.pinyin_surname
+        full_name_pinyin = self.json_args.pinyin_name
 
         user_info = yield self.employee_ps.get_employee_info_by_user_id(self.current_user.sysuser.id)
         employee_id = self.current_user.employee.id if not user_info.employee_id else user_info.employee_id
@@ -82,7 +100,7 @@ class ReferralProfileAPIHandler(BaseHandler):
         self._add_sensor_track(type, upload_from)
 
         res = yield self.employee_ps.update_recommend(employee_id, name, mobile, recom_reason, pid,
-                                                      type, relationship, recom_reason_text)
+                                                      type, relationship, recom_reason_text, email, family_name_pinyin, full_name_pinyin)
         if res.status == const.API_SUCCESS:
             if type == 1:
                 self.send_json_success(data=ObjectDict({
@@ -133,7 +151,7 @@ class EmployeeRecomProfileHandler(BaseHandler):
         if not employee_id:
             employee_id = self.current_user.employee.id
         ret = yield self.employee_ps.upload_recom_profile(file_name, file_data, employee_id)
-        if ret.status != const.API_SUCCESS:
+        if ret.code != const.NEWINFRA_API_SUCCESS:
             self.send_json_error(message=ret.message)
             return
         else:

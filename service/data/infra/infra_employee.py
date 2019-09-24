@@ -10,8 +10,9 @@ from util.tool.http_tool import http_get, http_post, unboxing, http_delete, http
 from requests.models import Request
 from setting import settings
 from globals import env
-from conf.newinfra_service_conf.service_info import employee_service
+from conf.newinfra_service_conf.service_info import employee_service, parsing_service
 from conf.newinfra_service_conf.employee import employee
+from conf.newinfra_service_conf.parsing import parsing
 
 
 class InfraEmployeeDataService(DataService):
@@ -81,12 +82,17 @@ class InfraEmployeeDataService(DataService):
 
     @gen.coroutine
     def upload_recom_profile(self, file_name, file_data, employee_id):
-        url = "{0}/{1}".format(settings['infra'], path.UPLOAD_RECOM_PROFILE)
+        url = "{0}/{1}{2}?appid={appid}&interfaceid={interfaceid}".format(
+            settings['cloud'],
+            parsing_service.service_name,
+            parsing.UPLOAD_RECOM_PROFILE,
+            appid=parsing_service.appid,
+            interfaceid=parsing_service.interfaceid
+        )
         # requests的包不支持中文名文件上传，因此file_name单独传个字段
         request = Request(data={
-            "employee": employee_id,
-            "appid": const.APPID[env],
-            "file_name": file_name
+            "employeeId": employee_id,
+            "filename": file_name
         },
             files={
                 "file": ("", file_data)

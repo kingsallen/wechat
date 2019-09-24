@@ -697,3 +697,16 @@ class PositionPageService(PageService):
         })
         ret = yield self.infra_position_ds.infra_create_share_position_list(params)
         return ret
+
+    @gen.coroutine
+    def get_position_template_by_pids(self, pid):
+        """
+        保存批量转发的职位列表信息
+        :param pid:
+        :return:
+        """
+        params = ObjectDict({
+            "position_ids": pid
+        })
+        ret = yield self.infra_position_ds.get_position_template_by_pids(params)
+        return ret
