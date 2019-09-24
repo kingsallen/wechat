@@ -224,9 +224,6 @@ class ApplicationPageService(PageService):
             )
         # 手机号结束
 
-        # 强制将姓名设为空
-        profile_basic.name = ""
-
         # 对于 profile basic 字段自定义字段名 mapping
         rename_keys(profile_basic, basic_other_key_mapping)
 
