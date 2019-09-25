@@ -270,8 +270,15 @@ class BaseHandler(MetaBaseHandler):
 
         conds = {'id': self._wechat.company_id}
         self._company = yield self.company_ps.get_company(conds=conds, need_conf=True)
+        current_path = self.request.uri.split('?')[0]
         if self._in_wechat == const.CLIENT_WORKWX:
             self._workwx = yield self.workwx_ps.get_workwx(self._company.id, self._company.hraccount_id)
+            if not self._workwx or not self._workwx.corpid or not self._workwx.secret:
+                self._workwx = None
+                non_employee = yield self._non_employee_or_workwx_config(current_path)
+                if non_employee:
+                    return
+
             self._work_oauth_service = WorkWXOauth2Service(
                 self._workwx, self.fullurl())
 
@@ -295,7 +302,6 @@ class BaseHandler(MetaBaseHandler):
         yield self._get_client_env_config()
 
         # 用户同意授权
-        current_path = self.request.uri.split('?')[0]
         if code and self._verify_code(code):
             # 保存 code 进 cookie
             self.set_cookie(
@@ -331,15 +337,10 @@ class BaseHandler(MetaBaseHandler):
                 workwx_userinfo = yield self._get_user_info_workwx(code, self._company)
                 if workwx_userinfo == "referral-non-employee":
                     self.logger.debug("来自 workwx 的授权, 获得 workwx_userinfo:{}".format(workwx_userinfo))
-                    paths_for_noweixin = [path.POSITION_LIST, path.WECHAT_COMPANY, path.COMPANY_TEAM,
-                                          path.EMPLOYEE_VERIFY_BYEMAIL, path.REFERRAL_UPLOAD_PC,
-                                          path.JOYWOK_HOME_PAGE, path.JOYWOK_AUTO_AUTH,
-                                          path.REFERRAL_UPLOAD_PCLOGIN, path.IMAGE_URL
-                                          ]
-                    if current_path not in paths_for_noweixin and not self.request.uri.startswith("/api/") and not self.request.uri.startswith("/pc/api/"):
-                        self.render(template_name="adjunct/not-weixin.html", http_code=416)
+                    non_employee = yield self._non_employee_or_workwx_config(current_path)
+                    if non_employee:
                         return
-                    self._workwx = None  #非员工免认证访问三个固定页面
+                    self._workwx = None  #非员工免员工认证访问三个个固定页面
 
                 elif workwx_userinfo:
                     self.logger.debug("来自 workwx 的授权, 获得 workwx_userinfo:{}".format(workwx_userinfo))
@@ -1285,3 +1286,19 @@ class BaseHandler(MetaBaseHandler):
                 raise InfraOperationError(e)
 
         yield self._set_workwx_cookie(sysuser)
+
+    @gen.coroutine
+    def _non_employee_or_workwx_config(self, current_path):
+
+        if current_path not in const.PATHS_FOR_NOWEIXIN and not self.request.uri.startswith("/api/") and not self.request.uri.startswith("/pc/api/"):
+            # 对于没有workwx配置的企业员工和 转发的链接，即有self._workwx但是非员工在企业微信打开的链接，让其跳转至微信
+            self._oauth_service.wechat = self._qx_wechat
+            # 仟寻授权需要重定向到仟寻appid对应的域名
+            self._get_oauth_redirect_url()
+            url = self._oauth_service.get_oauth_code_userinfo_url()
+            self.logger.debug("non-employee_workwx_skip_qx_oauth_redirect_url: {}".format(url))
+            self.redirect(url)
+            return True
+        else:
+            return False
+
