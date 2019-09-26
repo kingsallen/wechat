@@ -364,7 +364,7 @@ class SendValidCodeHandler(BaseHandler):
     def post(self):
 
         mobile = self.json_args.mobile
-        country_code = int(self.json_args.country_code or 0)
+        country_code = int(self.json_args.country_code or 86)
         if not mobile:
             mobile = self.redis.get(
                 const.CONFIRM_REFERRAL_MOBILE.format(self.json_args.rkey, self.current_user.sysuser.id)).get("mobile")
