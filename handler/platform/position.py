@@ -927,6 +927,7 @@ class PositionListInfraParamsMixin(BaseHandler):
             occupations=self.params.occupation.replace("\r\n", "\n") if self.params.occupation else "",
             custom=self.params.custom if self.params.custom else "",
             keywords=self.params.keyword if self.params.keyword else "",
+            store_id=int(self.params.store_id) if self.params.store_id else 0,
             order_by_priority=1)
 
         self.logger.debug("[position_list_infra_params]: %s" % infra_params)
@@ -1187,6 +1188,156 @@ class PositionEmpNoticeHandler(BaseHandler):
 
 
 class PositionListHandler(PositionListInfraParamsMixin, BaseHandler):
+    @log_time
+    @handle_response
+    @check_employee
+    @gen.coroutine
+    def get(self):
+        """获取职位列表页"""
+
+        infra_params = self.make_position_list_infra_params()
+
+        # 校验一下可能出现的参数：
+        # hb_c: 红包活动id
+        # did: 子公司id
+        hb_c = 0
+        if self.params.hb_c and self.params.hb_c.isdigit():
+            hb_c = int(self.params.hb_c)
+
+        did = 0
+        if self.params.did and self.params.did.isdigit():
+            did = int(self.params.did)
+
+        recom_push_id = 0
+        if self.params.recom_push_id and self.params.recom_push_id.isdigit():
+            recom_push_id = int(self.params.recom_push_id)
+
+        share_id = 0
+        if self.params.share_id and self.params.share_id.isdigit():
+            share_id = int(self.params.share_id)
+
+        if recom_push_id and hb_c and share_id:
+            raise MyException("错误的链接")
+
+        if hb_c:
+            # 红包职位分享
+            infra_params.update(id=hb_c)
+            rp_share_info = yield self.position_ps.infra_get_rp_share_info(infra_params)
+            yield self._make_share_info(self.current_user.company.id, did, rp_share_info)
+        else:
+            yield self._make_share_info(self.current_user.company.id, did)
+
+        # 只渲染必要的公司信息
+        yield self.make_company_info()
+
+        position_title = self.locale.translate(const_platform.POSITION_LIST_TITLE_DEFAULT)
+        if self.params.recomlist or self.params.noemprecom:
+            position_title = self.locale.translate(const_platform.POSITION_LIST_TITLE_RECOMLIST)
+
+        teamname_custom = self.current_user.company.conf_teamname_custom.teamname_custom
+
+        if self.locale.code == 'zh_CN':
+            teamname_custom = self.locale.translate(
+                teamname_custom, plural_message=teamname_custom, count=2)
+
+        elif self.locale.code == 'en_US':
+            teamname_custom = self.locale.translate(
+                '团队', plural_message='团队', count=2)
+
+        company = ObjectDict()
+        company['id'] = self.params.company.id
+        company['logo'] = self.params.company.logo
+        company['abbreviation'] = self.params.company.abbreviation
+        company['industry'] = self.params.company.industry
+        company['scale_name'] = self.params.company.scale_name
+        company['banner'] = self.params.company.banner
+
+        self.render_page(
+            template_name="position/index.html",
+            meta_title=position_title,
+            data=ObjectDict(
+                company=company,
+                use_neowx=bool(self.current_user.company.conf_newjd_status == 2),
+                teamname_custom=teamname_custom)
+        )
+
+    @gen.coroutine
+    def make_company_info(self):
+        """只提取必要的company信息用于渲染"""
+        if self.params.did:
+            company = yield self.company_ps.get_company(
+                conds={'id': self.params.did}, need_conf=True)
+            if not company.banner:
+                parent_company = self.current_user.company
+                company.banner = parent_company.banner
+        else:
+            company = self.current_user.company
+        self.params.company = self.position_ps.limited_company_info(company)
+
+    @gen.coroutine
+    def _make_share_info(self, company_id, did=None, rp_share_info=None):
+        """构建 share 内容"""
+
+        company_info = yield self.company_ps.get_company(
+            conds={"id": did or company_id}, need_conf=True)
+
+        if not rp_share_info:
+            escape = ["recomlist", "shareMongoliaFlag"]
+            cover = self.share_url(company_info.logo)
+            title = company_info.abbreviation + self.locale.translate('job_hotjobs')
+            description = self.locale.translate(msg.SHARE_DES_DEFAULT)
+
+        else:
+            cover = self.share_url(rp_share_info.shareImg)
+            escape = [
+                "pid", "keywords", "cities", "candidate_source",
+                "employment_type", "salary", "department", "occupations",
+                "custom", "degree", "page_from", "page_size", "shareMongoliaFlag"
+            ]
+            title = rp_share_info.shareTitle
+            description = rp_share_info.shareDesc
+
+        # transmit_from是判断场景值的字段，且场景值使用偶数表示，当员工通过活动页面跳转到该页面时，值为偶数，
+        # 当员工转发出去时需要+1，因此求职者打开员工转发的链接时该值为奇数。
+        transmit_from = self.params.transmit_from
+        if transmit_from is not None and transmit_from.isdigit():
+            transmit_from = int(transmit_from) if int(transmit_from) % 2 else int(transmit_from) + 1
+            self.params.update(transmit_from=transmit_from)
+
+        if self.params.forward_id:
+            self.params.pop('forward_id')
+
+        is_valid_employee = False
+        if self.current_user.sysuser.id:
+            is_valid_employee = yield self.employee_ps.is_valid_employee(
+                self.current_user.sysuser.id,
+                company_info.id
+            )
+        if is_valid_employee:
+            forward_id = re.sub('-', '', str(uuid.uuid1()))
+
+            link = self.make_url(
+                path.POSITION_LIST,
+                self.params,
+                recom=self.position_ps._make_recom(self.current_user.sysuser.id),
+                forward_id=forward_id,
+                escape=escape)
+        else:
+            link = self.make_url(
+                path.POSITION_LIST,
+                self.params,
+                recom=self.position_ps._make_recom(self.current_user.sysuser.id),
+                escape=escape)
+
+        self.params.share = ObjectDict({
+            "cover": cover,
+            "title": title,
+            "description": description,
+            "link": link
+        })
+
+
+class LbsPositionHandler(PositionListInfraParamsMixin, BaseHandler):
     @log_time
     @handle_response
     @check_employee

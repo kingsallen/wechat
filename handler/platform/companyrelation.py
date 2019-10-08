@@ -178,3 +178,27 @@ class CompanyHrInfoHandler(BaseHandler):
         """获取hr信息"""
         hr_info = yield self.company_ps.get_main_hr_info(self.current_user.company.id)
         self.send_json_success(data=hr_info)
+
+
+class NearbyStoresHandler(BaseHandler):
+
+    @handle_response
+    @gen.coroutine
+    def get(self):
+        """获取附近店铺"""
+        stores = yield self.company_ps.get_nearby_stores(self.current_user.company.id, self.params.longitude, self.params.latitude, self.params.radius)
+        data = stores.data
+        data.update({"coordinates": {"latitude": data.latitude, "longitude": data.longitude}})
+        self.send_json_success(data=stores.data)
+
+
+class PositionLbsHandler(BaseHandler):
+
+    @handle_response
+    @gen.coroutine
+    def get(self, position_id):
+        """根据职位id获取职位的LBS信息"""
+        stores = yield self.company_ps.get_position_lbs_info(self.current_user.company.id, self.params.longitude, self.params.latitude, self.params.radius, position_id)
+        data = stores.data
+        data.update({"coordinates": {"latitude": data.latitude, "longitude": data.longitude}})
+        self.send_json_success(data=stores.data)

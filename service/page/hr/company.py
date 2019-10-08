@@ -356,3 +356,20 @@ class CompanyPageService(PageService):
         res = yield self.infra_company_ds.check_oms_switch_status(company_id, module_name)
         return res
 
+    @gen.coroutine
+    def get_nearby_stores(self, company_id, longitude, latitude, radius):
+        """
+        获取用户指定范围内门店位置
+        :return:
+        """
+        ret = yield self.infra_company_ds.get_nearby_stores(company_id, longitude, latitude, radius)
+        return ret
+
+    @gen.coroutine
+    def get_position_lbs_info(self, company_id, longitude, latitude, radius, pid):
+        """
+        根据职位id获取职位的LBS信息
+        :return:
+        """
+        ret = yield self.infra_company_ds.get_position_lbs_info(company_id, longitude, latitude, radius, pid)
+        return ret
