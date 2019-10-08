@@ -27,6 +27,7 @@ from util.wechat.template import position_view_five_notice_tpl
 from util.common.decorator import log_time, log_time_common_func
 from util.common.mq import neo4j_position_forward
 from util.common.cipher import decode_id
+from util.common.exception import InfraOperationError
 
 
 class PositionHandler(BaseHandler):
@@ -1252,13 +1253,21 @@ class PositionListHandler(PositionListInfraParamsMixin, BaseHandler):
         company['scale_name'] = self.params.company.scale_name
         company['banner'] = self.params.company.banner
 
+        lbs_oms = yield self.company_ps.check_oms_switch_status(
+            self.current_user.company.id,
+            "LBS职位列表"
+        )
+        if lbs_oms.status != const.API_SUCCESS:
+            raise InfraOperationError(lbs_oms.message)
+
         self.render_page(
             template_name="position/index.html",
             meta_title=position_title,
             data=ObjectDict(
                 company=company,
                 use_neowx=bool(self.current_user.company.conf_newjd_status == 2),
-                teamname_custom=teamname_custom)
+                teamname_custom=teamname_custom,
+                lbs_oms=lbs_oms.data.get('valid'))
         )
 
     @gen.coroutine
@@ -1402,13 +1411,25 @@ class LbsPositionHandler(PositionListInfraParamsMixin, BaseHandler):
         company['scale_name'] = self.params.company.scale_name
         company['banner'] = self.params.company.banner
 
+        lbs_oms = yield self.company_ps.check_oms_switch_status(
+            self.current_user.company.id,
+            "LBS职位列表"
+        )
+        if lbs_oms.status != const.API_SUCCESS:
+            raise InfraOperationError(lbs_oms.message)
+
+        if not lbs_oms.data.get('valid'): # oms关闭
+            self.write_error(http_code=404)
+            return
+
         self.render_page(
             template_name="position/index.html",
             meta_title=position_title,
             data=ObjectDict(
                 company=company,
                 use_neowx=bool(self.current_user.company.conf_newjd_status == 2),
-                teamname_custom=teamname_custom)
+                teamname_custom=teamname_custom,
+                lbs_oms=lbs_oms.data.get('valid'))
         )
 
     @gen.coroutine
