@@ -186,7 +186,15 @@ class NearbyStoresHandler(BaseHandler):
     @gen.coroutine
     def get(self):
         """获取附近店铺"""
-        stores = yield self.company_ps.get_nearby_stores(self.current_user.company.id, self.params.longitude, self.params.latitude, self.params.radius)
+        if self.params.longitude and self.params.latitude:
+            longitude = self.params.longitude
+            latitude = self.params.latitude
+        else:
+            ret = yield self.company_ps.get_lbs_ip_location(self.request.remote_ip)
+            longitude = ret.rectangle.split(";")[0].split(",")[0]
+            latitude = ret.rectangle.split(";")[0].split(",")[1]
+
+        stores = yield self.company_ps.get_nearby_stores(self.current_user.company.id, longitude, latitude, self.params.radius)
         data = stores.data
         data.update({"coordinates": {"latitude": data.latitude, "longitude": data.longitude}})
         self.send_json_success(data=stores.data)
@@ -198,7 +206,14 @@ class PositionLbsHandler(BaseHandler):
     @gen.coroutine
     def get(self, position_id):
         """根据职位id获取职位的LBS信息"""
-        stores = yield self.company_ps.get_position_lbs_info(self.current_user.company.id, self.params.longitude, self.params.latitude, self.params.radius, position_id)
+        if self.params.longitude and self.params.latitude:
+            longitude = self.params.longitude
+            latitude = self.params.latitude
+        else:
+            ret = yield self.company_ps.get_lbs_ip_location(self.request.remote_ip)
+            longitude = ret.rectangle.split(";")[0].split(",")[0]
+            latitude = ret.rectangle.split(";")[0].split(",")[1]
+        stores = yield self.company_ps.get_position_lbs_info(self.current_user.company.id, longitude, latitude, self.params.radius, position_id)
         data = stores.data
         data.update({"coordinates": {"latitude": data.latitude, "longitude": data.longitude}})
         self.send_json_success(data=stores.data)

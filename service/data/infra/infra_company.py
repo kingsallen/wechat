@@ -155,3 +155,11 @@ class InfraCompanyDataService(DataService):
         })
         ret = yield http_get_v2(company.COMPANY_POSITION_LBS.format(pid), company_service, params)
         return ret
+
+    @gen.coroutine
+    def get_lbs_ip_location(self, remote_ip):
+        """
+        高德地图ip定位接口： 根据remote_ip获取定位信息：经纬度
+        """
+        ret = yield http_get(path.LBS_IP_LOCATION.format(remote_ip), infra=False)
+        return ret

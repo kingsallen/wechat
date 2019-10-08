@@ -373,3 +373,12 @@ class CompanyPageService(PageService):
         """
         ret = yield self.infra_company_ds.get_position_lbs_info(company_id, longitude, latitude, radius, pid)
         return ret
+
+    @gen.coroutine
+    def get_lbs_ip_location(self, remote_ip):
+        """
+        根据remote_ip获取定位信息：经纬度
+        :return:
+        """
+        ret = yield self.infra_company_ds.get_lbs_ip_location(remote_ip)
+        return ret

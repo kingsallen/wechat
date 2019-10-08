@@ -291,3 +291,5 @@ LINKEDIN_AUTH = "/oauth/v2/authorization"
 MAIMAI_ACCESSTOKEN = "https://maimai.cn/oauth_login?appid={appid}&{cusdata}&login=1"
 LIEPIN_ACCESSTOKEN = 'https://passport.liepin.com/mc/authlogin?state={}'
 JOYWOK_JMIS_AUTH = 'https://jmis.mcd.com.cn/jmis/NoLoginService'
+
+LBS_IP_LOCATION = "https://restapi.amap.com/v3/ip?key=c05906e1cd0400298adc1698a670e016&ip={}"
