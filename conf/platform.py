@@ -71,7 +71,7 @@ LANDING = ObjectDict({
     LANDING_INDEX_STORE:         {"name": "店铺职位", "chpe": "店铺",
                                   "key": "store",
                                   "display_key": "store",
-                                  "form_name": "custom"}
+                                  "form_name": "store"}
 })
 
 
