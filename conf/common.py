@@ -338,7 +338,7 @@ SEARCH_CONDITION = {
     "6": "search_job_type",
     "7": "search_education level",
     "8": "search_company",
-    "10": "search_store"
+    "10": "search_position_type"
 }
 
 # 及以上 工作经验、学历中使用
