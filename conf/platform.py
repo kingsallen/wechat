@@ -26,6 +26,7 @@ LANDING_INDEX_EMPLOYMENT = 6  # 工作性质
 LANDING_INDEX_DEGREE = 7
 LANDING_INDEX_CHILD_COMPANY = 8
 LANDING_INDEX_CUSTOM = 9
+LANDING_INDEX_STORE = 10 # 职位属性：店铺职位还是office职位
 
 # 栏目设置
 LANDING = ObjectDict({
@@ -66,7 +67,11 @@ LANDING = ObjectDict({
     LANDING_INDEX_CUSTOM:        {"name":        "企业自定义字段", "chpe": "自定义",
                                   "key":         "custom",
                                   "display_key": "custom",
-                                  "form_name":   "custom"}
+                                  "form_name":   "custom"},
+    LANDING_INDEX_STORE:         {"name": "店铺职位", "chpe": "店铺",
+                                  "key": "store",
+                                  "display_key": "store",
+                                  "form_name": "custom"}
 })
 
 
