@@ -7,11 +7,16 @@ import conf.path as path
 import conf.alphacloud_api as api
 from service.data.base import DataService
 from util.common import ObjectDict
-from util.tool.http_tool import http_get, http_post, http_put, unboxing, http_get_rp, http_get_v2, http_post_v2
+from util.tool.http_tool import http_get, http_post, http_put, unboxing, http_get_rp, http_get_v2, http_post_v2, http_post_multipart_form, _v2_async_http_post
 from util.common.decorator import log_time
 from conf.newinfra_service_conf.service_info import user_service, application_service
 from conf.newinfra_service_conf.user import user
 from conf.newinfra_service_conf.application import application
+from util.common.exception import InfraOperationError
+from tornado.httputil import url_concat
+from setting import settings
+import conf.common as const
+from requests.models import Request
 
 
 class InfraUserDataService(DataService):
@@ -428,3 +433,59 @@ class InfraUserDataService(DataService):
 
         ret = yield http_post_v2(user.INFRA_USER_CHANGE_MOBILE, user_service, params)
         raise gen.Return(ret)
+
+    @gen.coroutine
+    def upload_file_server(self, file_data, file_name, sysuser_id, scene_id):
+        """
+        自定义简历模板：上传身份证组件
+        :param params:
+        :return:
+        """
+        url = "{0}/{1}{2}?appid={appid}&interfaceid={interfaceid}".format(
+            settings['cloud'],
+            user_service.service_name,
+            user.INFRA_CUSTOM_FILE_UPLOAD,
+            appid=user_service.appid,
+            interfaceid=user_service.interfaceid
+        )
+        request = Request(data={
+            "fileName": file_name,
+            "sceneId": scene_id, # 场景值：1 身份证识别
+            "userId": sysuser_id,
+            "source": 1 # 来源： wechat上传:1 pc上传:2
+        },
+            files={
+                "file": ("", file_data)
+            },
+            url=url,
+            method="POST"
+        )
+        p = request.prepare()
+        body = p.body
+        headers = p.headers
+
+        ret = yield http_post_multipart_form(url, body, headers=headers)
+        if ret.code != const.NEWINFRA_API_SUCCESS:
+            raise InfraOperationError(ret.message)
+        raise gen.Return(ret.data)
+
+    @gen.coroutine
+    def get_custom_file(self, file_id, sysuser_id):
+        """
+        自定义简历模板：上传身份证组件
+        :param params:
+        :return:
+        """
+        params = ObjectDict({
+            "fileId": file_id,
+            "userId": sysuser_id,
+            "appid": user_service.appid,
+            "interfaceid": user_service.interfaceid
+        })
+
+        path = "{0}/{1}{2}".format(settings['cloud'], user_service.service_name, user.INFRA_GET_CUSTOM_FILE)
+        route = url_concat(path, params)  # post请求参数写在url里面，不能写在body里面
+        ret = yield _v2_async_http_post(route)
+        if ret.code != const.NEWINFRA_API_SUCCESS:
+            raise InfraOperationError(ret.message)
+        raise gen.Return(ret.data)

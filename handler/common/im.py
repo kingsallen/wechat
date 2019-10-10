@@ -790,14 +790,14 @@ class ChatHandler(BaseHandler):
         """处理 chatbot message
         获取消息 -> pub消息 -> 入库
         """
-        social = yield self.company_ps.check_oms_switch_status(
-            self.current_user.company.id,
-            "社招"
-        )
-        campus = yield self.company_ps.check_oms_switch_status(
-            self.current_user.company.id,
-            "校招"
-        )
+        # 聚合号入口应该使用对应hr对应所在的company_id
+        company_id = self.current_user.company.id
+        hr_info = yield self.chat_ps.get_company_hr_info(self.hr_id)
+        if hr_info and hr_info.company_id:
+            company_id = hr_info.company_id
+
+        social = yield self.company_ps.check_oms_switch_status(company_id, "社招")
+        campus = yield self.company_ps.check_oms_switch_status(company_id, "校招")
         bot_messages = yield self.chat_ps.get_chatbot_reply(
             current_user=self.current_user,
             message=user_message,

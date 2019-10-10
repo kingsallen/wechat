@@ -19,6 +19,10 @@ import conf.path as path
 import hashlib
 from urllib.parse import urlencode
 from util.common.cache import BaseRedis
+from util.tool.dict_tool import objectdictify
+from util.tool.str_tool import json_hump2underline
+import ujson
+import ast
 
 
 class ProfilePageService(PageService):
@@ -1177,7 +1181,7 @@ class ProfilePageService(PageService):
 
         else:
             target_keys = [c.field_name for c in custom_cv_tpls
-                           if not c.map]
+                           if not c.map and c.field_name != "id_card"]
 
         target = sub_dict(custom_cv, target_keys)
 
@@ -1205,7 +1209,10 @@ class ProfilePageService(PageService):
             "syncId": sync_id,
             "employeeId": employee_id
         }
-        res = yield self.infra_profile_ds.infra_referral_upload_resume_info(params)
+        ret = yield self.infra_profile_ds.infra_referral_upload_resume_info(params)
+        ret = json_hump2underline(str(ret), ptn=r"'\s*(\w+)\s*'\s*:")
+        ret = ast.literal_eval(ret)
+        res = objectdictify(ret)
         return res
 
     @gen.coroutine
@@ -1369,3 +1376,11 @@ class ProfilePageService(PageService):
                 importer=importer
             )
         )
+
+    @gen.coroutine
+    def custom_parse_idcard(self, file_id, side, company_id, sysuser_id):
+        """
+        自定义简历模板：解析身份证正面照片
+        """
+        ret = yield self.infra_profile_ds.custom_parse_idcard(file_id, side, company_id, sysuser_id)
+        return ret

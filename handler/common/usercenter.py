@@ -7,6 +7,7 @@ import conf.common as const
 import conf.message as msg
 from thrift_gen.gen.employee.struct.ttypes import BindStatus
 from util.common.decorator import handle_response, verified_mobile_oneself, authenticated, check_employee_common
+from util.tool.file_tool import filetype
 from util.tool.str_tool import email_validate, is_alphabet, is_chinese, password_crypt, password_validate
 from util.image.upload import QiniuUpload
 from util.common import ObjectDict
@@ -408,6 +409,11 @@ class UploadHandler(BaseHandler):
         uploader = QiniuUpload(upload_settings)
         uploader.set_logger(self.logger)
         body = vfile[0].get("body")
+        file_type = filetype(file_content=body)
+        self.logger.debug("[_upload] file_type: {}".format(file_type))
+        if file_type == "unknown":
+            self.send_json_error(message="上传的文件类型不支持")
+            return
         result = uploader.upload_bytes(body)
 
         self.logger.debug("[_upload]reusult:{}".format(result))

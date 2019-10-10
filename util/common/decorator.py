@@ -363,32 +363,9 @@ def cover_no_weixin(func):
     @functools.wraps(func)
     @gen.coroutine
     def wrapper(self, *args, **kwargs):
-        paths_for_noweixin = [path.POSITION_LIST, path.WECHAT_COMPANY, path.COMPANY_TEAM,
-                              path.EMPLOYEE_VERIFY_BYEMAIL, path.REFERRAL_UPLOAD_PC,
-                              path.JOYWOK_HOME_PAGE, path.JOYWOK_AUTO_AUTH,
-                              path.REFERRAL_UPLOAD_PCLOGIN, path.IMAGE_URL
-                              ]
+
         current_path = self.request.uri.split('?')[0]
-
-        if self.is_qx:
-            qx_appid = settings['multi_domain']['qx_appid']
-            wechat = yield self.wechat_ps.get_wechat(conds={
-                "appid": qx_appid
-            })
-        elif self.is_help:
-            wechat_id = settings['helper_wechat_id']
-            wechat = yield self.wechat_ps.get_wechat(conds={
-                "id": wechat_id
-            })
-        else:
-            signature = self.params['wechat_signature']
-            wechat = yield self.wechat_ps.get_wechat(conds={
-                "signature": signature
-            })
-        company = yield self.company_ps.get_company(conds={'id': wechat.company_id}, need_conf=True)
-        workwx = yield self.workwx_ps.get_workwx(company.id, company.hraccount_id) # 从微信转发过来的职位对应的公司在数据库中没有企业微信相关配置[self._workwx为空]
-
-        if current_path not in paths_for_noweixin and not self.request.uri.startswith("/api/") and not self.request.uri.startswith("/pc/api/") and not self.in_wechat and not (self._in_wechat == const.CLIENT_WORKWX and workwx) and 'moseeker' not in self.request.headers.get('User-Agent') and 'Joywok' not in self.request.headers.get('User-Agent'):
+        if current_path not in const.PATHS_FOR_NOWEIXIN and not self.request.uri.startswith("/api/") and not self.request.uri.startswith("/pc/api/") and not self.in_wechat and not self._in_wechat == const.CLIENT_WORKWX and 'moseeker' not in self.request.headers.get('User-Agent') and 'Joywok' not in self.request.headers.get('User-Agent'):
             self.render(template_name="adjunct/not-weixin.html")
             return
         else:

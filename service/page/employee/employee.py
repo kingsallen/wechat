@@ -20,6 +20,10 @@ from util.wechat.core import get_temporary_qrcode
 from util.common.mq import unread_praise_publisher
 from util.common.decorator import log_time
 from util.common.exception import InfraOperationError
+from util.tool.dict_tool import objectdictify
+from util.tool.str_tool import json_hump2underline
+import ujson
+import ast
 
 
 class EmployeePageService(PageService):
@@ -295,17 +299,18 @@ class EmployeePageService(PageService):
 
         return data
 
-    def make_bind_params(self, user_id, company_id, json_args, params):
+    def make_bind_params(self, user_id, company_id, json_args, params, source):
         """
         构建员工绑定的参数集合
         :param user_id:
         :param company_id:
         :param json_args:
         :param params
+        :param source
         :return:
         """
         type = json_args.type
-        source = int(params.source) if params.source and params.source.isdigit() else 0
+        source = int(params.source) if params.source and params.source.isdigit() else source
 
         needed_keys = ['type', 'name', 'mobile', 'custom_supply_info']
 
@@ -492,11 +497,12 @@ class EmployeePageService(PageService):
         return result.data
 
     @gen.coroutine
-    def resend_bind_email(self, current_user):
+    def resend_bind_email(self, current_user, source):
         """重新发送认证邮件"""
         params = {
             "user_id": current_user.sysuser.id,
-            "company_id": current_user.company.id
+            "company_id": current_user.company.id,
+            "source": source
         }
         result = yield self.infra_employee_ds.infra_resend_bind_email(params)
         return result
@@ -779,7 +785,7 @@ class EmployeePageService(PageService):
         return is_employee
 
     @gen.coroutine
-    def update_recommend(self, employee_id, name, mobile, recom_reason, pid, type, relationship, recom_reason_text):
+    def update_recommend(self, employee_id, name, mobile, recom_reason, pid, type, relationship, recom_reason_text, email, family_name_pinyin, full_name_pinyin):
         params = ObjectDict({
             "name": name,
             "mobile": mobile,
@@ -787,14 +793,20 @@ class EmployeePageService(PageService):
             "position": pid,
             "referral_type": type,
             "relationship": relationship,
-            "recom_reason_text": recom_reason_text
+            "recom_reason_text": recom_reason_text,
+            "email": email,
+            "fields": { "familynamepinyin": family_name_pinyin,
+                        "fullnamepinyin": full_name_pinyin }
         })
         res = yield self.infra_user_ds.update_recommend(params, employee_id)
         return res
 
     @gen.coroutine
     def upload_recom_profile(self, file_name, file_data, employee_id):
-        res = yield self.infra_employee_ds.upload_recom_profile(file_name, file_data, employee_id)
+        ret = yield self.infra_employee_ds.upload_recom_profile(file_name, file_data, employee_id)
+        ret = json_hump2underline(str(ret), ptn = r"'\s*(\w+)\s*'\s*:")
+        ret = ast.literal_eval(ret)
+        res = objectdictify(ret)
         return res
 
     @gen.coroutine

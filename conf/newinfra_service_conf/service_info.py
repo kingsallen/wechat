@@ -44,8 +44,20 @@ sharechain_service = ObjectDict(
     service_name="sharechain"
 )
 
+parsing_service = ObjectDict(
+    appid="A11027",
+    interfaceid="A11027001",
+    service_name="parsing"
+)
+
 company_service = ObjectDict(
     appid="A11007",
     interfaceid="A11007001",
     service_name="company"
+)
+
+parsing_service = ObjectDict(
+    appid="A11027",
+    interfaceid="A11027001",
+    service_name="parsing"
 )

@@ -223,6 +223,16 @@ class InfraPositionDataService(DataService):
         ret = yield http_post_v2(sharechain.SHARE_POSITION_LIST, sharechain_service, params)
         return ret
 
+    @gen.coroutine
+    def get_position_template_by_pids(self, params):
+        """
+        根据pids批量查询查询职位模板
+        :param params : {'positionIds': 123, 'positionIds': 3434}
+        :return:
+        """
+        ret = yield http_get_v2(position.POSITION_TEMPLATE_BY_PIDS, position_service, params)
+        return ret
+
 
 class TestEmployeeService(AsyncTestCase):
     """Just for test(or try results) during development :)"""

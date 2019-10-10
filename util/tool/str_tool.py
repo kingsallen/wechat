@@ -370,13 +370,13 @@ def get_send_time_from_template_message_url(url=''):
         return 0
 
 
-def json_hump2underline(hump_json_str):
+def json_hump2underline(hump_json_str, ptn = r'"\s*(\w+)\s*"\s*:'):
     """
     将命名为驼峰格式的转为下划线
     :param hump_json_str:
     :return:
     """
-    attr_ptn = re.compile(r'"\s*(\w+)\s*"\s*:')
+    attr_ptn = re.compile(ptn)
 
     # 使用hump2underline函数作为re.sub函数第二个参数的回调函数
     sub = re.sub(attr_ptn, lambda x: '"' + hump2underline(x.group(1)) + '" :', hump_json_str)

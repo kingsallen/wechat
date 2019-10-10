@@ -14,6 +14,7 @@ constant配置常量规范：
 
 from util.common import ObjectDict
 import enum
+import conf.path as path
 
 # ++++++++++系统常量++++++++++
 
@@ -68,6 +69,7 @@ CLIENT_WECHAT = 1
 CLIENT_NON_WECHAT = 2
 CLIENT_JOYWOK = 3
 CLIENT_WORKWX = 4
+CLIENT_MINIAPP = 5
 CLIENT_TYPE_IOS = 100
 CLIENT_TYPE_ANDROID = 101
 CLIENT_TYPE_WIN = 102
@@ -877,3 +879,13 @@ SA_REFERRAL_COMMENT_ORIGIN_HAS_APPLY = "已投递"
 # 语言
 LOCALE_ENGLISH = 'en_US'
 LOCALE_CHINESE = 'zh_CN'
+
+# 员工认证来源
+EMPLOYEE_SOURCE_MINIAPP = 14  # 小程序内员工认证
+
+# 不需要登陆可访问的公众号页面
+PATHS_FOR_NOWEIXIN = [ path.POSITION_LIST, path.WECHAT_COMPANY, path.COMPANY_TEAM,
+                       path.EMPLOYEE_VERIFY_BYEMAIL, path.REFERRAL_UPLOAD_PC,
+                       path.JOYWOK_HOME_PAGE, path.JOYWOK_AUTO_AUTH,
+                       path.REFERRAL_UPLOAD_PCLOGIN, path.IMAGE_URL
+                     ]

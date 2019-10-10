@@ -16,14 +16,21 @@ class ImageFetchHandler(BaseHandler):
     @handle_response
     @gen.coroutine
     def get(self):
+        file_id = self.get_argument("id_photo_url", None) # 身份证组件照片显示：id_photo_url数据库中照片存放的id, 通过id找到绝对路径
         url = self.get_argument("url", None)
-        if not url:
+        if not url and not file_id:
             self.write_error(http_code=404)
             return
 
-        url = make_static_url(urllib.parse.unquote_plus(url), ensure_protocol=True)
+        if file_id:
+            id_photo_url = yield self.user_ps.get_custom_file(file_id, self.current_user.sysuser.id)
+            binfile = open(id_photo_url.url, 'rb')
+            content = binfile.read()
+        else:
+            url = make_static_url(urllib.parse.unquote_plus(url), ensure_protocol=True)
 
-        headers = {"Referer": ""}
-        data = yield httpclient.AsyncHTTPClient().fetch(url, headers=headers)
+            headers = {"Referer": ""}
+            data = yield httpclient.AsyncHTTPClient().fetch(url, headers=headers)
+            content = data.body
         self.set_header("Content-Type", "image/jpeg")
-        self.write(data.body)
+        self.write(content)
