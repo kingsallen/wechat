@@ -306,8 +306,7 @@ class ChatPageService(PageService):
 
     @gen.coroutine
     def get_chatbot_reply(self, message, user_id, hr_id, position_id, flag, social, campus, create_new_context,
-                          current_user,
-                          from_textfield):
+                          current_user, from_textfield, project_id):
         """ 调用 chatbot 返回机器人的回复信息
                https://wiki.moseeker.com/chatbot.md
         :param message: 用户发送到文本内容
@@ -320,6 +319,7 @@ class ChatPageService(PageService):
         :param from_textfield:
         :param social:社招判断开关 1：开启；
         :param campus:校招判断开关 1：开启；
+        :param project_id: MoPlan预约项目ID
         """
         messages = []
 
@@ -329,7 +329,8 @@ class ChatPageService(PageService):
             hr_id=hr_id,
             position_id=position_id,
             create_new_context=create_new_context,
-            from_textfield=from_textfield
+            from_textfield=from_textfield,
+            project_id=project_id
         )
         self.logger.debug("get_chatbot_reply==>create_new_context:{} ".format(create_new_context))
         self.logger.debug("chabot_params:flag:%s, social:%s, capmpus:%s" % (flag, social, campus))

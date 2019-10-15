@@ -393,6 +393,7 @@ MSG_TYPE = {
     14: "shareReport",
     15: "positionSubscribe",
     16: "toHrHumanAnswer",
+    17: "moplanAppointmentProject",
 }
 
 # 积分配置类型
