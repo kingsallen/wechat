@@ -1356,9 +1356,10 @@ class ProfilePageService(PageService):
 
         # 第三方简历导入对接回调地址配置
         importer.update(
-            profile_import_liepin=path.LIEPIN_ACCESSTOKEN.format(
-                hashlib.sha1(str(current_user.sysuser.id).encode('u8')).hexdigest()
-            ),
+            # profile_import_liepin=path.LIEPIN_ACCESSTOKEN.format(
+            #     hashlib.sha1(str(current_user.sysuser.id).encode('u8')).hexdigest()
+            # ),
+            profile_import_liepin=None,
             profile_import_maimai=maimai_url
         )
 
