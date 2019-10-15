@@ -1260,12 +1260,6 @@ class PositionListHandler(PositionListInfraParamsMixin, BaseHandler):
         if lbs_oms.status != const.API_SUCCESS:
             raise InfraOperationError(lbs_oms.message)
 
-        current_path = self.request.uri.split('?')[0]
-        if current_path != path.POSITION_LIST:  #/lbs/position 页面根据Lbs开关是否显示
-            if not lbs_oms.data.get('valid'):  # oms关闭
-                self.write_error(http_code=404)
-                return
-
         self.render_page(
             template_name="position/index.html",
             meta_title=position_title,
@@ -1350,6 +1344,30 @@ class PositionListHandler(PositionListInfraParamsMixin, BaseHandler):
             "description": description,
             "link": link
         })
+
+
+class LbsPositionListHandler(BaseHandler):
+    @log_time
+    @handle_response
+    @check_employee
+    @gen.coroutine
+    def get(self):
+        """获取LBS职位列表页"""
+
+        lbs_oms = yield self.company_ps.check_oms_switch_status(
+            self.current_user.company.id,
+            "LBS职位列表"
+        )
+        if lbs_oms.status != const.API_SUCCESS:
+            raise InfraOperationError(lbs_oms.message)
+
+        if not lbs_oms.data.get('valid'):  # oms关闭
+            self.write_error(http_code=404)
+            return
+
+        self.render_page(
+            template_name="position/index.html"
+        )
 
 
 class PositionRecomListHandler(PositionListInfraParamsMixin, BaseHandler):
