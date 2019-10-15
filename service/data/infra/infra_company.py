@@ -136,7 +136,7 @@ class InfraCompanyDataService(DataService):
             "company_id": company_id,
             "longitude": longitude,
             "latitude": latitude,
-            "radius": radius
+            "radius": radius if radius else 1
         })
         ret = yield http_get_v2(company.COMPANY_NEARBY_STORES, company_service, params)
         return ret
@@ -151,7 +151,7 @@ class InfraCompanyDataService(DataService):
             "company_id": company_id,
             "longitude": longitude,
             "latitude": latitude,
-            "radius": radius
+            "radius": radius if radius else 1
         })
         ret = yield http_get_v2(company.COMPANY_POSITION_LBS.format(pid), company_service, params)
         return ret
