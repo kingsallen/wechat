@@ -49,7 +49,8 @@ class IsAgreePrivacyHandler(BaseHandler):
     @gen.coroutine
     def get(self):
         """
-        用户是否同意过隐私协议：data=0表示同意过，1表示没同意过。user_privacy_record有记录表示拒绝，没有记录表示同意过
+        用户是否同意过隐私协议：【以前：data=0表示同意过，1表示没同意过。user_privacy_record有记录表示拒绝，没有记录表示同意过】
+                            【现在：0 同意了最新的版本的隐私协议  1 未同意过任何版本的隐私协议  2 同意了老版本的隐私协议】
         -path: /api/privacy/is_agree/
         :return: {
             "status": 0,
@@ -66,6 +67,6 @@ class IsAgreePrivacyHandler(BaseHandler):
         result, show_privacy_agreement = yield self.privacy_ps.if_privacy_agreement_window(user_id)
 
         if result:
-            self.send_json_success(data=not show_privacy_agreement)
+            self.send_json_success(data=show_privacy_agreement)
         else:
             self.send_json_error()
