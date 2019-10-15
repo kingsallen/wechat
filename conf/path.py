@@ -289,5 +289,5 @@ REFERRAL_UPLOAD_RESUME_INFO = 'v1.2/referral/upload/candidate/info'
 LINKEDIN_ACCESSTOKEN = "https://www.linkedin.com/oauth/v2/accessToken"
 LINKEDIN_AUTH = "/oauth/v2/authorization"
 MAIMAI_ACCESSTOKEN = "https://maimai.cn/oauth_login?appid={appid}&{cusdata}&login=1"
-LIEPIN_ACCESSTOKEN = 'https://passport.liepin.com/mc/authlogin?state={}'
+LIEPIN_ACCESSTOKEN = 'https://passport.liepin.cn/mc/authlogin?state={}'
 JOYWOK_JMIS_AUTH = 'https://jmis.mcd.com.cn/jmis/NoLoginService'
