@@ -194,10 +194,10 @@ class NearbyStoresHandler(BaseHandler):
             longitude = ret.rectangle.split(";")[0].split(",")[0]
             latitude = ret.rectangle.split(";")[0].split(",")[1]
 
-        stores = yield self.company_ps.get_nearby_stores(self.current_user.company.id, longitude, latitude, self.params.radius)
-        data = stores.data
-        data.update({"coordinates": {"latitude": data.latitude, "longitude": data.longitude}})
-        self.send_json_success(data=stores.data)
+        stores_info = yield self.company_ps.get_nearby_stores(self.current_user.company.id, longitude, latitude, self.params.radius)
+        for store in stores_info.data.stores:
+            store.update({"coordinates": {"latitude": store.latitude, "longitude": store.longitude}})
+        self.send_json_success(data=stores_info.data)
 
 
 class PositionLbsHandler(BaseHandler):
@@ -213,7 +213,7 @@ class PositionLbsHandler(BaseHandler):
             ret = yield self.company_ps.get_lbs_ip_location(self.request.remote_ip)
             longitude = ret.rectangle.split(";")[0].split(",")[0]
             latitude = ret.rectangle.split(";")[0].split(",")[1]
-        stores = yield self.company_ps.get_position_lbs_info(self.current_user.company.id, longitude, latitude, self.params.radius, position_id)
-        data = stores.data
-        data.update({"coordinates": {"latitude": data.latitude, "longitude": data.longitude}})
-        self.send_json_success(data=stores.data)
+        stores_info = yield self.company_ps.get_position_lbs_info(self.current_user.company.id, longitude, latitude, self.params.radius, position_id)
+        for store in stores_info.data.stores:
+            store.update({"coordinates": {"latitude": store.latitude, "longitude": store.longitude}})
+        self.send_json_success(data=stores_info.data)
