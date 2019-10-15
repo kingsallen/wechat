@@ -1366,7 +1366,7 @@ class LbsPositionListHandler(BaseHandler):
             return
 
         self.render_page(
-            template_name="position/index.html"
+            template_name="position/lbs-job-list.html"
         )
 
 
