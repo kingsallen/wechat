@@ -271,6 +271,9 @@ class MetaBaseHandler(AtomHandler):
         )
         namespace.update(add_namespace)
         namespace.update(self._namespace)
+        if not namespace.get("client_env"):
+            client_env = ObjectDict({"name": self._client_env})
+            namespace.update({"client_env": client_env})
         self.logger.debug("metabase namespace: {}".format(namespace))
         return namespace
 
