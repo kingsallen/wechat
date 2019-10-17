@@ -946,6 +946,7 @@ class BaseHandler(MetaBaseHandler):
         )
         namespace.update(add_namespace)
         namespace.update(self.namespace)
+        self.logger.debug("base namespace: {}".format(namespace))
         return namespace
 
     def _set_access_time_cookie(self):
