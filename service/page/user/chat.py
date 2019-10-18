@@ -301,7 +301,7 @@ class ChatPageService(PageService):
     def get_fast_entry(self, company_id):
         uri = 'company/{company_id}/fastentry/config'.format(company_id=company_id)
         route = '{host}{uri}'.format(host=settings['chatbot_host'], uri=uri)
-        result = yield http_get(route=route, jdata=None, infra=False, timeout=1)
+        result = yield http_get(route=route, jdata=None, infra=False, timeout=5)
         raise gen.Return(result)
 
     @gen.coroutine
