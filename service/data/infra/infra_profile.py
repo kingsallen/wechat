@@ -734,13 +734,13 @@ class InfraProfileDataService(DataService):
         params = {k: v for k, v in params.items() if v is not None}
 
         if method == "get":
-            response = yield http_tool.http_get(route, params)
+            response = yield http_tool.http_get(route, params, timeout=3)
         elif method == "create":
-            response = yield http_tool.http_post(route, params)
+            response = yield http_tool.http_post(route, params, timeout=3)
         elif method == "update":
-            response = yield http_tool.http_put(route, params)
+            response = yield http_tool.http_put(route, params, timeout=3)
         elif method == "delete":
-            response = yield http_tool.http_delete(route, params)
+            response = yield http_tool.http_delete(route, params, timeout=3)
         else:
             raise Exception('Unknow Exception')
         return response
