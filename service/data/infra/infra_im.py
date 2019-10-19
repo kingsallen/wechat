@@ -44,3 +44,17 @@ class InfraIMDataService(DataService):
 
         ret = yield http_get_v2(user.INFRA_GET_CHATTING_MESSAGES.format(role=role), user_service.service_name, params)
         raise gen.Return(ret.data)
+
+    @gen.coroutine
+    def count_unread_message(self, room_id, role, user_id, employee_id, company_id):
+        """分页获取获取聊天记录"""
+
+        params = ObjectDict({
+            "room_id": room_id,
+            "employee_id": employee_id,
+            "user_id": user_id,
+            "company_id": company_id
+        })
+
+        ret = yield http_get_v2(user.INFRA_GET_CHATTING_UNREAD_COUNT.format(role=role), user_service.service_name, params)
+        raise gen.Return(ret.data)

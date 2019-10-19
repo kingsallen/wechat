@@ -11,4 +11,5 @@ INFRA_CUSTOM_FILE_UPLOAD ='/v4/file/upload'
 INFRA_GET_CUSTOM_FILE ='/v4/file/preview'
 INFRA_GET_CHATTING_ROOMS = '/v4/chat/{role}/chat-rooms'
 INFRA_GET_CHATTING_MESSAGES = '/v4/chat/{role}/history'
+INFRA_GET_CHATTING_UNREAD_COUNT = '/v4/chat/{role}/count-unread'
 

@@ -910,8 +910,6 @@ class EmployeeChattingHandler(BaseHandler):
         except Exception as e:
             self.write_error(404)
 
-    #@relate_user_and_former_employee ?
-    @authenticated
     @gen.coroutine
     def get_rooms(self):
         """
@@ -989,8 +987,8 @@ class EmployeeChattingHandler(BaseHandler):
             """
             role = "user"
             employee_id = 0
-        page_no = self.params.page_no or 1
-        page_size = self.params.page_size or 10
-        rooms = yield self.chat_ps.get_employee_chatting_unread(self.current_user.sysuser.id, role, employee_id,
-                                                          self._company.id, page_no, page_size)
-        return rooms
+
+        unread_count = yield self.chat_ps.get_employee_chatting_unread_count(self.params.room_id, role,
+                                                                             self.current_user.sysuser.id, employee_id,
+                                                                             self._company.id)
+        return unread_count

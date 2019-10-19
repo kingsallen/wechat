@@ -500,3 +500,10 @@ class ChatPageService(PageService):
 
         ret = yield self.infra_im_ds.get_messages(room_id, user_id, role, employee_id, company_id, page_no, page_size)
         raise gen.Return(ret)
+
+    @gen.coroutine
+    def get_employee_chatting_unread_count(self, room_id, role, user_id, employee_id, company_id):
+        """获得员工候选人聊天室列表"""
+
+        ret = yield self.infra_im_ds.count_unread_message(room_id, role, user_id, employee_id, company_id)
+        raise gen.Return(ret)
