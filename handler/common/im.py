@@ -891,7 +891,106 @@ class MobotHandler(BaseHandler):
     @handle_response
     @authenticated
     @gen.coroutine
-    def get(self):
+    def get(self, method):
         # 确保页面中用到的post请求的api接口cookie中设置了_xsrf
         self.xsrf_token
         self.render(template_name='mobot/index.html')
+
+
+class EmployeeChattingHandler(BaseHandler):
+
+    @handle_response
+    @gen.coroutine
+    def get(self, method):
+
+        try:
+            # 重置 event，准确描述
+            self._event = self._event + method
+            yield getattr(self, "get_" + method)()
+        except Exception as e:
+            self.write_error(404)
+
+    #@relate_user_and_former_employee ?
+    @authenticated
+    @gen.coroutine
+    def get_rooms(self):
+        """
+        获取聊天室列表
+        :return: 聊天室列表
+        """
+
+        if self.current_user.employee:
+            """
+            当前是员工，获取与候选人的聊天室列表
+            """
+            role = "employee"
+            employee_id = self.current_user.employee.id
+        else:
+            """
+            当前用户是普通的候选人，获取公众号所属公司下员工的聊天室列表
+            """
+            role = "user"
+            employee_id = 0
+        page_no = self.params.page_no or 1
+        page_size = self.params.page_size or 10
+        rooms = yield self.chat_ps.get_employee_chatrooms(self.current_user.sysuser.id, role, employee_id,
+                                                          self._company.id, page_no, page_size)
+        return rooms
+
+    @authenticated
+    @gen.coroutine
+    def get_messages(self):
+        """
+        获取聊天记录
+        :return: 聊天记录
+        """
+
+        if not self.params.room_id:
+            self.send_json_error(message=msg.REQUEST_PARAM_ERROR)
+            return
+
+        if self.current_user.employee:
+            """
+            当前是员工，获取与候选人的聊天室列表
+            """
+            role = "employee"
+            employee_id = self.current_user.employee.id
+        else:
+            """
+            当前用户是普通的候选人，获取公众号所属公司下员工的聊天室列表
+            """
+            role = "user"
+            employee_id = 0
+
+        page_no = self.params.page_no or 1
+        page_size = self.params.page_size or 10
+        messages = yield self.chat_ps.get_employee_chatting_messages(self.params.room_id, self.current_user.sysuser.id,
+                                                                     role, employee_id, self._company.id, page_no,
+                                                                     page_size)
+        return messages
+
+    @authenticated
+    @gen.coroutine
+    def get_unread(self):
+        """
+        获取聊天室列表
+        :return: 聊天室列表
+        """
+
+        if self.current_user.employee:
+            """
+            当前是员工，获取与候选人的聊天室列表
+            """
+            role = "employee"
+            employee_id = self.current_user.employee.id
+        else:
+            """
+            当前用户是普通的候选人，获取公众号所属公司下员工的聊天室列表
+            """
+            role = "user"
+            employee_id = 0
+        page_no = self.params.page_no or 1
+        page_size = self.params.page_size or 10
+        rooms = yield self.chat_ps.get_employee_chatting_unread(self.current_user.sysuser.id, role, employee_id,
+                                                          self._company.id, page_no, page_size)
+        return rooms

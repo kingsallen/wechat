@@ -486,3 +486,17 @@ class ChatPageService(PageService):
         # HR聊天是否托管给智能招聘助手，0 不托管，1 托管
         mobot_enable = bool(hr_info.leave_to_mobot) if hr_info else False
         raise gen.Return(mobot_enable)
+
+    @gen.coroutine
+    def get_employee_chatrooms(self, user_id, role, employee_id, company_id, page_no, page_size):
+        """获得员工候选人聊天室列表"""
+
+        ret = yield self.infra_im_ds.get_rooms(user_id, role, employee_id, company_id, page_no, page_size)
+        raise gen.Return(ret)
+
+    @gen.coroutine
+    def get_employee_chatting_messages(self, room_id, user_id, role, employee_id, company_id, page_no, page_size):
+        """获得员工候选人聊天室列表"""
+
+        ret = yield self.infra_im_ds.get_messages(room_id, user_id, role, employee_id, company_id, page_no, page_size)
+        raise gen.Return(ret)

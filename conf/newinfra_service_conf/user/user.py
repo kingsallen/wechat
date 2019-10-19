@@ -9,4 +9,6 @@ INFRA_USER_UNBIND_WORKWX_QXUSER = '/v4/user/workwx/unbindSysUser'
 INFRA_GET_WORKWX_USER_BY_SYSUSER_ID = '/v4/user/workwx/findBySysUserid'
 INFRA_CUSTOM_FILE_UPLOAD ='/v4/file/upload'
 INFRA_GET_CUSTOM_FILE ='/v4/file/preview'
+INFRA_GET_CHATTING_ROOMS = '/v4/chat/{role}/chat-rooms'
+INFRA_GET_CHATTING_MESSAGES = '/v4/chat/{role}/history'
 
