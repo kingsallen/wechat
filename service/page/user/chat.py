@@ -562,3 +562,65 @@ class ChatPageService(PageService):
 
         ret = yield self.infra_im_ds.post_switch(role, user_id, employee_id, company_id, False)
         raise gen.Return(ret)
+
+    @gen.coroutine
+    def enter_the_room(self, room_id, role, user_id, employee_id, company_id, position_id):
+        """
+        进入聊天室
+        :param room_id: 聊天室编号
+        :param role: 角色 employee是员工进入聊天室；user是候选人进入聊天室
+        :param user_id: 用户编号
+        :param employee_id:  员工编号
+        :param company_id: 公司编号
+        :param position_id: 职位
+        :return: 操作结果
+        """
+
+        ret = yield self.infra_im_ds.enter_the_room(room_id, role, user_id, employee_id, company_id, position_id)
+        raise gen.Return(ret)
+
+    @gen.coroutine
+    def leave_the_room(self, room_id, role, user_id, employee_id, company_id, position_id):
+        """
+        离开聊天室
+        :param room_id: 聊天室编号
+        :param role: 角色 employee是员工进入聊天室；user是候选人进入聊天室
+        :param user_id: 用户编号
+        :param employee_id:  员工编号
+        :param company_id: 公司编号
+        :param position_id: 职位
+        :return: 操作结果
+        """
+
+        ret = yield self.infra_im_ds.leave_the_room(room_id, role, user_id, employee_id, company_id, position_id)
+        raise gen.Return(ret)
+
+    @gen.coroutine
+    def delete_room(self, user_id, role, employee_id, company_id):
+        """
+        删除聊天室
+        :param user_id: 用户编号
+        :param role: 角色 employee是员工进入聊天室；user是候选人进入聊天室
+        :param employee_id: 员工编号
+        :param company_id: 公司编号
+        :return: 操作结果
+        """
+
+        ret = yield self.infra_im_ds.delete_room(user_id, role, employee_id, company_id)
+        raise gen.Return(ret)
+
+    @gen.coroutine
+    def post_message(self, room_id, role, user_id, employee_id, company_id, content):
+        """
+        保存消息
+        :param room_id: 聊天室编号
+        :param role: 角色 employee是员工进入聊天室；user是候选人进入聊天室
+        :param user_id: 用户编号
+        :param employee_id:  员工编号
+        :param company_id: 公司编号
+        :param content: 消息内容
+        :return: 操作结果
+        """
+
+        ret = yield self.infra_im_ds.post_message(room_id, role, user_id, employee_id, company_id, content)
+        raise gen.Return(ret)

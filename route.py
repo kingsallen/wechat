@@ -121,6 +121,7 @@ common_routes = [
 
     # websocket
     (r"/websocket/([A-Za-z0-9_]{1,32})",             handler.common.im.ChatWebSocketHandler),
+    (r"/ws/chatting/([A-Za-z0-9_]{1,32})",           handler.common.im.ChattingWebSocketHandler),
 
     (r"/api/send/vcode/?",                           handler.common.passport.SendValidCodeHandler,              {"event": "send_vcode"}),
     (r"/api/upload/recomprofile/?",                  handler.platform.referral.EmployeeRecomProfileHandler,     {"event": "upload_referral_profile"}),

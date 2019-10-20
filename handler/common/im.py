@@ -931,13 +931,15 @@ class EmployeeChattingHandler(BaseHandler):
             # 当前是员工，获取与候选人的聊天室列表
             role = "employee"
             employee_id = self.current_user.employee.id
+            user_id = 0
         else:
             # 当前用户是普通的候选人，获取公众号所属公司下员工的聊天室列表
             role = "user"
             employee_id = 0
+            user_id = self.current_user.sysuser.id
         page_no = self.params.page_no or 1
         page_size = self.params.page_size or 10
-        rooms = yield self.chat_ps.get_employee_chatrooms(self.current_user.sysuser.id, role, employee_id,
+        rooms = yield self.chat_ps.get_employee_chatrooms(user_id, role, employee_id,
                                                           self._company.id, page_no, page_size)
         self.send_json_success(rooms)
 
@@ -948,22 +950,20 @@ class EmployeeChattingHandler(BaseHandler):
         :return: 聊天记录
         """
 
-        if not self.params.room_id:
-            self.send_json_error(message=msg.REQUEST_PARAM_ERROR)
-            return
-
         if self.current_user.employee:
             # 当前是员工，获取与候选人的聊天室列表
             role = "employee"
             employee_id = self.current_user.employee.id
+            user_id = 0
         else:
             # 当前用户是普通的候选人，获取公众号所属公司下员工的聊天室列表
             role = "user"
             employee_id = 0
+            user_id = self.current_user.sysuser.id
 
         page_no = self.params.page_no or 1
         page_size = self.params.page_size or 10
-        messages = yield self.chat_ps.get_employee_chatting_messages(self.params.room_id, self.current_user.sysuser.id,
+        messages = yield self.chat_ps.get_employee_chatting_messages(self.params.room_id, user_id,
                                                                      role, employee_id, self._company.id, page_no,
                                                                      page_size)
         self.send_json_success(messages)
@@ -979,13 +979,15 @@ class EmployeeChattingHandler(BaseHandler):
             # 当前是员工，获取与候选人的聊天室列表
             role = "employee"
             employee_id = self.current_user.employee.id
+            user_id = 0
         else:
             # 当前用户是普通的候选人，获取公众号所属公司下员工的聊天室列表
             role = "user"
             employee_id = 0
+            user_id = self.current_user.sysuser.id
 
         unread_count = yield self.chat_ps.get_employee_chatting_unread_count(self.params.room_id, role,
-                                                                             self.current_user.sysuser.id, employee_id,
+                                                                             user_id, employee_id,
                                                                              self._company.id)
         self.send_json_success(unread_count)
 
@@ -1000,12 +1002,14 @@ class EmployeeChattingHandler(BaseHandler):
             # 当前是员工，获取与候选人的聊天室列表
             role = "employee"
             employee_id = self.current_user.employee.id
+            user_id = 0
         else:
             # 当前用户是普通的候选人，获取公众号所属公司下员工的聊天室列表
             role = "user"
             employee_id = 0
+            user_id = self.current_user.sysuser.id
 
-        switch = yield self.chat_ps.get_switch(role, self.current_user.sysuser.id, employee_id, self._company.id)
+        switch = yield self.chat_ps.get_switch(role, user_id, employee_id, self._company.id)
         self.send_json_success(switch)
 
     @gen.coroutine
@@ -1019,10 +1023,150 @@ class EmployeeChattingHandler(BaseHandler):
             # 当前是员工，获取与候选人的聊天室列表
             role = "employee"
             employee_id = self.current_user.employee.id
+            user_id = 0
         else:
             # 当前用户是普通的候选人，获取公众号所属公司下员工的聊天室列表
             role = "user"
             employee_id = 0
+            user_id = self.current_user.sysuser.id
 
-        switch = yield self.chat_ps.post_switch(role, self.current_user.sysuser.id, employee_id, self._company.id)
+        switch = yield self.chat_ps.post_switch(role, user_id, employee_id, self._company.id)
         self.send_json_success(switch)
+
+    @gen.coroutine
+    def post_enter(self):
+        """
+        关闭消息推送
+        :return: 推送开关状态
+        """
+
+        if self.current_user.employee:
+            # 当前是员工，获取与候选人的聊天室列表
+            role = "employee"
+            employee_id = self.current_user.employee.id
+            user_id = 0
+        else:
+            # 当前用户是普通的候选人，获取公众号所属公司下员工的聊天室列表
+            role = "user"
+            employee_id = 0
+            user_id = self.current_user.sysuser.id
+
+        ret = yield self.chat_ps.enter_the_room(self.params.room_id, role, user_id, employee_id, self._company_id,
+                                                self.params.position_id)
+        self.send_json_success(ret)
+
+
+class ChattingWebSocketHandler(websocket.WebSocketHandler):
+    """
+    处理 候选人和员工的聊天的各种 webSocket 传输，直接继承 tornado 的 WebSocketHandler
+    """
+
+    _pool = redis.ConnectionPool(
+        host=settings["store_options"]["redis_host"],
+        port=settings["store_options"]["redis_port"],
+        max_connections=settings["store_options"]["max_connections"])
+
+    _redis = redis.StrictRedis(connection_pool=_pool)
+
+    def __init__(self, application, request, **kwargs):
+        super(ChattingWebSocketHandler, self).__init__(application, request, **kwargs)
+        self.redis_client = self._redis
+        self.chatting_user_channel = ''
+        self.chatting_employee_channel = ''
+        self.employee_id = 0
+        self.room_id = 0
+        self.user_id = 0
+        self.position_id = 0
+        self.io_loop = ioloop.IOLoop.current()
+
+        self.chat_session = ChatCache()
+        self.chat_ps = ChatPageService()
+
+    def open(self, room_id, *args, **kwargs):
+        logger.debug("------------ start open websocket --------------")
+        self.room_id = room_id
+        self.user_id = match_session_id(to_str(self.get_secure_cookie(const.COOKIE_SESSIONID)))
+        self.employee_id = self.get_argument("employee_id")
+        self.position_id = self.get_argument("pid", 0) or 0
+
+        try:
+            assert self.user_id and self.employee_id and self.room_id
+        except AssertionError:
+            self.close(WebSocketCloseCode.normal.value, "not authorized")
+
+        self.set_nodelay(True)
+
+        self.chatting_user_channel = const.CHAT_CHATTING_CHANNEL.format(self.user_id, self.employee_id)
+        self.chatting_employee_channel = const.CHAT_HR_CHANNEL.format(self.employee_id, self.user_id)
+        #?
+        self.chat_session.mark_enter_chatroom(self.room_id)
+
+        if self.current_user.employee:
+            channel = self.chatting_employee_channel;
+        else:
+            channel = self.chatting_user_channel;
+
+        def message_handler(message):
+            # 处理 sub 接受到的消息
+            nonlocal self
+            try:
+                data = ujson.loads(message.get("data"))
+
+                logger.debug("websocket data:{}".format(data))
+                if data:
+                    self.write_message(json_dumps(ObjectDict(
+                        content=data.get("content"),
+                        compoundContent=data.get("compoundContent"),
+                        chatTime=data.get("createTime"),
+                        speaker=data.get("speaker"),
+                        msgType=data.get("msgType"),
+                        stats=data.get("stats")
+                    )))
+                    logger.debug("----------websocket write finish----------")
+            except websocket.WebSocketClosedError:
+                self.logger.error(traceback.format_exc())
+                self.close(WebSocketCloseCode.internal_error.value)
+                raise
+
+        logger.debug("---------- ready to subscribe -----------")
+
+        self.subscriber = Subscriber(
+            self.redis_client,
+            channel=channel,
+            message_handler=message_handler)
+
+        logger.debug("------------- subscribe finish ---------------")
+        self.subscriber.start_run_in_thread()
+
+    @gen.coroutine
+    def on_message(self, message):
+        logger.debug("[websocket] received a message:{}".format(message))
+        data = ujson.loads(message)
+        if data.get("msgType") == 'ping':
+            self.write_message(ujson.dumps({"msgType": 'pong'}))
+
+        if self.current_user.employee:
+            role = "employee"
+            employee_id = self.current_user.employee.id
+            user_id = 0
+        else:
+            role = "user"
+            employee_id = 0
+            user_id = self.current_user.sysuser.id
+        yield self.chat_ps.post_message(self.room_id, role, user_id, employee_id, self._company.id,
+                                        data.get("content"))
+
+    @gen.coroutine
+    def on_close(self):
+        logger.debug("&=! {}".format("on_close, before stop_run_in_thread"))
+        self.subscriber.stop_run_in_thread()
+        logger.debug("&=! {}".format("on_close, after stop_run_in_thread"))
+        logger.debug("&=! {}".format("on_close, before cleanup"))
+        self.subscriber.cleanup()
+        logger.debug("&=! {}".format("on_close, after cleanup"))
+
+        self.chat_session.mark_leave_chatroom(self.room_id)
+        yield self.chat_ps.leave_the_room(self.room_id)
+
+    def data_received(self):
+        pass

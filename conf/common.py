@@ -142,6 +142,9 @@ TEMPLATE_JOB_SEND_FINISH_MSGID = "template_message_receipt_id"
 # joywok绑定授权验证码
 JOYWOK_IDENTIFY_CODE = "joywok_identify_{}"
 
+# C端用户监听频道
+CHAT_CHATTING_CHANNEL = "chatting_{0}_{1}"
+
 # ++++++++++业务常量+++++++++++
 # Cookie name
 COOKIE_SESSIONID = "5MA8A989"

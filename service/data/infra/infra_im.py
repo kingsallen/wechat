@@ -121,7 +121,7 @@ class InfraIMDataService(DataService):
     @gen.coroutine
     def leave_the_room(self, room_id, role, user_id, employee_id, company_id, position_id):
         """
-        进入聊天室
+        离开聊天室
         :param room_id: 聊天室编号
         :param role: 角色 employee是员工进入聊天室；user是候选人进入聊天室
         :param user_id: 用户编号
@@ -145,7 +145,7 @@ class InfraIMDataService(DataService):
     @gen.coroutine
     def post_message(self, room_id, role, user_id, employee_id, company_id, content):
         """
-        进入聊天室
+        保存消息
         :param room_id: 聊天室编号
         :param role: 角色 employee是员工进入聊天室；user是候选人进入聊天室
         :param user_id: 用户编号
