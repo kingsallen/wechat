@@ -910,6 +910,16 @@ class EmployeeChattingHandler(BaseHandler):
         except Exception as e:
             self.write_error(404)
 
+    @handle_response
+    @gen.coroutine
+    def post(self, method):
+        try:
+            # 重置 event，准确描述
+            self._event = self._event + method
+            yield getattr(self, "post_" + method)()
+        except Exception as e:
+            self.write_error(404)
+
     @gen.coroutine
     def get_rooms(self):
         """
@@ -918,24 +928,19 @@ class EmployeeChattingHandler(BaseHandler):
         """
 
         if self.current_user.employee:
-            """
-            当前是员工，获取与候选人的聊天室列表
-            """
+            # 当前是员工，获取与候选人的聊天室列表
             role = "employee"
             employee_id = self.current_user.employee.id
         else:
-            """
-            当前用户是普通的候选人，获取公众号所属公司下员工的聊天室列表
-            """
+            # 当前用户是普通的候选人，获取公众号所属公司下员工的聊天室列表
             role = "user"
             employee_id = 0
         page_no = self.params.page_no or 1
         page_size = self.params.page_size or 10
         rooms = yield self.chat_ps.get_employee_chatrooms(self.current_user.sysuser.id, role, employee_id,
                                                           self._company.id, page_no, page_size)
-        return rooms
+        self.send_json_success(rooms)
 
-    @authenticated
     @gen.coroutine
     def get_messages(self):
         """
@@ -948,15 +953,11 @@ class EmployeeChattingHandler(BaseHandler):
             return
 
         if self.current_user.employee:
-            """
-            当前是员工，获取与候选人的聊天室列表
-            """
+            # 当前是员工，获取与候选人的聊天室列表
             role = "employee"
             employee_id = self.current_user.employee.id
         else:
-            """
-            当前用户是普通的候选人，获取公众号所属公司下员工的聊天室列表
-            """
+            # 当前用户是普通的候选人，获取公众号所属公司下员工的聊天室列表
             role = "user"
             employee_id = 0
 
@@ -965,9 +966,8 @@ class EmployeeChattingHandler(BaseHandler):
         messages = yield self.chat_ps.get_employee_chatting_messages(self.params.room_id, self.current_user.sysuser.id,
                                                                      role, employee_id, self._company.id, page_no,
                                                                      page_size)
-        return messages
+        self.send_json_success(messages)
 
-    @authenticated
     @gen.coroutine
     def get_unread(self):
         """
@@ -976,19 +976,53 @@ class EmployeeChattingHandler(BaseHandler):
         """
 
         if self.current_user.employee:
-            """
-            当前是员工，获取与候选人的聊天室列表
-            """
+            # 当前是员工，获取与候选人的聊天室列表
             role = "employee"
             employee_id = self.current_user.employee.id
         else:
-            """
-            当前用户是普通的候选人，获取公众号所属公司下员工的聊天室列表
-            """
+            # 当前用户是普通的候选人，获取公众号所属公司下员工的聊天室列表
             role = "user"
             employee_id = 0
 
         unread_count = yield self.chat_ps.get_employee_chatting_unread_count(self.params.room_id, role,
                                                                              self.current_user.sysuser.id, employee_id,
                                                                              self._company.id)
-        return unread_count
+        self.send_json_success(unread_count)
+
+    @gen.coroutine
+    def get_switch(self):
+        """
+        获取推送开关
+        :return: 推送开关状态
+        """
+
+        if self.current_user.employee:
+            # 当前是员工，获取与候选人的聊天室列表
+            role = "employee"
+            employee_id = self.current_user.employee.id
+        else:
+            # 当前用户是普通的候选人，获取公众号所属公司下员工的聊天室列表
+            role = "user"
+            employee_id = 0
+
+        switch = yield self.chat_ps.get_switch(role, self.current_user.sysuser.id, employee_id, self._company.id)
+        self.send_json_success(switch)
+
+    @gen.coroutine
+    def post_switch(self):
+        """
+        关闭消息推送
+        :return: 推送开关状态
+        """
+
+        if self.current_user.employee:
+            # 当前是员工，获取与候选人的聊天室列表
+            role = "employee"
+            employee_id = self.current_user.employee.id
+        else:
+            # 当前用户是普通的候选人，获取公众号所属公司下员工的聊天室列表
+            role = "user"
+            employee_id = 0
+
+        switch = yield self.chat_ps.post_switch(role, self.current_user.sysuser.id, employee_id, self._company.id)
+        self.send_json_success(switch)

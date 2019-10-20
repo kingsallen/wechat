@@ -489,21 +489,76 @@ class ChatPageService(PageService):
 
     @gen.coroutine
     def get_employee_chatrooms(self, user_id, role, employee_id, company_id, page_no, page_size):
-        """获得员工候选人聊天室列表"""
+        """
+        获取聊天室列表
+        :param user_id: 用户编号
+        :param role: 角色 employee是员工进入聊天室；user是候选人进入聊天室
+        :param employee_id: 员工编号
+        :param company_id: 公司编号
+        :param page_no: 页码
+        :param page_size: 每页数量
+        :return: 聊天室列表
+        """
 
         ret = yield self.infra_im_ds.get_rooms(user_id, role, employee_id, company_id, page_no, page_size)
         raise gen.Return(ret)
 
     @gen.coroutine
     def get_employee_chatting_messages(self, room_id, user_id, role, employee_id, company_id, page_no, page_size):
-        """获得员工候选人聊天室列表"""
+        """
+        分页获取获取聊天记录
+        :param room_id: 聊天室编号
+        :param user_id: 用户编号
+        :param role: 角色 employee是员工进入聊天室；user是候选人进入聊天室
+        :param employee_id: 员工编号
+        :param company_id: 公司编号
+        :param page_no: 页码
+        :param page_size: 每页数量
+        :return: 聊天消息列表
+        """
 
         ret = yield self.infra_im_ds.get_messages(room_id, user_id, role, employee_id, company_id, page_no, page_size)
         raise gen.Return(ret)
 
     @gen.coroutine
     def get_employee_chatting_unread_count(self, room_id, role, user_id, employee_id, company_id):
-        """获得员工候选人聊天室列表"""
+        """
+        获取未读聊天消息数量
+        :param room_id: 聊天室编号
+        :param role: 角色 employee是员工进入聊天室；user是候选人进入聊天室
+        :param user_id:  用户编号
+        :param employee_id: 员工编号
+        :param company_id: 公司编号
+        :return: 未读消息数量
+        """
 
         ret = yield self.infra_im_ds.count_unread_message(room_id, role, user_id, employee_id, company_id)
+        raise gen.Return(ret)
+
+    @gen.coroutine
+    def get_switch(self, role, user_id, employee_id, company_id):
+        """
+        获取消息推送开关状态
+        :param role: 角色
+        :param user_id: 用户编号
+        :param employee_id: 员工编号
+        :param company_id: 公司编号
+        :return: 开关状态
+        """
+
+        ret = yield self.infra_im_ds.get_switch(role, user_id, employee_id, company_id)
+        raise gen.Return(ret)
+
+    @gen.coroutine
+    def post_switch(self, role, user_id, employee_id, company_id):
+        """
+        关闭消息推送
+        :param role: 角色
+        :param user_id: 用户编号
+        :param employee_id: 员工编号
+        :param company_id: 公司编号
+        :return: 开关状态
+        """
+
+        ret = yield self.infra_im_ds.post_switch(role, user_id, employee_id, company_id, False)
         raise gen.Return(ret)
