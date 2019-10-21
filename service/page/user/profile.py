@@ -107,7 +107,7 @@ class ProfilePageService(PageService):
     })
 
     @gen.coroutine
-    def has_profile(self, user_id, locale=None, locale_display=None):
+    def has_profile(self, user_id, locale=None, locale_display=None, timeout=30):
         """
         判断 user_user 是否有 profile (profile_profile 表数据)
         :param user_id:
@@ -117,7 +117,7 @@ class ProfilePageService(PageService):
         profile = has_profile[1]
         """
 
-        result, profile = yield self.infra_profile_ds.get_profile(user_id)
+        result, profile = yield self.infra_profile_ds.get_profile(user_id, timeout=timeout)
         if locale:
             profile = self.__translate_profile(profile, locale, locale_display)
         return result, profile

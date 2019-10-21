@@ -17,9 +17,9 @@ from conf.newinfra_service_conf.service_info import parsing_service
 
 class InfraProfileDataService(DataService):
     @gen.coroutine
-    def get_profile(self, user_id):
+    def get_profile(self, user_id, timeout=30):
         params = ObjectDict(user_id=user_id)
-        res = yield http_tool.http_get(path.PROFILE, params)
+        res = yield http_tool.http_get(path.PROFILE, params, timeout=timeout)
         return http_tool.unboxing(res)
 
     @gen.coroutine
