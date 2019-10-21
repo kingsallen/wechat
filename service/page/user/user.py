@@ -312,7 +312,7 @@ class UserPageService(PageService):
         """
         try:
             check_group_passed = yield self.infra_user_ds.is_valid_employee(
-                user_id, company_id)
+                user_id, company_id, timeout=3)
         except Exception as e:
             self.logger.error("check employee type error: {}".format(e))
             return ObjectDict()
