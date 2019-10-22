@@ -8,7 +8,7 @@ from util.tool.date_tool import curr_now_minute, curr_now
 from util.tool.http_tool import http_get_v2, http_post_v2
 
 
-class InfraIMDataService(DataService):
+class InfraImDataService(DataService):
     """
     员工候选人IM数据操作接口
     1. 分页查找聊天室记录
