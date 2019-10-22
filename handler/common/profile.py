@@ -782,6 +782,14 @@ class ProfileSectionHandler(BaseHandler):
             if hasattr(e, "__status") and getattr(e, "__status") == 'x':
                 verb = "delete"
             else:
+                for symbol in """，,、:：;；’'“”""''""":
+                    if symbol in e.get("name"):
+                        self.send_json_error(message='请删除标签中的特殊字符')
+                        return
+                if len(e.get("name")) >= 20:
+                    self.send_json_error(message='请填写20个字以内')
+                    return
+
                 verb = 'update' if e.id else 'create'
 
             result, res = yield getattr(
