@@ -1147,7 +1147,7 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
         if data.get("msgType") == 'ping':
             self.write_message(ujson.dumps({"msgType": 'pong'}))
 
-        if data.get("speaker") == 1:
+        if data.get("speaker") == 2:
             role = "employee"
             employee_id = self.employee_id
             user_id = 0
@@ -1160,10 +1160,6 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
 
         chat_id = yield self.chat_ps.post_message(self.room_id, role, user_id, employee_id, 0, data.get("content"))
 
-
-        self.subscriber.psubscribe(channel)
-        self.subscriber.start_run_in_thread()
-
         message_body = json_dumps(ObjectDict(
             msgType="text",
             content=data.get("content"),
@@ -1175,7 +1171,7 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
             id=chat_id.get("data"),
         ))
         self.logger.debug("publish chat by redis message_body:{}".format(message_body))
-        self.redis_client.publish(self.hr_channel, message_body)
+        self.redis_client.publish(channel, message_body)
 
     @gen.coroutine
     def on_close(self):
