@@ -56,8 +56,8 @@ company_service = ObjectDict(
     service_name="company"
 )
 
-parsing_service = ObjectDict(
-    appid="A11027",
-    interfaceid="A11027001",
-    service_name="parsing"
+profile_service = ObjectDict(
+    appid="A11011",
+    interfaceid="A11011001",
+    service_name="profile"
 )

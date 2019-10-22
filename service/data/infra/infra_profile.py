@@ -12,7 +12,9 @@ from requests.models import Request
 from setting import settings
 from globals import env
 from conf.newinfra_service_conf.parsing import parsing
-from conf.newinfra_service_conf.service_info import parsing_service
+from conf.newinfra_service_conf.service_info import parsing_service, profile_service
+from conf.newinfra_service_conf.profile import profile
+
 
 
 class InfraProfileDataService(DataService):
@@ -835,3 +837,11 @@ class InfraProfileDataService(DataService):
         })
         ret = yield http_tool.http_post_v2(parsing.INFRA_CUSTOM_PARSE_IDCARD, parsing_service, params)
         raise gen.Return(ret)
+
+    @gen.coroutine
+    def get_profile_completeness(self, user_id, timeout=30):
+        params = ObjectDict({
+            "user_id": user_id
+        })
+        ret = yield http_tool.http_post_v2(profile.PROFILE_COMPLETE, profile_service, params, timeout=timeout)
+        return ret
