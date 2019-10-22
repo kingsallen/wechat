@@ -1060,7 +1060,7 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
     """
     处理 候选人和员工的聊天的各种 webSocket 传输，直接继承 tornado 的 WebSocketHandler
     """
-
+    # todo redis 连接池公用一个
     _pool = redis.ConnectionPool(
         host=settings["store_options"]["redis_host"],
         port=settings["store_options"]["redis_port"],
@@ -1076,6 +1076,7 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
         self.employee_id = 0
         self.room_id = 0
         self.user_id = 0
+        self.candidate_id = 0
         self.position_id = 0
         self.io_loop = ioloop.IOLoop.current()
 
@@ -1087,6 +1088,7 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
         self.room_id = room_id
         self.user_id = match_session_id(to_str(self.get_secure_cookie(const.COOKIE_SESSIONID)))
         self.employee_id = self.get_argument("employee_id")
+        self.candidate_id = self.get_argument("user_id")
         self.position_id = self.get_argument("pid", 0) or 0
 
         try:
@@ -1097,14 +1099,14 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
         self.set_nodelay(True)
 
         self.chatting_user_channel = const.CHAT_CHATTING_CHANNEL.format(self.user_id, self.employee_id)
-        self.chatting_employee_channel = const.CHAT_HR_CHANNEL.format(self.employee_id, self.user_id)
+        self.chatting_employee_channel = const.CHAT_CHATTING_CHANNEL.format(self.employee_id, self.user_id)
         #?
         self.chat_session.mark_enter_chatroom(self.room_id)
 
         if self.current_user.employee:
-            channel = self.chatting_employee_channel;
+            channel = self.chatting_employee_channel
         else:
-            channel = self.chatting_user_channel;
+            channel = self.chatting_user_channel
 
         def message_handler(message):
             # 处理 sub 接受到的消息
@@ -1145,20 +1147,40 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
         if data.get("msgType") == 'ping':
             self.write_message(ujson.dumps({"msgType": 'pong'}))
 
-        if self.current_user.employee:
+        if data.get("speaker") == 1:
             role = "employee"
-            employee_id = self.current_user.employee.id
+            employee_id = self.employee_id
             user_id = 0
+            channel = self.chatting_user_channel
         else:
             role = "user"
             employee_id = 0
-            user_id = self.current_user.sysuser.id
-        yield self.chat_ps.post_message(self.room_id, role, user_id, employee_id, self._company.id,
-                                        data.get("content"))
+            user_id = self.candidate_id
+            channel = self.chatting_employee_channel
+
+        chat_id = yield self.chat_ps.post_message(self.room_id, role, user_id, employee_id, 0, data.get("content"))
+
+
+        self.subscriber.psubscribe(channel)
+        self.subscriber.start_run_in_thread()
+
+        message_body = json_dumps(ObjectDict(
+            msgType="text",
+            content=data.get("content"),
+            compoundContent=None,
+            speaker=data.get("speaker"),
+            cid=int(self.room_id),
+            pid=int(self.position_id),
+            createTime=curr_now_minute(),
+            id=chat_id.get("data"),
+        ))
+        self.logger.debug("publish chat by redis message_body:{}".format(message_body))
+        self.redis_client.publish(self.hr_channel, message_body)
 
     @gen.coroutine
     def on_close(self):
         logger.debug("&=! {}".format("on_close, before stop_run_in_thread"))
+        # todo 离开房间发现连接已经关闭了
         self.subscriber.stop_run_in_thread()
         logger.debug("&=! {}".format("on_close, after stop_run_in_thread"))
         logger.debug("&=! {}".format("on_close, before cleanup"))
