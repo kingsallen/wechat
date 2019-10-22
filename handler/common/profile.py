@@ -203,7 +203,7 @@ class APIProfileCompletenessHandler(BaseHandler):
         if not user_id:
             self.send_json_error()
         else:
-            completeness = yield self.profile_ps.get_profile_completeness(user_id)
+            completeness = yield self.profile_ps.get_profile_completeness(user_id, timeout=3)
             if completeness:
                 self.send_json_success(data=completeness)
 

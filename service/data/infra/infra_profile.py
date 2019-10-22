@@ -839,9 +839,9 @@ class InfraProfileDataService(DataService):
         raise gen.Return(ret)
 
     @gen.coroutine
-    def get_profile_completeness(self, user_id):
+    def get_profile_completeness(self, user_id, timeout=30):
         params = ObjectDict({
             "user_id": user_id
         })
-        ret = yield http_tool.http_post_v2(profile.PROFILE_COMPLETE, profile_service, params)
+        ret = yield http_tool.http_post_v2(profile.PROFILE_COMPLETE, profile_service, params, timeout=timeout)
         return ret

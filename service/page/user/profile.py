@@ -154,8 +154,8 @@ class ProfilePageService(PageService):
 
     @cache(ttl=30)
     @gen.coroutine
-    def get_profile_completeness(self, user_id):
-        res = yield self.infra_profile_ds.get_profile_completeness(user_id)
+    def get_profile_completeness(self, user_id, timeout=30):
+        res = yield self.infra_profile_ds.get_profile_completeness(user_id, timeout=timeout)
         return res.data or 0
 
     @gen.coroutine
