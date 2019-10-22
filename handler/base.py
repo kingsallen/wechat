@@ -395,16 +395,16 @@ class BaseHandler(MetaBaseHandler):
             company_id = 0
             company_name = ''
         try:
-            _, profile = yield self.profile_ps.has_profile(self.current_user.sysuser.id if self.current_user.sysuser else 0, timeout=3)
+            completeness = yield self.profile_ps.get_profile_completeness(self.current_user.sysuser.id if self.current_user.sysuser else 0, timeout=3)
         except Exception as e:
             self.logger.error("[sensors] get profile completeness error: {}".format(e))
-            profile = ObjectDict()
+            completeness = 0
         profiles = {
             'user_role': user_role,
             'sysuser_id': self.current_user.sysuser.id if self.current_user.sysuser else self._sc_cookie_id,
             'company_id': company_id,
             'company_name': company_name,
-            'ProfileCompleteness': profile.basic.completeness if profile and profile.basic else 0
+            'ProfileCompleteness': completeness if completeness else 0
         }
         self.profile_set(profiles=profiles)
 

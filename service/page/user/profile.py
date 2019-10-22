@@ -21,6 +21,7 @@ from urllib.parse import urlencode
 from util.common.cache import BaseRedis
 from util.tool.dict_tool import objectdictify
 from util.tool.str_tool import json_hump2underline
+from util.common.decorator import cache
 import ujson
 import ast
 
@@ -150,6 +151,12 @@ class ProfilePageService(PageService):
                             industry['industry_name'] = (INDUSTRY.get(industry.get('industry_name')) if locale_display == "en_US" else INDUSTRY_REVERSE.get(industry.get('industry_name'))) or industry.get('industry_name')
         self.logger.debug("translate_profile:{}".format(profile))
         return profile
+
+    @cache(ttl=30)
+    @gen.coroutine
+    def get_profile_completeness(self, user_id):
+        res = yield self.infra_profile_ds.get_profile_completeness(user_id)
+        return res.data or 0
 
     @gen.coroutine
     def has_profile_basic(self, profile_id):
