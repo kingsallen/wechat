@@ -550,17 +550,18 @@ class ChatPageService(PageService):
         raise gen.Return(ret)
 
     @gen.coroutine
-    def post_switch(self, role, user_id, employee_id, company_id):
+    def post_switch(self, role, user_id, employee_id, company_id, tpl_switch):
         """
         关闭消息推送
         :param role: 角色
         :param user_id: 用户编号
         :param employee_id: 员工编号
         :param company_id: 公司编号
+        :param tpl_switch 开关
         :return: 开关状态
         """
 
-        ret = yield self.infra_im_ds.post_switch(role, user_id, employee_id, company_id, False)
+        ret = yield self.infra_im_ds.post_switch(role, user_id, employee_id, company_id, tpl_switch)
         raise gen.Return(ret)
 
     @gen.coroutine

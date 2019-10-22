@@ -1030,7 +1030,7 @@ class EmployeeChattingHandler(BaseHandler):
             employee_id = 0
             user_id = self.current_user.sysuser.id
 
-        switch = yield self.chat_ps.post_switch(role, user_id, employee_id, self._company.id)
+        switch = yield self.chat_ps.post_switch(role, user_id, employee_id, self._company.id, self.params.tpl_switch)
         self.send_json_success(switch)
 
     @gen.coroutine

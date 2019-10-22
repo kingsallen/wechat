@@ -7,33 +7,31 @@
 
 # Copyright 2016 MoSeeker
 
+import json
 import re
 import time
 import traceback
-import json
+
 from tornado import gen
 from tornado.httpclient import AsyncHTTPClient
 from tornado.httputil import HTTPHeaders
-import ujson
 
 import conf.common as const
-import conf.wechat as wx_const
 import conf.message as message
+import conf.wechat as wx_const
 from cache.user.user_hr_account import UserHrAccountCache
 from service.page.base import PageService
-from util.wechat.msgcrypt import WXBizMsgCrypt
-from util.tool.url_tool import make_static_url
-from util.tool.date_tool import curr_now
-from util.tool.str_tool import mobile_validate, get_send_time_from_template_message_url
-from util.common import ObjectDict
-from util.tool.json_tool import json_dumps
-from util.tool.http_tool import http_post_cs_msg
-from util.wechat.core import get_wxuser, send_succession_message, get_test_access_token
-from util.common.mq import user_follow_wechat_publisher, user_unfollow_wechat_publisher
 from service.page.user.user import UserPageService
-from util.common.exception import InfraOperationError
-
 from setting import settings
+from util.common import ObjectDict
+from util.common.exception import InfraOperationError
+from util.common.mq import user_follow_wechat_publisher, user_unfollow_wechat_publisher
+from util.tool.http_tool import http_post_cs_msg
+from util.tool.json_tool import json_dumps
+from util.tool.str_tool import mobile_validate, get_send_time_from_template_message_url
+from util.tool.url_tool import make_static_url
+from util.wechat.core import get_wxuser, send_succession_message, send_succession_news, get_test_access_token
+from util.wechat.msgcrypt import WXBizMsgCrypt
 
 
 class EventPageService(PageService):
@@ -827,6 +825,22 @@ class EventPageService(PageService):
                         raise InfraOperationError(e)
 
                 send_succession_message(wechat=wechat, open_id=msg.FromUserName, pattern_id=str_scene)
+
+            elif str_scene == const.STR_SCENE_EMPLOYEE_CHATTING:
+                employee_id_str = re.match(r"EMPLOYEECHATTING_(\d*)_(\d*)", msg.EventKey).group(1)
+                position_id_str = re.match(r"EMPLOYEECHATTING_(\d*)_(\d*)", msg.EventKey).group(2)
+                employee = yield self.user_employee_ds.get_employee({'id': int(employee_id_str)})
+
+                position_params = {"id", position_id_str}
+                position = yield self.infra_position_ds.get_position(position_params)
+
+                company = yield  self.infra_company_ds.get_company_by_id(employee.company_id)
+
+                user = yield self.infra_user_ds.infra_get_user(employee.sysuerId)
+
+                send_succession_news(wechat=wechat, open_id=msg.FromUserName, company_abbreviation=company.abbreviation,
+                                     employee_name=employee.cname, position_title=position.title,
+                                     user_head_img=user.headimg)
             else:
                 send_succession_message(wechat=wechat, open_id=msg.FromUserName, pattern_id=str_scene)
 

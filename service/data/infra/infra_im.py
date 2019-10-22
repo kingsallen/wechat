@@ -213,7 +213,7 @@ class InfraImDataService(DataService):
         raise gen.Return(ret)
 
     @gen.coroutine
-    def post_switch(self, role, user_id, employee_id, company_id, tpl_switch = False):
+    def post_switch(self, role, user_id, employee_id, company_id, tpl_switch=False):
         """
         改变消息推送的开关状态
         :param role: 角色
