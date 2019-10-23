@@ -931,12 +931,14 @@ class EmployeeChattingHandler(BaseHandler):
         if self.current_user.employee:
             # 当前是员工，获取与候选人的聊天室列表
             self.role = "employee"
-            self.employee_id = self.current_user.employee.id
-            self.user_id = self.params.user_id
+            self.employee_id = self.current_user.employee.id or 0
+            self.logger.debug("GET employee_id:{}".format(self.employee_id))
+            self.user_id = self.params.user_id or 0
         else:
             # 当前用户是普通的候选人，获取公众号所属公司下员工的聊天室列表
             self.role = "user"
-            self.employee_id = self.params.employee_id
+            self.employee_id = self.params.employee_id or 0
+            self.logger.debug("GET employee_id:{}".format(self.employee_id))
             self.user_id = self.current_user.sysuser.id
 
         try:
@@ -966,7 +968,7 @@ class EmployeeChattingHandler(BaseHandler):
             # 当前是员工，获取与候选人的聊天室列表
             self.role = "employee"
             self.logger.debug("POST params:{}".format(self.self.json_args))
-            self.employee_id = self.current_user.employee.id
+            self.employee_id = self.current_user.employee.id or 0
             self.logger.debug("POST employee_id:{}".format(self.employee_id))
             self.user_id = self.json_args.get("user_id") or 0
         else:
@@ -975,7 +977,7 @@ class EmployeeChattingHandler(BaseHandler):
             self.logger.debug("POST params:{}".format(self.json_args))
             self.employee_id = self.json_args.get("employee_id") or 0
             self.logger.debug("POST employee_id:{}".format(self.employee_id))
-            self.user_id = self.current_user.sysuser.id
+            self.user_id = self.current_user.sysuser.id or 0
 
         try:
             # 重置 event，准确描述
