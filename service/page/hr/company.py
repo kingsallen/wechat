@@ -12,6 +12,7 @@ from util.tool.url_tool import make_static_url
 from util.tool.dict_tool import sub_dict
 from util.tool.str_tool import is_odd, split, gen_salary, set_literl
 from util.common.decorator import log_time
+from util.common.exception import InfraOperationError
 
 cached_company_sug_wechat = None
 
@@ -363,6 +364,8 @@ class CompanyPageService(PageService):
         :return:
         """
         ret = yield self.infra_company_ds.get_nearby_stores(company_id, longitude, latitude, radius)
+        if ret.code != const.NEWINFRA_API_SUCCESS:
+            raise InfraOperationError(ret.message)
         return ret
 
     @gen.coroutine
@@ -372,6 +375,8 @@ class CompanyPageService(PageService):
         :return:
         """
         ret = yield self.infra_company_ds.get_position_lbs_info(company_id, longitude, latitude, radius, pid)
+        if ret.code != const.NEWINFRA_API_SUCCESS:
+            raise InfraOperationError(ret.message)
         return ret
 
     @gen.coroutine
