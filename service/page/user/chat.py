@@ -504,7 +504,7 @@ class ChatPageService(PageService):
         raise gen.Return(ret)
 
     @gen.coroutine
-    def get_employee_chatting_messages(self, room_id, user_id, role, employee_id, company_id, page_no, page_size):
+    def get_employee_chatting_messages(self, room_id, user_id, role, employee_id, company_id, page_size, message_id):
         """
         分页获取获取聊天记录
         :param room_id: 聊天室编号
@@ -512,12 +512,13 @@ class ChatPageService(PageService):
         :param role: 角色 employee是员工进入聊天室；user是候选人进入聊天室
         :param employee_id: 员工编号
         :param company_id: 公司编号
-        :param page_no: 页码
         :param page_size: 每页数量
+        :param message_id: message_id 消息编号。查找的列表是这个消息编号之前的历史消息。如果第一次进入聊天室，message_id = 0
         :return: 聊天消息列表
         """
 
-        ret = yield self.infra_im_ds.get_messages(room_id, user_id, role, employee_id, company_id, page_no, page_size)
+        ret = yield self.infra_im_ds.get_messages(room_id, user_id, role, employee_id, company_id, page_size,
+                                                  message_id)
         raise gen.Return(ret)
 
     @gen.coroutine

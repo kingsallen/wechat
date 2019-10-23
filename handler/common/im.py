@@ -1006,11 +1006,11 @@ class EmployeeChattingHandler(BaseHandler):
         :return: 聊天记录
         """
 
-        page_no = self.params.page_no or 1
         page_size = self.params.page_size or 10
+        message_id = self.params.message_id or 0
         messages = yield self.chat_ps.get_employee_chatting_messages(self.params.room_id, self.user_id, self.role,
                                                                      self.employee_id, self.current_user.company.id,
-                                                                     page_no, page_size)
+                                                                     page_size, message_id)
         self.send_json_success(messages)
 
     @handle_response
