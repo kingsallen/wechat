@@ -931,12 +931,12 @@ class EmployeeChattingHandler(BaseHandler):
         if self.current_user.employee:
             # 当前是员工，获取与候选人的聊天室列表
             self.role = "employee"
-            self.employee_id = self.current_user.employee.id
+            self.employee_id = self.params.employee_id
             self.user_id = 0
         else:
             # 当前用户是普通的候选人，获取公众号所属公司下员工的聊天室列表
             self.role = "user"
-            self.employee_id = 0
+            self.employee_id = self.params.employee_id
             self.user_id = self.current_user.sysuser.id
 
         try:
@@ -1053,6 +1053,7 @@ class EmployeeChattingHandler(BaseHandler):
         :return: 推送开关状态
         """
 
+        self.logger.debug("enter room. employee_id:{}", self.employee_id)
         ret = yield self.chat_ps.enter_the_room(self.params.room_id, self.role, self.user_id, self.employee_id,
                                                 self.current_user.company.id, self.params.position_id)
         self.send_json_success(ret)
