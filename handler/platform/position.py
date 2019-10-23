@@ -943,7 +943,7 @@ class PositionListInfraParamsMixin(BaseHandler):
             occupations=self.params.occupation.replace("\r\n", "\n") if self.params.occupation else "",
             custom=self.params.custom if self.params.custom else "",
             keywords=self.params.keyword if self.params.keyword else "",
-            store_id=int(self.params.store_id) if self.params.store_id else 0,
+            # store_id=int(self.params.store_id) if self.params.store_id else 0,
             order_by_priority=1)
 
         self.logger.debug("[position_list_infra_params]: %s" % infra_params)
