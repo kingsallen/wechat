@@ -991,7 +991,7 @@ class EmployeeChattingHandler(BaseHandler):
         page_no = self.params.page_no or 1
         page_size = self.params.page_size or 10
         rooms = yield self.chat_ps.get_employee_chatrooms(self.user_id, self.role, self.employee_id,
-                                                          self._company.id, page_no, page_size)
+                                                          self.current_user.company.id, page_no, page_size)
         self.send_json_success(rooms)
 
     @handle_response
@@ -1005,8 +1005,8 @@ class EmployeeChattingHandler(BaseHandler):
         page_no = self.params.page_no or 1
         page_size = self.params.page_size or 10
         messages = yield self.chat_ps.get_employee_chatting_messages(self.params.room_id, self.user_id, self.role,
-                                                                     self.employee_id, self._company.id, page_no,
-                                                                     page_size)
+                                                                     self.employee_id, self.current_user.company.id,
+                                                                     page_no, page_size)
         self.send_json_success(messages)
 
     @handle_response
@@ -1019,7 +1019,7 @@ class EmployeeChattingHandler(BaseHandler):
 
         unread_count = yield self.chat_ps.get_employee_chatting_unread_count(self.params.room_id, self.role,
                                                                              self.user_id, self.employee_id,
-                                                                             self._company.id)
+                                                                             self.current_user.company.id)
         self.send_json_success(unread_count)
 
     @handle_response
@@ -1030,7 +1030,7 @@ class EmployeeChattingHandler(BaseHandler):
         :return: 推送开关状态
         """
 
-        switch = yield self.chat_ps.get_switch(self.role, self.user_id, self.employee_id, self._company.id)
+        switch = yield self.chat_ps.get_switch(self.role, self.user_id, self.employee_id, self.current_user.company.id)
         self.send_json_success(switch)
 
     @handle_response
@@ -1041,7 +1041,7 @@ class EmployeeChattingHandler(BaseHandler):
         :return: 推送开关状态
         """
 
-        switch = yield self.chat_ps.post_switch(self.role, self.user_id, self.employee_id, self._company.id,
+        switch = yield self.chat_ps.post_switch(self.role, self.user_id, self.employee_id, self.current_user.company.id,
                                                 self.params.tpl_switch)
         self.send_json_success(switch)
 
