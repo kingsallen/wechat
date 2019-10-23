@@ -110,6 +110,7 @@ common_routes = [
     (r"/image/?",                                    handler.common.image.ImageFetchHandler,                    {"event": "image_fetch"}),
     (r"/chat/room[\/]*([0-9]+)*",                    handler.common.im.ChatRoomHandler,                         {"event": "im_room"}),
     (r"/mobot",                                      handler.common.im.MobotHandler,                            {"event": "im_mobot"}),
+    (r"/chatting/index",                             handler.common.im.ChattingRoomsHandler,                    {"event": "im_chat_rooms"}),
     (r"/im/laiye",                                   handler.common.laiye_im.LaiyeImHandler,                    {"event": "im laiye"}),
     (r"/resume/import/limit",                        handler.common.resume.ResumeImportLimit,                   {"event": "resume_import_limit"}),
     (r"/redirect",                                   handler.common.redirect.RedirectHandler,                   {"event": "redirect"}),

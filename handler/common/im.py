@@ -897,6 +897,21 @@ class MobotHandler(BaseHandler):
         self.render(template_name='mobot/index.html')
 
 
+class ChattingRoomsHandler(BaseHandler):
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def get(self):
+        """
+        聊天界面。页面由前端同学提供
+        :return: 聊天页面
+        """
+        # 确保页面中用到的post请求的api接口cookie中设置了_xsrf
+        self.xsrf_token
+        self.render(template_name='chat/room.html')
+
+
 class EmployeeChattingHandler(BaseHandler):
     """
     员工候选人聊天室
