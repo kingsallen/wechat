@@ -1073,6 +1073,7 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
             position_ex['bonus'] = pos.total_bonus
             position_ex['candidate_source'] = pos.candidate_source
             position_ex['job_need'] = pos.requirement
+            position_ex['distance'] = pos.distance
             position_ex['is_referral'] = bool(pos.is_referral) if self.current_user.employee else False
             if not data.flag or (data.flag and pos.is_referral):
                 has_point_reward = has_point_reward
