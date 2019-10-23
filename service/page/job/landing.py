@@ -319,6 +319,8 @@ class LandingPageService(PageService):
                     key = 'publisher_company_id'
                 elif key == 'degree':
                     key = 'degree_name'
+                elif key == 'position_type':
+                    key = 'notOffice'
                 display_key_dict[key] = value
         self.logger.debug(display_key_dict)
 

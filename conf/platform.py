@@ -69,7 +69,7 @@ LANDING = ObjectDict({
                                   "display_key": "custom",
                                   "form_name":   "custom"},
     LANDING_INDEX_POSITION_TYPE: {"name": "职位类型", "chpe": "类型",
-                                  "key": "position_type",
+                                  "key": "notOffice",
                                   "display_key": "position_type",
                                   "form_name": "position_type"}
 })
