@@ -195,12 +195,12 @@ class NearbyStoresHandler(BaseHandler):
             latitude = ret.rectangle.split(";")[0].split(",")[1]
 
         stores_info = yield self.company_ps.get_nearby_stores(self.current_user.company.id, longitude, latitude, self.params.radius)
-        if ret.code != const.NEWINFRA_API_SUCCESS:
-            self.send_json_error(message=ret.message)
-            return
-        for store in stores_info.data.stores:
-            store.update({"coordinates": {"latitude": store["latitude"], "longitude": store["longitude"]}})
-        self.send_json_success(data=stores_info.data)
+        if stores_info.code == const.NEWINFRA_API_SUCCESS:
+            for store in stores_info.data.stores:
+                store.update({"coordinates": {"latitude": store["latitude"], "longitude": store["longitude"]}})
+            self.send_json_success(data=stores_info.data)
+        else:
+            self.send_json_error(message=stores_info.message)
 
 
 class PositionLbsHandler(BaseHandler):
@@ -217,9 +217,9 @@ class PositionLbsHandler(BaseHandler):
             longitude = ret.rectangle.split(";")[0].split(",")[0]
             latitude = ret.rectangle.split(";")[0].split(",")[1]
         stores_info = yield self.company_ps.get_position_lbs_info(self.current_user.company.id, longitude, latitude, self.params.radius, position_id)
-        if ret.code != const.NEWINFRA_API_SUCCESS:
-            self.send_json_error(message=ret.message)
-            return
-        for store in stores_info.data.stores:
-            store.update({"coordinates": {"latitude": store["latitude"], "longitude": store["longitude"]}})
-        self.send_json_success(data=stores_info.data)
+        if stores_info.code == const.NEWINFRA_API_SUCCESS:
+            for store in stores_info.data.stores:
+                store.update({"coordinates": {"latitude": store["latitude"], "longitude": store["longitude"]}})
+            self.send_json_success(data=stores_info.data)
+        else:
+            self.send_json_error(message=stores_info.message)
