@@ -22,8 +22,11 @@ class PositionStarHandler(BaseHandler):
 
         # 收藏操作
         if self.params.star:
-            ret = yield self.user_ps.favorite_position(
-                self.current_user.sysuser.id, self.params.pid)
+            if self.params.employee_id:
+                ret = yield self.user_ps.favorite_referral_position(self.current_user.sysuser.id,
+                                                                    self.params.employee_id, self.params.pid)
+            else:
+                ret = yield self.user_ps.favorite_position(self.current_user.sysuser.id, self.params.pid)
         else:
             ret = yield self.user_ps.unfavorite_position(
                 self.current_user.sysuser.id, self.params.pid)

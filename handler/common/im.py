@@ -937,7 +937,7 @@ class EmployeeChattingHandler(BaseHandler):
         """
         # 确保页面中用到的post请求的api接口cookie中设置了_xsrf
         self.xsrf_token
-        self.render(template_name='chat/room.html')
+        self.render(template_name='templates/chat/room.html')
 
     @handle_response
     @gen.coroutine
