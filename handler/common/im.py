@@ -1054,7 +1054,7 @@ class EmployeeChattingHandler(BaseHandler):
         """
 
         ret = yield self.chat_ps.enter_the_room(self.params.room_id, self.role, self.user_id, self.employee_id,
-                                                self._company_id, self.params.position_id)
+                                                self.current_user.company.id, self.params.position_id)
         self.send_json_success(ret)
 
 
