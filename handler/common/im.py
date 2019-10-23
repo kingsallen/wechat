@@ -965,12 +965,16 @@ class EmployeeChattingHandler(BaseHandler):
         if self.current_user.employee:
             # 当前是员工，获取与候选人的聊天室列表
             self.role = "employee"
+            self.logger.debug("POST params:{}".format(self.self.json_args))
             self.employee_id = self.current_user.employee.id
-            self.user_id = self.params.user_id
+            self.logger.debug("POST employee_id:{}".format(self.employee_id))
+            self.user_id = self.json_args.get("user_id") or 0
         else:
             # 当前用户是普通的候选人，获取公众号所属公司下员工的聊天室列表
             self.role = "user"
-            self.employee_id = self.params.employee_id
+            self.logger.debug("POST params:{}".format(self.json_args))
+            self.employee_id = self.json_args.get("employee_id") or 0
+            self.logger.debug("POST employee_id:{}".format(self.employee_id))
             self.user_id = self.current_user.sysuser.id
 
         try:
@@ -1041,8 +1045,9 @@ class EmployeeChattingHandler(BaseHandler):
         :return: 推送开关状态
         """
 
+        tpl_switch = self.json_args.get("tpl_switch");
         switch = yield self.chat_ps.post_switch(self.role, self.user_id, self.employee_id, self.current_user.company.id,
-                                                self.params.tpl_switch)
+                                                tpl_switch)
         self.send_json_success(switch)
 
     @handle_response
@@ -1053,9 +1058,10 @@ class EmployeeChattingHandler(BaseHandler):
         :return: 推送开关状态
         """
 
-        self.logger.debug("enter room. employee_id:{}".format())
-        ret = yield self.chat_ps.enter_the_room(self.params.room_id, self.role, self.user_id, self.employee_id,
-                                                self.current_user.company.id, self.params.position_id)
+        self.logger.debug("enter room. employee_id:{}".format(self.employee_id))
+        ret = yield self.chat_ps.enter_the_room(self.json_args.get("room_id") or 0, self.role, self.user_id,
+                                                self.employee_id, self.current_user.company.id,
+                                                self.json_args.get("position_id") or 0)
         self.send_json_success(ret)
 
 
