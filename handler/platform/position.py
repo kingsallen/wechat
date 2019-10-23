@@ -123,10 +123,16 @@ class PositionHandler(BaseHandler):
             res_crucial_info_switch = yield self.company_ps.get_crucial_info_state(self.current_user.company.id)
             switch = res_crucial_info_switch.data
             conf_response = yield self.employee_ps.get_employee_conf(self.current_user.company.id)
+            lbs_oms = yield self.company_ps.check_oms_switch_status(
+                self.current_user.company.id,
+                "LBS职位列表"
+            )
+            if lbs_oms.status != const.API_SUCCESS:
+                raise InfraOperationError(lbs_oms.message)
             header = yield self._make_json_header(
                 position_info, company_info, star, application, endorse,
                 can_apply, team.id if team else 0, did, teamname_custom,
-                reward, share_reward, has_point_reward, bonus, switch, conf_response)
+                reward, share_reward, has_point_reward, bonus, switch, conf_response, lbs_oms.data.get('valid'))
             module_job_description = self._make_json_job_description(position_info)
             module_job_need = self._make_json_job_need(position_info)
             position_feature = yield self.position_ps.get_position_feature(position_id)
@@ -408,7 +414,7 @@ class PositionHandler(BaseHandler):
     @gen.coroutine
     def _make_json_header(self, position_info, company_info, star, application,
                           endorse, can_apply, team_id, did, teamname_custom, reward, share_reward, has_point_reward,
-                          bonus, switch, conf_response):
+                          bonus, switch, conf_response, lbs_oms):
         """构造头部 header 信息"""
 
         # 获得母公司配置信息
@@ -441,6 +447,7 @@ class PositionHandler(BaseHandler):
             "has_point_reward": has_point_reward,
             "bonus": bonus,
             "recom_info_switch": switch,
+            "lbs_oms": lbs_oms,
             "emp_bind_config": bool(conf_response.exists if conf_response else None)  # 是否拥有员工认证配置项
             # "team": position_info.department.lower() if position_info.department else ""
         })
