@@ -905,20 +905,24 @@ class EmployeeChattingHandler(BaseHandler):
     def __init__(self, application, request, **kwargs):
         super(EmployeeChattingHandler, self).__init__(application, request, **kwargs)
 
-        if self.current_user.employee:
-            # 当前是员工，获取与候选人的聊天室列表
-            role = "employee"
-            employee_id = self.current_user.employee.id
-            user_id = 0
-        else:
-            # 当前用户是普通的候选人，获取公众号所属公司下员工的聊天室列表
-            role = "user"
-            employee_id = 0
-            user_id = self.current_user.sysuser.id
+        self.role = ""
+        self.employee_id = 0
+        self.user_id = 0
 
     @handle_response
     @gen.coroutine
     def get(self, method):
+
+        if self.current_user.employee:
+            # 当前是员工，获取与候选人的聊天室列表
+            self.role = "employee"
+            self.employee_id = self.current_user.employee.id
+            self.user_id = 0
+        else:
+            # 当前用户是普通的候选人，获取公众号所属公司下员工的聊天室列表
+            self.role = "user"
+            self.employee_id = 0
+            self.user_id = self.current_user.sysuser.id
 
         try:
             # 重置 event，准确描述
@@ -937,11 +941,23 @@ class EmployeeChattingHandler(BaseHandler):
         """
         # 确保页面中用到的post请求的api接口cookie中设置了_xsrf
         self.xsrf_token
-        self.render(template_name='templates/chat/room.html')
+        self.render(template_name='chat/room.html')
 
     @handle_response
     @gen.coroutine
     def post(self, method):
+
+        if self.current_user.employee:
+            # 当前是员工，获取与候选人的聊天室列表
+            self.role = "employee"
+            self.employee_id = self.current_user.employee.id
+            self.user_id = 0
+        else:
+            # 当前用户是普通的候选人，获取公众号所属公司下员工的聊天室列表
+            self.role = "user"
+            self.employee_id = 0
+            self.user_id = self.current_user.sysuser.id
+
         try:
             # 重置 event，准确描述
             self._event = self._event + method
