@@ -43,7 +43,7 @@ class InfraImDataService(DataService):
             "page_size": page_size,
         })
 
-        ret = yield http_get_v2(user.INFRA_GET_CHATTING_ROOMS.format(role=role), user_service.service_name, params)
+        ret = yield http_get_v2(user.INFRA_GET_CHATTING_ROOMS.format(role=role), user_service, params)
         raise gen.Return(ret)
 
     @gen.coroutine
@@ -69,7 +69,7 @@ class InfraImDataService(DataService):
             "page_size": page_size,
         })
 
-        ret = yield http_get_v2(user.INFRA_GET_CHATTING_MESSAGES.format(role=role), user_service.service_name, params)
+        ret = yield http_get_v2(user.INFRA_GET_CHATTING_MESSAGES.format(role=role), user_service, params)
         raise gen.Return(ret)
 
     @gen.coroutine
@@ -91,7 +91,7 @@ class InfraImDataService(DataService):
             "company_id": company_id
         })
 
-        ret = yield http_get_v2(user.INFRA_GET_CHATTING_UNREAD_COUNT.format(role=role), user_service.service_name, params)
+        ret = yield http_get_v2(user.INFRA_GET_CHATTING_UNREAD_COUNT.format(role=role), user_service, params)
         raise gen.Return(ret)
 
     @gen.coroutine
@@ -115,7 +115,7 @@ class InfraImDataService(DataService):
             "position_id": position_id
         })
 
-        ret = yield http_post_v2(user.INFRA_GET_CHATTING_ENTER_THE_ROOM.format(role=role), user_service.service_name, params)
+        ret = yield http_post_v2(user.INFRA_GET_CHATTING_ENTER_THE_ROOM.format(role=role), user_service, params)
         raise gen.Return(ret)
 
     @gen.coroutine
@@ -139,7 +139,7 @@ class InfraImDataService(DataService):
             "position_id": position_id
         })
 
-        ret = yield http_post_v2(user.INFRA_GET_CHATTING_LEAVE_THE_ROOM.format(role=role), user_service.service_name, params)
+        ret = yield http_post_v2(user.INFRA_GET_CHATTING_LEAVE_THE_ROOM.format(role=role), user_service, params)
         raise gen.Return(ret)
 
     @gen.coroutine
@@ -168,7 +168,7 @@ class InfraImDataService(DataService):
             }
         })
 
-        ret = yield http_post_v2(user.INFRA_GET_CHATTING_LEAVE_THE_ROOM.format(role=role), user_service.service_name,
+        ret = yield http_post_v2(user.INFRA_GET_CHATTING_LEAVE_THE_ROOM.format(role=role), user_service,
                                  params)
         raise gen.Return(ret)
 
@@ -189,7 +189,7 @@ class InfraImDataService(DataService):
             "company_id": company_id,
         })
 
-        ret = yield http_get_v2(user.INFRA_GET_CHATTING_DELETE_THE_ROOM.format(role=role), user_service.service_name, params)
+        ret = yield http_get_v2(user.INFRA_GET_CHATTING_DELETE_THE_ROOM.format(role=role), user_service, params)
         raise gen.Return(ret)
 
     @gen.coroutine
@@ -209,7 +209,7 @@ class InfraImDataService(DataService):
             "company_id": company_id,
         })
 
-        ret = yield http_get_v2(user.INFRA_GET_CHATTING_SWITCH.format(role=role), user_service.service_name, params)
+        ret = yield http_get_v2(user.INFRA_GET_CHATTING_SWITCH.format(role=role), user_service, params)
         raise gen.Return(ret)
 
     @gen.coroutine
@@ -231,5 +231,5 @@ class InfraImDataService(DataService):
             "tpl_switch": tpl_switch
         })
 
-        ret = yield http_post_v2(user.INFRA_GET_CHATTING_SWITCH.format(role=role), user_service.service_name, params)
+        ret = yield http_post_v2(user.INFRA_GET_CHATTING_SWITCH.format(role=role), user_service, params)
         raise gen.Return(ret)

@@ -891,13 +891,30 @@ class MobotHandler(BaseHandler):
     @handle_response
     @authenticated
     @gen.coroutine
-    def get(self, method):
+    def get(self):
         # 确保页面中用到的post请求的api接口cookie中设置了_xsrf
         self.xsrf_token
         self.render(template_name='mobot/index.html')
 
 
 class EmployeeChattingHandler(BaseHandler):
+    """
+    员工候选人聊天室
+    """
+
+    def __init__(self, application, request, **kwargs):
+        super(EmployeeChattingHandler, self).__init__(application, request, **kwargs)
+
+        if self.current_user.employee:
+            # 当前是员工，获取与候选人的聊天室列表
+            role = "employee"
+            employee_id = self.current_user.employee.id
+            user_id = 0
+        else:
+            # 当前用户是普通的候选人，获取公众号所属公司下员工的聊天室列表
+            role = "user"
+            employee_id = 0
+            user_id = self.current_user.sysuser.id
 
     @handle_response
     @gen.coroutine
@@ -911,6 +928,18 @@ class EmployeeChattingHandler(BaseHandler):
             self.write_error(404)
 
     @handle_response
+    @authenticated
+    @gen.coroutine
+    def get_index(self):
+        """
+        聊天界面。页面由前端同学提供
+        :return: 聊天页面
+        """
+        # 确保页面中用到的post请求的api接口cookie中设置了_xsrf
+        self.xsrf_token
+        self.render(template_name='chat/room.html')
+
+    @handle_response
     @gen.coroutine
     def post(self, method):
         try:
@@ -920,6 +949,7 @@ class EmployeeChattingHandler(BaseHandler):
         except Exception as e:
             self.write_error(404)
 
+    @handle_response
     @gen.coroutine
     def get_rooms(self):
         """
@@ -927,22 +957,13 @@ class EmployeeChattingHandler(BaseHandler):
         :return: 聊天室列表
         """
 
-        if self.current_user.employee:
-            # 当前是员工，获取与候选人的聊天室列表
-            role = "employee"
-            employee_id = self.current_user.employee.id
-            user_id = 0
-        else:
-            # 当前用户是普通的候选人，获取公众号所属公司下员工的聊天室列表
-            role = "user"
-            employee_id = 0
-            user_id = self.current_user.sysuser.id
         page_no = self.params.page_no or 1
         page_size = self.params.page_size or 10
-        rooms = yield self.chat_ps.get_employee_chatrooms(user_id, role, employee_id,
+        rooms = yield self.chat_ps.get_employee_chatrooms(self.user_id, self.role, self.employee_id,
                                                           self._company.id, page_no, page_size)
         self.send_json_success(rooms)
 
+    @handle_response
     @gen.coroutine
     def get_messages(self):
         """
@@ -950,24 +971,14 @@ class EmployeeChattingHandler(BaseHandler):
         :return: 聊天记录
         """
 
-        if self.current_user.employee:
-            # 当前是员工，获取与候选人的聊天室列表
-            role = "employee"
-            employee_id = self.current_user.employee.id
-            user_id = 0
-        else:
-            # 当前用户是普通的候选人，获取公众号所属公司下员工的聊天室列表
-            role = "user"
-            employee_id = 0
-            user_id = self.current_user.sysuser.id
-
         page_no = self.params.page_no or 1
         page_size = self.params.page_size or 10
-        messages = yield self.chat_ps.get_employee_chatting_messages(self.params.room_id, user_id,
-                                                                     role, employee_id, self._company.id, page_no,
+        messages = yield self.chat_ps.get_employee_chatting_messages(self.params.room_id, self.user_id, self.role,
+                                                                     self.employee_id, self._company.id, page_no,
                                                                      page_size)
         self.send_json_success(messages)
 
+    @handle_response
     @gen.coroutine
     def get_unread(self):
         """
@@ -975,22 +986,12 @@ class EmployeeChattingHandler(BaseHandler):
         :return: 聊天室列表
         """
 
-        if self.current_user.employee:
-            # 当前是员工，获取与候选人的聊天室列表
-            role = "employee"
-            employee_id = self.current_user.employee.id
-            user_id = 0
-        else:
-            # 当前用户是普通的候选人，获取公众号所属公司下员工的聊天室列表
-            role = "user"
-            employee_id = 0
-            user_id = self.current_user.sysuser.id
-
-        unread_count = yield self.chat_ps.get_employee_chatting_unread_count(self.params.room_id, role,
-                                                                             user_id, employee_id,
+        unread_count = yield self.chat_ps.get_employee_chatting_unread_count(self.params.room_id, self.role,
+                                                                             self.user_id, self.employee_id,
                                                                              self._company.id)
         self.send_json_success(unread_count)
 
+    @handle_response
     @gen.coroutine
     def get_switch(self):
         """
@@ -998,20 +999,10 @@ class EmployeeChattingHandler(BaseHandler):
         :return: 推送开关状态
         """
 
-        if self.current_user.employee:
-            # 当前是员工，获取与候选人的聊天室列表
-            role = "employee"
-            employee_id = self.current_user.employee.id
-            user_id = 0
-        else:
-            # 当前用户是普通的候选人，获取公众号所属公司下员工的聊天室列表
-            role = "user"
-            employee_id = 0
-            user_id = self.current_user.sysuser.id
-
-        switch = yield self.chat_ps.get_switch(role, user_id, employee_id, self._company.id)
+        switch = yield self.chat_ps.get_switch(self.role, self.user_id, self.employee_id, self._company.id)
         self.send_json_success(switch)
 
+    @handle_response
     @gen.coroutine
     def post_switch(self):
         """
@@ -1019,20 +1010,11 @@ class EmployeeChattingHandler(BaseHandler):
         :return: 推送开关状态
         """
 
-        if self.current_user.employee:
-            # 当前是员工，获取与候选人的聊天室列表
-            role = "employee"
-            employee_id = self.current_user.employee.id
-            user_id = 0
-        else:
-            # 当前用户是普通的候选人，获取公众号所属公司下员工的聊天室列表
-            role = "user"
-            employee_id = 0
-            user_id = self.current_user.sysuser.id
-
-        switch = yield self.chat_ps.post_switch(role, user_id, employee_id, self._company.id, self.params.tpl_switch)
+        switch = yield self.chat_ps.post_switch(self.role, self.user_id, self.employee_id, self._company.id,
+                                                self.params.tpl_switch)
         self.send_json_success(switch)
 
+    @handle_response
     @gen.coroutine
     def post_enter(self):
         """
@@ -1040,19 +1022,8 @@ class EmployeeChattingHandler(BaseHandler):
         :return: 推送开关状态
         """
 
-        if self.current_user.employee:
-            # 当前是员工，获取与候选人的聊天室列表
-            role = "employee"
-            employee_id = self.current_user.employee.id
-            user_id = 0
-        else:
-            # 当前用户是普通的候选人，获取公众号所属公司下员工的聊天室列表
-            role = "user"
-            employee_id = 0
-            user_id = self.current_user.sysuser.id
-
-        ret = yield self.chat_ps.enter_the_room(self.params.room_id, role, user_id, employee_id, self._company_id,
-                                                self.params.position_id)
+        ret = yield self.chat_ps.enter_the_room(self.params.room_id, self.role, self.user_id, self.employee_id,
+                                                self._company_id, self.params.position_id)
         self.send_json_success(ret)
 
 
@@ -1060,6 +1031,10 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
     """
     处理 候选人和员工的聊天的各种 webSocket 传输，直接继承 tornado 的 WebSocketHandler
     """
+
+    def data_received(self, chunk):
+        pass
+
     # todo redis 连接池公用一个
     _pool = redis.ConnectionPool(
         host=settings["store_options"]["redis_host"],
@@ -1151,12 +1126,10 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
             role = "employee"
             employee_id = self.employee_id
             user_id = 0
-            channel = self.chatting_user_channel
         else:
             role = "user"
             employee_id = 0
             user_id = self.candidate_id
-            channel = self.chatting_employee_channel
 
         chat_id = yield self.chat_ps.post_message(self.room_id, role, user_id, employee_id, 0, data.get("content"))
 
@@ -1170,8 +1143,9 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
             createTime=curr_now_minute(),
             id=chat_id.get("data"),
         ))
-        self.logger.debug("publish chat by redis message_body:{}".format(message_body))
-        self.redis_client.publish(channel, message_body)
+        logger.debug("publish chat by redis message_body:{}".format(message_body))
+        self.redis_client.publish(self.chatting_user_channel, message_body)
+        self.redis_client.publish(self.chatting_employee_channel, message_body)
 
     @gen.coroutine
     def on_close(self):
@@ -1186,5 +1160,3 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
         self.chat_session.mark_leave_chatroom(self.room_id)
         yield self.chat_ps.leave_the_room(self.room_id)
 
-    def data_received(self):
-        pass

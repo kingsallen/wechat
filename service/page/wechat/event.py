@@ -20,16 +20,18 @@ import conf.common as const
 import conf.message as message
 import conf.wechat as wx_const
 from cache.user.user_hr_account import UserHrAccountCache
+from conf import path
 from service.page.base import PageService
 from service.page.user.user import UserPageService
 from setting import settings
 from util.common import ObjectDict
 from util.common.exception import InfraOperationError
 from util.common.mq import user_follow_wechat_publisher, user_unfollow_wechat_publisher
+from util.tool.date_tool import curr_now
 from util.tool.http_tool import http_post_cs_msg
 from util.tool.json_tool import json_dumps
 from util.tool.str_tool import mobile_validate, get_send_time_from_template_message_url
-from util.tool.url_tool import make_static_url
+from util.tool.url_tool import make_static_url, make_url
 from util.wechat.core import get_wxuser, send_succession_message, send_succession_news, get_test_access_token
 from util.wechat.msgcrypt import WXBizMsgCrypt
 
@@ -827,20 +829,37 @@ class EventPageService(PageService):
                 send_succession_message(wechat=wechat, open_id=msg.FromUserName, pattern_id=str_scene)
 
             elif str_scene == const.STR_SCENE_EMPLOYEE_CHATTING:
-                employee_id_str = re.match(r"EMPLOYEECHATTING_(\d*)_(\d*)", msg.EventKey).group(1)
-                position_id_str = re.match(r"EMPLOYEECHATTING_(\d*)_(\d*)", msg.EventKey).group(2)
+
+                if re.match(r"EMPLOYEECHATTING_(\d*)_(\d*)") is None:
+                    return
+                # 解析场景参数，拉取员工id和职位id
+                employee_id_str = re.match(r"EMPLOYEECHATTING_(\d*)_(\d*)", msg.EventKey).group(1) or 0
+                position_id_str = re.match(r"EMPLOYEECHATTING_(\d*)_(\d*)", msg.EventKey).group(2) or 0
+
+                #查数据
                 employee = yield self.user_employee_ds.get_employee({'id': int(employee_id_str)})
+                position_params = {"id", int(position_id_str)}
+                position = yield self.job_position_ds.get_position(position_params)
+                _, company = yield self.infra_company_ds.get_company_by_id(employee.company_id)
+                user = yield self.infra_user_ds.get_user(employee.sysuser_id)
 
-                position_params = {"id", position_id_str}
-                position = yield self.infra_position_ds.get_position(position_params)
+                if not (employee and user and position):
+                    return
 
-                company = yield  self.infra_company_ds.get_company_by_id(employee.company_id)
+                employee_name = employee.cname or user.name or user.nickname or ""
 
-                user = yield self.infra_user_ds.infra_get_user(employee.sysuerId)
-
-                send_succession_news(wechat=wechat, open_id=msg.FromUserName, company_abbreviation=company.abbreviation,
-                                     employee_name=employee.cname, position_title=position.title,
-                                     user_head_img=user.headimg)
+                # 组装发送图文消息的参数
+                params = ObjectDict(
+                    title=const.CONSTANT_CHATTING_NEWS_TITLE,
+                    description=const.CONSTANT_CHATTING_NEWS_DESCRIPTION.format(company.abbreviation or "",
+                                                                                employee_name,
+                                                                                position.title or ""),
+                    url=make_url(path.EMPLOYEE_CHATTING_ROOMS, host=settings["platform_host"],
+                                 wechat_signature=wechat.get("signature")),
+                    picurl=user.data.headimg if user.data and user.data.headimg else ""
+                )
+                # 发送客服消息
+                send_succession_news(wechat=wechat, open_id=msg.FromUserName, params=params)
             else:
                 send_succession_message(wechat=wechat, open_id=msg.FromUserName, pattern_id=str_scene)
 
