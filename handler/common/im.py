@@ -1061,7 +1061,7 @@ class EmployeeChattingHandler(BaseHandler):
         self.logger.debug("enter room. employee_id:{}".format(self.employee_id))
         ret = yield self.chat_ps.enter_the_room(self.json_args.get("room_id") or 0, self.role, self.user_id,
                                                 self.employee_id, self.current_user.company.id,
-                                                self.json_args.get("position_id") or 0)
+                                                self.json_args.get("pid") or 0)
         self.send_json_success(ret)
 
 
