@@ -1164,10 +1164,10 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
                 if data:
                     self.write_message(json_dumps(ObjectDict(
                         content=data.get("content"),
-                        compoundContent=data.get("compoundContent"),
-                        chatTime=data.get("createTime"),
+                        compound_content=data.get("compoundContent"),
+                        chat_time=data.get("createTime"),
                         speaker=data.get("speaker"),
-                        msgType=data.get("msg_type"),
+                        msg_type=data.get("msg_type"),
                         stats=data.get("stats")
                     )))
                     logger.debug("----------websocket write finish----------")
@@ -1210,13 +1210,13 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
 
             try:
                 message_body = json_dumps(ObjectDict(
-                    msgType="msg_id",
+                    msg_type="msg_id",
                     content=chat_id.get("data"),
-                    compoundContent=None,
+                    compound_content=None,
                     speaker=data.get("speaker"),
                     cid=int(self.room_id),
                     pid=int(self.position_id) if self.position_id else 0,
-                    createTime=curr_now_minute(),
+                    create_time=curr_now_minute(),
                     id=chat_id.get("data"),
                 ))
 
@@ -1228,14 +1228,14 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
                 raise
 
             message_body = json_dumps(ObjectDict(
-                msgType=data.get("msg_type"),
+                msg_type=data.get("msg_type"),
                 content=data.get("content"),
-                compoundContent=None,
+                compound_content=None,
                 speaker=data.get("speaker"),
                 cid=int(self.room_id),
 
                 pid=int(self.position_id),
-                createTime=curr_now_minute(),
+                create_time=curr_now_minute(),
                 id=chat_id.get("data"),
             ))
             logger.debug("ChattingWebSocketHandler publish chat by redis message_body:{}".format(message_body))
