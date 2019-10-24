@@ -1105,6 +1105,7 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
         self.user_id = 0
         self.candidate_id = 0
         self.position_id = 0
+        self.speaker = 0
         self.io_loop = ioloop.IOLoop.current()
 
         self.chat_session = ChatCache()
@@ -1116,7 +1117,8 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
         self.user_id = match_session_id(to_str(self.get_secure_cookie(const.COOKIE_SESSIONID)))
         self.employee_id = self.get_argument("employee_id")
         self.candidate_id = self.get_argument("user_id")
-        self.position_id = self.get_argument("pid", 0) or 0
+        self.position_id = self.get_argument("pid", 0)
+        self.speaker = self.get_argument("speaker", 0)
 
         try:
             assert self.user_id and self.employee_id and self.room_id
