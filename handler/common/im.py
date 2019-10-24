@@ -1196,10 +1196,10 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
 
         if data.get("speaker") == 1:
             role = "employee"
-            channel = self.chatting_user_channel
+            channel = self.chatting_employee_channel
         else:
             role = "user"
-            channel = self.chatting_employee_channel
+            channel = self.chatting_user_channel
 
         room_info = yield self.chat_ps.get_employee_chatroom(self.room_id, role)
         if room_info and (room_info.code == "0" or room_info.code == 0) and room_info.data and room_info.data.company_id:
