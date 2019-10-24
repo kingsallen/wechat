@@ -1150,9 +1150,9 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
         self.chat_session.mark_enter_chatroom(self.room_id)
 
         if self.get_argument("speaker") == 1:
-            channel = self.chatting_employee_channel
-        else:
             channel = self.chatting_user_channel
+        else:
+            channel = self.chatting_employee_channel
 
         def message_handler(message):
             # 处理 sub 接受到的消息
