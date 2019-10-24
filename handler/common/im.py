@@ -1095,6 +1095,7 @@ class EmployeeChattingHandler(BaseHandler):
                                                 self.json_args.get("pid") or 0)
         self.un_box(ret)
 
+
 class ChattingWebSocketHandler(websocket.WebSocketHandler):
     """
     处理 候选人和员工的聊天的各种 webSocket 传输，直接继承 tornado 的 WebSocketHandler
@@ -1211,6 +1212,7 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
                                                       room_info.data.company_id, data.get("content"))
             if not chat_id or (chat_id.code != "0" and chat_id.code != 0) or not chat_id.data:
                 return
+
             message_body = json_dumps(ObjectDict(
                 msgType=data.get("msgType"),
                 content=data.get("content"),
