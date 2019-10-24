@@ -1198,7 +1198,8 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
 
             chat_id = yield self.chat_ps.post_message(self.room_id, role, user_id, employee_id,
                                                       room_info.data.company_id, data.get("content"))
-
+            if not chat_id or (chat_id.code != "0" and chat_id.code != 0) or not chat_id.data:
+                return
             message_body = json_dumps(ObjectDict(
                 msgType=data.get("msgType"),
                 content=data.get("content"),
