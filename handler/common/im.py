@@ -992,7 +992,8 @@ class EmployeeChattingHandler(BaseHandler):
         :param ret: 基础服务返回的数据结构
         :return: json
         """
-        if ret and ret.status and ret.status == 0:
+
+        if ret and ret.code and (ret.code == "0" or ret.code == 0):
             self.send_json_success(ret.data)
         else:
             self.send_json_error(ret.data, ret.message)
