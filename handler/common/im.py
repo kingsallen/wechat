@@ -969,8 +969,17 @@ class EmployeeChattingHandler(BaseHandler):
             self.role = "employee"
             self.logger.debug("POST params:{}".format(self.json_args))
             self.employee_id = self.current_user.employee.id or 0
-            self.logger.debug("POST employee_id:{}".format(self.employee_id))
-            self.user_id = self.json_args.get("user_id") or 0
+
+            if self.json_args.get("user_id"):
+                self.user_id = self.json_args.get("user_id")
+            elif self.json_args.get("room_id"):
+                room_info = yield self.chat_ps.get_employee_chatroom(self.room_id, self.role)
+                if room_info and (room_info.code == "0" or room_info.code == 0) and room_info.data and room_info.data.user_id:
+                    self.user_id = room_info.data.user_id
+                else:
+                    self.write_error(416)
+            else:
+                self.write_error(416)
         else:
             # 当前用户是普通的候选人，获取公众号所属公司下员工的聊天室列表
             self.role = "user"
@@ -978,6 +987,8 @@ class EmployeeChattingHandler(BaseHandler):
             self.employee_id = self.json_args.get("employee_id") or 0
             self.logger.debug("POST employee_id:{}".format(self.employee_id))
             self.user_id = self.current_user.sysuser.id or 0
+
+        self.logger.debug("POST user_id:{}, employee_id:{}".format(self.user_id, self.employee_id))
 
         try:
             # 重置 event，准确描述
