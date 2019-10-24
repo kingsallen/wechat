@@ -440,7 +440,8 @@ class UserPageService(PageService):
         """
         params = {
             "user_id": user_id,
-            "position_id": position_id
+            "position_id": position_id,
+            "employee_id": employee_id,
         }
         ret = yield self.infra_user_ds.infra_create_collect_position(params)
         raise gen.Return(ret.data.status)
