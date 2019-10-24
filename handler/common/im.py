@@ -1013,7 +1013,7 @@ class EmployeeChattingHandler(BaseHandler):
         messages = yield self.chat_ps.get_employee_chatting_messages(self.params.room_id, self.user_id, self.role,
                                                                      self.employee_id, self.current_user.company.id,
                                                                      page_size, message_id)
-        self.send_json_success(messages)
+        self.send_json_success(messages.data)
 
     @handle_response
     @gen.coroutine
@@ -1099,7 +1099,7 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
         self.chat_ps = ChatPageService()
 
     def open(self, room_id, *args, **kwargs):
-        logger.debug("------------ start open websocket --------------")
+        logger.debug("------------ start open ChattingWebSocketHandler --------------")
         self.room_id = room_id
         self.user_id = match_session_id(to_str(self.get_secure_cookie(const.COOKIE_SESSIONID)))
         self.employee_id = self.get_argument("employee_id")
@@ -1118,7 +1118,7 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
         #?
         self.chat_session.mark_enter_chatroom(self.room_id)
 
-        if self.current_user.employee:
+        if self.get_argument("speaker") == 1:
             channel = self.chatting_employee_channel
         else:
             channel = self.chatting_user_channel
@@ -1129,7 +1129,7 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
             try:
                 data = ujson.loads(message.get("data"))
 
-                logger.debug("websocket data:{}".format(data))
+                logger.debug("ChattingWebSocketHandler data:{}".format(data))
                 if data:
                     self.write_message(json_dumps(ObjectDict(
                         content=data.get("content"),
@@ -1157,7 +1157,7 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
 
     @gen.coroutine
     def on_message(self, message):
-        logger.debug("[websocket] received a message:{}".format(message))
+        logger.debug("ChattingWebSocketHandler received a message:{}".format(message))
         data = ujson.loads(message)
         if data.get("msgType") == 'ping':
             self.write_message(ujson.dumps({"msgType": 'pong'}))
@@ -1183,19 +1183,19 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
             createTime=curr_now_minute(),
             id=chat_id.get("data"),
         ))
-        logger.debug("publish chat by redis message_body:{}".format(message_body))
+        logger.debug("ChattingWebSocketHandler publish chat by redis message_body:{}".format(message_body))
         self.redis_client.publish(self.chatting_user_channel, message_body)
         self.redis_client.publish(self.chatting_employee_channel, message_body)
 
     @gen.coroutine
     def on_close(self):
-        logger.debug("&=! {}".format("on_close, before stop_run_in_thread"))
+        logger.debug("ChattingWebSocketHandler &=! {}".format("on_close, before stop_run_in_thread"))
         # todo 离开房间发现连接已经关闭了
         self.subscriber.stop_run_in_thread()
-        logger.debug("&=! {}".format("on_close, after stop_run_in_thread"))
+        logger.debug("ChattingWebSocketHandler &=! {}".format("on_close, after stop_run_in_thread"))
         logger.debug("&=! {}".format("on_close, before cleanup"))
         self.subscriber.cleanup()
-        logger.debug("&=! {}".format("on_close, after cleanup"))
+        logger.debug("ChattingWebSocketHandler &=! {}".format("on_close, after cleanup"))
 
         self.chat_session.mark_leave_chatroom(self.room_id)
         yield self.chat_ps.leave_the_room(self.room_id)
