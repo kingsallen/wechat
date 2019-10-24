@@ -1180,10 +1180,12 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
             role = "employee"
             employee_id = self.employee_id
             user_id = 0
+            channel = self.chatting_user_channel
         else:
             role = "user"
             employee_id = 0
             user_id = self.candidate_id
+            channel = self.chatting_employee_channel
 
         chat_id = yield self.chat_ps.post_message(self.room_id, role, user_id, employee_id, 0, data.get("content"))
 
@@ -1198,8 +1200,7 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
             id=chat_id.get("data"),
         ))
         logger.debug("ChattingWebSocketHandler publish chat by redis message_body:{}".format(message_body))
-        self.redis_client.publish(self.chatting_user_channel, message_body)
-        self.redis_client.publish(self.chatting_employee_channel, message_body)
+        self.redis_client.publish(channel, message_body)
 
     @gen.coroutine
     def on_close(self):
