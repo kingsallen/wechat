@@ -1187,20 +1187,25 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
             user_id = self.candidate_id
             channel = self.chatting_employee_channel
 
-        chat_id = yield self.chat_ps.post_message(self.room_id, role, user_id, employee_id, 0, data.get("content"))
+        room_info = yield self.chat_ps.get_employee_chatrooms(self.room_id)
+        if room_info and (room_info.code == "0" or room_info.code == 0) and room_info.data and room_info.data.company_id:
 
-        message_body = json_dumps(ObjectDict(
-            msgType="text",
-            content=data.get("content"),
-            compoundContent=None,
-            speaker=data.get("speaker"),
-            cid=int(self.room_id),
-            pid=int(self.position_id),
-            createTime=curr_now_minute(),
-            id=chat_id.get("data"),
-        ))
-        logger.debug("ChattingWebSocketHandler publish chat by redis message_body:{}".format(message_body))
-        self.redis_client.publish(channel, message_body)
+            chat_id = yield self.chat_ps.post_message(self.room_id, role, user_id, employee_id,
+                                                      room_info.data.company_id, data.get("content"))
+
+            message_body = json_dumps(ObjectDict(
+                msgType=data.get("msgType"),
+                content=data.get("content"),
+                compoundContent=None,
+                speaker=data.get("speaker"),
+                cid=int(self.room_id),
+
+                pid=int(self.position_id),
+                createTime=curr_now_minute(),
+                id=chat_id.get("data"),
+            ))
+            logger.debug("ChattingWebSocketHandler publish chat by redis message_body:{}".format(message_body))
+            self.redis_client.publish(channel, message_body)
 
     @gen.coroutine
     def on_close(self):

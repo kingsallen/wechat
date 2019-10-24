@@ -47,6 +47,21 @@ class InfraImDataService(DataService):
         raise gen.Return(ret)
 
     @gen.coroutine
+    def get_room(self, room_id):
+        """
+        获取聊天室详情
+        :param room_id 聊天室编号
+        :return: 聊天室列表
+        """
+
+        params = ObjectDict({
+            "room_id": room_id,
+        })
+
+        ret = yield http_get_v2(user.INFRA_GET_CHATTING_ROOM, user_service, params)
+        raise gen.Return(ret)
+
+    @gen.coroutine
     def get_messages(self, room_id, user_id, role, employee_id, company_id, page_size=200, message_id = 0):
         """
         分页获取获取聊天记录

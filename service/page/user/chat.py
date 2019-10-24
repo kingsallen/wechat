@@ -504,6 +504,17 @@ class ChatPageService(PageService):
         raise gen.Return(ret)
 
     @gen.coroutine
+    def get_employee_chatrooms(self, room_id):
+        """
+        获取聊天室详情
+        :param room_id 聊天室编号
+        :return: 聊天室列表
+        """
+
+        ret = yield self.infra_im_ds.get_room(room_id)
+        raise gen.Return(ret)
+
+    @gen.coroutine
     def get_employee_chatting_messages(self, room_id, user_id, role, employee_id, company_id, page_size, message_id):
         """
         分页获取获取聊天记录
