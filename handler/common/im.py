@@ -1024,8 +1024,12 @@ class EmployeeChattingHandler(BaseHandler):
         page_size = self.params.page_size or 10
         message_id = self.params.message_id or 0
         ret = yield self.chat_ps.get_employee_chatting_messages(self.params.room_id, self.user_id, self.role,
-                                                                     self.employee_id, self.current_user.company.id,
-                                                                     page_size, message_id)
+                                                                self.employee_id, self.current_user.company.id,
+                                                                page_size, message_id)
+        if ret and ret.data and ret.data.current_page_data:
+            for data in ret.data.current_page_data:
+                data.compound_content = ujson.loads(data.compound_content)
+
         self.un_box(ret)
 
     @handle_response
@@ -1175,7 +1179,7 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
         data = ujson.loads(message)
         if data.get("msgType") == 'ping':
             self.write_message(ujson.dumps({"msgType": 'pong'}))
-            return 
+            return
 
         if data.get("speaker") == 1:
             role = "employee"
