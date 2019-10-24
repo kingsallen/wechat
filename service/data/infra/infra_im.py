@@ -159,7 +159,7 @@ class InfraImDataService(DataService):
         raise gen.Return(ret)
 
     @gen.coroutine
-    def post_message(self, room_id, role, user_id, employee_id, company_id, content):
+    def post_message(self, room_id, role, user_id, employee_id, company_id, content, msg_type):
         """
         保存消息
         :param room_id: 聊天室编号
@@ -168,6 +168,7 @@ class InfraImDataService(DataService):
         :param employee_id:  员工编号
         :param company_id: 公司编号
         :param content: 消息内容
+        :param msg_type: 消息类型
         :return: 操作结果
         """
 
@@ -176,14 +177,14 @@ class InfraImDataService(DataService):
             "employee_id": employee_id,
             "user_id": user_id,
             "company_id": company_id,
-            "message": {
+            "message": [{
                 "content": content,
                 "createTime": curr_now(),
-                "msgType": "text",
-                "speaker": 1 if role == "employee" else 2
-            }
+                "msgType": msg_type,
+                "speaker": 1 if role == "employee" else 0
+            }]
         })
-
+        self.logger.debug("InfraImDataService post_message params:{}".format(params))
         ret = yield http_post_v2(user.INFRA_GET_CHATTING_POST_MESSAGE.format(role=role), user_service,
                                  params)
         raise gen.Return(ret)
