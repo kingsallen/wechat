@@ -1175,6 +1175,7 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
         data = ujson.loads(message)
         if data.get("msgType") == 'ping':
             self.write_message(ujson.dumps({"msgType": 'pong'}))
+            return 
 
         if data.get("speaker") == 1:
             role = "employee"
