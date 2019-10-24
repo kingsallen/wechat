@@ -1167,7 +1167,7 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
                         compoundContent=data.get("compoundContent"),
                         chatTime=data.get("createTime"),
                         speaker=data.get("speaker"),
-                        msgType=data.get("msgType"),
+                        msgType=data.get("msg_type"),
                         stats=data.get("stats")
                     )))
                     logger.debug("----------websocket write finish----------")
@@ -1190,8 +1190,8 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
     def on_message(self, message):
         logger.debug("ChattingWebSocketHandler received a message:{}".format(message))
         data = ujson.loads(message)
-        if data.get("msgType") == 'ping':
-            self.write_message(ujson.dumps({"msgType": 'pong'}))
+        if data.get("msg_type") == 'ping':
+            self.write_message(ujson.dumps({"msg_type": 'pong'}))
             return
 
         if data.get("speaker") == 1:
@@ -1204,8 +1204,7 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
         room_info = yield self.chat_ps.get_employee_chatroom(self.room_id, role)
         if room_info and (room_info.code == "0" or room_info.code == 0) and room_info.data and room_info.data.company_id:
             chat_id = yield self.chat_ps.post_message(self.room_id, role, self.candidate_id, self.employee_id,
-                                                      room_info.data.company_id, data.get("content"),
-                                                      data.get("msgType"))
+                                                      room_info.data.company_id, data.get("content"), "html")
             if not chat_id or (chat_id.code != "0" and chat_id.code != 0) or not chat_id.data:
                 return
 
@@ -1229,7 +1228,7 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
                 raise
 
             message_body = json_dumps(ObjectDict(
-                msgType=data.get("msgType"),
+                msgType=data.get("msg_type"),
                 content=data.get("content"),
                 compoundContent=None,
                 speaker=data.get("speaker"),

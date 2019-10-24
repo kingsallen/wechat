@@ -177,7 +177,7 @@ class InfraImDataService(DataService):
             "employee_id": employee_id,
             "user_id": user_id,
             "company_id": company_id,
-            "message": [{
+            "messages": [{
                 "content": content,
                 "createTime": curr_now(),
                 "msgType": msg_type,
