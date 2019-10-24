@@ -57,8 +57,8 @@ class LandingPageService(PageService):
             "query": {
                 "bool": {
                     "must": [
-                        {"match": {"company_id": company_id}},
-                        {"match": {"status": const.OLD_YES}}
+                        {"match": {"position.companyId": company_id}},
+                        {"match": {"position.status": const.OLD_YES}}
                     ]
                 }
             }
@@ -87,8 +87,8 @@ class LandingPageService(PageService):
                     "query": {
                         "bool": {
                             "must": [
-                                {"match": {"company_id": company_id}},
-                                {"match": {"status": const.OLD_YES}},
+                                {"match": {"position.companyId": company_id}},
+                                {"match": {"position.status": const.OLD_YES}},
                                 {"match": {key_a: value_a}}
                             ]
                         }
@@ -103,8 +103,8 @@ class LandingPageService(PageService):
                     "query": {
                         "bool": {
                             "must": [
-                                {"match": {"company_id": company_id}},
-                                {"match": {"status": const.OLD_YES}},
+                                {"match": {"position.companyId": company_id}},
+                                {"match": {"position.status": const.OLD_YES}},
                                 {"match": {key_a: value_a}},
                                 {"match": {key_b: value_b}}
                             ]
@@ -121,8 +121,8 @@ class LandingPageService(PageService):
                     "query": {
                         "bool": {
                             "must": [
-                                {"match": {"company_id": company_id}},
-                                {"match": {"status": const.OLD_YES}},
+                                {"match": {"position.companyId": company_id}},
+                                {"match": {"position.status": const.OLD_YES}},
                                 {"match": {key_a: value_a}},
                                 {"match": {key_b: value_b}},
                                 {"match": {key_c: value_c}}
@@ -142,13 +142,13 @@ class LandingPageService(PageService):
                     "query": {
                         "bool": {
                             "must": [
-                                {"match": {"company_id": company_id}},
-                                {"match": {"status": const.OLD_YES}},
+                                {"match": {"position.companyId": company_id}},
+                                {"match": {"position.status": const.OLD_YES}},
                                 {"match": {key_a: value_a}}
                             ],
                             "should": [
-                                {"range": {"salary_top": {"lte": salary_dict.get('salary_top'), "gte": salary_dict.get('salary_bottom')}}},
-                                {"range": {"salary_bottom": {"lte": salary_dict.get('salary_top'), "gte": salary_dict.get('salary_bottom')}}}
+                                {"range": {"salaryData.salaryTop": {"lte": salary_dict.get('salary_top'), "gte": salary_dict.get('salary_bottom')}}},
+                                {"range": {"salaryData.salaryBottom": {"lte": salary_dict.get('salary_top'), "gte": salary_dict.get('salary_bottom')}}}
                             ],
                             "minimum_should_match": 1
                         }
@@ -163,14 +163,14 @@ class LandingPageService(PageService):
                     "query": {
                         "bool": {
                             "must": [
-                                {"match": {"company_id": company_id}},
-                                {"match": {"status": const.OLD_YES}},
+                                {"match": {"position.companyId": company_id}},
+                                {"match": {"position.status": const.OLD_YES}},
                                 {"match": {key_a: value_a}},
                                 {"match": {key_b: value_b}}
                             ],
                             "should": [
-                                {"range": {"salary_top": {"lte": salary_dict.get('salary_top'), "gte": salary_dict.get('salary_bottom')}}},
-                                {"range": {"salary_bottom": {"lte": salary_dict.get('salary_top'), "gte": salary_dict.get('salary_bottom')}}}
+                                {"range": {"salaryData.salaryTop": {"lte": salary_dict.get('salary_top'), "gte": salary_dict.get('salary_bottom')}}},
+                                {"range": {"salaryData.salaryBottom": {"lte": salary_dict.get('salary_top'), "gte": salary_dict.get('salary_bottom')}}}
                             ],
                             "minimum_should_match": 1
                         }
@@ -182,12 +182,12 @@ class LandingPageService(PageService):
                 "query": {
                     "bool": {
                         "must": [
-                            {"match": {"company_id": company_id}},
-                            {"match": {"status": const.OLD_YES}}
+                            {"match": {"position.companyId": company_id}},
+                            {"match": {"position.status": const.OLD_YES}}
                         ],
                         "should": [
-                            {"range": {"salary_top": {"lte": salary_dict.get('salary_top'), "gte": salary_dict.get('salary_bottom')}}},
-                            {"range": {"salary_bottom": {"lte": salary_dict.get('salary_top'), "gte": salary_dict.get('salary_bottom')}}}
+                            {"range": {"salaryData.salaryTop": {"lte": salary_dict.get('salary_top'), "gte": salary_dict.get('salary_bottom')}}},
+                            {"range": {"salaryData.salaryBottom": {"lte": salary_dict.get('salary_top'), "gte": salary_dict.get('salary_bottom')}}}
                         ],
                         "minimum_should_match": 1
                     }
