@@ -1134,8 +1134,16 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
         self.user_id = match_session_id(to_str(self.get_secure_cookie(const.COOKIE_SESSIONID)))
         self.employee_id = self.get_argument("employee_id")
         self.candidate_id = self.get_argument("user_id")
-        self.position_id = self.get_argument("pid", 0)
         self.speaker = self.get_argument("speaker", 0)
+        if not self.candidate_id:
+            if self.speaker == 1:
+                role = "employee"
+            else:
+                role = "user"
+            room_info = yield self.chat_ps.get_employee_chatroom(self.room_id, role)
+            if room_info and (room_info.code == "0" or room_info.code == 0) and room_info.data and room_info.data.company_id:
+                self.candidate_id = room_info.data.user_id
+        self.position_id = self.get_argument("pid", 0)
 
         try:
             assert self.user_id and self.employee_id and self.room_id
