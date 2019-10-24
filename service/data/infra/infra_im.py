@@ -47,10 +47,11 @@ class InfraImDataService(DataService):
         raise gen.Return(ret)
 
     @gen.coroutine
-    def get_room(self, room_id):
+    def get_room(self, room_id, role):
         """
         获取聊天室详情
         :param room_id 聊天室编号
+        :param role 角色
         :return: 聊天室列表
         """
 
@@ -58,7 +59,7 @@ class InfraImDataService(DataService):
             "room_id": room_id,
         })
 
-        ret = yield http_get_v2(user.INFRA_GET_CHATTING_ROOM, user_service, params)
+        ret = yield http_get_v2(user.INFRA_GET_CHATTING_ROOM.format(role=role), user_service, params)
         raise gen.Return(ret)
 
     @gen.coroutine
