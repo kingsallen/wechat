@@ -184,7 +184,7 @@ class InfraImDataService(DataService):
             }
         })
 
-        ret = yield http_post_v2(user.INFRA_GET_CHATTING_LEAVE_THE_ROOM.format(role=role), user_service,
+        ret = yield http_post_v2(user.INFRA_GET_CHATTING_POST_MESSAGE.format(role=role), user_service,
                                  params)
         raise gen.Return(ret)
 
