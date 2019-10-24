@@ -1028,7 +1028,8 @@ class EmployeeChattingHandler(BaseHandler):
                                                                 page_size, message_id)
         if ret and ret.data and ret.data.current_page_data:
             for data in ret.data.current_page_data:
-                data.compound_content = ujson.loads(data.compound_content)
+                if data.get("compound_content"):
+                    data["compound_content"] = ujson.loads(data.get("compound_content"))
 
         self.un_box(ret)
 
