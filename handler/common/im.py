@@ -986,6 +986,17 @@ class EmployeeChattingHandler(BaseHandler):
         except Exception as e:
             self.write_error(404)
 
+    def un_box(self, ret):
+        """
+        处理基础服务的返回的数据结构
+        :param ret: 基础服务返回的数据结构
+        :return: json
+        """
+        if ret and ret.status and ret.status == 0:
+            self.send_json_success(ret.data)
+        else:
+            self.send_json_error(ret.data, ret.message)
+
     @handle_response
     @gen.coroutine
     def get_rooms(self):
@@ -996,9 +1007,10 @@ class EmployeeChattingHandler(BaseHandler):
 
         page_no = self.params.page_no or 1
         page_size = self.params.page_size or 10
-        rooms = yield self.chat_ps.get_employee_chatrooms(self.user_id, self.role, self.employee_id,
-                                                          self.current_user.company.id, page_no, page_size)
-        self.send_json_success(rooms)
+        ret = yield self.chat_ps.get_employee_chatrooms(self.user_id, self.role, self.employee_id,
+                                                        self.current_user.company.id, page_no, page_size)
+
+        self.un_box(ret)
 
     @handle_response
     @gen.coroutine
@@ -1010,10 +1022,10 @@ class EmployeeChattingHandler(BaseHandler):
 
         page_size = self.params.page_size or 10
         message_id = self.params.message_id or 0
-        messages = yield self.chat_ps.get_employee_chatting_messages(self.params.room_id, self.user_id, self.role,
+        ret = yield self.chat_ps.get_employee_chatting_messages(self.params.room_id, self.user_id, self.role,
                                                                      self.employee_id, self.current_user.company.id,
                                                                      page_size, message_id)
-        self.send_json_success(messages.data)
+        self.un_box(ret)
 
     @handle_response
     @gen.coroutine
@@ -1023,10 +1035,10 @@ class EmployeeChattingHandler(BaseHandler):
         :return: 聊天室列表
         """
 
-        unread_count = yield self.chat_ps.get_employee_chatting_unread_count(self.params.room_id, self.role,
-                                                                             self.user_id, self.employee_id,
-                                                                             self.current_user.company.id)
-        self.send_json_success(unread_count)
+        ret = yield self.chat_ps.get_employee_chatting_unread_count(self.params.room_id, self.role,
+                                                                    self.user_id, self.employee_id,
+                                                                    self.current_user.company.id)
+        self.un_box(ret)
 
     @handle_response
     @gen.coroutine
@@ -1037,7 +1049,7 @@ class EmployeeChattingHandler(BaseHandler):
         """
 
         switch = yield self.chat_ps.get_switch(self.role, self.user_id, self.employee_id, self.current_user.company.id)
-        self.send_json_success(switch)
+        self.un_box(switch)
 
     @handle_response
     @gen.coroutine
@@ -1050,7 +1062,7 @@ class EmployeeChattingHandler(BaseHandler):
         tpl_switch = self.json_args.get("tpl_switch");
         switch = yield self.chat_ps.post_switch(self.role, self.user_id, self.employee_id, self.current_user.company.id,
                                                 tpl_switch)
-        self.send_json_success(switch)
+        self.un_box(switch)
 
     @handle_response
     @gen.coroutine
@@ -1064,8 +1076,7 @@ class EmployeeChattingHandler(BaseHandler):
         ret = yield self.chat_ps.enter_the_room(self.json_args.get("room_id") or 0, self.role, self.user_id,
                                                 self.employee_id, self.current_user.company.id,
                                                 self.json_args.get("pid") or 0)
-        self.send_json_success(ret)
-
+        self.un_box(ret)
 
 class ChattingWebSocketHandler(websocket.WebSocketHandler):
     """
