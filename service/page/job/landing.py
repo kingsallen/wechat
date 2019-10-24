@@ -306,7 +306,7 @@ class LandingPageService(PageService):
         # 获取链接上配置的筛选参数
         display_key_dict = dict()
         salary_dict = dict()
-        all_form_name = [platform_const.LANDING[e].get('form_name') for e in range(1, 10)]
+        all_form_name = [platform_const.LANDING[e].get('form_name') for e in range(1, 11)]
         all_key_order = [[platform_const.LANDING[e].get("display_key"), platform_const.LANDING[e].get('form_name')] for e in range(1, 10)]
         self.logger.debug('key_order: %s,form_name: %s,all_key_order: %s,all_form_name: %s' % (key_order, form_name, all_key_order, all_form_name))
         for key, value in params.items():
@@ -326,7 +326,7 @@ class LandingPageService(PageService):
 
         # 链接所带参数
         conf_search_seq_append = []
-        for index in range(1, 10):
+        for index in range(1, 11):
             for s in display_key_dict.keys():
                 if platform_const.LANDING[index].get("key") == s:
                     conf_search_seq_append.append(index)
