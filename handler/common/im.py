@@ -1187,7 +1187,7 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
             user_id = self.candidate_id
             channel = self.chatting_employee_channel
 
-        room_info = yield self.chat_ps.get_employee_chatrooms(self.room_id)
+        room_info = yield self.chat_ps.get_employee_chatroom(self.room_id)
         if room_info and (room_info.code == "0" or room_info.code == 0) and room_info.data and room_info.data.company_id:
 
             chat_id = yield self.chat_ps.post_message(self.room_id, role, user_id, employee_id,
