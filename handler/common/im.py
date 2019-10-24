@@ -973,7 +973,7 @@ class EmployeeChattingHandler(BaseHandler):
             if self.json_args.get("user_id"):
                 self.user_id = self.json_args.get("user_id")
             elif self.json_args.get("room_id"):
-                room_info = yield self.chat_ps.get_employee_chatroom(self.room_id, self.role)
+                room_info = yield self.chat_ps.get_employee_chatroom(self.json_args.get("room_id"), self.role)
                 if room_info and (room_info.code == "0" or room_info.code == 0) and room_info.data and room_info.data.user_id:
                     self.user_id = room_info.data.user_id
                 else:
