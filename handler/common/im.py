@@ -967,7 +967,7 @@ class EmployeeChattingHandler(BaseHandler):
         if self.current_user.employee:
             # 当前是员工，获取与候选人的聊天室列表
             self.role = "employee"
-            self.logger.debug("POST params:{}".format(self.self.json_args))
+            self.logger.debug("POST params:{}".format(self.json_args))
             self.employee_id = self.current_user.employee.id or 0
             self.logger.debug("POST employee_id:{}".format(self.employee_id))
             self.user_id = self.json_args.get("user_id") or 0
