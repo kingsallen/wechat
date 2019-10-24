@@ -1234,7 +1234,7 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
                 speaker=data.get("speaker"),
                 cid=int(self.room_id),
 
-                pid=int(self.position_id),
+                pid=int(self.position_id) if self.position_id else 0,
                 create_time=curr_now_minute(),
                 id=chat_id.get("data"),
             ))
