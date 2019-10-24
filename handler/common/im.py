@@ -1213,6 +1213,25 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
             if not chat_id or (chat_id.code != "0" and chat_id.code != 0) or not chat_id.data:
                 return
 
+            try:
+                message_body = json_dumps(ObjectDict(
+                    msgType="msg_id",
+                    content=chat_id.get("data"),
+                    compoundContent=None,
+                    speaker=data.get("speaker"),
+                    cid=int(self.room_id),
+                    pid=int(self.position_id) if self.position_id else 0,
+                    createTime=curr_now_minute(),
+                    id=chat_id.get("data"),
+                ))
+
+                self.write_message(message_body)
+
+            except websocket.WebSocketClosedError:
+                self.logger.error(traceback.format_exc())
+                self.close(WebSocketCloseCode.internal_error.value)
+                raise
+
             message_body = json_dumps(ObjectDict(
                 msgType=data.get("msgType"),
                 content=data.get("content"),
