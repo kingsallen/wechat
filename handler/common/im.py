@@ -1134,7 +1134,7 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
         self.room_id = room_id
         self.user_id = match_session_id(to_str(self.get_secure_cookie(const.COOKIE_SESSIONID)))
         self.employee_id = self.get_argument("employee_id")
-        self.speaker = self.get_argument("speaker", 0)
+        self.speaker = int(self.get_argument("speaker", 0))
         if not self.get_argument("user_id"):
             if self.speaker == 1:
                 role = "employee"
