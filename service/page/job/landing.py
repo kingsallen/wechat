@@ -198,7 +198,7 @@ class LandingPageService(PageService):
         if pop_occupation:
             data.get("query").get("bool").get("must").append({"term": {"search_data.occupation": occupation_value}})
         self.logger.debug(data)
-        response = self.es.search(index='index', body=data)
+        response = self.es.search(index='newpositions', body=data)
 
         result_list = response.hits.hits
         self.logger.debug(result_list)
