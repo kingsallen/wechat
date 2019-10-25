@@ -1085,7 +1085,7 @@ class EmployeeChattingHandler(BaseHandler):
             room_info = yield self.chat_ps.get_employee_chatroom(self.json_args.get("room_id"), self.role)
             if room_info and (room_info.code == "0" or room_info.code == 0) and room_info.data:
                 user_id = room_info.data.user_id
-                employee_id = room_info.employee_id
+                employee_id = room_info.data.employee_id
 
         ret = yield self.chat_ps.enter_the_room(self.json_args.get("room_id") or 0, self.role, user_id, employee_id,
                                                 self.current_user.company.id, self.json_args.get("pid") or 0)
