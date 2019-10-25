@@ -912,22 +912,6 @@ class ChattingRoomsHandler(BaseHandler):
         self.render(template_name='chat/room.html')
 
 
-class EmployeeRoomHandler(BaseHandler):
-
-    @handle_response
-    @gen.coroutine
-    def delete(self, room_id):
-        """
-        删除聊天室
-        :param room_id: 聊天室编号
-        :return: 操作结果
-        """
-
-        ret = yield self.chat_ps.delete_room(room_id or 0, self.role, self.user_id, self.employee_id,
-                                             self.current_user.company.id)
-        self.un_box(ret)
-
-
 class EmployeeChattingHandler(BaseHandler):
     """
     员工候选人聊天室
@@ -1108,6 +1092,20 @@ class EmployeeChattingHandler(BaseHandler):
         ret = yield self.chat_ps.enter_the_room(self.json_args.get("room_id") or 0, self.role, self.user_id,
                                                 self.employee_id, self.current_user.company.id,
                                                 self.json_args.get("pid") or 0)
+        self.un_box(ret)
+
+    @handle_response
+    @gen.coroutine
+    def post_rooms(self):
+        """
+        删除聊天室
+        :return: 操作结果
+        """
+
+        self.logger.debug("enter room. employee_id:{}, user_id:{}".format(self.employee_id, self.user_id))
+
+        ret = yield self.chat_ps.delete_room(self.json_args.get("room_id") or 0, self.role, self.user_id,
+                                             self.employee_id, self.current_user.company.id)
         self.un_box(ret)
 
 

@@ -610,7 +610,7 @@ class ChatPageService(PageService):
         raise gen.Return(ret)
 
     @gen.coroutine
-    def delete_room(self, room_id, user_id, role, employee_id, company_id):
+    def delete_room(self, room_id, role, user_id, employee_id, company_id):
         """
         删除聊天室
         :param room_id: 聊天室编号

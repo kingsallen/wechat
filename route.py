@@ -160,7 +160,6 @@ common_routes = [
     (r"/api/resume/import",                          handler.common.resume.ResumeImportHandler,                 {"event": "resume_import"}),
     (r"/api/sug/company",                            handler.common.suggest.SuggestCompanyHandler,              {"event": "sug_company"}),
     (r"/api/sug/college",                            handler.common.suggest.SuggestCollegeHandler,              {"event": "sug_college"}),
-    (r"/api/chatting/rooms[\/]*([0-9]+)*",           handler.common.im.EmployeeRoomHandler,                     {"event": "chatting_rooms_"}),
     (r"/api/chatting[\/]*([a-z]+)*",                 handler.common.im.EmployeeChattingHandler,                 {"event": "chatting_rooms_"}),
     (r"/api/chat[\/]*([a-z]+)*",                     handler.common.im.ChatHandler,                             {"event": "chat_"}),
     (r"/api/application",                            handler.common.application.ApplicationHandler,             {"event": "application_profile"}),
