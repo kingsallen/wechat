@@ -1148,7 +1148,7 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
         self.position_id = self.get_argument("pid", 0)
 
         try:
-            assert self.user_id and self.employee_id and self.room_id
+            assert self.user_id and self.employee_id and self.room_id and self.candidate_id
         except AssertionError:
             self.close(WebSocketCloseCode.normal.value, "not authorized")
 
