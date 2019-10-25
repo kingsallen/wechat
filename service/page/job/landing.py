@@ -81,6 +81,7 @@ class LandingPageService(PageService):
                 value_list.append(value)
             if len(key_list) == 1:
                 key_a, value_a = key_list[0], value_list[0]
+                key_a = self.get_by_value_dict(key_a, platform_const.LANDING)
 
                 data = {
                     "size": query_size,
@@ -97,6 +98,8 @@ class LandingPageService(PageService):
             elif len(key_list) == 2:
                 key_a, value_a = key_list[0], value_list[0]
                 key_b, value_b = key_list[1], value_list[1]
+                key_a = self.get_by_value_dict(key_a, platform_const.LANDING)
+                key_b = self.get_by_value_dict(key_b, platform_const.LANDING)
 
                 data = {
                     "size": query_size,
@@ -115,6 +118,9 @@ class LandingPageService(PageService):
                 key_a, value_a = key_list[0], value_list[0]
                 key_b, value_b = key_list[1], value_list[1]
                 key_c, value_c = key_list[2], value_list[2]
+                key_a = self.get_by_value_dict(key_a, platform_const.LANDING)
+                key_b = self.get_by_value_dict(key_b, platform_const.LANDING)
+                key_c = self.get_by_value_dict(key_c, platform_const.LANDING)
 
                 data = {
                     "size": query_size,
@@ -136,6 +142,7 @@ class LandingPageService(PageService):
                 value_list.append(value)
             if len(key_list) == 1:
                 key_a, value_a = key_list[0], value_list[0]
+                key_a = self.get_by_value_dict(key_a, platform_const.LANDING)
 
                 data = {
                     "size": query_size,
@@ -157,6 +164,8 @@ class LandingPageService(PageService):
             elif len(key_list) == 2:
                 key_a, value_a = key_list[0], value_list[0]
                 key_b, value_b = key_list[1], value_list[1]
+                key_a = self.get_by_value_dict(key_a, platform_const.LANDING)
+                key_b = self.get_by_value_dict(key_b, platform_const.LANDING)
 
                 data = {
                     "size": query_size,
@@ -194,9 +203,9 @@ class LandingPageService(PageService):
                 }
             }
         if is_referral:
-            data.get("query").get("bool").get("must").append({"match": {"is_referral": const.YES}})
+            data.get("query").get("bool").get("must").append({"match": {"position.isReferral": const.YES}})
         if pop_occupation:
-            data.get("query").get("bool").get("must").append({"term": {"search_data.occupation": occupation_value}})
+            data.get("query").get("bool").get("must").append({"term": {"jobOccupation.name": occupation_value}})
         self.logger.debug(data)
         response = self.es.search(index='newpositions', body=data)
 
@@ -235,20 +244,37 @@ class LandingPageService(PageService):
     @staticmethod
     def sub_nested_dict(somedict, somekeys, default=None):
         if isinstance(somekeys, list):
-            for k in somekeys:
-                value = somedict.get(k.split(".")[0], default)
+            for key in somekeys:
+                es_key = self.get_by_value_dict(key, platform_const.LANDING)
+                value = somedict.get(es_key.split(".")[0], default)
                 if value:
-                    ret = {k: value.get(k.split(".")[1], default)}
+                    ret = {key: value.get(es_key.split(".")[1], default)}
             # ret = {k: somedict.get(k, default) for k in somekeys}
         elif isinstance(somekeys, str):
             key = somekeys
-            value = somedict.get(key.split(".")[0], default)
+            es_key = self.get_by_value_dict(key, platform_const.LANDING)
+            value = somedict.get(es_key.split(".")[0], default)
             if value:
-                ret = {key: value.get(key.split(".")[1], default)}
+                ret = {key: value.get(es_key.split(".")[1], default)}
             # ret = {key: somedict.get(key, default)}
         else:
             raise ValueError('sub dict key should be list or str')
         return ObjectDict(ret)
+
+    @staticmethod
+    def get_by_value_dict(value, nested_dict):
+        if value == "salary_top":
+            return nested_dict[2]["es_key"][0]
+        elif value == "salary_bottom":
+            return nested_dict[2]["es_key"][1]
+        elif value == "city_ename":
+            return "citys.ename"
+        else:
+            for key_out, value_out in nested_dict.items():
+                for key_in, value_in in value_out.items():
+                    if value_in == value:
+                        return value_out["es_key"]
+            return ""
 
     @staticmethod
     def split_cities(data, *, delimiter=None, display_locale=None):
