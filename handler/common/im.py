@@ -1136,6 +1136,7 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
         self.candidate_id = 0
         self.position_id = 0
         self.speaker = 0
+        self.company_id = 0
         self.io_loop = ioloop.IOLoop.current()
 
         self.chat_session = ChatCache()
@@ -1156,6 +1157,8 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
             room_info = yield self.chat_ps.get_employee_chatroom(self.room_id, role)
             if room_info and (room_info.code == "0" or room_info.code == 0) and room_info.data and room_info.data.company_id:
                 self.candidate_id = room_info.data.user_id
+                if not self.company_id or self.company_id == 0:
+                    self.company_id = room_info.data.company_id
         else:
             self.candidate_id = self.get_argument("user_id")
         self.position_id = self.get_argument("pid", 0)
@@ -1224,45 +1227,48 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
             role = "user"
             channel = self.chatting_user_channel
 
-        room_info = yield self.chat_ps.get_employee_chatroom(self.room_id, role)
-        if room_info and (room_info.code == "0" or room_info.code == 0) and room_info.data and room_info.data.company_id:
-            chat_id = yield self.chat_ps.post_message(self.room_id, role, self.candidate_id, self.employee_id,
-                                                      room_info.data.company_id, data.get("content"), "html")
-            if not chat_id or (chat_id.code != "0" and chat_id.code != 0) or not chat_id.data:
-                return
+        if not self.company_id or self.company_id == 0:
+            room_info = yield self.chat_ps.get_employee_chatroom(self.room_id, role)
+            if room_info and (room_info.code == "0" or room_info.code == 0) and room_info.data and room_info.data.company_id:
+                self.company_id = room_info.data.company_id
 
-            try:
-                message_body = json_dumps(ObjectDict(
-                    msg_type="msg_id",
-                    content=chat_id.get("data"),
-                    compound_content=None,
-                    speaker=data.get("speaker"),
-                    cid=int(self.room_id),
-                    pid=int(self.position_id) if self.position_id else 0,
-                    create_time=curr_now_minute(),
-                    id=chat_id.get("data"),
-                ))
+        chat_id = yield self.chat_ps.post_message(self.room_id, role, self.candidate_id, self.employee_id,
+                                                  self.company_id, data.get("content"), "html")
+        if not chat_id or (chat_id.code != "0" and chat_id.code != 0) or not chat_id.data:
+            return
 
-                self.write_message(message_body)
-
-            except websocket.WebSocketClosedError:
-                self.logger.error(traceback.format_exc())
-                self.close(WebSocketCloseCode.internal_error.value)
-                raise
-
+        try:
             message_body = json_dumps(ObjectDict(
-                msg_type=data.get("msg_type"),
-                content=data.get("content"),
+                msg_type="msg_id",
+                content=chat_id.get("data"),
                 compound_content=None,
                 speaker=data.get("speaker"),
                 cid=int(self.room_id),
-
                 pid=int(self.position_id) if self.position_id else 0,
                 create_time=curr_now_minute(),
                 id=chat_id.get("data"),
             ))
-            logger.debug("ChattingWebSocketHandler publish chat by redis message_body:{}".format(message_body))
-            self.redis_client.publish(channel, message_body)
+
+            self.write_message(message_body)
+
+        except websocket.WebSocketClosedError:
+            self.logger.error(traceback.format_exc())
+            self.close(WebSocketCloseCode.internal_error.value)
+            raise
+
+        message_body = json_dumps(ObjectDict(
+            msg_type=data.get("msg_type"),
+            content=data.get("content"),
+            compound_content=None,
+            speaker=data.get("speaker"),
+            cid=int(self.room_id),
+
+            pid=int(self.position_id) if self.position_id else 0,
+            create_time=curr_now_minute(),
+            id=chat_id.get("data"),
+        ))
+        logger.debug("ChattingWebSocketHandler publish chat by redis message_body:{}".format(message_body))
+        self.redis_client.publish(channel, message_body)
 
     @gen.coroutine
     def on_close(self):
@@ -1279,5 +1285,6 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
             role = "employee"
         else:
             role = "user"
-        yield self.chat_ps.leave_the_room(self.room_id, role, self.candidate_id, self.employee_id, self.position_id)
+        yield self.chat_ps.leave_the_room(self.room_id, role, self.candidate_id, self.employee_id, self.company_id,
+                                          self.position_id)
 
