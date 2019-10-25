@@ -190,9 +190,10 @@ class InfraImDataService(DataService):
         raise gen.Return(ret)
 
     @gen.coroutine
-    def delete_room(self, user_id, role, employee_id, company_id):
+    def delete_room(self, room_id, user_id, role, employee_id, company_id):
         """
         删除聊天室
+        :param room_id: 聊天室编号
         :param user_id: 用户编号
         :param role: 角色 employee是员工进入聊天室；user是候选人进入聊天室
         :param employee_id: 员工编号
@@ -204,6 +205,7 @@ class InfraImDataService(DataService):
             "employee_id": employee_id,
             "user_id": user_id,
             "company_id": company_id,
+            "room_id": room_id,
         })
 
         ret = yield http_get_v2(user.INFRA_GET_CHATTING_DELETE_THE_ROOM.format(role=role), user_service, params)

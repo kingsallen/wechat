@@ -949,6 +949,29 @@ class EmployeeChattingHandler(BaseHandler):
             self.write_error(404)
 
     @handle_response
+    @gen.coroutine
+    def delete(self, method, room_id):
+
+        if self.current_user.employee:
+            # 当前是员工，获取与候选人的聊天室列表
+            self.role = "employee"
+            self.employee_id = self.current_user.employee.id or "0"
+            self.user_id = self.params.user_id or "0"
+        else:
+            # 当前用户是普通的候选人，获取公众号所属公司下员工的聊天室列表
+            self.role = "user"
+            self.employee_id = self.params.employee_id or "0"
+            self.user_id = self.current_user.sysuser.id
+
+        try:
+            # "api/chatting/rooms/33"
+            # 重置 event，准确描述
+            self._event = self._event + method
+            yield getattr(self, "delete_" + method)(room_id)
+        except Exception as e:
+            self.write_error(404)
+
+    @handle_response
     @authenticated
     @gen.coroutine
     def get_index(self):
@@ -1093,6 +1116,19 @@ class EmployeeChattingHandler(BaseHandler):
         ret = yield self.chat_ps.enter_the_room(self.json_args.get("room_id") or 0, self.role, self.user_id,
                                                 self.employee_id, self.current_user.company.id,
                                                 self.json_args.get("pid") or 0)
+        self.un_box(ret)
+
+    @handle_response
+    @gen.coroutine
+    def delete_rooms(self, room_id):
+        """
+        删除聊天室
+        :param room_id: 聊天室编号
+        :return: 操作结果
+        """
+
+        ret = yield self.chat_ps.delete_room(room_id or 0, self.role, self.user_id, self.employee_id,
+                                             self.current_user.company.id)
         self.un_box(ret)
 
 
