@@ -1088,7 +1088,7 @@ class EmployeeChattingHandler(BaseHandler):
                 employee_id = room_info.employee_id
 
         ret = yield self.chat_ps.enter_the_room(self.json_args.get("room_id") or 0, self.role, user_id, employee_id,
-                                                self.json_args.get("pid") or 0)
+                                                self.current_user.company.id, self.json_args.get("pid") or 0)
         self.un_box(ret)
 
     @handle_response
