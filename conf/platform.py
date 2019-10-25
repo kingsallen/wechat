@@ -69,12 +69,25 @@ LANDING = ObjectDict({
                                   "display_key": "custom",
                                   "form_name":   "custom"},
     LANDING_INDEX_POSITION_TYPE: {"name": "职位类型", "chpe": "类型",
-                                  "key": "notOffice",
+                                  "key": "position_type",
                                   "display_key": "position_type",
                                   "form_name": "position_type"}
 })
 
-
+# LANDING的key映射到es里面数据的key
+LANDING_ES_KEY_MAP = {
+    "city" : "citys.name",
+    "salary_top": "salaryData.salaryTop",
+    "salary_bottom": "salaryData.salaryBottom",
+    "occupation": "jobOccupation.name",
+    "team_name": "team.name",
+    "candidate_source_name": "candidateData.name",
+    "employment_type_name": "employeeTypeData.name",
+    "degree_name": "degreeData.name",
+    "publisher_company_id": "company.id",
+    "custom": "jobCustom.name",
+    "position_type": "notOffice"
+}
 
 # 薪资范围搜索项
 SALARY = ObjectDict({

@@ -33,7 +33,9 @@ class LandingPageService(PageService):
             to_append = platform_const.LANDING.get(key)
             if to_append:
                 to_append = to_append.key
-                if isinstance(to_append, list):
+                if isinstance(to_append, list):  # salary
+                    for k in to_append:
+                    to_append = platform_const.LANDING_ES_KEY_MAP.get(to_append.key)
                     key_list = key_list + to_append
                 else:
                     key_list.append(to_append)
