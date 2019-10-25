@@ -968,22 +968,12 @@ class EmployeeChattingHandler(BaseHandler):
             self.role = "employee"
             self.logger.debug("POST params:{}".format(self.json_args))
             self.employee_id = self.current_user.employee.id or 0
-
-            if self.json_args.get("user_id"):
-                self.user_id = self.json_args.get("user_id")
-            elif self.json_args.get("room_id"):
-                room_info = yield self.chat_ps.get_employee_chatroom(self.json_args.get("room_id"), self.role)
-                if room_info and (room_info.code == "0" or room_info.code == 0) and room_info.data and room_info.data.user_id:
-                    self.user_id = room_info.data.user_id
-                else:
-                    self.write_error(416)
-            else:
-                self.write_error(416)
+            self.user_id = int(self.json_args.get("user_id") or 0)
         else:
             # 当前用户是普通的候选人，获取公众号所属公司下员工的聊天室列表
             self.role = "user"
             self.logger.debug("POST params:{}".format(self.json_args))
-            self.employee_id = self.json_args.get("employee_id") or 0
+            self.employee_id = int(self.json_args.get("employee_id") or 0)
             self.logger.debug("POST employee_id:{}".format(self.employee_id))
             self.user_id = self.current_user.sysuser.id or 0
 
@@ -1087,10 +1077,17 @@ class EmployeeChattingHandler(BaseHandler):
         关闭消息推送
         :return: 推送开关状态
         """
+        self.logger.debug("enter room. employee_id:{}, user_id:{}".format(self.employee_id, self.user_id))
+        user_id = self.user_id
+        employee_id = self.employee_id
+        if (self.json_args.get("room_id") and self.json_args.get("room_id") > 0) and (self.user_id == 0 or
+                                                                                      self.employee_id == 0):
+            room_info = yield self.chat_ps.get_employee_chatroom(self.json_args.get("room_id"), self.role)
+            if room_info and (room_info.code == "0" or room_info.code == 0) and room_info.data:
+                user_id = room_info.data.user_id
+                employee_id = room_info.employee_id
 
-        self.logger.debug("enter room. employee_id:{}".format(self.employee_id))
-        ret = yield self.chat_ps.enter_the_room(self.json_args.get("room_id") or 0, self.role, self.user_id,
-                                                self.employee_id, self.current_user.company.id,
+        ret = yield self.chat_ps.enter_the_room(self.json_args.get("room_id") or 0, self.role, user_id, employee_id,
                                                 self.json_args.get("pid") or 0)
         self.un_box(ret)
 
@@ -1102,7 +1099,7 @@ class EmployeeChattingHandler(BaseHandler):
         :return: 操作结果
         """
 
-        self.logger.debug("enter room. employee_id:{}, user_id:{}".format(self.employee_id, self.user_id))
+        self.logger.debug("delete room. employee_id:{}, user_id:{}".format(self.employee_id, self.user_id))
 
         ret = yield self.chat_ps.delete_room(self.json_args.get("room_id") or 0, self.role, self.user_id,
                                              self.employee_id, self.current_user.company.id)
