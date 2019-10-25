@@ -904,13 +904,16 @@ class PositionListInfraParamsMixin(BaseHandler):
         infra_params.user_id = self.current_user.sysuser.id or 0
         infra_params.is_referral = 1 if self.params.is_referral and self.params.is_referral.isdigit() else -1
 
-        if self.params.longitude and self.params.latitude:
-            infra_params.longitude = self.params.longitude
-            infra_params.latitude = self.params.latitude
+        if self.params.store_id:
+            infra_params.update(store_id=self.params.store_id)
         else:
-            ret = yield self.company_ps.get_lbs_ip_location(self.request.remote_ip)
-            infra_params.longitude = ret.rectangle.split(";")[0].split(",")[0]
-            infra_params.latitude = ret.rectangle.split(";")[0].split(",")[1]
+            if self.params.longitude and self.params.latitude:
+                infra_params.longitude = self.params.longitude
+                infra_params.latitude = self.params.latitude
+            else:
+                ret = yield self.company_ps.get_lbs_ip_location(self.request.remote_ip)
+                infra_params.longitude = ret.rectangle.split(";")[0].split(",")[0]
+                infra_params.latitude = ret.rectangle.split(";")[0].split(",")[1]
 
         if self.params.did:
             infra_params.did = self.params.did
@@ -946,8 +949,6 @@ class PositionListInfraParamsMixin(BaseHandler):
             keywords=self.params.keyword if self.params.keyword else "",
             order_by_priority=1)
 
-        if self.params.store_id:
-            infra_params.update(store_id=self.params.store_id)
         self.logger.debug("[position_list_infra_params]: %s" % infra_params)
 
         return infra_params
