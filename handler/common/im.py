@@ -1204,7 +1204,7 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
             self.write_message(ujson.dumps({"msg_type": 'pong'}))
             return
 
-        if data.get("speaker") == 1:
+        if data.get("speaker") == 1 or data.get("speaker") == "1":
             role = "employee"
             channel = self.chatting_employee_channel
         else:
