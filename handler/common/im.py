@@ -1262,5 +1262,9 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
         logger.debug("ChattingWebSocketHandler &=! {}".format("on_close, after cleanup"))
 
         self.chat_session.mark_leave_chatroom(self.room_id)
-        yield self.chat_ps.leave_the_room(self.room_id)
+        if self.speaker == 1:
+            role = "employee"
+        else:
+            role = "user"
+        yield self.chat_ps.leave_the_room(self.room_id, role, self.candidate_id, self.employee_id, self.position_id)
 
