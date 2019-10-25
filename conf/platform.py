@@ -86,7 +86,7 @@ LANDING_ES_KEY_MAP = {
     "degree_name": "degreeData.name",
     "publisher_company_id": "company.id",
     "custom": "jobCustom.name",
-    "position_type": "notOffice"
+    "position_type": "position.notOffice"
 }
 
 # 薪资范围搜索项

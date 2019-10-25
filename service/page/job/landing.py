@@ -218,7 +218,7 @@ class LandingPageService(PageService):
             source = e.get("_source")
 
             # 使用 key_list 来筛选 source
-            source = ObjectDict(sub_dict(source, key_list))
+            source = ObjectDict(self.sub_nested_dict(source, key_list))
 
             if 'salary_top' in key_list:
                 # 对 salary 做特殊处理 (salary_top, salary_bottom) -> salary
@@ -235,6 +235,24 @@ class LandingPageService(PageService):
             ret.append(source)
 
         return ret
+
+    @staticmethod
+    def sub_nested_dict(somedict, somekeys, default=None):
+        if isinstance(somekeys, list):
+            for k in somekeys:
+                value = somedict.get(k.split(".")[0], default)
+                if value:
+                    ret = {k: value.get(k.split(".")[1], default)}
+            # ret = {k: somedict.get(k, default) for k in somekeys}
+        elif isinstance(somekeys, str):
+            key = somekeys
+            value = somedict.get(key.split(".")[0], default)
+            if value:
+                ret = {key: value.get(key.split(".")[1], default)}
+            # ret = {key: somedict.get(key, default)}
+        else:
+            raise ValueError('sub dict key should be list or str')
+        return ObjectDict(ret)
 
     @staticmethod
     def split_cities(data, *, delimiter=None, display_locale=None):
