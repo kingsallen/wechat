@@ -621,7 +621,7 @@ class ChatPageService(PageService):
         :return: 操作结果
         """
 
-        ret = yield self.infra_im_ds.delete_room(user_id, role, employee_id, company_id)
+        ret = yield self.infra_im_ds.delete_room(room_id, user_id, role, employee_id, company_id)
         raise gen.Return(ret)
 
     @gen.coroutine

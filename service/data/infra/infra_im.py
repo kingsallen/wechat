@@ -5,7 +5,7 @@ from conf.newinfra_service_conf.user import user
 from service.data.base import DataService
 from util.common import ObjectDict
 from util.tool.date_tool import curr_now_minute, curr_now
-from util.tool.http_tool import http_get_v2, http_post_v2
+from util.tool.http_tool import http_get_v2, http_post_v2, http_delete_v2
 
 
 class InfraImDataService(DataService):
@@ -208,7 +208,7 @@ class InfraImDataService(DataService):
             "room_id": room_id,
         })
 
-        ret = yield http_get_v2(user.INFRA_GET_CHATTING_DELETE_THE_ROOM.format(role=role), user_service, params)
+        ret = yield http_delete_v2(user.INFRA_GET_CHATTING_DELETE_THE_ROOM.format(role=role), user_service, params)
         raise gen.Return(ret)
 
     @gen.coroutine
