@@ -243,14 +243,14 @@ class LandingPageService(PageService):
 
     def sub_nested_dict(self, somedict, somekeys, default=None):
         if isinstance(somekeys, list):
-            ret = []
+            ret = {}
             for key in somekeys:
                 es_key = self.get_by_value_dict(key, platform_const.LANDING)
                 value = somedict.get(es_key.split(".")[0], default)
                 if value:
-                    ret.append({key: value.get(es_key.split(".")[1], default)})
+                    ret.update({key: value.get(es_key.split(".")[1], default)})
                 else:
-                    ret.append({key: value})
+                    ret.update({key: value})
             # ret = {k: somedict.get(k, default) for k in somekeys}
         elif isinstance(somekeys, str):
             key = somekeys
