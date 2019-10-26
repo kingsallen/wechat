@@ -241,8 +241,7 @@ class LandingPageService(PageService):
 
         return ret
 
-    @staticmethod
-    def sub_nested_dict(somedict, somekeys, default=None):
+    def sub_nested_dict(self, somedict, somekeys, default=None):
         if isinstance(somekeys, list):
             for key in somekeys:
                 es_key = self.get_by_value_dict(key, platform_const.LANDING)
