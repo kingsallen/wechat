@@ -1151,19 +1151,26 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
         self.user_id = match_session_id(to_str(self.get_secure_cookie(const.COOKIE_SESSIONID)))
         self.employee_id = self.get_argument("employee_id")
         self.speaker = int(self.get_argument("speaker", 0))
-        if not self.get_argument("user_id"):
-            if self.speaker == 1:
-                role = "employee"
-            else:
-                role = "user"
-            room_info = yield self.chat_ps.get_employee_chatroom(self.room_id, role)
-            if room_info and (room_info.code == "0" or room_info.code == 0) and room_info.data and room_info.data.company_id:
-                self.candidate_id = room_info.data.user_id
-                if not self.company_id or self.company_id == 0:
-                    self.company_id = room_info.data.company_id
+        self.candidate_id = self.get_argument("user_id", 0)
+        self.company_id = self.get_argument("company_id", 0)
+
+        if self.speaker == 1:
+            role = "employee"
         else:
-            self.candidate_id = self.get_argument("user_id")
+            role = "user"
+
+        if room_id and (not self.employee_id or not self.user_id or not self.company_id):
+            room_info = yield self.chat_ps.get_employee_chatroom(self.room_id, role)
+            logger.debug("ChattingWebSocketHandler open room_info:{}".format(room_info))
+            if room_info and (
+                room_info.code == "0" or room_info.code == 0) and room_info.data and room_info.data.user_id:
+                self.company_id = room_info.data.company_id
+                self.employee_id = room_info.data.employee_id
+                self.candidate_id = room_info.data.user_id
+
         self.position_id = self.get_argument("pid", 0)
+        self.chatting_user_channel = const.CHAT_CHATTING_CHANNEL.format(self.candidate_id, self.employee_id)
+        self.chatting_employee_channel = const.CHAT_CHATTING_CHANNEL.format(self.employee_id, self.candidate_id)
 
         try:
             assert self.user_id and self.employee_id and self.room_id and self.candidate_id
@@ -1171,9 +1178,6 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
             self.close(WebSocketCloseCode.normal.value, "not authorized")
 
         self.set_nodelay(True)
-
-        self.chatting_user_channel = const.CHAT_CHATTING_CHANNEL.format(self.candidate_id, self.employee_id)
-        self.chatting_employee_channel = const.CHAT_CHATTING_CHANNEL.format(self.employee_id, self.candidate_id)
         #?
         self.chat_session.mark_enter_chatroom(self.room_id)
 
