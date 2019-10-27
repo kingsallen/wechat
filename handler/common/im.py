@@ -1178,9 +1178,6 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
             self.close(WebSocketCloseCode.normal.value, "not authorized")
 
         self.set_nodelay(True)
-        #?
-        self.chat_session.mark_enter_chatroom(self.room_id)
-
         if self.speaker == 1:
             channel = self.chatting_user_channel
         else:
