@@ -1040,8 +1040,7 @@ class EmployeeChattingHandler(BaseHandler):
         获取聊天室列表
         :return: 聊天室列表
         """
-
-        ret = yield self.chat_ps.get_employee_chatting_unread_count(self.params.room_id, self.role,
+        ret = yield self.chat_ps.get_employee_chatting_unread_count(self.params.room_id or 0, self.role,
                                                                     self.user_id, self.employee_id,
                                                                     self.current_user.company.id)
         self.un_box(ret)
