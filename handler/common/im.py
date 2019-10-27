@@ -909,7 +909,7 @@ class ChattingRoomsHandler(BaseHandler):
         """
         # 确保页面中用到的post请求的api接口cookie中设置了_xsrf
         self.xsrf_token
-        self.render_page(template_name='chat/room.html')
+        self.render_page(template_name='chat/room.html', data={})
 
 
 class EmployeeChattingHandler(BaseHandler):
