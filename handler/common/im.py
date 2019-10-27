@@ -1098,11 +1098,16 @@ class EmployeeChattingHandler(BaseHandler):
         删除聊天室
         :return: 操作结果
         """
-
-        self.logger.debug("delete room. employee_id:{}, user_id:{}".format(self.employee_id, self.user_id))
-
-        ret = yield self.chat_ps.delete_room(self.json_args.get("room_id") or 0, self.role, self.user_id,
-                                             self.employee_id, self.current_user.company.id)
+        user_id = self.user_id
+        employee_id = self.employee_id
+        if (self.json_args.get("room_id") and int(self.json_args.get("room_id")) > 0) and (self.user_id == 0 or
+                                                                                           self.employee_id == 0):
+            room_info = yield self.chat_ps.get_employee_chatroom(self.json_args.get("room_id"), self.role)
+            if room_info and (room_info.code == "0" or room_info.code == 0) and room_info.data:
+                user_id = room_info.data.user_id
+                employee_id = room_info.data.employee_id
+        ret = yield self.chat_ps.delete_room(self.json_args.get("room_id") or 0, self.role, user_id,
+                                             employee_id, self.current_user.company.id)
         self.un_box(ret)
 
 
