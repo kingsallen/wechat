@@ -830,7 +830,7 @@ class EventPageService(PageService):
 
             elif str_scene == const.STR_SCENE_EMPLOYEE_CHATTING:
 
-                if re.match(r"EMPLOYEECHATTING_(\d*)_(\d*)") is None:
+                if re.match(r"EMPLOYEECHATTING_(\d*)_(\d*)", msg.EventKey) is None:
                     return
                 # 解析场景参数，拉取员工id和职位id
                 employee_id_str = re.match(r"EMPLOYEECHATTING_(\d*)_(\d*)", msg.EventKey).group(1) or 0
