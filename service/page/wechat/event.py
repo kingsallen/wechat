@@ -845,6 +845,9 @@ class EventPageService(PageService):
                 if not (employee and user and position):
                     return
 
+                if isinstance(company, list):
+                    company = company[0]
+
                 employee_name = employee.cname or user.name or user.nickname or ""
 
                 # 组装发送图文消息的参数
