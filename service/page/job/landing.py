@@ -57,8 +57,8 @@ class LandingPageService(PageService):
             "query": {
                 "bool": {
                     "must": [
-                        {"match": {"company_id": company_id}},
-                        {"match": {"status": const.OLD_YES}}
+                        {"match": {"position.companyId": company_id}},
+                        {"match": {"position.status": const.OLD_YES}}
                     ]
                 }
             }
@@ -81,14 +81,15 @@ class LandingPageService(PageService):
                 value_list.append(value)
             if len(key_list) == 1:
                 key_a, value_a = key_list[0], value_list[0]
+                key_a = self.get_by_value_dict(key_a, platform_const.LANDING)
 
                 data = {
                     "size": query_size,
                     "query": {
                         "bool": {
                             "must": [
-                                {"match": {"company_id": company_id}},
-                                {"match": {"status": const.OLD_YES}},
+                                {"match": {"position.companyId": company_id}},
+                                {"match": {"position.status": const.OLD_YES}},
                                 {"match": {key_a: value_a}}
                             ]
                         }
@@ -97,14 +98,16 @@ class LandingPageService(PageService):
             elif len(key_list) == 2:
                 key_a, value_a = key_list[0], value_list[0]
                 key_b, value_b = key_list[1], value_list[1]
+                key_a = self.get_by_value_dict(key_a, platform_const.LANDING)
+                key_b = self.get_by_value_dict(key_b, platform_const.LANDING)
 
                 data = {
                     "size": query_size,
                     "query": {
                         "bool": {
                             "must": [
-                                {"match": {"company_id": company_id}},
-                                {"match": {"status": const.OLD_YES}},
+                                {"match": {"position.companyId": company_id}},
+                                {"match": {"position.status": const.OLD_YES}},
                                 {"match": {key_a: value_a}},
                                 {"match": {key_b: value_b}}
                             ]
@@ -115,14 +118,17 @@ class LandingPageService(PageService):
                 key_a, value_a = key_list[0], value_list[0]
                 key_b, value_b = key_list[1], value_list[1]
                 key_c, value_c = key_list[2], value_list[2]
+                key_a = self.get_by_value_dict(key_a, platform_const.LANDING)
+                key_b = self.get_by_value_dict(key_b, platform_const.LANDING)
+                key_c = self.get_by_value_dict(key_c, platform_const.LANDING)
 
                 data = {
                     "size": query_size,
                     "query": {
                         "bool": {
                             "must": [
-                                {"match": {"company_id": company_id}},
-                                {"match": {"status": const.OLD_YES}},
+                                {"match": {"position.companyId": company_id}},
+                                {"match": {"position.status": const.OLD_YES}},
                                 {"match": {key_a: value_a}},
                                 {"match": {key_b: value_b}},
                                 {"match": {key_c: value_c}}
@@ -136,19 +142,20 @@ class LandingPageService(PageService):
                 value_list.append(value)
             if len(key_list) == 1:
                 key_a, value_a = key_list[0], value_list[0]
+                key_a = self.get_by_value_dict(key_a, platform_const.LANDING)
 
                 data = {
                     "size": query_size,
                     "query": {
                         "bool": {
                             "must": [
-                                {"match": {"company_id": company_id}},
-                                {"match": {"status": const.OLD_YES}},
+                                {"match": {"position.companyId": company_id}},
+                                {"match": {"position.status": const.OLD_YES}},
                                 {"match": {key_a: value_a}}
                             ],
                             "should": [
-                                {"range": {"salary_top": {"lte": salary_dict.get('salary_top'), "gte": salary_dict.get('salary_bottom')}}},
-                                {"range": {"salary_bottom": {"lte": salary_dict.get('salary_top'), "gte": salary_dict.get('salary_bottom')}}}
+                                {"range": {"salaryData.salaryTop": {"lte": salary_dict.get('salary_top'), "gte": salary_dict.get('salary_bottom')}}},
+                                {"range": {"salaryData.salaryBottom": {"lte": salary_dict.get('salary_top'), "gte": salary_dict.get('salary_bottom')}}}
                             ],
                             "minimum_should_match": 1
                         }
@@ -157,20 +164,22 @@ class LandingPageService(PageService):
             elif len(key_list) == 2:
                 key_a, value_a = key_list[0], value_list[0]
                 key_b, value_b = key_list[1], value_list[1]
+                key_a = self.get_by_value_dict(key_a, platform_const.LANDING)
+                key_b = self.get_by_value_dict(key_b, platform_const.LANDING)
 
                 data = {
                     "size": query_size,
                     "query": {
                         "bool": {
                             "must": [
-                                {"match": {"company_id": company_id}},
-                                {"match": {"status": const.OLD_YES}},
+                                {"match": {"position.companyId": company_id}},
+                                {"match": {"position.status": const.OLD_YES}},
                                 {"match": {key_a: value_a}},
                                 {"match": {key_b: value_b}}
                             ],
                             "should": [
-                                {"range": {"salary_top": {"lte": salary_dict.get('salary_top'), "gte": salary_dict.get('salary_bottom')}}},
-                                {"range": {"salary_bottom": {"lte": salary_dict.get('salary_top'), "gte": salary_dict.get('salary_bottom')}}}
+                                {"range": {"salaryData.salaryTop": {"lte": salary_dict.get('salary_top'), "gte": salary_dict.get('salary_bottom')}}},
+                                {"range": {"salaryData.salaryBottom": {"lte": salary_dict.get('salary_top'), "gte": salary_dict.get('salary_bottom')}}}
                             ],
                             "minimum_should_match": 1
                         }
@@ -182,23 +191,23 @@ class LandingPageService(PageService):
                 "query": {
                     "bool": {
                         "must": [
-                            {"match": {"company_id": company_id}},
-                            {"match": {"status": const.OLD_YES}}
+                            {"match": {"position.companyId": company_id}},
+                            {"match": {"position.status": const.OLD_YES}}
                         ],
                         "should": [
-                            {"range": {"salary_top": {"lte": salary_dict.get('salary_top'), "gte": salary_dict.get('salary_bottom')}}},
-                            {"range": {"salary_bottom": {"lte": salary_dict.get('salary_top'), "gte": salary_dict.get('salary_bottom')}}}
+                            {"range": {"salaryData.salaryTop": {"lte": salary_dict.get('salary_top'), "gte": salary_dict.get('salary_bottom')}}},
+                            {"range": {"salaryData.salaryBottom": {"lte": salary_dict.get('salary_top'), "gte": salary_dict.get('salary_bottom')}}}
                         ],
                         "minimum_should_match": 1
                     }
                 }
             }
         if is_referral:
-            data.get("query").get("bool").get("must").append({"match": {"is_referral": const.YES}})
+            data.get("query").get("bool").get("must").append({"match": {"position.isReferral": const.YES}})
         if pop_occupation:
-            data.get("query").get("bool").get("must").append({"term": {"search_data.occupation": occupation_value}})
+            data.get("query").get("bool").get("must").append({"term": {"jobOccupation.name": occupation_value}})
         self.logger.debug(data)
-        response = self.es.search(index='index', body=data)
+        response = self.es.search(index='newpositions', body=data)
 
         result_list = response.hits.hits
         self.logger.debug(result_list)
@@ -214,7 +223,7 @@ class LandingPageService(PageService):
             source = e.get("_source")
 
             # 使用 key_list 来筛选 source
-            source = ObjectDict(sub_dict(source, key_list))
+            source = ObjectDict(self.sub_nested_dict(source, key_list))
 
             if 'salary_top' in key_list:
                 # 对 salary 做特殊处理 (salary_top, salary_bottom) -> salary
@@ -231,6 +240,43 @@ class LandingPageService(PageService):
             ret.append(source)
 
         return ret
+
+    def sub_nested_dict(self, somedict, somekeys, default=None):
+        if isinstance(somekeys, list):
+            ret = {}
+            for key in somekeys:
+                es_key = self.get_by_value_dict(key, platform_const.LANDING)
+                value = somedict.get(es_key.split(".")[0], default)
+                if value:
+                    ret.update({key: value.get(es_key.split(".")[1], default)})
+                else:
+                    ret.update({key: value})
+            # ret = {k: somedict.get(k, default) for k in somekeys}
+        elif isinstance(somekeys, str):
+            key = somekeys
+            es_key = self.get_by_value_dict(key, platform_const.LANDING)
+            value = somedict.get(es_key.split(".")[0], default)
+            if value:
+                ret = {key: value.get(es_key.split(".")[1], default)}
+            # ret = {key: somedict.get(key, default)}
+        else:
+            raise ValueError('sub dict key should be list or str')
+        return ObjectDict(ret)
+
+    @staticmethod
+    def get_by_value_dict(value, nested_dict):
+        if value == "salary_top":
+            return nested_dict[2]["es_key"][0]
+        elif value == "salary_bottom":
+            return nested_dict[2]["es_key"][1]
+        elif value == "city_ename":
+            return "citys.ename"
+        else:
+            for key_out, value_out in nested_dict.items():
+                for key_in, value_in in value_out.items():
+                    if value_in == value:
+                        return value_out["es_key"]
+            return ""
 
     @staticmethod
     def split_cities(data, *, delimiter=None, display_locale=None):
@@ -264,6 +310,7 @@ class LandingPageService(PageService):
         """ 对position_data 添加子公司简称 """
 
         child_company_ids = list(set([v.publisher_company_id for v in data]))
+        child_company_ids.remove(None)
         if child_company_ids:
             child_company_id_abbr_list = yield self.hr_company_ds.get_companys_list(
                 conds="id in " + set_literl(child_company_ids),
@@ -306,8 +353,8 @@ class LandingPageService(PageService):
         # 获取链接上配置的筛选参数
         display_key_dict = dict()
         salary_dict = dict()
-        all_form_name = [platform_const.LANDING[e].get('form_name') for e in range(1, 10)]
-        all_key_order = [[platform_const.LANDING[e].get("display_key"), platform_const.LANDING[e].get('form_name')] for e in range(1, 10)]
+        all_form_name = [platform_const.LANDING[e].get('form_name') for e in range(1, 11)]
+        all_key_order = [[platform_const.LANDING[e].get("display_key"), platform_const.LANDING[e].get('form_name')] for e in range(1, 11)]
         self.logger.debug('key_order: %s,form_name: %s,all_key_order: %s,all_form_name: %s' % (key_order, form_name, all_key_order, all_form_name))
         for key, value in params.items():
             if value and key in all_form_name and key not in form_name:
@@ -324,7 +371,7 @@ class LandingPageService(PageService):
 
         # 链接所带参数
         conf_search_seq_append = []
-        for index in range(1, 10):
+        for index in range(1, 11):
             for s in display_key_dict.keys():
                 if platform_const.LANDING[index].get("key") == s:
                     conf_search_seq_append.append(index)
@@ -398,6 +445,12 @@ class LandingPageService(PageService):
                     en = pinyin_initials(text)
                     to_append.append({"text": text, "value": text,
                                       "en": en[0] if en else ""})
+                elif k == 'position_type':
+                    cotent = const.POSITION_TYPE.get(str(e.get(k)))
+                    text = locale.translate(const.POSITION_TYPE_LOCALE.get(cotent)) if cotent else cotent
+                    en = pinyin_initials(text)
+                    to_append.append({"text": text, "value": str(e.get(k)),
+                                      "en": en[0] if en else ""})
                 else:
                     en = pinyin_initials(e.get(k))
                     to_append.append({"text": e.get(k), "value": e.get(k), "en": en[0] if en else ""})
@@ -437,6 +490,12 @@ class LandingPageService(PageService):
                     text = e.get('city_ename') if display_locale == 'en_US' else e.get(s)
                     en = pinyin_initials(text)
                     to_append.append({"text": text, "value": text,
+                                      "en": en[0] if en else ""})
+                elif s == 'position_type':
+                    cotent = const.POSITION_TYPE.get(str(e.get(s)))
+                    text = locale.translate(const.POSITION_TYPE_LOCALE.get(cotent)) if cotent else cotent
+                    en = pinyin_initials(text)
+                    to_append.append({"text": text, "value": str(e.get(s)),
                                       "en": en[0] if en else ""})
                 else:
                     en = pinyin_initials(e.get(s))
