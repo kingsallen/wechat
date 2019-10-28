@@ -354,7 +354,7 @@ class LandingPageService(PageService):
         display_key_dict = dict()
         salary_dict = dict()
         all_form_name = [platform_const.LANDING[e].get('form_name') for e in range(1, 11)]
-        all_key_order = [[platform_const.LANDING[e].get("display_key"), platform_const.LANDING[e].get('form_name')] for e in range(1, 10)]
+        all_key_order = [[platform_const.LANDING[e].get("display_key"), platform_const.LANDING[e].get('form_name')] for e in range(1, 11)]
         self.logger.debug('key_order: %s,form_name: %s,all_key_order: %s,all_form_name: %s' % (key_order, form_name, all_key_order, all_form_name))
         for key, value in params.items():
             if value and key in all_form_name and key not in form_name:
@@ -366,8 +366,6 @@ class LandingPageService(PageService):
                     key = 'publisher_company_id'
                 elif key == 'degree':
                     key = 'degree_name'
-                elif key == 'position_type':
-                    key = 'notOffice'
                 display_key_dict[key] = value
         self.logger.debug(display_key_dict)
 
