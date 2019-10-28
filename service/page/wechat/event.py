@@ -829,13 +829,11 @@ class EventPageService(PageService):
                 send_succession_message(wechat=wechat, open_id=msg.FromUserName, pattern_id=str_scene)
 
             elif str_scene == const.STR_SCENE_EMPLOYEE_CHATTING:
-
-                if re.match(r"qrscene_EMPLOYEECHATTING(\d*)_(\d*)", msg.EventKey) is None:
+                if re.match(r"qrscene_EMPLOYEECHATTING_(\d*)_(\d*)", msg.EventKey) is None:
                     return
                 # 解析场景参数，拉取员工id和职位id
-                employee_id_str = re.match(r"qrscene_EMPLOYEECHATTING(\d*)_(\d*)", msg.EventKey).group(1) or 0
-                position_id_str = re.match(r"qrscene_EMPLOYEECHATTING(\d*)_(\d*)", msg.EventKey).group(2) or 0
-
+                employee_id_str = re.match(r"qrscene_EMPLOYEECHATTING_(\d*)_(\d*)", msg.EventKey).group(1) or 0
+                position_id_str = re.match(r"qrscene_EMPLOYEECHATTING_(\d*)_(\d*)", msg.EventKey).group(2) or 0
                 #查数据
                 employee = yield self.user_employee_ds.get_employee({'id': int(employee_id_str)})
                 position_params = {"id", int(position_id_str)}
