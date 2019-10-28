@@ -853,7 +853,7 @@ class EventPageService(PageService):
                 # 组装发送图文消息的参数
                 params = ObjectDict(
                     title=const.CONSTANT_CHATTING_NEWS_TITLE,
-                    description=const.CONSTANT_CHATTING_NEWS_DESCRIPTION.format(company.abbreviation or "",
+                    description=const.CONSTANT_CHATTING_NEWS_DESCRIPTION.format(company.get("abbreviation") or "",
                                                                                 employee_name,
                                                                                 position.title or ""),
                     url=make_url(path.EMPLOYEE_CHATTING_ROOMS, host=settings["platform_host"],
