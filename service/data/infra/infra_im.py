@@ -63,7 +63,7 @@ class InfraImDataService(DataService):
         raise gen.Return(ret)
 
     @gen.coroutine
-    def get_messages(self, room_id, user_id, role, employee_id, company_id, page_size=200, message_id = 0):
+    def get_messages(self, room_id, user_id, role, employee_id, company_id, page_size=200, message_id=0):
         """
         分页获取获取聊天记录
         :param room_id: 聊天室编号
@@ -82,7 +82,7 @@ class InfraImDataService(DataService):
             "user_id": user_id,
             "company_id": company_id,
             "page_size": page_size,
-            "message_id": message_id,
+            "last_msg_id": message_id,
         })
 
         ret = yield http_get_v2(user.INFRA_GET_CHATTING_MESSAGES.format(role=role), user_service, params)
