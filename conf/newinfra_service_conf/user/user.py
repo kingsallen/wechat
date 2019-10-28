@@ -18,4 +18,5 @@ INFRA_GET_CHATTING_ENTER_THE_ROOM = '/v4/chat/{role}/enter-room'
 INFRA_GET_CHATTING_LEAVE_THE_ROOM = '/v4/chat/{role}/leave-room'
 INFRA_GET_CHATTING_DELETE_THE_ROOM = '/v4/chat/{role}/room'
 INFRA_GET_CHATTING_SWITCH = '/v4/chat/{role}/switch'
+INFRA_USER_COLLECT_POSITION = '/v4/user/collect/position'
 
