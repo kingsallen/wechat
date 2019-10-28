@@ -285,28 +285,22 @@ class LandingPageService(PageService):
             return ""
 
     @staticmethod
-    def split_cities(data, *, delimiter=None, display_locale=None):
+    def split_cities(data, *, display_locale=None):
         """如果一条数据中包含多个城市，应该分裂成多条数据"""
         ret = []
         if display_locale == "en_US":
             key_to_split = 'city_ename'
         else:
             key_to_split = 'city'
-        if not delimiter:
-            delimiter = [",", "，"]
 
         for e in data:
             e = ObjectDict(e)
             value_to_split = e.get(key_to_split)
             if value_to_split:
-                splitted_items = split(value_to_split, delimiter)
-                if len(splitted_items) > 1:
-                    for item in splitted_items:
-                        new_e = e.copy()
-                        new_e[key_to_split] = item
-                        ret.append(ObjectDict(new_e))
-                else:
-                    ret.append(e)
+                for item in value_to_split:
+                    new_e = e.copy()
+                    new_e[key_to_split] = item
+                    ret.append(ObjectDict(new_e))
             else:
                 ret.append(e)
         return ret
