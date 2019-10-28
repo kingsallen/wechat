@@ -829,29 +829,31 @@ class EventPageService(PageService):
                 send_succession_message(wechat=wechat, open_id=msg.FromUserName, pattern_id=str_scene)
 
             elif str_scene == const.STR_SCENE_EMPLOYEE_CHATTING:
-
-                if re.match(r"EMPLOYEECHATTING_(\d*)_(\d*)") is None:
+                if re.match(r"qrscene_EMPLOYEECHATTING_(\d*)_(\d*)", msg.EventKey) is None:
                     return
                 # 解析场景参数，拉取员工id和职位id
-                employee_id_str = re.match(r"EMPLOYEECHATTING_(\d*)_(\d*)", msg.EventKey).group(1) or 0
-                position_id_str = re.match(r"EMPLOYEECHATTING_(\d*)_(\d*)", msg.EventKey).group(2) or 0
-
+                employee_id_str = re.match(r"qrscene_EMPLOYEECHATTING_(\d*)_(\d*)", msg.EventKey).group(1) or 0
+                position_id_str = re.match(r"qrscene_EMPLOYEECHATTING_(\d*)_(\d*)", msg.EventKey).group(2) or 0
                 #查数据
                 employee = yield self.user_employee_ds.get_employee({'id': int(employee_id_str)})
-                position_params = {"id", int(position_id_str)}
+                position_params = {"id": int(position_id_str)}
                 position = yield self.job_position_ds.get_position(position_params)
-                _, company = yield self.infra_company_ds.get_company_by_id(employee.company_id)
-                user = yield self.infra_user_ds.get_user(employee.sysuser_id)
+                company_params = {"id": employee.company_id}
+                _, company = yield self.infra_company_ds.get_company_by_id(company_params)
+                user = yield self.infra_user_ds.get_user_by_user_id(employee.sysuser_id)
 
                 if not (employee and user and position):
                     return
+
+                if isinstance(company, list):
+                    company = company[0]
 
                 employee_name = employee.cname or user.name or user.nickname or ""
 
                 # 组装发送图文消息的参数
                 params = ObjectDict(
                     title=const.CONSTANT_CHATTING_NEWS_TITLE,
-                    description=const.CONSTANT_CHATTING_NEWS_DESCRIPTION.format(company.abbreviation or "",
+                    description=const.CONSTANT_CHATTING_NEWS_DESCRIPTION.format(company.get("abbreviation") or "",
                                                                                 employee_name,
                                                                                 position.title or ""),
                     url=make_url(path.EMPLOYEE_CHATTING_ROOMS, host=settings["platform_host"],
