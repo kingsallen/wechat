@@ -942,7 +942,8 @@ class PositionListInfraParamsMixin(BaseHandler):
             infra_params.employment_type = const.EMPLOYMENT_TYPE_SEARCH.get(self.params.employment_type, "") \
                 if self.params.employment_type.isdigit() else self.params.employment_type
         if self.params.position_type:
-            infra_params.position_type = self.params.position_type
+            infra_params.position_type = const.POSITION_TYPE_SEARCH.get(self.params.position_type, "") \
+                if self.params.position_type.isdigit() else self.params.position_type
 
         infra_params.update(
             teamName=self.params.team_name if self.params.team_name else "",

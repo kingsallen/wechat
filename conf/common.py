@@ -240,13 +240,18 @@ MANAGEMENT_EXP = {
 
 # 职位类型
 POSITION_TYPE = {
-    "0": "店铺职位",
-    "1": "Office职位"
+    "0": "Office职位",
+    "1": "店铺职位"
 }
 
 POSITION_TYPE_LOCALE = {
     "店铺职位": "common_retail",
     "Office职位": "common_office"
+}
+
+POSITION_TYPE_SEARCH = {
+    "0": "office",
+    "1": "outlets"
 }
 
 # 工作状态
