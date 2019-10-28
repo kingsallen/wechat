@@ -850,14 +850,19 @@ class EventPageService(PageService):
 
                 employee_name = employee.cname or user.name or user.nickname or ""
 
+                url = make_url(path.EMPLOYEE_CHATTING_ROOMS,
+                               host=settings["platform_host"],
+                               wechat_signature=wechat.get("signature"),
+                               params={"employee_id": employee_id_str}
+                               )
+
                 # 组装发送图文消息的参数
                 params = ObjectDict(
                     title=const.CONSTANT_CHATTING_NEWS_TITLE,
                     description=const.CONSTANT_CHATTING_NEWS_DESCRIPTION.format(company.get("abbreviation") or "",
                                                                                 employee_name,
                                                                                 position.title or ""),
-                    url=make_url(path.EMPLOYEE_CHATTING_ROOMS, host=settings["platform_host"],
-                                 wechat_signature=wechat.get("signature")),
+                    url=url,
                     picurl=user.data.headimg if user.data and user.data.headimg else ""
                 )
                 # 发送客服消息
