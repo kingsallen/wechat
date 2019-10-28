@@ -241,30 +241,31 @@ class LandingPageService(PageService):
 
         return ret
 
-    def sub_nested_dict(self, somedict, somekeys, default=None):
+    def sub_nested_dict(self, somedict, somekeys):
         if isinstance(somekeys, list):
             ret = {}
             for key in somekeys:
                 es_key = self.get_by_value_dict(key, platform_const.LANDING)
-                value = somedict.get(es_key.split(".")[0], default)
+                value = somedict.get(es_key.split(".")[0])
                 if value:
                     if key in ["city", "city_ename"]:
                         citys = []
                         for city in value:
-                            citys.append(city.get(es_key.split(".")[1], default))
+                            citys.append(city.get(es_key.split(".")[1]))
                         ret.update({key: citys})
                     else:
-                        ret.update({key: value.get(es_key.split(".")[1], default)})
+                        ret.update({key: value.get(es_key.split(".")[1])})
                 else:
-                    ret.update({key: value})
+                    ret.update({key: ""})
             # ret = {k: somedict.get(k, default) for k in somekeys}
         elif isinstance(somekeys, str):
             key = somekeys
             es_key = self.get_by_value_dict(key, platform_const.LANDING)
-            value = somedict.get(es_key.split(".")[0], default)
+            value = somedict.get(es_key.split(".")[0])
             if value:
-                ret = {key: value.get(es_key.split(".")[1], default)}
-            # ret = {key: somedict.get(key, default)}
+                ret = {key: value.get(es_key.split(".")[1])}
+            else:
+                ret = {key: ""}
         else:
             raise ValueError('sub dict key should be list or str')
         return ObjectDict(ret)
