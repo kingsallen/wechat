@@ -204,7 +204,7 @@ CHAT_LIMIT = "api/v1/chat/voice/sendWarnEmail"
 VOICE = "api/v1/chat/voice/pullVoiceFile"
 MOBOT_IMAGE = "api/hrcompany/mobot/conf"
 OMS_SWITCH = 'api/company/switch'
-EMPLOYEE_CHATTING_ROOMS = '/api/chatting/rooms'
+EMPLOYEE_CHATTING_ROOMS = 'chatting/index'
 
 # 内推服务
 REFERRAL_POLICY = "v1.0/referral/conf"
