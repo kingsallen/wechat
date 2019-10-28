@@ -840,7 +840,7 @@ class EventPageService(PageService):
                 position = yield self.job_position_ds.get_position(position_params)
                 company_params = {"id": employee.company_id}
                 _, company = yield self.infra_company_ds.get_company_by_id(company_params)
-                user = yield self.infra_user_ds.get_user(employee.sysuser_id)
+                user = yield self.infra_user_ds.get_user_by_user_id(employee.sysuser_id)
 
                 if not (employee and user and position):
                     return
