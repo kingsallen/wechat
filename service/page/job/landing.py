@@ -402,7 +402,9 @@ class LandingPageService(PageService):
 
         def pinyin_initials(field):
             en = ""
-            if field and type(field) != int:
+            if field == "Office职位":
+                en = 'o'
+            elif field and type(field) != int:
                 en = lazy_pinyin(field, style=pypinyin.INITIALS, strict=False)
             return en
         # 构建 [{"text": XXX, "value": XXX}, ...] 的形式
