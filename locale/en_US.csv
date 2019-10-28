@@ -62,6 +62,9 @@
 "common_experienced","Experienced"
 "common_graduate","Graduate"
 
+"common_retail","Retail Positions"
+"common_office","Office Positions"
+
 "common_fulltime","Full-time"
 "common_parttime","Part-time"
 "common_contractor","Contractor"

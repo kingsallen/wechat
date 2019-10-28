@@ -63,6 +63,9 @@
 "common_experienced","社招"
 "common_graduate","校招"
 
+"common_retail","店铺职位"
+"common_office","Office职位"
+
 "common_fulltime","全职"
 "common_parttime","兼职"
 "common_contractor","合同工"

@@ -245,8 +245,8 @@ POSITION_TYPE = {
 }
 
 POSITION_TYPE_LOCALE = {
-    "店铺职位": "Retail Positions",
-    "Office职位": "Office Positions"
+    "店铺职位": "common_retail",
+    "Office职位": "common_office"
 }
 
 # 工作状态
