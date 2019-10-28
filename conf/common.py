@@ -238,6 +238,12 @@ MANAGEMENT_EXP = {
     "1": "common_no_need"
 }
 
+# 职位类型
+POSITION_TYPE = {
+    "0": "店铺职位",
+    "1": "Office职位"
+}
+
 # 工作状态
 WORKSTATE = {
     "0": "未填写",
