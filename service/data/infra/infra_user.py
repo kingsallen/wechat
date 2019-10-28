@@ -401,6 +401,12 @@ class InfraUserDataService(DataService):
         return ret
 
     @gen.coroutine
+    def infra_create_collect_position(self, params):
+        """增加收藏职位"""
+        ret = yield http_post_v2(user.INFRA_USER_COLLECT_POSITION, user_service, params)
+        return ret
+
+    @gen.coroutine
     def infra_get_user_by_joywok_info(self, params):
         """
         根据麦当劳APP授权获取的员工信息查找仟寻微信用户，及员工在仟寻系统的认证状态:
@@ -489,3 +495,4 @@ class InfraUserDataService(DataService):
         if ret.code != const.NEWINFRA_API_SUCCESS:
             raise InfraOperationError(ret.message)
         raise gen.Return(ret.data)
+
