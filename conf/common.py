@@ -244,6 +244,11 @@ POSITION_TYPE = {
     "1": "Office职位"
 }
 
+POSITION_TYPE_LOCALE = {
+    "店铺职位": "Retail Positions",
+    "Office职位": "Office Positions"
+}
+
 # 工作状态
 WORKSTATE = {
     "0": "未填写",

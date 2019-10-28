@@ -445,6 +445,12 @@ class LandingPageService(PageService):
                     en = pinyin_initials(text)
                     to_append.append({"text": text, "value": text,
                                       "en": en[0] if en else ""})
+                elif k == 'position_type':
+                    cotent = const.POSITION_TYPE.get(str(e.get(k)))
+                    text = locale.translate(const.POSITION_TYPE_LOCALE.get(cotent)) if cotent else cotent
+                    en = pinyin_initials(text)
+                    to_append.append({"text": text, "value": str(e.get(k)),
+                                      "en": en[0] if en else ""})
                 else:
                     en = pinyin_initials(e.get(k))
                     to_append.append({"text": e.get(k), "value": e.get(k), "en": en[0] if en else ""})
@@ -484,6 +490,12 @@ class LandingPageService(PageService):
                     text = e.get('city_ename') if display_locale == 'en_US' else e.get(s)
                     en = pinyin_initials(text)
                     to_append.append({"text": text, "value": text,
+                                      "en": en[0] if en else ""})
+                elif s == 'position_type':
+                    cotent = const.POSITION_TYPE.get(str(e.get(s)))
+                    text = locale.translate(const.POSITION_TYPE_LOCALE.get(cotent)) if cotent else cotent
+                    en = pinyin_initials(text)
+                    to_append.append({"text": text, "value": str(e.get(s)),
                                       "en": en[0] if en else ""})
                 else:
                     en = pinyin_initials(e.get(s))
