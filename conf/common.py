@@ -241,6 +241,22 @@ MANAGEMENT_EXP = {
     "1": "common_no_need"
 }
 
+# 职位类型
+POSITION_TYPE = {
+    "0": "Office职位",
+    "1": "店铺职位"
+}
+
+POSITION_TYPE_LOCALE = {
+    "店铺职位": "common_retail",
+    "Office职位": "common_office"
+}
+
+POSITION_TYPE_SEARCH = {
+    "0": "office",
+    "1": "outlets"
+}
+
 # 工作状态
 WORKSTATE = {
     "0": "未填写",
@@ -340,7 +356,8 @@ SEARCH_CONDITION = {
     "5": "search_recruitment_type",
     "6": "search_job_type",
     "7": "search_education level",
-    "8": "search_company"
+    "8": "search_company",
+    "10": "search_position_type"
 }
 
 # 及以上 工作经验、学历中使用
@@ -398,6 +415,7 @@ MSG_TYPE = {
     16: "toHrHumanAnswer",
     17: "moplanAppointmentProject",
     18: "moplanUserModifyAppointmentMobile",
+    19: "uploadImage",
 }
 
 # 积分配置类型
@@ -413,7 +431,7 @@ REWARD_UPLOAD_PROFILE = "员工上传人才简历"
 # 操作的聊天类型
 INTERACTIVE_MSG = ["employeeBind", "jobSelect", "teamSelect", "citySelect", "jobCard", "positionSelect",
                    "industrySelect", "uploadResume", "shareReport", "positionSubscribe", "moplanAppointmentProject",
-                   "moplanUserModifyAppointmentMobile"]
+                   "moplanUserModifyAppointmentMobile", "uploadImage"]
 
 # 默认图标
 SYSUSER_HEADIMG = "weixin/images/hr-avatar-default.png"
