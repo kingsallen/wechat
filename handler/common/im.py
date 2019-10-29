@@ -1126,9 +1126,17 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
 
     _redis = redis.StrictRedis(connection_pool=_pool)
 
+    _pool_bak = redis.ConnectionPool(
+        host=settings["store_options"]["redis_host"],
+        port=settings["store_options"]["redis_port"],
+        max_connections=settings["store_options"]["max_connections"])
+
+    _redis_bak = redis.StrictRedis(connection_pool=_pool_bak)
+
     def __init__(self, application, request, **kwargs):
         super(ChattingWebSocketHandler, self).__init__(application, request, **kwargs)
         self.redis_client = self._redis
+        self.redis_client_bak = self._redis_bak
         self.chatting_user_channel = ''
         self.chatting_employee_channel = ''
         self.employee_id = 0
@@ -1254,7 +1262,7 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
             self.write_message(message_body)
 
         except websocket.WebSocketClosedError:
-            self.logger.error(traceback.format_exc())
+            logger.error(traceback.format_exc())
             self.close(WebSocketCloseCode.internal_error.value)
             raise
 
@@ -1264,13 +1272,12 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
             compound_content=None,
             speaker=data.get("speaker"),
             cid=int(self.room_id),
-
             pid=int(self.position_id) if self.position_id else 0,
             create_time=curr_now_minute(),
             id=chat_id.get("data"),
         ))
         logger.debug("ChattingWebSocketHandler publish chat by redis message_body:{}".format(message_body))
-        self.redis_client.publish(channel, message_body)
+        self.redis_client_bak.publish(channel, message_body)
 
     @gen.coroutine
     def on_close(self):
