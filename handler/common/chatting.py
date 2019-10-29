@@ -170,7 +170,10 @@ class EmployeeChattingHandler(BaseHandler):
         ret = yield self.chatting_ps.get_employee_chatting_unread_count(self.params.room_id or 0, self.role,
                                                                     self.user_id, self.employee_id,
                                                                     self.current_user.company.id)
-        self.un_box(ret)
+        if ret and ret.code and (ret.code == "0" or ret.code == 0):
+            self.send_json_success({"unread": ret.data})
+        else:
+            self.send_json_error({"unread": ret.data}, ret.message)
 
     @handle_response
     @gen.coroutine
@@ -187,7 +190,7 @@ class EmployeeChattingHandler(BaseHandler):
         if ret and ret.code and (ret.code == "0" or ret.code == 0):
             self.send_json_success({"unread": ret.data + (chat_num if chat_num else 0)})
         else:
-            self.send_json_error(ret.data, ret.message)
+            self.send_json_error({"unread": (ret.data if ret.data else 0) + (chat_num if chat_num else 0)}, ret.message)
 
         self.un_box(ret)
 
