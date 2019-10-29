@@ -1120,16 +1120,16 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
 
     # todo redis 连接池公用一个
     _pool = redis.ConnectionPool(
-        host=settings["store_options"]["redis_host"],
-        port=settings["store_options"]["redis_port"],
-        max_connections=settings["store_options"]["max_connections"])
+        host=settings["chatting_options"]["redis_host"],
+        port=settings["chatting_options"]["redis_port"],
+        max_connections=settings["chatting_options"]["max_connections"])
 
     _redis = redis.StrictRedis(connection_pool=_pool)
 
     _pool_bak = redis.ConnectionPool(
-        host=settings["store_options"]["redis_host"],
-        port=settings["store_options"]["redis_port"],
-        max_connections=settings["store_options"]["max_connections"])
+        host=settings["chatting_options"]["redis_host"],
+        port=settings["chatting_options"]["redis_port"],
+        max_connections=settings["chatting_options"]["max_connections"])
 
     _redis_bak = redis.StrictRedis(connection_pool=_pool_bak)
 
