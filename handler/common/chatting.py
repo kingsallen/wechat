@@ -444,10 +444,13 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
         condition = {'id': self.company_id}
         company_info = yield self.company_ps.get_company(condition)
 
-        ObjectDict({"companyId": company_info.id,
-                    "companyName": company_info.abbreviation})
+        properties = ObjectDict({"companyId": company_info.id,
+                                "companyName": company_info.abbreviation})
 
-        self.sa.track(distinct_id, CHATTING_SEND_MESSAGE, ObjectDict, is_login_id)
+        self.sa.track(distinct_id=distinct_id,
+                      event_name=CHATTING_SEND_MESSAGE,
+                      properties=properties,
+                      is_login_id=is_login_id)
 
     @gen.coroutine
     def on_close(self):
