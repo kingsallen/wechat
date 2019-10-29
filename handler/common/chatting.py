@@ -174,7 +174,7 @@ class EmployeeChattingHandler(BaseHandler):
 
     @handle_response
     @gen.coroutine
-    def get_unread_total(self):
+    def get_totalunread(self):
         """
         获取聊天室列表
         :return: 聊天室列表
