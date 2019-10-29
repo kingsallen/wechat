@@ -447,10 +447,7 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
         ObjectDict({"companyId": company_info.id,
                     "companyName": company_info.abbreviation})
 
-        self.sa.track(distinct_id=distinct_id,
-                      event_name=CHATTING_SEND_MESSAGE,
-                      properties=ObjectDict,
-                      is_login_id=is_login_id)
+        self.sa.track(distinct_id, CHATTING_SEND_MESSAGE, ObjectDict, is_login_id)
 
     @gen.coroutine
     def on_close(self):
