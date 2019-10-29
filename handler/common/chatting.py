@@ -135,7 +135,7 @@ class EmployeeChattingHandler(BaseHandler):
 
         page_no = self.params.page_no or 1
         page_size = self.params.page_size or 10
-        ret = yield self.chat_ps.get_employee_chatrooms(self.user_id, self.role, self.employee_id,
+        ret = yield self.chatting_ps.get_employee_chatrooms(self.user_id, self.role, self.employee_id,
                                                         self.current_user.company.id, page_no, page_size)
 
         self.un_box(ret)
@@ -150,7 +150,7 @@ class EmployeeChattingHandler(BaseHandler):
 
         page_size = self.params.page_size or 10
         message_id = self.params.message_id or 0
-        ret = yield self.chat_ps.get_employee_chatting_messages(self.params.room_id, self.user_id, self.role,
+        ret = yield self.chatting_ps.get_employee_chatting_messages(self.params.room_id, self.user_id, self.role,
                                                                 self.employee_id, self.current_user.company.id,
                                                                 page_size, message_id)
         if ret and ret.data and ret.data.current_page_data:
@@ -167,7 +167,7 @@ class EmployeeChattingHandler(BaseHandler):
         获取聊天室列表
         :return: 聊天室列表
         """
-        ret = yield self.chat_ps.get_employee_chatting_unread_count(self.params.room_id or 0, self.role,
+        ret = yield self.chatting_ps.get_employee_chatting_unread_count(self.params.room_id or 0, self.role,
                                                                     self.user_id, self.employee_id,
                                                                     self.current_user.company.id)
         self.un_box(ret)
@@ -180,7 +180,7 @@ class EmployeeChattingHandler(BaseHandler):
         :return: 推送开关状态
         """
 
-        switch = yield self.chat_ps.get_switch(self.role, self.user_id, self.employee_id, self.current_user.company.id)
+        switch = yield self.chatting_ps.get_switch(self.role, self.user_id, self.employee_id, self.current_user.company.id)
         self.un_box(switch)
 
     @handle_response
@@ -192,7 +192,7 @@ class EmployeeChattingHandler(BaseHandler):
         """
 
         tpl_switch = self.json_args.get("tpl_switch");
-        switch = yield self.chat_ps.post_switch(self.role, self.user_id, self.employee_id, self.current_user.company.id,
+        switch = yield self.chatting_ps.post_switch(self.role, self.user_id, self.employee_id, self.current_user.company.id,
                                                 tpl_switch)
         self.un_box(switch)
 
@@ -208,12 +208,12 @@ class EmployeeChattingHandler(BaseHandler):
         employee_id = self.employee_id
         if (self.json_args.get("room_id") and int(self.json_args.get("room_id")) > 0) and (self.user_id == 0 or
                                                                                            self.employee_id == 0):
-            room_info = yield self.chat_ps.get_employee_chatroom(self.json_args.get("room_id"), self.role)
+            room_info = yield self.chatting_ps.get_employee_chatroom(self.json_args.get("room_id"), self.role)
             if room_info and (room_info.code == "0" or room_info.code == 0) and room_info.data:
                 user_id = room_info.data.user_id
                 employee_id = room_info.data.employee_id
 
-        ret = yield self.chat_ps.enter_the_room(self.json_args.get("room_id") or 0, self.role, user_id, employee_id,
+        ret = yield self.chatting_ps.enter_the_room(self.json_args.get("room_id") or 0, self.role, user_id, employee_id,
                                                 self.current_user.company.id, self.json_args.get("pid") or 0)
         self.un_box(ret)
 
@@ -228,11 +228,11 @@ class EmployeeChattingHandler(BaseHandler):
         employee_id = self.employee_id
         if (self.json_args.get("room_id") and int(self.json_args.get("room_id")) > 0) and (self.user_id == 0 or
                                                                                            self.employee_id == 0):
-            room_info = yield self.chat_ps.get_employee_chatroom(self.json_args.get("room_id"), self.role)
+            room_info = yield self.chatting_ps.get_employee_chatroom(self.json_args.get("room_id"), self.role)
             if room_info and (room_info.code == "0" or room_info.code == 0) and room_info.data:
                 user_id = room_info.data.user_id
                 employee_id = room_info.data.employee_id
-        ret = yield self.chat_ps.delete_room(self.json_args.get("room_id") or 0, self.role, user_id,
+        ret = yield self.chatting_ps.delete_room(self.json_args.get("room_id") or 0, self.role, user_id,
                                              employee_id, self.current_user.company.id)
         self.un_box(ret)
 
