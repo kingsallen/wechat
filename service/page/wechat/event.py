@@ -342,6 +342,7 @@ class EventPageService(PageService):
         yield user_follow_wechat_publisher.publish_message(message=data, routing_key="user_follow_wechat.#")
 
         # 处理临时二维码，目前主要在 PC 上创建帐号、绑定账号时使用,以及Mars EDM活动
+        self.logger.debug("EventPageService opt_event_subscribe msg.EventKey:{}".format(msg.EventKey))
         if msg.EventKey:
             # 临时二维码处理逻辑, 5位type+27为自定义id
             yield self._do_weixin_qrcode(current_user.wechat, msg, is_newbie=is_newbie)
@@ -781,6 +782,8 @@ class EventPageService(PageService):
             else:
                 raise gen.Return()
 
+            self.logger.debug("EventPageService _do_weixin_qrcode str_scene:{}".format(str_scene))
+
             # joywok对接，对麦当劳用户做自动认证
             # 获取str_code
             if str_scene == const.STR_SCENE_JOYWOK:
@@ -830,10 +833,14 @@ class EventPageService(PageService):
 
             elif str_scene == const.STR_SCENE_EMPLOYEE_CHATTING:
                 if re.match(r"qrscene_EMPLOYEECHATTING_(\d*)_(\d*)", msg.EventKey) is None:
+                    self.logger.debug(
+                        "EventPageService _do_weixin_qrcode re.match None")
                     return
                 # 解析场景参数，拉取员工id和职位id
                 employee_id_str = re.match(r"qrscene_EMPLOYEECHATTING_(\d*)_(\d*)", msg.EventKey).group(1) or 0
                 position_id_str = re.match(r"qrscene_EMPLOYEECHATTING_(\d*)_(\d*)", msg.EventKey).group(2) or 0
+                self.logger.debug("EventPageService _do_weixin_qrcode employee_id_str:{}, position_id_str:{}".format(employee_id_str, position_id_str))
+
                 #查数据
                 employee = yield self.user_employee_ds.get_employee({'id': int(employee_id_str)})
                 position_params = {"id": int(position_id_str)}
@@ -845,8 +852,13 @@ class EventPageService(PageService):
                 if not (employee and user and position):
                     return
 
+                self.logger.debug(
+                    "EventPageService _do_weixin_qrcode employee:{}, user:{}, position:{}".format(employee, user,
+                                                                                                  position))
+                self.logger.debug("EventPageService _do_weixin_qrcode company:{}".format(company))
                 if isinstance(company, list):
                     company = company[0]
+                self.logger.debug("EventPageService _do_weixin_qrcode company:{}".format(company))
 
                 employee_name = employee.cname or user.name or user.nickname or ""
 
@@ -866,6 +878,7 @@ class EventPageService(PageService):
                     picurl=user.data.headimg if user.data and user.data.headimg else ""
                 )
                 # 发送客服消息
+                self.logger.debug("EventPageService _do_weixin_qrcode params:{}".format(params))
                 send_succession_news(wechat=wechat, open_id=msg.FromUserName, params=params)
             else:
                 send_succession_message(wechat=wechat, open_id=msg.FromUserName, pattern_id=str_scene)
