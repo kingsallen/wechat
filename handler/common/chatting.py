@@ -7,11 +7,13 @@ import redis
 from tornado import gen, websocket, ioloop
 
 import conf.common as const
-from cache.user.chat_session import ChatCache
 from conf.protocol import WebSocketCloseCode
+from conf.sensors import CHATTING_SEND_MESSAGE
 from globals import logger
+from globals import sa
 from handler.base import BaseHandler
-from service.page.user.chat import ChatPageService
+from service.page.user.chatting import ChattingPageService
+from service.page.user.user import UserPageService
 from setting import settings
 from util.common import ObjectDict
 from util.common.decorator import handle_response, authenticated
@@ -272,8 +274,10 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
         self.company_id = 0
         self.io_loop = ioloop.IOLoop.current()
 
-        self.chat_session = ChatCache()
-        self.chat_ps = ChatPageService()
+        self.chat_ps = ChattingPageService()
+        self.employee_ps = UserPageService()
+        self.user_ps = UserPageService()
+        self.sa = sa
 
     @gen.coroutine
     def open(self, room_id, *args, **kwargs):
@@ -400,20 +404,28 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
             create_time=curr_now_minute(),
             id=chat_id.get("data"),
         ))
+
         logger.debug("ChattingWebSocketHandler publish chat by redis message_body:{}".format(message_body))
         self.redis_client_bak.publish(channel, message_body)
 
+        if data.get("speaker") == 1 or data.get("speaker") == "1":
+            employee = self.employee_ps.get_employee_by_id(self.employee_id)
+            distinct_id = employee.sysuser_id
+            is_login_id = True
+        else:
+            distinct_id = self.candidate_id
+            user_user = self.user_ps.get_user_user({"id": distinct_id})
+            is_login_id = bool(user_user.username.isdigit())
+
+        self.sa.track(distinct_id=distinct_id,
+                      event_name=CHATTING_SEND_MESSAGE,
+                      properties={"company_id": self.company_id},
+                      is_login_id=is_login_id)
+
     @gen.coroutine
     def on_close(self):
-        logger.debug("ChattingWebSocketHandler &=! {}".format("on_close, before stop_run_in_thread"))
-        # todo 离开房间发现连接已经关闭了
         self.subscriber.stop_run_in_thread()
-        logger.debug("ChattingWebSocketHandler &=! {}".format("on_close, after stop_run_in_thread"))
-        logger.debug("&=! {}".format("on_close, before cleanup"))
         self.subscriber.cleanup()
-        logger.debug("ChattingWebSocketHandler &=! {}".format("on_close, after cleanup"))
-
-        self.chat_session.mark_leave_chatroom(self.room_id)
         if self.speaker == 1:
             role = "employee"
         else:

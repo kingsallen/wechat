@@ -807,7 +807,7 @@ class PositionForwardFromEmpHandler(BaseHandler):
             "is_employee": ret.data['employee'],
             "employee_name": ret.data['user']['name'] if ret.data['employee'] else '',
             "employee_icon": ret.data['user']['avatar'] if ret.data['employee'] else '',
-            "employee_id": ret.data['employee_id'] if ret.data['employee_id'] else 0,
+            "employee_id": ret.data['employee_id'] if ret.data.get("employee_id") else 0,
         }
         self.send_json_success(data)
 

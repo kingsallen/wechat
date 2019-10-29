@@ -6,4 +6,5 @@
 """
 
 PRAISE = "wxPraise"
+CHATTING_SEND_MESSAGE = "wx_chatting_send_message"
 
