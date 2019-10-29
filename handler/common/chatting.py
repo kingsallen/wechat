@@ -174,6 +174,25 @@ class EmployeeChattingHandler(BaseHandler):
 
     @handle_response
     @gen.coroutine
+    def get_unread_total(self):
+        """
+        获取聊天室列表
+        :return: 聊天室列表
+        """
+        ret = yield self.chatting_ps.get_employee_chatting_unread_count(self.params.room_id or 0, self.role,
+                                                                        self.user_id, self.employee_id,
+                                                                        self.current_user.company.id)
+        chat_num = yield self.chat_ps.get_all_unread_chat_num(self.current_user.sysuser.id)
+
+        if ret and ret.code and (ret.code == "0" or ret.code == 0):
+            self.send_json_success(ret.data + (chat_num if chat_num else 0))
+        else:
+            self.send_json_error(ret.data, ret.message)
+
+        self.un_box(ret)
+
+    @handle_response
+    @gen.coroutine
     def get_switch(self):
         """
         获取推送开关
