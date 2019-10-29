@@ -178,3 +178,46 @@ class CompanyHrInfoHandler(BaseHandler):
         """获取hr信息"""
         hr_info = yield self.company_ps.get_main_hr_info(self.current_user.company.id)
         self.send_json_success(data=hr_info)
+
+
+class NearbyStoresHandler(BaseHandler):
+
+    @handle_response
+    @gen.coroutine
+    def get(self):
+        """获取附近店铺"""
+        if self.params.longitude and self.params.latitude:
+            longitude = self.params.longitude
+            latitude = self.params.latitude
+        else:
+            ret = yield self.company_ps.get_lbs_ip_location(self.request.remote_ip)
+            longitude = ret.rectangle.split(";")[0].split(",")[0]
+            latitude = ret.rectangle.split(";")[0].split(",")[1]
+
+        stores_info = yield self.company_ps.get_nearby_stores(self.current_user.company.id, longitude, latitude, self.params.radius)
+
+        if stores_info.data:
+            for store in stores_info.data.stores:
+                store.update({"coordinates": {"latitude": store["latitude"], "longitude": store["longitude"]}})
+        self.send_json_success(data=stores_info.data)
+
+
+class PositionLbsHandler(BaseHandler):
+
+    @handle_response
+    @gen.coroutine
+    def get(self, position_id):
+        """根据职位id获取职位的LBS信息"""
+        if self.params.longitude and self.params.latitude:
+            longitude = self.params.longitude
+            latitude = self.params.latitude
+        else:
+            ret = yield self.company_ps.get_lbs_ip_location(self.request.remote_ip)
+            longitude = ret.rectangle.split(";")[0].split(",")[0]
+            latitude = ret.rectangle.split(";")[0].split(",")[1]
+        stores_info = yield self.company_ps.get_position_lbs_info(self.current_user.company.id, longitude, latitude, self.params.radius, position_id)
+
+        if stores_info.data:
+            for store in stores_info.data.stores:
+                store.update({"coordinates": {"latitude": store["latitude"], "longitude": store["longitude"]}})
+        self.send_json_success(data=stores_info.data)

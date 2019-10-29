@@ -12,6 +12,7 @@ from util.tool.url_tool import make_static_url
 from util.tool.dict_tool import sub_dict
 from util.tool.str_tool import is_odd, split, gen_salary, set_literl
 from util.common.decorator import log_time
+from util.common.exception import InfraOperationError
 
 cached_company_sug_wechat = None
 
@@ -356,3 +357,33 @@ class CompanyPageService(PageService):
         res = yield self.infra_company_ds.check_oms_switch_status(company_id, module_name)
         return res
 
+    @gen.coroutine
+    def get_nearby_stores(self, company_id, longitude, latitude, radius):
+        """
+        获取用户指定范围内门店位置
+        :return:
+        """
+        ret = yield self.infra_company_ds.get_nearby_stores(company_id, longitude, latitude, radius)
+        if ret.code != const.NEWINFRA_API_SUCCESS:
+            raise InfraOperationError(ret.message)
+        return ret
+
+    @gen.coroutine
+    def get_position_lbs_info(self, company_id, longitude, latitude, radius, pid):
+        """
+        根据职位id获取职位的LBS信息
+        :return:
+        """
+        ret = yield self.infra_company_ds.get_position_lbs_info(company_id, longitude, latitude, radius, pid)
+        if ret.code != const.NEWINFRA_API_SUCCESS:
+            raise InfraOperationError(ret.message)
+        return ret
+
+    @gen.coroutine
+    def get_lbs_ip_location(self, remote_ip):
+        """
+        根据remote_ip获取定位信息：经纬度
+        :return:
+        """
+        ret = yield self.infra_company_ds.get_lbs_ip_location(remote_ip)
+        return ret

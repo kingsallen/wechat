@@ -125,3 +125,41 @@ class InfraCompanyDataService(DataService):
         """
         ret = yield http_get_v2(company.COMPANY_HR_INFO, company_service, params)
         return ret
+
+    @gen.coroutine
+    def get_nearby_stores(self, company_id, longitude, latitude, radius):
+        """
+        获取用户指定范围内门店位置
+        :param params : {'companyId': 123, 'longitude': 120.749991, 'latitude': 30.770423, 'radius': }
+        """
+        params = ObjectDict({
+            "company_id": company_id,
+            "longitude": longitude,
+            "latitude": latitude,
+            "radius": radius if radius else 1
+        })
+        ret = yield http_get_v2(company.COMPANY_NEARBY_STORES, company_service, params)
+        return ret
+
+    @gen.coroutine
+    def get_position_lbs_info(self, company_id, longitude, latitude, radius, pid):
+        """
+        根据职位id获取职位的LBS信息
+        :param params : {'companyId': 123, 'pid': 120 }
+        """
+        params = ObjectDict({
+            "company_id": company_id,
+            "longitude": longitude,
+            "latitude": latitude,
+            "radius": radius if radius else 1
+        })
+        ret = yield http_get_v2(company.COMPANY_POSITION_LBS.format(pid), company_service, params)
+        return ret
+
+    @gen.coroutine
+    def get_lbs_ip_location(self, remote_ip):
+        """
+        高德地图ip定位接口： 根据remote_ip获取定位信息：经纬度
+        """
+        ret = yield http_get(path.LBS_IP_LOCATION.format(remote_ip), infra=False)
+        return ret

@@ -27,6 +27,7 @@ from util.wechat.template import position_view_five_notice_tpl
 from util.common.decorator import log_time, log_time_common_func
 from util.common.mq import neo4j_position_forward
 from util.common.cipher import decode_id
+from util.common.exception import InfraOperationError
 
 
 class PositionHandler(BaseHandler):
@@ -122,10 +123,16 @@ class PositionHandler(BaseHandler):
             res_crucial_info_switch = yield self.company_ps.get_crucial_info_state(self.current_user.company.id)
             switch = res_crucial_info_switch.data
             conf_response = yield self.employee_ps.get_employee_conf(self.current_user.company.id)
+            lbs_oms = yield self.company_ps.check_oms_switch_status(
+                self.current_user.company.id,
+                "LBS职位列表"
+            )
+            if lbs_oms.status != const.API_SUCCESS:
+                raise InfraOperationError(lbs_oms.message)
             header = yield self._make_json_header(
                 position_info, company_info, star, application, endorse,
                 can_apply, team.id if team else 0, did, teamname_custom,
-                reward, share_reward, has_point_reward, bonus, switch, conf_response)
+                reward, share_reward, has_point_reward, bonus, switch, conf_response, lbs_oms.data.get('valid'))
             module_job_description = self._make_json_job_description(position_info)
             module_job_need = self._make_json_job_need(position_info)
             position_feature = yield self.position_ps.get_position_feature(position_id)
@@ -407,7 +414,7 @@ class PositionHandler(BaseHandler):
     @gen.coroutine
     def _make_json_header(self, position_info, company_info, star, application,
                           endorse, can_apply, team_id, did, teamname_custom, reward, share_reward, has_point_reward,
-                          bonus, switch, conf_response):
+                          bonus, switch, conf_response, lbs_oms):
         """构造头部 header 信息"""
 
         # 获得母公司配置信息
@@ -440,6 +447,7 @@ class PositionHandler(BaseHandler):
             "has_point_reward": has_point_reward,
             "bonus": bonus,
             "recom_info_switch": switch,
+            "lbs_oms": lbs_oms,
             "emp_bind_config": bool(conf_response.exists if conf_response else None)  # 是否拥有员工认证配置项
             # "team": position_info.department.lower() if position_info.department else ""
         })
@@ -884,6 +892,7 @@ class PositionHandler(BaseHandler):
 class PositionListInfraParamsMixin(BaseHandler):
 
     @log_time_common_func
+    @gen.coroutine
     def make_position_list_infra_params(self):
         """构建调用基础服务职位列表的 params"""
 
@@ -894,6 +903,17 @@ class PositionListInfraParamsMixin(BaseHandler):
         infra_params.company_id = self.current_user.company.id
         infra_params.user_id = self.current_user.sysuser.id or 0
         infra_params.is_referral = 1 if self.params.is_referral and self.params.is_referral.isdigit() else -1
+
+        if self.params.store_id:
+            infra_params.update(store_id=self.params.store_id)
+        else:
+            if self.params.longitude and self.params.latitude:
+                infra_params.longitude = self.params.longitude
+                infra_params.latitude = self.params.latitude
+            else:
+                ret = yield self.company_ps.get_lbs_ip_location(self.request.remote_ip)
+                infra_params.longitude = ret.rectangle.split(";")[0].split(",")[0]
+                infra_params.latitude = ret.rectangle.split(";")[0].split(",")[1]
 
         if self.params.did:
             infra_params.did = self.params.did
@@ -921,6 +941,9 @@ class PositionListInfraParamsMixin(BaseHandler):
         if self.params.employment_type:
             infra_params.employment_type = const.EMPLOYMENT_TYPE_SEARCH.get(self.params.employment_type, "") \
                 if self.params.employment_type.isdigit() else self.params.employment_type
+        if self.params.position_type:
+            infra_params.job_type = const.POSITION_TYPE_SEARCH.get(self.params.position_type, "") \
+                if self.params.position_type.isdigit() else self.params.position_type
 
         infra_params.update(
             teamName=self.params.team_name if self.params.team_name else "",
@@ -943,7 +966,7 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
     @gen.coroutine
     def get(self):
 
-        infra_params = self.make_position_list_infra_params()
+        infra_params = yield self.make_position_list_infra_params()
         display_locale = self.get_current_locale()
         # 校验一下可能出现的参数：
         # hb_c: 红包活动id
@@ -1071,6 +1094,7 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
             position_ex['bonus'] = pos.total_bonus
             position_ex['candidate_source'] = pos.candidate_source
             position_ex['job_need'] = pos.requirement
+            position_ex['distance'] = pos.distance
             position_ex['is_referral'] = bool(pos.is_referral) if self.current_user.employee else False
             if not data.flag or (data.flag and pos.is_referral):
                 has_point_reward = has_point_reward
@@ -1194,7 +1218,7 @@ class PositionListHandler(PositionListInfraParamsMixin, BaseHandler):
     def get(self):
         """获取职位列表页"""
 
-        infra_params = self.make_position_list_infra_params()
+        infra_params = yield self.make_position_list_infra_params()
 
         # 校验一下可能出现的参数：
         # hb_c: 红包活动id
@@ -1251,13 +1275,21 @@ class PositionListHandler(PositionListInfraParamsMixin, BaseHandler):
         company['scale_name'] = self.params.company.scale_name
         company['banner'] = self.params.company.banner
 
+        lbs_oms = yield self.company_ps.check_oms_switch_status(
+            self.current_user.company.id,
+            "LBS职位列表"
+        )
+        if lbs_oms.status != const.API_SUCCESS:
+            raise InfraOperationError(lbs_oms.message)
+
         self.render_page(
             template_name="position/index.html",
             meta_title=position_title,
             data=ObjectDict(
                 company=company,
                 use_neowx=bool(self.current_user.company.conf_newjd_status == 2),
-                teamname_custom=teamname_custom)
+                teamname_custom=teamname_custom,
+                lbs_oms=lbs_oms.data.get('valid'))
         )
 
     @gen.coroutine
@@ -1336,6 +1368,28 @@ class PositionListHandler(PositionListInfraParamsMixin, BaseHandler):
         })
 
 
+class LbsPositionListHandler(BaseHandler):
+    @log_time
+    @handle_response
+    @check_employee
+    @gen.coroutine
+    def get(self):
+        """获取LBS职位列表页"""
+
+        lbs_oms = yield self.company_ps.check_oms_switch_status(
+            self.current_user.company.id,
+            "LBS职位列表"
+        )
+        if lbs_oms.status != const.API_SUCCESS:
+            raise InfraOperationError(lbs_oms.message)
+
+        if not lbs_oms.data.get('valid'):  # oms关闭
+            self.write_error(http_code=404)
+            return
+
+        self.render_page(template_name="position/lbs-job-list.html", data=ObjectDict())
+
+
 class PositionRecomListHandler(PositionListInfraParamsMixin, BaseHandler):
     @log_time
     @handle_response
@@ -1403,7 +1457,7 @@ class PositionListSugHandler(PositionListInfraParamsMixin, BaseHandler):
         :return:
         """
 
-        infra_params = self.make_position_list_infra_params()
+        infra_params = yield self.make_position_list_infra_params()
 
         is_referral = 0
         if self.params.is_referral and self.params.is_referral.isdigit():
