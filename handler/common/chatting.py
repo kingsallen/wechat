@@ -185,7 +185,7 @@ class EmployeeChattingHandler(BaseHandler):
         chat_num = yield self.chat_ps.get_all_unread_chat_num(self.current_user.sysuser.id)
 
         if ret and ret.code and (ret.code == "0" or ret.code == 0):
-            self.send_json_success(ret.data + (chat_num if chat_num else 0))
+            self.send_json_success({"unread": ret.data + (chat_num if chat_num else 0)})
         else:
             self.send_json_error(ret.data, ret.message)
 
