@@ -433,12 +433,12 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
         self.redis_client_bak.publish(channel, message_body)
 
         if data.get("speaker") == 1 or data.get("speaker") == "1":
-            employee = self.employee_ps.get_employee_by_id(self.employee_id)
+            employee = yield self.employee_ps.get_employee_by_id(self.employee_id)
             distinct_id = employee.sysuser_id
             is_login_id = True
         else:
             distinct_id = self.candidate_id
-            user_user = self.user_ps.get_user_user({"id": distinct_id})
+            user_user = yield self.user_ps.get_user_user({"id": distinct_id})
             is_login_id = bool(user_user.username.isdigit())
 
         condition = {'id': self.company_id}
