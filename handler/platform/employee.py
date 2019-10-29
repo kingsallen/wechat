@@ -161,7 +161,7 @@ class MomoSwitchSubHandler(BaseHandler):
 
         momo_switch = yield self.company_ps.check_oms_switch_status(
             self.current_user.company.id,
-            "momo微信端"
+            "MOMO微信端"
         )
         if momo_switch.data.get('valid'):
             subscribed = True if not self.in_wechat or self.current_user.wechat.type == 0 or self.current_user.wxuser.is_subscribe else False
