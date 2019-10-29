@@ -907,13 +907,18 @@ class PositionListInfraParamsMixin(BaseHandler):
         if self.params.store_id:
             infra_params.update(store_id=self.params.store_id)
         else:
-            if self.params.longitude and self.params.latitude:
-                infra_params.longitude = self.params.longitude
-                infra_params.latitude = self.params.latitude
-            else:
-                ret = yield self.company_ps.get_lbs_ip_location(self.request.remote_ip)
-                infra_params.longitude = ret.rectangle.split(";")[0].split(",")[0]
-                infra_params.latitude = ret.rectangle.split(";")[0].split(",")[1]
+            lbs_oms = yield self.company_ps.check_oms_switch_status(
+                self.current_user.company.id,
+                "LBS职位列表"
+            )
+            if lbs_oms.status == const.API_SUCCESS and lbs_oms.data.get('valid'):
+                if self.params.longitude and self.params.latitude:
+                    infra_params.longitude = self.params.longitude
+                    infra_params.latitude = self.params.latitude
+                else:
+                    ret = yield self.company_ps.get_lbs_ip_location(self.request.remote_ip)
+                    infra_params.longitude = ret.rectangle.split(";")[0].split(",")[0]
+                    infra_params.latitude = ret.rectangle.split(";")[0].split(",")[1]
 
         if self.params.did:
             infra_params.did = self.params.did
