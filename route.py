@@ -21,6 +21,7 @@ import handler.common.app
 import handler.common.application
 import handler.common.cellphone
 import handler.common.im
+import handler.common.chatting
 import handler.common.interest
 import handler.common.jssdkerror
 import handler.common.jslog
@@ -110,7 +111,7 @@ common_routes = [
     (r"/image/?",                                    handler.common.image.ImageFetchHandler,                    {"event": "image_fetch"}),
     (r"/chat/room[\/]*([0-9]+)*",                    handler.common.im.ChatRoomHandler,                         {"event": "im_room"}),
     (r"/mobot",                                      handler.common.im.MobotHandler,                            {"event": "im_mobot"}),
-    (r"/chatting/index",                             handler.common.im.ChattingRoomsHandler,                    {"event": "im_chat_rooms"}),
+    (r"/chatting/index",                             handler.common.chatting.ChattingRoomsHandler,              {"event": "im_chat_rooms"}),
     (r"/im/laiye",                                   handler.common.laiye_im.LaiyeImHandler,                    {"event": "im laiye"}),
     (r"/resume/import/limit",                        handler.common.resume.ResumeImportLimit,                   {"event": "resume_import_limit"}),
     (r"/redirect",                                   handler.common.redirect.RedirectHandler,                   {"event": "redirect"}),
@@ -122,7 +123,7 @@ common_routes = [
 
     # websocket
     (r"/websocket/([A-Za-z0-9_]{1,32})",             handler.common.im.ChatWebSocketHandler),
-    (r"/ws/chatting/([A-Za-z0-9_]{1,32})",           handler.common.im.ChattingWebSocketHandler),
+    (r"/ws/chatting/([A-Za-z0-9_]{1,32})",           handler.common.chatting.ChattingWebSocketHandler),
 
     (r"/api/send/vcode/?",                           handler.common.passport.SendValidCodeHandler,              {"event": "send_vcode"}),
     (r"/api/upload/recomprofile/?",                  handler.platform.referral.EmployeeRecomProfileHandler,     {"event": "upload_referral_profile"}),
@@ -160,7 +161,7 @@ common_routes = [
     (r"/api/resume/import",                          handler.common.resume.ResumeImportHandler,                 {"event": "resume_import"}),
     (r"/api/sug/company",                            handler.common.suggest.SuggestCompanyHandler,              {"event": "sug_company"}),
     (r"/api/sug/college",                            handler.common.suggest.SuggestCollegeHandler,              {"event": "sug_college"}),
-    (r"/api/chatting[\/]*([a-z]+)*",                 handler.common.im.EmployeeChattingHandler,                 {"event": "chatting_rooms_"}),
+    (r"/api/chatting[\/]*([a-z]+)*",                 handler.common.chatting.EmployeeChattingHandler,           {"event": "chatting_rooms_"}),
     (r"/api/chat[\/]*([a-z]+)*",                     handler.common.im.ChatHandler,                             {"event": "chat_"}),
     (r"/api/application",                            handler.common.application.ApplicationHandler,             {"event": "application_profile"}),
     (r"/api/JSSDKError",                             handler.common.jssdkerror.JSSDKErrorHandler,               {"event": "frontend_jssdkerror"}),
