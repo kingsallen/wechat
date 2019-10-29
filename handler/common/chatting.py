@@ -12,6 +12,7 @@ from conf.sensors import CHATTING_SEND_MESSAGE
 from globals import logger
 from globals import sa
 from handler.base import BaseHandler
+from service.data.hr.hr_company import HrCompanyDataService
 from service.page.user.chatting import ChattingPageService
 from service.page.user.user import UserPageService
 from setting import settings
@@ -277,6 +278,7 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
         self.chat_ps = ChattingPageService()
         self.employee_ps = UserPageService()
         self.user_ps = UserPageService()
+        self.company_ps = HrCompanyDataService()
         self.sa = sa
 
     @gen.coroutine
@@ -417,9 +419,15 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
             user_user = self.user_ps.get_user_user({"id": distinct_id})
             is_login_id = bool(user_user.username.isdigit())
 
+        condition = {'id': self.company_id}
+        company_info = self.company_ps.get_company(condition)
+
+        ObjectDict({"companyId": company_info.id,
+                    "companyName": company_info.abbreviation})
+
         self.sa.track(distinct_id=distinct_id,
                       event_name=CHATTING_SEND_MESSAGE,
-                      properties={"company_id": self.company_id},
+                      properties=ObjectDict,
                       is_login_id=is_login_id)
 
     @gen.coroutine
