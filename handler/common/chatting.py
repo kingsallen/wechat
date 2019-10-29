@@ -442,7 +442,7 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
             is_login_id = bool(user_user.username.isdigit())
 
         condition = {'id': self.company_id}
-        company_info = self.company_ps.get_company(condition)
+        company_info = yield self.company_ps.get_company(condition)
 
         ObjectDict({"companyId": company_info.id,
                     "companyName": company_info.abbreviation})
