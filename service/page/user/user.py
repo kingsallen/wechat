@@ -310,9 +310,12 @@ class UserPageService(PageService):
         :param user_id: 当前用户id
         :param company_id: 当前公众号的 company_id
         """
-
-        check_group_passed = yield self.infra_user_ds.is_valid_employee(
-            user_id, company_id)
+        try:
+            check_group_passed = yield self.infra_user_ds.is_valid_employee(
+                user_id, company_id, timeout=3)
+        except Exception as e:
+            self.logger.error("check employee type error: {}".format(e))
+            return ObjectDict()
 
         if not check_group_passed:
             return ObjectDict()

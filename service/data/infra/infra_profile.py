@@ -12,14 +12,16 @@ from requests.models import Request
 from setting import settings
 from globals import env
 from conf.newinfra_service_conf.parsing import parsing
-from conf.newinfra_service_conf.service_info import parsing_service
+from conf.newinfra_service_conf.service_info import parsing_service, profile_service
+from conf.newinfra_service_conf.profile import profile
+
 
 
 class InfraProfileDataService(DataService):
     @gen.coroutine
-    def get_profile(self, user_id):
+    def get_profile(self, user_id, timeout=30):
         params = ObjectDict(user_id=user_id)
-        res = yield http_tool.http_get(path.PROFILE, params)
+        res = yield http_tool.http_get(path.PROFILE, params, timeout=timeout)
         return http_tool.unboxing(res)
 
     @gen.coroutine
@@ -734,13 +736,13 @@ class InfraProfileDataService(DataService):
         params = {k: v for k, v in params.items() if v is not None}
 
         if method == "get":
-            response = yield http_tool.http_get(route, params)
+            response = yield http_tool.http_get(route, params, timeout=3)
         elif method == "create":
-            response = yield http_tool.http_post(route, params)
+            response = yield http_tool.http_post(route, params, timeout=3)
         elif method == "update":
-            response = yield http_tool.http_put(route, params)
+            response = yield http_tool.http_put(route, params, timeout=3)
         elif method == "delete":
-            response = yield http_tool.http_delete(route, params)
+            response = yield http_tool.http_delete(route, params, timeout=3)
         else:
             raise Exception('Unknow Exception')
         return response
@@ -835,3 +837,11 @@ class InfraProfileDataService(DataService):
         })
         ret = yield http_tool.http_post_v2(parsing.INFRA_CUSTOM_PARSE_IDCARD, parsing_service, params)
         raise gen.Return(ret)
+
+    @gen.coroutine
+    def get_profile_completeness(self, user_id, timeout=30):
+        params = ObjectDict({
+            "user_id": user_id
+        })
+        ret = yield http_tool.http_post_v2(profile.PROFILE_COMPLETE, profile_service, params, timeout=timeout)
+        return ret

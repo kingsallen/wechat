@@ -211,13 +211,13 @@ class InfraUserDataService(DataService):
 
     @log_time
     @gen.coroutine
-    def is_valid_employee(self, user_id, company_id):
+    def is_valid_employee(self, user_id, company_id, timeout=30):
         params = {
             "userId": int(user_id),
             "companyId": int(company_id)
         }
 
-        res = yield http_get(path.INFRA_USER_EMPLOYEE_CHECK, params)
+        res = yield http_get(path.INFRA_USER_EMPLOYEE_CHECK, params, timeout=timeout)
         ret, data = unboxing(res)
 
         return data.result if ret else False
