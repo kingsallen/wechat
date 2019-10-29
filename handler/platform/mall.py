@@ -243,6 +243,7 @@ class MallExchangeHandler(BaseHandler):
 
         res = yield self.mall_ps.exchange_imd(employee_id, company_id, count, goods_id)
 
+        #
         if res.status == 0:
             self.send_json_success()
         elif res.status in [10038, 10039, 10043]:
