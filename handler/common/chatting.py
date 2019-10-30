@@ -350,8 +350,8 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
                 if data:
                     self.write_message(json_dumps(ObjectDict(
                         content=data.get("content"),
-                        compound_content=data.get("compoundContent"),
-                        creat_time=data.get("createTime"),
+                        compound_content=data.get("compound_content"),
+                        create_time=data.get("create_time"),
                         speaker=data.get("speaker"),
                         msg_type=data.get("msg_type"),
                         stats=data.get("stats")
