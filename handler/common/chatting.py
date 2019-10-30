@@ -7,7 +7,7 @@ import redis
 from tornado import gen, websocket, ioloop
 
 import conf.common as const
-from conf.message import CHATTING_EMPLOYEE_RESIGNATION
+from conf.message import CHATTING_EMPLOYEE_RESIGNATION, CHATTING_EMPLOYEE_RESIGNATION_TIPS
 from conf.protocol import WebSocketCloseCode
 from conf.sensors import CHATTING_SEND_MESSAGE
 from globals import logger
@@ -137,7 +137,7 @@ class EmployeeChattingHandler(BaseHandler):
         page_no = self.params.page_no or 1
         page_size = self.params.page_size or 10
         ret = yield self.chatting_ps.get_employee_chatrooms(self.user_id, self.role, self.employee_id,
-                                                        self.current_user.company.id, page_no, page_size)
+                                                            self.current_user.company.id, page_no, page_size)
 
         self.un_box(ret)
 
@@ -152,8 +152,8 @@ class EmployeeChattingHandler(BaseHandler):
         page_size = self.params.page_size or 10
         message_id = self.params.message_id or 0
         ret = yield self.chatting_ps.get_employee_chatting_messages(self.params.room_id, self.user_id, self.role,
-                                                                self.employee_id, self.current_user.company.id,
-                                                                page_size, message_id)
+                                                                    self.employee_id, self.current_user.company.id,
+                                                                    page_size, message_id)
         if ret and ret.data and ret.data.current_page_data:
             for data in ret.data.current_page_data:
                 if data.get("compound_content"):
@@ -214,14 +214,14 @@ class EmployeeChattingHandler(BaseHandler):
 
         tpl_switch = self.json_args.get("tpl_switch");
         switch = yield self.chatting_ps.post_switch(self.role, self.user_id, self.employee_id, self.current_user.company.id,
-                                                tpl_switch)
+                                                    tpl_switch)
         self.un_box(switch)
 
     @handle_response
     @gen.coroutine
     def post_enter(self):
         """
-        关闭消息推送
+        进入聊天室
         :return: 推送开关状态
         """
         self.logger.debug("enter room. employee_id:{}, user_id:{}".format(self.employee_id, self.user_id))
@@ -236,6 +236,11 @@ class EmployeeChattingHandler(BaseHandler):
 
         ret = yield self.chatting_ps.enter_the_room(self.json_args.get("room_id") or 0, self.role, user_id, employee_id,
                                                     self.current_user.company.id, self.json_args.get("pid") or 0)
+
+        if self.json_args.get("speaker") and (self.json_args.get("speaker") == "0"
+                                              or self.json_args.get("speaker") == 0) and ret and ret.code == "US30500":
+            self._send_json(data={}, status_code=30500, message=CHATTING_EMPLOYEE_RESIGNATION_TIPS, http_code=200)
+            return
         self.un_box(ret)
 
     @handle_response
