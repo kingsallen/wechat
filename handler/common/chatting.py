@@ -388,9 +388,9 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
             role = "user"
             channel = self.chatting_user_channel
 
-        if self.room_id and self.room_id > 0 and (not self.company_id or self.company_id == 0 or not self.candidate_id
-                                                  or self.candidate_id == 0 or not self.employee_id
-                                                  or self.employee_id == 0) :
+        if self.room_id and int(self.room_id) > 0 and (not self.company_id or self.company_id == 0
+                                                       or not self.candidate_id or self.candidate_id == 0
+                                                       or not self.employee_id or self.employee_id == 0):
             room_info = yield self.chat_ps.get_employee_chatroom(self.room_id, role)
             if room_info and (room_info.code == "0" or room_info.code == 0) and room_info.data and room_info.data.company_id:
                 self.company_id = room_info.data.company_id
