@@ -421,7 +421,7 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
         if role == "user" and chat_id and chat_id.code == "US305073":
             try:
                 message_body = json_dumps(ObjectDict(
-                    msg_type="html",
+                    msg_type=const.CHATTING_EMPLOYEE_MSG_TYPE_RESIGNATION,
                     content=CHATTING_EMPLOYEE_RESIGNATION,
                     compound_content=None,
                     speaker=1,
