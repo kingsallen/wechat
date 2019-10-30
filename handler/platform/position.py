@@ -868,6 +868,7 @@ class PositionHandler(BaseHandler):
                 recom = decode_id(self.params.recom)
                 psc = self.params.psc if self.params.psc else 0
             click_user_id = self.current_user.sysuser.id
+            self.logger.debug('PositionHandler _insert_into_kafka psc:{}, params:{}'.format(psc, self.params))
             ret = yield self.user_ps.if_referral_position(
                 self.current_user.company.id,
                 recom, psc, position_id, click_user_id)
