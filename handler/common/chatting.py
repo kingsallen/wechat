@@ -1,5 +1,5 @@
 # coding=utf-8
-
+import html
 import traceback
 import ujson
 
@@ -7,6 +7,7 @@ import redis
 from tornado import gen, websocket, ioloop
 
 import conf.common as const
+from conf.message import CHATTING_EMPLOYEE_RESIGNATION, CHATTING_EMPLOYEE_RESIGNATION_TIPS
 from conf.protocol import WebSocketCloseCode
 from conf.sensors import CHATTING_SEND_MESSAGE
 from globals import logger
@@ -55,18 +56,22 @@ class EmployeeChattingHandler(BaseHandler):
     @gen.coroutine
     def get(self, method):
 
-        if self.current_user.employee:
+        if self.params.speaker == "1" or self.params.speaker == 1:
             # 当前是员工，获取与候选人的聊天室列表
             self.role = "employee"
-            self.employee_id = self.current_user.employee.id or 0
-            self.logger.debug("GET employee_id:{}".format(self.employee_id))
-            self.user_id = self.params.user_id or 0
+            self.employee_id = int(self.params.employee_id or 0)
+            self.user_id = int(self.params.user_id or 0)
         else:
             # 当前用户是普通的候选人，获取公众号所属公司下员工的聊天室列表
             self.role = "user"
-            self.employee_id = self.params.employee_id or 0
-            self.logger.debug("GET employee_id:{}".format(self.employee_id))
-            self.user_id = self.current_user.sysuser.id
+            self.employee_id = int(self.params.employee_id or 0)
+            self.user_id = int(self.params.user_id or 0)
+
+        if self.employee_id == 0 and self.current_user.employee:
+            self.employee_id = self.current_user.employee.id or 0
+
+        if self.user_id == 0 and not self.current_user.employee:
+            self.user_id = self.current_user.sysuser.id or 0
 
         try:
             # 重置 event，准确描述
@@ -90,21 +95,22 @@ class EmployeeChattingHandler(BaseHandler):
     @gen.coroutine
     def post(self, method):
 
-        if self.current_user.employee:
+        if self.json_args.get("speaker") == "1" or self.json_args.get("speaker") == 1:
             # 当前是员工，获取与候选人的聊天室列表
             self.role = "employee"
-            self.logger.debug("POST params:{}".format(self.json_args))
-            self.employee_id = self.current_user.employee.id or 0
+            self.employee_id = int(self.json_args.get("employee_id") or 0)
             self.user_id = int(self.json_args.get("user_id") or 0)
         else:
             # 当前用户是普通的候选人，获取公众号所属公司下员工的聊天室列表
             self.role = "user"
-            self.logger.debug("POST params:{}".format(self.json_args))
             self.employee_id = int(self.json_args.get("employee_id") or 0)
-            self.logger.debug("POST employee_id:{}".format(self.employee_id))
-            self.user_id = self.current_user.sysuser.id or 0
+            self.user_id = int(self.json_args.get("user_id") or 0)
 
-        self.logger.debug("POST user_id:{}, employee_id:{}".format(self.user_id, self.employee_id))
+        if self.employee_id == 0 and self.current_user.employee:
+            self.employee_id = self.current_user.employee.id or 0
+
+        if self.user_id == 0 and not self.current_user.employee:
+            self.user_id = self.current_user.sysuser.id or 0
 
         try:
             # 重置 event，准确描述
@@ -136,7 +142,7 @@ class EmployeeChattingHandler(BaseHandler):
         page_no = self.params.page_no or 1
         page_size = self.params.page_size or 10
         ret = yield self.chatting_ps.get_employee_chatrooms(self.user_id, self.role, self.employee_id,
-                                                        self.current_user.company.id, page_no, page_size)
+                                                            self.current_user.company.id, page_no, page_size)
 
         self.un_box(ret)
 
@@ -151,8 +157,8 @@ class EmployeeChattingHandler(BaseHandler):
         page_size = self.params.page_size or 10
         message_id = self.params.message_id or 0
         ret = yield self.chatting_ps.get_employee_chatting_messages(self.params.room_id, self.user_id, self.role,
-                                                                self.employee_id, self.current_user.company.id,
-                                                                page_size, message_id)
+                                                                    self.employee_id, self.current_user.company.id,
+                                                                    page_size, message_id)
         if ret and ret.data and ret.data.current_page_data:
             for data in ret.data.current_page_data:
                 if data.get("compound_content"):
@@ -213,14 +219,14 @@ class EmployeeChattingHandler(BaseHandler):
 
         tpl_switch = self.json_args.get("tpl_switch");
         switch = yield self.chatting_ps.post_switch(self.role, self.user_id, self.employee_id, self.current_user.company.id,
-                                                tpl_switch)
+                                                    tpl_switch)
         self.un_box(switch)
 
     @handle_response
     @gen.coroutine
     def post_enter(self):
         """
-        关闭消息推送
+        进入聊天室
         :return: 推送开关状态
         """
         self.logger.debug("enter room. employee_id:{}, user_id:{}".format(self.employee_id, self.user_id))
@@ -234,7 +240,11 @@ class EmployeeChattingHandler(BaseHandler):
                 employee_id = room_info.data.employee_id
 
         ret = yield self.chatting_ps.enter_the_room(self.json_args.get("room_id") or 0, self.role, user_id, employee_id,
-                                                self.current_user.company.id, self.json_args.get("pid") or 0)
+                                                    self.current_user.company.id, self.json_args.get("pid") or 0)
+
+        if self.role == "employee" and ret and ret.code == "US30500":
+            self._send_json(data={}, status_code=30500, message=CHATTING_EMPLOYEE_RESIGNATION_TIPS, http_code=200)
+            return
         self.un_box(ret)
 
     @handle_response
@@ -252,8 +262,8 @@ class EmployeeChattingHandler(BaseHandler):
             if room_info and (room_info.code == "0" or room_info.code == 0) and room_info.data:
                 user_id = room_info.data.user_id
                 employee_id = room_info.data.employee_id
-        ret = yield self.chatting_ps.delete_room(self.json_args.get("room_id") or 0, self.role, user_id,
-                                             employee_id, self.current_user.company.id)
+        ret = yield self.chatting_ps.delete_room(self.json_args.get("room_id") or 0, self.role, user_id, employee_id,
+                                                 self.current_user.company.id)
         self.un_box(ret)
 
 
@@ -387,13 +397,37 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
             role = "user"
             channel = self.chatting_user_channel
 
-        if not self.company_id or self.company_id == 0:
+        if self.room_id and int(self.room_id) > 0 and (not self.company_id or self.company_id == 0
+                                                       or not self.candidate_id or self.candidate_id == 0
+                                                       or not self.employee_id or self.employee_id == 0):
             room_info = yield self.chat_ps.get_employee_chatroom(self.room_id, role)
             if room_info and (room_info.code == "0" or room_info.code == 0) and room_info.data and room_info.data.company_id:
                 self.company_id = room_info.data.company_id
+                self.candidate_id = room_info.data.user_id
+                self.employee_id = room_info.data.employee_id
         create_time = curr_now()
+        content = html.escape(data.get('content'))
         chat_id = yield self.chat_ps.post_message(self.room_id, role, self.candidate_id, self.employee_id,
-                                                  self.company_id, data.get("content"), "html", create_time)
+                                                  self.company_id, content, "html", create_time)
+        if role == "user" and chat_id and chat_id.code == "US305073":
+            try:
+                message_body = json_dumps(ObjectDict(
+                    msg_type="html",
+                    content=CHATTING_EMPLOYEE_RESIGNATION,
+                    compound_content=None,
+                    speaker=1,
+                    cid=int(self.room_id),
+                    pid=int(self.position_id) if self.position_id else 0,
+                    create_time=create_time,
+                    id=chat_id.get("data"),
+                ))
+                self.write_message(message_body)
+            except websocket.WebSocketClosedError:
+                logger.error(traceback.format_exc())
+                self.close(WebSocketCloseCode.internal_error.value)
+                raise
+            return
+
         if not chat_id or (chat_id.code != "0" and chat_id.code != 0) or not chat_id.data:
             return
 
@@ -418,7 +452,7 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
 
         message_body = json_dumps(ObjectDict(
             msg_type=data.get("msg_type"),
-            content=data.get("content"),
+            content=content,
             compound_content=None,
             speaker=data.get("speaker"),
             cid=int(self.room_id),

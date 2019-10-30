@@ -436,15 +436,18 @@ class UserPageService(PageService):
         raise gen.Return(ret.status)
 
     @gen.coroutine
-    def favorite_referral_position(self, user_id, employee_id, position_id):
+    def favorite_referral_position(self, user_id, employee_id, position_id, psc):
         """用户收藏员工推荐的职位的粒子操作
         :param user_id: user_id
+        :param employee_id: 员工编号
         :param position_id: 职位id
+        :param psc: 分享链路
         """
         params = {
             "user_id": user_id,
             "position_id": position_id,
             "employee_id": employee_id,
+            "psc": psc
         }
         ret = yield self.infra_user_ds.infra_create_collect_position(params)
         raise gen.Return(ret.data.status)
