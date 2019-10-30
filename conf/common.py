@@ -917,3 +917,6 @@ PATHS_FOR_NOWEIXIN = [ path.POSITION_LIST, path.WECHAT_COMPANY, path.COMPANY_TEA
                        path.JOYWOK_HOME_PAGE, path.JOYWOK_AUTO_AUTH,
                        path.REFERRAL_UPLOAD_PCLOGIN, path.IMAGE_URL
                      ]
+
+# 员工离职的消息类型
+CHATTING_EMPLOYEE_MSG_TYPE_RESIGNATION = "employee_off"
