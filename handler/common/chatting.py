@@ -18,7 +18,7 @@ from service.page.user.user import UserPageService
 from setting import settings
 from util.common import ObjectDict
 from util.common.decorator import handle_response, authenticated
-from util.tool.date_tool import curr_now_minute
+from util.tool.date_tool import curr_now
 from util.tool.json_tool import json_dumps
 from util.tool.pubsub_tool import Subscriber
 from util.tool.str_tool import to_str, match_session_id
@@ -351,7 +351,7 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
                     self.write_message(json_dumps(ObjectDict(
                         content=data.get("content"),
                         compound_content=data.get("compoundContent"),
-                        chat_time=data.get("createTime"),
+                        creat_time=data.get("createTime"),
                         speaker=data.get("speaker"),
                         msg_type=data.get("msg_type"),
                         stats=data.get("stats")
@@ -391,9 +391,9 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
             room_info = yield self.chat_ps.get_employee_chatroom(self.room_id, role)
             if room_info and (room_info.code == "0" or room_info.code == 0) and room_info.data and room_info.data.company_id:
                 self.company_id = room_info.data.company_id
-
+        create_time = curr_now()
         chat_id = yield self.chat_ps.post_message(self.room_id, role, self.candidate_id, self.employee_id,
-                                                  self.company_id, data.get("content"), "html")
+                                                  self.company_id, data.get("content"), "html", create_time)
         if not chat_id or (chat_id.code != "0" and chat_id.code != 0) or not chat_id.data:
             return
 
@@ -405,7 +405,7 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
                 speaker=data.get("speaker"),
                 cid=int(self.room_id),
                 pid=int(self.position_id) if self.position_id else 0,
-                create_time=curr_now_minute(),
+                create_time=create_time,
                 id=chat_id.get("data"),
             ))
 
@@ -423,7 +423,7 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
             speaker=data.get("speaker"),
             cid=int(self.room_id),
             pid=int(self.position_id) if self.position_id else 0,
-            create_time=curr_now_minute(),
+            create_time=create_time,
             id=chat_id.get("data"),
         ))
 

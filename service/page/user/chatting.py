@@ -147,7 +147,7 @@ class ChattingPageService(PageService):
         raise gen.Return(ret)
 
     @gen.coroutine
-    def post_message(self, room_id, role, user_id, employee_id, company_id, content, msg_type):
+    def post_message(self, room_id, role, user_id, employee_id, company_id, content, msg_type, chat_time):
         """
         保存消息
         :param room_id: 聊天室编号
@@ -157,8 +157,10 @@ class ChattingPageService(PageService):
         :param company_id: 公司编号
         :param content: 消息内容
         :param msg_type: 消息类型
+        :param chat_time: 消息发送时间
         :return: 操作结果
         """
 
-        ret = yield self.infra_im_ds.post_message(room_id, role, user_id, employee_id, company_id, content, msg_type)
+        ret = yield self.infra_im_ds.post_message(room_id, role, user_id, employee_id, company_id, content, msg_type,
+                                                  chat_time)
         raise gen.Return(ret)
