@@ -400,7 +400,7 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
         content = html.escape(data.get('content'))
         chat_id = yield self.chat_ps.post_message(self.room_id, role, self.candidate_id, self.employee_id,
                                                   self.company_id, content, "html", create_time)
-        if role == "user" and chat_id and chat_id.code == "US30500":
+        if role == "user" and chat_id and chat_id.code == "US305073":
             try:
                 message_body = json_dumps(ObjectDict(
                     msg_type="html",
@@ -410,7 +410,7 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
                     cid=int(self.room_id),
                     pid=int(self.position_id) if self.position_id else 0,
                     create_time=create_time,
-                    id=0,
+                    id=chat_id.get("data"),
                 ))
                 self.write_message(message_body)
             except websocket.WebSocketClosedError:
