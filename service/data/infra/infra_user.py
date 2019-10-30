@@ -372,7 +372,7 @@ class InfraUserDataService(DataService):
         params = ObjectDict({
             "company_id": company_id,
             "recom_user_id": recom,
-            "parent_chain_id": psc,
+            "parent_chain_id": psc if psc else -1,
             "pid": pid,
             "presentee_user_id": click_user_id
         })
