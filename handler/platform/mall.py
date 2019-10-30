@@ -241,9 +241,16 @@ class MallExchangeHandler(BaseHandler):
         count = int(self.json_args.count)
         goods_id = int(self.json_args.goods_id)
 
-        res = yield self.mall_ps.exchange_imd(employee_id, company_id, count, goods_id)
+        name = self.json_args.name
+        mobile = self.json_args.mobile
+        province = self.json_args.province
+        city = self.json_args.city
+        region = self.json_args.region
+        address = self.json_args.address
+        user_id = self.current_user.sysuser.id
 
-        #
+        res = yield self.mall_ps.exchange_imd(employee_id, company_id, count, goods_id, name, mobile, province, city, region, address, user_id)
+
         if res.status == 0:
             self.send_json_success()
         elif res.status in [10038, 10039, 10043]:

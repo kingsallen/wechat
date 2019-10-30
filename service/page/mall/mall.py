@@ -54,9 +54,9 @@ class MallPageService(PageService):
         return result, data
 
     @gen.coroutine
-    def exchange_imd(self, employee_id, company_id, count, goods_id):
+    def exchange_imd(self, employee_id, company_id, count, goods_id, name, mobile, province, city, region, address, user_id):
         """立即兑换商品"""
-        res = yield self.infra_mall_ds.exchange_imd(employee_id, company_id, count, goods_id)
+        res = yield self.infra_mall_ds.exchange_imd(employee_id, company_id, count, goods_id, name, mobile, province, city, region, address, user_id)
         return res
 
     @gen.coroutine

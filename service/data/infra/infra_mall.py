@@ -55,12 +55,20 @@ class InfraMallDataService(DataService):
         return unboxing(ret)
 
     @gen.coroutine
-    def exchange_imd(self, employee_id, company_id, count, goods_id):
+    def exchange_imd(self, employee_id, company_id, count, goods_id, name, mobile, province, city, region, address, user_id):
         params = ObjectDict({
             "employee_id": employee_id,
             "company_id": company_id,
             "count": count,
-            "goods_id": goods_id
+            "goods_id": goods_id,
+            "addressee": name,
+            "mobile": mobile,
+            "province": province,
+            "city": city,
+            "region": region,
+            "address": address,
+            "userId": user_id
+
         })
         ret = yield http_post(path.EXCHANGE, params)
 
