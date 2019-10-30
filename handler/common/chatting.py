@@ -150,6 +150,11 @@ class EmployeeChattingHandler(BaseHandler):
 
         page_no = self.params.page_no or 1
         page_size = self.params.page_size or 10
+
+        if self.role == "employee" and self.employee_id == 0:
+            self._send_json(data={}, status_code=30500, message=CHATTING_EMPLOYEE_RESIGNATION_TIPS, http_code=200)
+            return
+
         ret = yield self.chatting_ps.get_employee_chatrooms(self.user_id, self.role, self.employee_id,
                                                             self.current_user.company.id, page_no, page_size)
 
