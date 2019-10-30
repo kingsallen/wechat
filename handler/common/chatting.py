@@ -56,18 +56,22 @@ class EmployeeChattingHandler(BaseHandler):
     @gen.coroutine
     def get(self, method):
 
-        if self.current_user.employee:
+        if self.params.speaker == "1" or self.params.speaker == 1:
             # 当前是员工，获取与候选人的聊天室列表
             self.role = "employee"
-            self.employee_id = self.current_user.employee.id or 0
-            self.logger.debug("GET employee_id:{}".format(self.employee_id))
-            self.user_id = self.params.user_id or 0
+            self.employee_id = int(self.params.employee_id or 0)
+            self.user_id = int(self.params.user_id or 0)
         else:
             # 当前用户是普通的候选人，获取公众号所属公司下员工的聊天室列表
             self.role = "user"
-            self.employee_id = self.params.employee_id or 0
-            self.logger.debug("GET employee_id:{}".format(self.employee_id))
-            self.user_id = self.current_user.sysuser.id
+            self.employee_id = int(self.params.employee_id or 0)
+            self.user_id = int(self.params.user_id or 0)
+
+        if self.employee_id == 0 and self.current_user.employee:
+            self.employee_id = self.current_user.employee.id or 0
+
+        if self.user_id == 0 and not self.current_user.employee:
+            self.user_id = self.current_user.sysuser.id or 0
 
         try:
             # 重置 event，准确描述
@@ -91,21 +95,22 @@ class EmployeeChattingHandler(BaseHandler):
     @gen.coroutine
     def post(self, method):
 
-        if self.current_user.employee:
+        if self.json_args.get("speaker") == "1" or self.json_args.get("speaker") == 1:
             # 当前是员工，获取与候选人的聊天室列表
             self.role = "employee"
-            self.logger.debug("POST params:{}".format(self.json_args))
-            self.employee_id = self.current_user.employee.id or 0
+            self.employee_id = int(self.json_args.get("employee_id") or 0)
             self.user_id = int(self.json_args.get("user_id") or 0)
         else:
             # 当前用户是普通的候选人，获取公众号所属公司下员工的聊天室列表
             self.role = "user"
-            self.logger.debug("POST params:{}".format(self.json_args))
             self.employee_id = int(self.json_args.get("employee_id") or 0)
-            self.logger.debug("POST employee_id:{}".format(self.employee_id))
-            self.user_id = self.current_user.sysuser.id or 0
+            self.user_id = int(self.json_args.get("user_id") or 0)
 
-        self.logger.debug("POST user_id:{}, employee_id:{}".format(self.user_id, self.employee_id))
+        if self.employee_id == 0 and self.current_user.employee:
+            self.employee_id = self.current_user.employee.id or 0
+
+        if self.user_id == 0 and not self.current_user.employee:
+            self.user_id = self.current_user.sysuser.id or 0
 
         try:
             # 重置 event，准确描述
