@@ -567,3 +567,26 @@ class InfraDictDataService(DataService):
         })
         res = yield http_get_v2(dictionary.NEWINFRA_DICT_HOPE_JOB_TREE, dict_service, params)
         return res.data
+
+    @gen.coroutine
+    def get_province_citys(self):
+        """
+        获取全国的省市
+        :param
+        :return:
+        """
+        res = yield http_get_v2(dictionary.NEWINFRA_DICT_PROVINCE_CITYS, dict_service)
+        return res.data
+
+    @gen.coroutine
+    def get_dict_region(self, code):
+        """
+        获取所属市的区
+        :param
+        :return:
+        """
+        params = ObjectDict({
+            'code': code
+        })
+        res = yield http_get_v2(dictionary.NEWINFRA_DICT_REGION, dict_service, params)
+        return res.data
