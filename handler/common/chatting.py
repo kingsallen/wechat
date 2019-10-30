@@ -237,8 +237,8 @@ class EmployeeChattingHandler(BaseHandler):
         ret = yield self.chatting_ps.enter_the_room(self.json_args.get("room_id") or 0, self.role, user_id, employee_id,
                                                     self.current_user.company.id, self.json_args.get("pid") or 0)
 
-        if self.json_args.get("speaker") and (self.json_args.get("speaker") == "0"
-                                              or self.json_args.get("speaker") == 0) and ret and ret.code == "US30500":
+        if self.json_args.get("speaker") and (self.json_args.get("speaker") == "1"
+                                              or self.json_args.get("speaker") == 1) and ret and ret.code == "US30500":
             self._send_json(data={}, status_code=30500, message=CHATTING_EMPLOYEE_RESIGNATION_TIPS, http_code=200)
             return
         self.un_box(ret)
