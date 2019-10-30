@@ -159,6 +159,9 @@ class EmployeeChattingHandler(BaseHandler):
         self.logger.debug("EmployeeChattingHandler get_rooms user_id:{}, role:{}, employee_id:{}, company_id:{}, "
                           "page_no:{}, page_size:{}".format(self.user_id, self.role, self.employee_id,
                                                             self.current_user.company.id, page_no, page_size))
+        if self.role == "employee" and self.employee_id == 0:
+            self._send_json(data={}, status_code=30500, message=CHATTING_EMPLOYEE_RESIGNATION_TIPS, http_code=200)
+            return
         ret = yield self.chatting_ps.get_employee_chatrooms(self.user_id, self.role, self.employee_id,
                                                             self.current_user.company.id, page_no, page_size)
         self.logger.debug("EmployeeChattingHandler get_rooms ret:{}".format(ret))
