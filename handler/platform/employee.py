@@ -1575,3 +1575,15 @@ class ReferralExpiredPageHandler(BaseHandler):
                         self.params)
                 }
             })
+
+
+class ApiEmployeeInfoHandler(BaseHandler):
+    """员工积分兑换回填手机号"""
+
+    @handle_response
+    @gen.coroutine
+    def get(self):
+
+        data = yield self.employee_ps.get_employee_mobile_info(self.current_user.sysuser.id)
+        data["fullname"] = data["cname"]
+        self.send_json_success(data)

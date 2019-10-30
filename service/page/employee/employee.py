@@ -1180,3 +1180,13 @@ class EmployeePageService(PageService):
             return ret.get('data')
         else:
             raise InfraOperationError(ret.get('message'))
+
+    @gen.coroutine
+    def get_employee_mobile_info(self, sysuser_id):
+        """
+        员工积分兑换回填手机号
+        :param params:
+        :return:
+        """
+        ret = yield self.infra_employee_ds.get_employee_mobile_info(sysuser_id)
+        return ret

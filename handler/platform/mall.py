@@ -240,10 +240,44 @@ class MallExchangeHandler(BaseHandler):
 
         count = int(self.json_args.count)
         goods_id = int(self.json_args.goods_id)
+        user_id = self.current_user.sysuser.id
+        deliver_type = self.json_args.deliver_type
 
-        res = yield self.mall_ps.exchange_imd(employee_id, company_id, count, goods_id)
+        if int(deliver_type) == 2:  # 2: 需要邮寄积分兑换的商品, 1: 不需要邮寄
+            deliver_info = ObjectDict(self.json_args.deliver_info)
 
-        #
+            username = deliver_info.username
+            mobile = deliver_info.mobile
+            province = deliver_info.province
+            city = deliver_info.city
+            district = deliver_info.district
+            address = deliver_info.address
+
+            params = ObjectDict({
+                "employee_id": employee_id,
+                "company_id": company_id,
+                "count": count,
+                "goods_id": goods_id,
+                "userId": user_id,
+                "deliverType": deliver_type,
+                "addressee": username,
+                "mobile": mobile,
+                "province": province,
+                "city": city,
+                "region": district,
+                "address": address
+            })
+        else:
+            params = ObjectDict({
+                "employee_id": employee_id,
+                "company_id": company_id,
+                "count": count,
+                "goods_id": goods_id,
+                "userId": user_id,
+                "deliverType": deliver_type
+            })
+        res = yield self.mall_ps.exchange_imd(params)
+
         if res.status == 0:
             self.send_json_success()
         elif res.status in [10038, 10039, 10043]:
