@@ -123,3 +123,6 @@ REFERRAL_PROGRESS_DESCRIPTION = '快来看看你的应聘进度吧~'
 JOYWOK_AUTO_BIND_SUCCESS = "员工认证成功，微信绑定已完成，快去转发职位吧"
 JOYWOK_AUTO_BIND_EMPLOYEE_INFO_IS_GONE = "该员工信息已被认证"
 JOYWOK_AUTO_BIND_FAIL = "员工认证失败"
+
+# 员工和候选人聊天
+CHATTING_EMPLOYEE_RESIGNATION = "对方已不在公司，需要了解职位情况可以找HR或者其他员工沟通哦~"

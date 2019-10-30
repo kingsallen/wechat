@@ -1,5 +1,5 @@
 # coding=utf-8
-
+import html
 import traceback
 import ujson
 
@@ -7,6 +7,7 @@ import redis
 from tornado import gen, websocket, ioloop
 
 import conf.common as const
+from conf.message import CHATTING_EMPLOYEE_RESIGNATION
 from conf.protocol import WebSocketCloseCode
 from conf.sensors import CHATTING_SEND_MESSAGE
 from globals import logger
@@ -234,7 +235,7 @@ class EmployeeChattingHandler(BaseHandler):
                 employee_id = room_info.data.employee_id
 
         ret = yield self.chatting_ps.enter_the_room(self.json_args.get("room_id") or 0, self.role, user_id, employee_id,
-                                                self.current_user.company.id, self.json_args.get("pid") or 0)
+                                                    self.current_user.company.id, self.json_args.get("pid") or 0)
         self.un_box(ret)
 
     @handle_response
@@ -252,8 +253,8 @@ class EmployeeChattingHandler(BaseHandler):
             if room_info and (room_info.code == "0" or room_info.code == 0) and room_info.data:
                 user_id = room_info.data.user_id
                 employee_id = room_info.data.employee_id
-        ret = yield self.chatting_ps.delete_room(self.json_args.get("room_id") or 0, self.role, user_id,
-                                             employee_id, self.current_user.company.id)
+        ret = yield self.chatting_ps.delete_room(self.json_args.get("room_id") or 0, self.role, user_id, employee_id,
+                                                 self.current_user.company.id)
         self.un_box(ret)
 
 
@@ -387,13 +388,37 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
             role = "user"
             channel = self.chatting_user_channel
 
-        if not self.company_id or self.company_id == 0:
+        if self.room_id and self.room_id > 0 and (not self.company_id or self.company_id == 0 or not self.candidate_id
+                                                  or self.candidate_id == 0 or not self.employee_id
+                                                  or self.employee_id == 0) :
             room_info = yield self.chat_ps.get_employee_chatroom(self.room_id, role)
             if room_info and (room_info.code == "0" or room_info.code == 0) and room_info.data and room_info.data.company_id:
                 self.company_id = room_info.data.company_id
+                self.candidate_id = room_info.data.user_id
+                self.employee_id = room_info.data.employee_id
         create_time = curr_now()
+        content = html.escape(data.get('content'))
         chat_id = yield self.chat_ps.post_message(self.room_id, role, self.candidate_id, self.employee_id,
-                                                  self.company_id, data.get("content"), "html", create_time)
+                                                  self.company_id, content, "html", create_time)
+        if role == "user" and chat_id and chat_id.code == "US30500":
+            try:
+                message_body = json_dumps(ObjectDict(
+                    msg_type="html",
+                    content=CHATTING_EMPLOYEE_RESIGNATION,
+                    compound_content=None,
+                    speaker=1,
+                    cid=int(self.room_id),
+                    pid=int(self.position_id) if self.position_id else 0,
+                    create_time=create_time,
+                    id=0,
+                ))
+                self.write_message(message_body)
+            except websocket.WebSocketClosedError:
+                logger.error(traceback.format_exc())
+                self.close(WebSocketCloseCode.internal_error.value)
+                raise
+            return
+
         if not chat_id or (chat_id.code != "0" and chat_id.code != 0) or not chat_id.data:
             return
 
@@ -418,7 +443,7 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
 
         message_body = json_dumps(ObjectDict(
             msg_type=data.get("msg_type"),
-            content=data.get("content"),
+            content=content,
             compound_content=None,
             speaker=data.get("speaker"),
             cid=int(self.room_id),
