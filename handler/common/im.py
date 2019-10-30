@@ -51,7 +51,8 @@ class UnreadCountHandler(BaseHandler):
         :param publisher:
         :return:
         """
-        self.logger.debug("UnreadCountHandler get_jd_unread publisher:{}".format(publisher))
+        self.logger.debug("UnreadCountHandler get_jd_unread publisher:{}, user_id:{}"
+                          .format(publisher, self.current_user.sysuser.id))
         chat_num = yield self.chat_ps.get_unread_chat_num(self.current_user.sysuser.id, publisher)
         self.logger.debug("UnreadCountHandler get_jd_unread chat_num:{}".format(chat_num))
         self.logger.debug("UnreadCountHandler get_jd_unread is_platform:{}".format(self.is_platform))

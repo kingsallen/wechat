@@ -176,6 +176,7 @@ class ChatPageService(PageService):
             "hraccount_id": int(hr_id),
             "sysuser_id": user_id
         })
+        self.logger.debug("ChatPageService get_unread_chat_num chatroom:{}".format(chatroom))
 
         # 若无聊天，则默认显示1条未读消息
         if not chatroom:
