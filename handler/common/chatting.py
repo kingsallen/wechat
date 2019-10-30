@@ -73,6 +73,9 @@ class EmployeeChattingHandler(BaseHandler):
         if self.user_id == 0 and not self.current_user.employee:
             self.user_id = self.current_user.sysuser.id or 0
 
+        self.logger.debug("EmployeeChattingHandler get params role:{}, employee_id:{}, user_id:{}"
+                          .format(self.role, self.employee_id, self.user_id))
+
         try:
             # 重置 event，准确描述
             self._event = self._event + method
@@ -112,6 +115,9 @@ class EmployeeChattingHandler(BaseHandler):
         if self.user_id == 0 and not self.current_user.employee:
             self.user_id = self.current_user.sysuser.id or 0
 
+        self.logger.debug("EmployeeChattingHandler get params role:{}, employee_id:{}, user_id:{}"
+                          .format(self.role, self.employee_id, self.user_id))
+
         try:
             # 重置 event，准确描述
             self._event = self._event + method
@@ -141,9 +147,12 @@ class EmployeeChattingHandler(BaseHandler):
 
         page_no = self.params.page_no or 1
         page_size = self.params.page_size or 10
+        self.logger.debug("EmployeeChattingHandler get_rooms user_id:{}, role:{}, employee_id:{}, company_id:{}, "
+                          "page_no:{}, page_size:{}".format(self.user_id, self.role, self.employee_id,
+                                                            self.current_user.company.id, page_no, page_size))
         ret = yield self.chatting_ps.get_employee_chatrooms(self.user_id, self.role, self.employee_id,
                                                             self.current_user.company.id, page_no, page_size)
-
+        self.logger.debug("EmployeeChattingHandler get_rooms ret:{}".format(ret))
         self.un_box(ret)
 
     @handle_response
