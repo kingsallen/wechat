@@ -79,13 +79,17 @@ class UnreadCountHandler(BaseHandler):
         :return:
         """
 
+        self.logger.debug("UnreadCountHandler get_unread_total user_id:{}".format(self.current_user.sysuser.id))
         chat_num = yield self.chat_ps.get_all_unread_chat_num(self.current_user.sysuser.id)
+        self.logger.debug("UnreadCountHandler get_unread_total chat_num:{}".format(chat_num))
+        self.logger.debug("UnreadCountHandler get_unread_total is_platform:{}".format(self.is_platform))
         if self.is_platform:
             self.send_json_success(data={
                 "unread": chat_num,
             })
         else:
             g_event = yield self._get_ga_event()
+            self.logger.debug("UnreadCountHandler get_unread_total g_event:{}".format(g_event))
             self.send_json_success(data={
                 "unread": chat_num,
                 "is_subscribe": self.current_user.qxuser.is_subscribe == 1,
