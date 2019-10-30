@@ -61,12 +61,16 @@ class EmployeeChattingHandler(BaseHandler):
             self.role = "employee"
             self.employee_id = int(self.params.employee_id or 0)
             self.user_id = int(self.params.user_id or 0)
-        else:
+        elif self.params.speaker == "0" or self.params.speaker == 0:
             # 当前用户是普通的候选人，获取公众号所属公司下员工的聊天室列表
             self.role = "user"
             self.employee_id = int(self.params.employee_id or 0)
             self.user_id = int(self.params.user_id or 0)
-
+        else:
+            if self.current_user.employee:
+                self.role = "employee"
+            else:
+                self.role = "user"
         if self.employee_id == 0 and self.current_user.employee:
             self.employee_id = self.current_user.employee.id or 0
 
@@ -103,11 +107,16 @@ class EmployeeChattingHandler(BaseHandler):
             self.role = "employee"
             self.employee_id = int(self.json_args.get("employee_id") or 0)
             self.user_id = int(self.json_args.get("user_id") or 0)
-        else:
+        elif  self.json_args.get("speaker") == "0" or self.json_args.get("speaker") == 0
             # 当前用户是普通的候选人，获取公众号所属公司下员工的聊天室列表
             self.role = "user"
             self.employee_id = int(self.json_args.get("employee_id") or 0)
             self.user_id = int(self.json_args.get("user_id") or 0)
+        else:
+            if self.current_user.employee:
+                self.role = "employee"
+            else:
+                self.role = "user"
 
         if self.employee_id == 0 and self.current_user.employee:
             self.employee_id = self.current_user.employee.id or 0
