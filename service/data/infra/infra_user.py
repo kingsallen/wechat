@@ -376,6 +376,7 @@ class InfraUserDataService(DataService):
             "pid": pid,
             "presentee_user_id": click_user_id
         })
+        self.logger.debug("InfraUserDataService if_referral_position params:{}".format(params))
         ret = yield http_post(path.INFRA_IF_EMPLOYEE_POS, params)
         return ret
 
