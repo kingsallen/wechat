@@ -850,6 +850,7 @@ class PositionHandler(BaseHandler):
 
         if not (self.params.recom or self.params.root_recom):
             employee_user_id = 0
+            psc = -1
         else:
             if self.params.root_recom:
                 # 人脉连连看页面目标用户打开的职位链接
