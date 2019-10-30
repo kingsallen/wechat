@@ -569,24 +569,12 @@ class InfraDictDataService(DataService):
         return res.data
 
     @gen.coroutine
-    def get_province_citys(self):
+    def get_dict_regions(self, locale_display=None):
         """
         获取全国的省市
         :param
         :return:
         """
-        res = yield http_get_v2(dictionary.NEWINFRA_DICT_PROVINCE_CITYS, dict_service)
-        return res.data
-
-    @gen.coroutine
-    def get_dict_region(self, code):
-        """
-        获取所属市的区
-        :param
-        :return:
-        """
-        params = ObjectDict({
-            'code': code
-        })
-        res = yield http_get_v2(dictionary.NEWINFRA_DICT_REGION, dict_service, params)
+        res = yield http_get_v2(dictionary.NEWINFRA_DICT_REGION, dict_service)
+        # ret = yield self.make_industries_result(res, locale_display)
         return res.data

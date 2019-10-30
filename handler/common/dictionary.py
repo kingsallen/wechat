@@ -125,3 +125,13 @@ class DictHopeJobTreeHandler(BaseHandler):
         field_type = self.params.type
         hope_job_trees = yield self.dictionary_ps.get_hope_job_tree(field_type)
         self.send_json_success(hope_job_trees)
+
+
+class DictRegionHandler(BaseHandler):
+
+    @handle_response
+    @gen.coroutine
+    def get(self):
+        locale_display = self.get_current_locale()
+        cities = yield self.dictionary_ps.get_dict_regions(locale_display)
+        self.send_json_success(cities)
