@@ -372,7 +372,7 @@ class InfraUserDataService(DataService):
         params = ObjectDict({
             "company_id": company_id,
             "recom_user_id": recom,
-            "parent_chain_id": psc,
+            "parent_chain_id": psc if psc else 0,
             "pid": pid,
             "presentee_user_id": click_user_id
         })
@@ -398,6 +398,12 @@ class InfraUserDataService(DataService):
             "presentee_user_id": click_user_id
         })
         ret = yield http_get(path.INFRA_IF_SEEK_CHECK, params)
+        return ret
+
+    @gen.coroutine
+    def infra_create_collect_position(self, params):
+        """增加收藏职位"""
+        ret = yield http_post_v2(user.INFRA_USER_COLLECT_POSITION, user_service, params)
         return ret
 
     @gen.coroutine
@@ -489,3 +495,4 @@ class InfraUserDataService(DataService):
         if ret.code != const.NEWINFRA_API_SUCCESS:
             raise InfraOperationError(ret.message)
         raise gen.Return(ret.data)
+

@@ -142,6 +142,9 @@ TEMPLATE_JOB_SEND_FINISH_MSGID = "template_message_receipt_id"
 # joywok绑定授权验证码
 JOYWOK_IDENTIFY_CODE = "joywok_identify_{}"
 
+# C端用户监听频道
+CHAT_CHATTING_CHANNEL = "chatting_{0}_{1}"
+
 # ++++++++++业务常量+++++++++++
 # Cookie name
 COOKIE_SESSIONID = "5MA8A989"
@@ -788,6 +791,10 @@ TEMPORARY_CODE_STR_SCENE = "{}_{}"
 STR_SCENE_JOYWOK = "JOYWOK"
 STR_SCENE_MRAS_WELCOME = "PCAPPLICATION"
 STR_SCENE_WORKWX = "WORKWX"
+# 员工候选人聊天。
+STR_SCENE_EMPLOYEE_CHATTING = "EMPLOYEECHATTING"
+CONSTANT_CHATTING_NEWS_TITLE = "开始聊一聊吧"
+CONSTANT_CHATTING_NEWS_DESCRIPTION = "{}员工 {}向你内推职位：{}"
 
 # 临时二维码的生成来源依据
 SCAN_FROM = 'pc_referral'
@@ -893,3 +900,6 @@ PATHS_FOR_NOWEIXIN = [ path.POSITION_LIST, path.WECHAT_COMPANY, path.COMPANY_TEA
                        path.JOYWOK_HOME_PAGE, path.JOYWOK_AUTO_AUTH,
                        path.REFERRAL_UPLOAD_PCLOGIN, path.IMAGE_URL
                      ]
+
+# 员工离职的消息类型
+CHATTING_EMPLOYEE_MSG_TYPE_RESIGNATION = "employee_off"

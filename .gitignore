@@ -126,3 +126,5 @@ cert/*
 .gradle/
 
 node_modules/
+python3/
+python

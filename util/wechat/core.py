@@ -439,6 +439,7 @@ def send_succession_message(wechat, open_id, pattern_id=99, position_id=0, messa
     elif pattern_id == const.STR_SCENE_WORKWX:
         content = '您已认证成功!'
     else:
+
         content = "欢迎关注：{}, 点击菜单栏发现更多精彩~".format(wechat.get("name"))
     if message:
         content = message
@@ -449,8 +450,37 @@ def send_succession_message(wechat, open_id, pattern_id=99, position_id=0, messa
             "content": content
         }
     })
+
     yield http_post_cs_msg(
         wx.WX_CS_MESSAGE_API % wechat.get("access_token"), data=jdata)
+
+
+@gen.coroutine
+def send_succession_news(wechat, open_id, params):
+    """
+    员工候选人聊天触发的候选人关注公众号事件，给候选人发送公众号客服消息
+    :param wechat: 公众号记录
+    :param open_id: 候选人open_id
+    :param params: 客服消息参数
+    :return: 操作结果
+    """
+    data = ObjectDict({
+        "touser": open_id,
+        "msgtype": "news",
+        "news": {
+            "articles": [
+                {
+                    "title": params.title,
+                    "description": params.description,
+                    "url": params.url,
+                    "picurl": params.picurl
+                }
+            ]
+        }
+    })
+
+    yield http_post_cs_msg(
+        wx.WX_CS_MESSAGE_API % wechat.get("access_token"), data=data)
 
 
 @cache(ttl=60 * 60)

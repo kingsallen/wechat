@@ -1497,7 +1497,6 @@ class ReferralRadarCardJobViewHandler(BaseHandler):
 
 
 class ReferralRadarCardPositionHandler(BaseHandler):
-
     @handle_response
     @authenticated
     @gen.coroutine

@@ -5,8 +5,8 @@
 from tornado import gen
 
 from service.data.base import DataService
-from util.common.decorator import cache
 from util.common import ObjectDict
+
 
 class UserUserDataService(DataService):
 
