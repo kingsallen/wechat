@@ -209,10 +209,19 @@ class EmployeeChattingHandler(BaseHandler):
         获取聊天室列表
         :return: 聊天室列表
         """
+        self.logger.debug("EmployeeChattingHandler get_totalunread room_id:{}, role:{}, user_id:{}, employee_id:{}, "
+                          "company_id:{}"
+                          .format(self.params.room_id,
+                                  self.role,
+                                  self.user_id,
+                                  self.employee_id,
+                                  self.current_user.company.id)
+                          )
         ret = yield self.chatting_ps.get_employee_chatting_unread_count(self.params.room_id or 0, self.role,
                                                                         self.user_id, self.employee_id,
                                                                         self.current_user.company.id)
         chat_num = yield self.chat_ps.get_all_unread_chat_num(self.current_user.sysuser.id)
+        self.logger.debug("EmployeeChattingHandler get_totalunread chat_num:{}".format(chat_num))
 
         if ret and ret.code and (ret.code == "0" or ret.code == 0):
             self.send_json_success({"unread": ret.data + (chat_num if chat_num else 0)})
