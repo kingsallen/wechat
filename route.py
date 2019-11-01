@@ -284,6 +284,7 @@ platform_routes = [
     (r"/api/position/share?",                        handler.platform.position.APIPositionShareInBulkHandler,   {"event": "api_share_position_list"}),
 
     (r"/api/func/wechat/?",                          handler.platform.employee.WechatSubInfoHandler,            {"event": "wechat_sub_info"}),
+    (r"/api/func/momo-graph/?",                      handler.platform.employee.MomoSwitchSubHandler,            {"event": "momo_switch_sub"}),
     (r'/api/user/survey/?',                          handler.platform.user.APIUserSurveyHandler,                {"event": "user_survey_api"}),
     (r'/api/position/recom/list/?',                  handler.platform.user.APIPositionRecomListHandler,         {"event": "position_ai-recomlist"}),
     (r'/api/recom/position/switch',                  handler.platform.user.APIPositionRecomListCloseHandler,    {"event": "position_ai-recom-position"}),
