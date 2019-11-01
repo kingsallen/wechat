@@ -869,7 +869,7 @@ class EventPageService(PageService):
                                )
                 picurl = user.data.headimg if user.data and user.data.headimg else ""
                 if not picurl.startswith("http"):
-                    picurl += "https://cdn.moseeker.com/"
+                    picurl = settings["static_domain"] + picurl
 
                 # 组装发送图文消息的参数
                 if position:
