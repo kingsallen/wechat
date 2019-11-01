@@ -161,10 +161,12 @@ class EmployeeChattingHandler(BaseHandler):
                           "page_no:{}, page_size:{}".format(self.user_id, self.role, self.employee_id,
                                                             self.current_user.company.id, page_no, page_size))
         if self.role == "employee" and self.employee_id == 0:
+            self.logger.debug("EmployeeChattingHandler get_rooms 30500")
             self._send_json(data={}, status_code=30500, message=CHATTING_EMPLOYEE_RESIGNATION_TIPS, http_code=200)
             return
 
         if self.role == "user" and self.user_id == 0:
+            self.logger.debug("EmployeeChattingHandler get_rooms 305072")
             self._send_json(data={}, status_code=305072, message=CHATTING_EMPLOYEE_EMPLOYEE_TIPS, http_code=200)
             return
 
