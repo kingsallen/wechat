@@ -163,9 +163,13 @@ class EmployeeChattingHandler(BaseHandler):
         ret = yield self.chatting_ps.get_employee_chatrooms(self.user_id, self.role, self.employee_id,
                                                             self.current_user.company.id, page_no, page_size)
 
-        if ret and ret.code and ret.code == "US305072":
-            self._send_json(data={}, status_code=30500, message=CHATTING_EMPLOYEE_EMPLOYEE_TIPS, http_code=200)
-            return
+        if ret and ret.code:
+            if self.role == "user" and ret.code == "US305072":
+                self._send_json(data={}, status_code=30500, message=CHATTING_EMPLOYEE_EMPLOYEE_TIPS, http_code=200)
+                return
+            elif self.role == "employee" and ret.code == "US30500":
+                self._send_json(data={}, status_code=30500, message=CHATTING_EMPLOYEE_RESIGNATION_TIPS, http_code=200)
+                return
 
         self.un_box(ret)
 
