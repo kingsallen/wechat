@@ -576,5 +576,28 @@ class InfraDictDataService(DataService):
         :return:
         """
         res = yield http_get_v2(dictionary.NEWINFRA_DICT_REGION, dict_service)
-        # ret = yield self.make_industries_result(res, locale_display)
+        ret = yield self.make_result(res.data, locale_display)
         return res.data
+
+    @staticmethod
+    @gen.coroutine
+    def make_result(data, locale_display=None):
+        if locale_display == "en_US":
+            sub_name = ['code', 'ename']
+        else:
+            sub_name = ['code', 'name']
+        rename_mapping = {'ename': 'name'}
+
+        for province in data:
+            for city in province.cities:
+                if city.get("cities"):
+                    city["cities"] = list(map(lambda x: rename_keys(sub_dict(x, sub_name), rename_mapping), city.get("cities")))
+
+            if province.get("cities"):
+                province["cities"] = list(map(lambda x: rename_keys(sub_dict(x, sub_name), rename_mapping), province.get("cities")))
+        data = list(map(lambda x: rename_keys(sub_dict(x, sub_name), rename_mapping), data))
+        return data
+
+    # return list(
+    #     filter(lambda x: x.get('code') in self._LEVEL1_CITY_CODES,
+    #            res_data))
