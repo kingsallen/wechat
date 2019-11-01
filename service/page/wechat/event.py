@@ -868,8 +868,11 @@ class EventPageService(PageService):
                                params={"employee_id": employee_id_str}
                                )
                 picurl = user.data.headimg if user.data and user.data.headimg else ""
+                self.logger.debug("EventPageService _do_weixin_qrcode picurl:{} ".format(picurl))
                 if not picurl.startswith("http"):
                     picurl = settings["static_domain"] + picurl
+
+                self.logger.debug("EventPageService _do_weixin_qrcode picurl:{} ".format(picurl))
 
                 # 组装发送图文消息的参数
                 if position:
