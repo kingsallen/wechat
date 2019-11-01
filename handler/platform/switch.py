@@ -83,3 +83,11 @@ class SwitchHandler(BaseHandler):
 
         data = ret.data.get('valid') if ret.data else 0
         self.send_json_success(data=data)
+
+    @handle_response
+    @gen.coroutine
+    def get_referral_rule(self):
+        """
+        获取内推方式开关
+        :return:
+        """
