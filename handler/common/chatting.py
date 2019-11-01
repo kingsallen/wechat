@@ -7,7 +7,8 @@ import redis
 from tornado import gen, websocket, ioloop
 
 import conf.common as const
-from conf.message import CHATTING_EMPLOYEE_RESIGNATION, CHATTING_EMPLOYEE_RESIGNATION_TIPS
+from conf.message import CHATTING_EMPLOYEE_RESIGNATION, CHATTING_EMPLOYEE_RESIGNATION_TIPS, \
+    CHATTING_EMPLOYEE_EMPLOYEE_TIPS
 from conf.protocol import WebSocketCloseCode
 from conf.sensors import CHATTING_SEND_MESSAGE
 from globals import logger
@@ -162,9 +163,23 @@ class EmployeeChattingHandler(BaseHandler):
         if self.role == "employee" and self.employee_id == 0:
             self._send_json(data={}, status_code=30500, message=CHATTING_EMPLOYEE_RESIGNATION_TIPS, http_code=200)
             return
+
+        if self.role == "user" and self.user_id == 0:
+            self._send_json(data={}, status_code=30500, message=CHATTING_EMPLOYEE_EMPLOYEE_TIPS, http_code=200)
+            return
+
         ret = yield self.chatting_ps.get_employee_chatrooms(self.user_id, self.role, self.employee_id,
                                                             self.current_user.company.id, page_no, page_size)
         self.logger.debug("EmployeeChattingHandler get_rooms ret:{}".format(ret))
+
+        if ret and ret.code:
+            if self.role == "user" and ret.code == "US305072":
+                self._send_json(data={}, status_code=30500, message=CHATTING_EMPLOYEE_EMPLOYEE_TIPS, http_code=200)
+                return
+            elif self.role == "employee" and ret.code == "US30500":
+                self._send_json(data={}, status_code=30500, message=CHATTING_EMPLOYEE_RESIGNATION_TIPS, http_code=200)
+                return
+
         self.un_box(ret)
 
     @handle_response
@@ -287,6 +302,9 @@ class EmployeeChattingHandler(BaseHandler):
 
         if self.role == "employee" and ret and ret.code == "US30500":
             self._send_json(data={}, status_code=30500, message=CHATTING_EMPLOYEE_RESIGNATION_TIPS, http_code=200)
+            return
+        if self.role == "user" and ret and ret.code == "US305072":
+            self._send_json(data={}, status_code=30500, message=CHATTING_EMPLOYEE_EMPLOYEE_TIPS, http_code=200)
             return
         self.un_box(ret)
 
