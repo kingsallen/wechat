@@ -870,7 +870,7 @@ class EventPageService(PageService):
                 picurl = user.data.headimg if user.data and user.data.headimg else ""
                 self.logger.debug("EventPageService _do_weixin_qrcode picurl:{} ".format(picurl))
                 if not picurl.startswith("http"):
-                    picurl = settings["static_domain"] + "/" + picurl
+                    picurl = "https:" + settings["static_domain"] + "/" + picurl
 
                 self.logger.debug("EventPageService _do_weixin_qrcode picurl:{} ".format(picurl))
 
