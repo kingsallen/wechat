@@ -356,3 +356,12 @@ class CompanyPageService(PageService):
         res = yield self.infra_company_ds.check_oms_switch_status(company_id, module_name)
         return res
 
+    @gen.coroutine
+    def get_referral_rule_switch(self, company_id):
+        """
+        获取内推方式开关
+        :param company_id:
+        :return:
+        """
+        res = yield self.infra_company_ds.get_referral_rule_switch(company_id)
+        return res

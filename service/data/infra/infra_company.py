@@ -125,3 +125,11 @@ class InfraCompanyDataService(DataService):
         """
         ret = yield http_get_v2(company.COMPANY_HR_INFO, company_service, params)
         return ret
+
+    @gen.coroutine
+    def get_referral_rule_switch(self, company_id):
+        params = ObjectDict({
+            "company_id": company_id
+        })
+        ret = yield http_get_v2(company.REFERRAL_RULE_SWITCH, company_service, params)
+        return ret
