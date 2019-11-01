@@ -867,6 +867,9 @@ class EventPageService(PageService):
                                wechat_signature=wechat.get("signature"),
                                params={"employee_id": employee_id_str}
                                )
+                picurl = user.data.headimg if user.data and user.data.headimg else ""
+                if not picurl.startswith("http"):
+                    picurl += "https://cdn.moseeker.com/"
 
                 # 组装发送图文消息的参数
                 if position:
@@ -882,7 +885,7 @@ class EventPageService(PageService):
                     title=const.CONSTANT_CHATTING_NEWS_TITLE,
                     description=description,
                     url=url,
-                    picurl=user.data.headimg if user.data and user.data.headimg else ""
+                    picurl=picurl
                 )
                 # 发送客服消息
                 self.logger.debug("EventPageService _do_weixin_qrcode params:{}".format(params))
