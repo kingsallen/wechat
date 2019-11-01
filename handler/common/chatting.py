@@ -165,7 +165,7 @@ class EmployeeChattingHandler(BaseHandler):
             return
 
         if self.role == "user" and self.user_id == 0:
-            self._send_json(data={}, status_code=30500, message=CHATTING_EMPLOYEE_EMPLOYEE_TIPS, http_code=200)
+            self._send_json(data={}, status_code=305072, message=CHATTING_EMPLOYEE_EMPLOYEE_TIPS, http_code=200)
             return
 
         ret = yield self.chatting_ps.get_employee_chatrooms(self.user_id, self.role, self.employee_id,
@@ -174,7 +174,7 @@ class EmployeeChattingHandler(BaseHandler):
 
         if ret and ret.code:
             if self.role == "user" and ret.code == "US305072":
-                self._send_json(data={}, status_code=30500, message=CHATTING_EMPLOYEE_EMPLOYEE_TIPS, http_code=200)
+                self._send_json(data={}, status_code=305072, message=CHATTING_EMPLOYEE_EMPLOYEE_TIPS, http_code=200)
                 return
             elif self.role == "employee" and ret.code == "US30500":
                 self._send_json(data={}, status_code=30500, message=CHATTING_EMPLOYEE_RESIGNATION_TIPS, http_code=200)
@@ -304,7 +304,7 @@ class EmployeeChattingHandler(BaseHandler):
             self._send_json(data={}, status_code=30500, message=CHATTING_EMPLOYEE_RESIGNATION_TIPS, http_code=200)
             return
         if self.role == "user" and ret and ret.code == "US305072":
-            self._send_json(data={}, status_code=30500, message=CHATTING_EMPLOYEE_EMPLOYEE_TIPS, http_code=200)
+            self._send_json(data={}, status_code=305072, message=CHATTING_EMPLOYEE_EMPLOYEE_TIPS, http_code=200)
             return
         self.un_box(ret)
 
