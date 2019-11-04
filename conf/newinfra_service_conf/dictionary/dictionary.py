@@ -2,4 +2,4 @@
 
 
 NEWINFRA_DICT_HOPE_JOB_TREE = "/v4/constant/codeTreeList"
-NEWINFRA_DICT_REGION = "/v4/city/provinceandcitys"
+NEWINFRA_DICT_REGION = "/v4/province/city/region"
