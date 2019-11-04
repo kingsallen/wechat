@@ -589,6 +589,9 @@ class InfraDictDataService(DataService):
         rename_mapping = {'ename': 'name'}
 
         for province in data:
+            if province.get("name") in ["全国", "海外"]:
+                data.remove(province)
+                continue
             if province.get("cities"):
                 for city in province.get("cities"):
                     if city.get("cities"):
