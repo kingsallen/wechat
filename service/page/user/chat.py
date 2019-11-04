@@ -23,8 +23,10 @@ class ChatPageService(PageService):
     @gen.coroutine
     def get_chatrooms(self, user_id, page_no, page_size):
         """获得聊天室列表"""
-
+        self.logger.debug("ChatPageService get_chatrooms user_id:{}, page_no:{}, page_size:{}".format(user_id, page_no,
+                                                                                                      page_size))
         ret = yield self.thrift_chat_ds.get_chatrooms_list(user_id, page_no, page_size)
+        self.logger.debug("ChatPageService get_chatrooms ret:{}".format(ret))
         obj_list = list()
         if ret.rooms:
             for e in ret.rooms:
@@ -37,7 +39,7 @@ class ChatPageService(PageService):
                 room['chat_time'] = str_2_date(e.createTime, self.constant.TIME_FORMAT_MINUTE)
                 room['unread_num'] = e.unReadNum
                 obj_list.append(room)
-
+        self.logger.debug("ChatPageService get_chatrooms obj_list:{}".format(obj_list))
         raise gen.Return(obj_list)
 
     @gen.coroutine
@@ -176,6 +178,7 @@ class ChatPageService(PageService):
             "hraccount_id": int(hr_id),
             "sysuser_id": user_id
         })
+        self.logger.debug("ChatPageService get_unread_chat_num chatroom:{}".format(chatroom))
 
         # 若无聊天，则默认显示1条未读消息
         if not chatroom:

@@ -26,8 +26,9 @@ class HrWxHrChatListDataService(DataService):
 
         if not fields:
             fields = list(self.hr_wx_hr_chat_list_dao.fields_map.keys())
-
+        self.logger.debug("HrWxHrChatListDataService get_chatroom conds:{}".format(conds))
         response = yield self.hr_wx_hr_chat_list_dao.get_record_by_conds(conds, fields)
+        self.logger.debug("HrWxHrChatListDataService get_chatroom response:{}".format(response))
         raise gen.Return(response)
 
     @gen.coroutine

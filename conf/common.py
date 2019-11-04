@@ -811,7 +811,8 @@ STR_SCENE_WORKWX = "WORKWX"
 # 员工候选人聊天。
 STR_SCENE_EMPLOYEE_CHATTING = "EMPLOYEECHATTING"
 CONSTANT_CHATTING_NEWS_TITLE = "开始聊一聊吧"
-CONSTANT_CHATTING_NEWS_DESCRIPTION = "{}员工 {}向你内推职位：{}"
+CONSTANT_CHATTING_NEWS_DESCRIPTION = "{}员工 {}期待和你沟通内推职位：{}"
+CONSTANT_CHATTING_NEWS_DESCRIPTION_NONE_POSITION = "{}员工 {}期待和你沟通内推职位"
 
 # 临时二维码的生成来源依据
 SCAN_FROM = 'pc_referral'
@@ -917,3 +918,6 @@ PATHS_FOR_NOWEIXIN = [ path.POSITION_LIST, path.WECHAT_COMPANY, path.COMPANY_TEA
                        path.JOYWOK_HOME_PAGE, path.JOYWOK_AUTO_AUTH,
                        path.REFERRAL_UPLOAD_PCLOGIN, path.IMAGE_URL
                      ]
+
+# 员工离职的消息类型
+CHATTING_EMPLOYEE_MSG_TYPE_RESIGNATION = "employee_off"

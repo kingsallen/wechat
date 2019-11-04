@@ -858,6 +858,7 @@ class PositionHandler(BaseHandler):
 
         if not (self.params.recom or self.params.root_recom):
             employee_user_id = 0
+            psc = -1
         else:
             if self.params.root_recom:
                 # 人脉连连看页面目标用户打开的职位链接
@@ -867,6 +868,7 @@ class PositionHandler(BaseHandler):
                 recom = decode_id(self.params.recom)
                 psc = self.params.psc if self.params.psc else 0
             click_user_id = self.current_user.sysuser.id
+            self.logger.debug('PositionHandler _insert_into_kafka psc:{}, params:{}'.format(psc, self.params))
             ret = yield self.user_ps.if_referral_position(
                 self.current_user.company.id,
                 recom, psc, position_id, click_user_id)
@@ -884,7 +886,8 @@ class PositionHandler(BaseHandler):
             recom_user_id=self.current_user.recom.id if self.current_user.recom else 0,
             click_from=self.params.get("from"),
             source=self.params.source,
-            send_time=self.params.send_time or ''
+            send_time=self.params.send_time or '',
+            psc=psc
         )
         radar_event_emitter.emit(position_page_view_event)
 
