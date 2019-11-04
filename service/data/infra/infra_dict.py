@@ -581,7 +581,7 @@ class InfraDictDataService(DataService):
 
     @staticmethod
     @gen.coroutine
-    def internationalize_result(data, locale_display=None):
+    def internationalize_result(data, locale_display=None):  # self._LEVEL1_CITY_CODES
         if locale_display == "en_US":
             sub_name = ['code', 'ename', 'children']
         else:
