@@ -191,8 +191,8 @@ class NearbyStoresHandler(BaseHandler):
             latitude = self.params.latitude
         else:
             ret = yield self.company_ps.get_lbs_ip_location(self.request.remote_ip)
-            longitude = ret.rectangle.split(";")[0].split(",")[0]
-            latitude = ret.rectangle.split(";")[0].split(",")[1]
+            longitude = ret.split(";")[0].split(",")[0]
+            latitude = ret.split(";")[0].split(",")[1]
 
         stores_info = yield self.company_ps.get_nearby_stores(self.current_user.company.id, longitude, latitude, self.params.radius)
 
@@ -213,8 +213,8 @@ class PositionLbsHandler(BaseHandler):
             latitude = self.params.latitude
         else:
             ret = yield self.company_ps.get_lbs_ip_location(self.request.remote_ip)
-            longitude = ret.rectangle.split(";")[0].split(",")[0]
-            latitude = ret.rectangle.split(";")[0].split(",")[1]
+            longitude = ret.split(";")[0].split(",")[0]
+            latitude = ret.split(";")[0].split(",")[1]
         stores_info = yield self.company_ps.get_position_lbs_info(self.current_user.company.id, longitude, latitude, self.params.radius, position_id)
 
         if stores_info.data:
