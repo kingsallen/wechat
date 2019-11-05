@@ -351,17 +351,25 @@ class ChatPageService(PageService):
                     route='{host}{uri}'.format(host=settings['chatbot_host'], uri='qa.api'), jdata=params,
                     infra=False)
 
-            self.logger.debug(res.results)
-            results = res.results
-            for r in results:
-                ret_message = yield self.make_response(r, current_user)
-                messages.append(ret_message)
-            self.logger.debug(messages)
+            self.logger.debug(res)
+            if res.status == 0 and res.data.results:
+                results = res.data.results
+                for r in results:
+                    ret_message = yield self.make_response(r, current_user)
+                    messages.append(ret_message)
         except Exception as e:
-            self.logger.error("[get_chatbot_reply_fail!!]reeor: %s, params: %s" % (e, params))
-            return []
-        else:
-            return messages
+            self.logger.error("mobot api error: %s, params: %s" % (e, params))
+
+        # 没有返回内容，回复默认信息
+        if not messages:
+            default_message = dict(resultType=0,
+                                   values=dict(content='很抱歉，HR小姐姐还没告诉我答案，我暂时不能帮你回答问题哦。',
+                                               compoundContent=None))
+            default_result_message = yield self.make_response(default_message, current_user)
+            messages.append(default_result_message)
+
+        self.logger.debug(messages)
+        return messages
 
     @gen.coroutine
     def make_response(self, message, current_user):
