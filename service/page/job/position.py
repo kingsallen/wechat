@@ -117,7 +117,7 @@ class PositionPageService(PageService):
         }
         # 防止因为es的不稳定导致的职位详情页无法访问的情况。
         try:
-            response = self.es.search(index='index', body=data)
+            response = self.es.search(index='index', body=data, timeout=1)
             result_list = response.hits.hits
         except Exception as e:
             self.logger.error("position info es search error: {}".format(e))
