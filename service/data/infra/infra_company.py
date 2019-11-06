@@ -126,6 +126,7 @@ class InfraCompanyDataService(DataService):
         ret = yield http_get_v2(company.COMPANY_HR_INFO, company_service, params)
         return ret
 
+    @gen.coroutine
     def get_company_hr_list(self, params):
         """
         根据hr_ids批量获取HR列表数据
