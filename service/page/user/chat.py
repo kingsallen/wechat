@@ -23,8 +23,8 @@ class ChatPageService(PageService):
     @gen.coroutine
     def get_chatrooms(self, user_id, page_no, page_size):
         """获得聊天室列表"""
-
         ret = yield self.thrift_chat_ds.get_chatrooms_list(user_id, page_no, page_size)
+        self.logger.debug(ret)
         obj_list = list()
         if ret.rooms:
             for e in ret.rooms:

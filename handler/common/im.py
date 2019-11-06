@@ -230,66 +230,6 @@ class ChatRoomHandler(BaseHandler):
 
         return
 
-        # hr_id = self.params.hr_id or 0
-        # if hr_id:
-        #     company_id = yield self.company_ps.get_real_company_id(hr_id, self.current_user.company.id)
-        #     wechat = yield self.wechat_ps.get_wechat(conds={
-        #         "company_id": company_id,
-        #         "authorized": const.YES
-        #     })
-        #     jsapi_ticket = wechat.jsapi_ticket
-        #     appid = wechat.appid
-        # else:
-        #     jsapi_ticket = self.current_user.wechat.jsapi_ticket
-        #     appid = self.current_user.wechat.appid
-        #
-        # jsapi = JsApi(
-        #     jsapi_ticket=jsapi_ticket, url=self.fullurl(encode=False))
-        #
-        # res_privacy, data_privacy = yield self.privacy_ps.if_privacy_agreement_window(
-        #     self.current_user.sysuser.id)
-        #
-        # config = ObjectDict({
-        #     "debug": False,
-        #     "appid": appid,
-        #     "timestamp": jsapi.timestamp,
-        #     "nonceStr": jsapi.nonceStr,
-        #     "signature": jsapi.signature,
-        #     "jsApiList": ["onMenuShareTimeline",
-        #                   "onMenuShareAppMessage",
-        #                   "updateTimelineShareData",
-        #                   "updateAppMessageShareData",
-        #                   "onMenuShareQQ",
-        #                   "updateTimelineShareData",
-        #                   "updateAppMessageShareData",
-        #                   "onMenuShareWeibo",
-        #                   "hideOptionMenu",
-        #                   "showOptionMenu",
-        #                   "startRecord",
-        #                   "stopRecord",
-        #                   "onVoiceRecordEnd",
-        #                   "playVoice",
-        #                   "pauseVoice",
-        #                   "stopVoice",
-        #                   "onVoicePlayEnd",
-        #                   "uploadVoice",
-        #                   "translateVoice",
-        #                   "downloadVoice",
-        #                   "hideMenuItems",
-        #                   "showMenuItems",
-        #                   "hideAllNonBaseMenuItem",
-        #                   "showAllNonBaseMenuItem"]
-        # })
-        # self.logger.debug("jsapi_config:{}".format(config))
-        # self._render(
-        #     template_name="chat/room.html",
-        #     data={
-        #         "room_id": room_id,
-        #         "show_privacy_agreement": bool(data_privacy)
-        #     },
-        #     config=config
-        # )
-
     @gen.coroutine
     def _render(self, template_name,
                 data,
@@ -445,7 +385,6 @@ class ChatHandler(BaseHandler):
     @gen.coroutine
     def get_chatrooms(self):
         """获得 C 端用户的聊天室列表"""
-
         page_no = self.params.page_no or 1
         page_size = self.params.page_size or 10
         res = yield self.chat_ps.get_chatrooms(self.current_user.sysuser.id, page_no, page_size)
