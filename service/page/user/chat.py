@@ -25,12 +25,12 @@ class ChatPageService(PageService):
         """获得聊天室列表"""
         def get_hr_info(hrs, hr_id):
             for h in hrs:
-                if h['id'] == hr_id:
+                if int(h['id']) == int(hr_id):
                     return ObjectDict(h)
 
         def get_company_info(companys, company_id):
             for c in companys:
-                if c['id'] == company_id:
+                if int(c['id']) == int(company_id):
                     return ObjectDict(c)
 
         records = []
