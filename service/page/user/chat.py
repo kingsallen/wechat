@@ -81,8 +81,8 @@ class ChatPageService(PageService):
             room['hr_name'] = hr.username or "HR"
             room['hr_headimg'] = make_static_url(hr.headimgurl or company.logo or const.HR_HEADIMG)
             room['company_name'] = company.abbreviation or company.name or ""
-            room['chat_time'] = str_2_date(d.create_time, self.constant.TIME_FORMAT_MINUTE)
-            room['unread_num'] = d.hr_have_unread_msg
+            room['chat_time'] = str_2_date(d.update_time, self.constant.TIME_FORMAT_MINUTE)
+            room['unread_num'] = d.user_have_unread_msg
             records.append(room)
 
         raise gen.Return(records)
