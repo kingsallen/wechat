@@ -231,7 +231,7 @@ class EmployeeChattingHandler(BaseHandler):
     @gen.coroutine
     def get_totalunread(self):
         """
-        获取聊天室列表
+        获取未读聊天消息
         :return: 聊天室列表
         """
         self.logger.debug("EmployeeChattingHandler get_totalunread room_id:{}, role:{}, user_id:{}, employee_id:{}, "
@@ -246,17 +246,22 @@ class EmployeeChattingHandler(BaseHandler):
                                                                         self.user_id, self.employee_id,
                                                                         self.current_user.company.id)
         self.logger.debug("EmployeeChattingHandler get_totalunread ret:{}".format(ret))
-        chat_num = yield self.chat_ps.get_all_unread_chat_num(self.current_user.sysuser.id)
-        self.logger.debug("EmployeeChattingHandler get_totalunread chat_num:{}".format(chat_num))
+        if self.role == "employee":
 
-        if ret and ret.code and (ret.code == "0" or ret.code == 0):
-            self.logger.debug("EmployeeChattingHandler get_totalunread unread:{}".format(ret.data +
-                                                                                         (chat_num if chat_num else 0)))
-            self.send_json_success({"unread": ret.data + (chat_num if chat_num else 0)})
+            if ret and ret.code and (ret.code == "0" or ret.code == 0):
+                self.logger.debug("EmployeeChattingHandler get_totalunread unread:{}".format(ret.data))
+                self.send_json_success({"unread": ret.data})
+            else:
+                self.send_json_error({"unread": ret.data if ret.data else 0}, ret.message)
         else:
-            self.logger.debug("EmployeeChattingHandler get_totalunread unread:{}"
-                              .format((ret.data if ret.data else 0) + (chat_num if chat_num else 0)))
-            self.send_json_error({"unread": (ret.data if ret.data else 0) + (chat_num if chat_num else 0)}, ret.message)
+            chat_num = yield self.chat_ps.get_all_unread_chat_num(self.current_user.sysuser.id)
+            self.logger.debug("EmployeeChattingHandler get_totalunread chat_num:{}".format(chat_num))
+            if ret and ret.code and (ret.code == "0" or ret.code == 0):
+                self.logger.debug("EmployeeChattingHandler get_totalunread unread:{}"
+                                  .format(ret.data + (chat_num if chat_num else 0)))
+                self.send_json_success({"unread": ret.data + (chat_num if chat_num else 0)})
+            else:
+                self.send_json_error({"unread": (ret.data if ret.data else 0) + (chat_num if chat_num else 0)}, ret.message)
 
     @handle_response
     @gen.coroutine
