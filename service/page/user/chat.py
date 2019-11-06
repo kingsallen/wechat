@@ -408,6 +408,7 @@ class ChatPageService(PageService):
         # 没有返回内容，回复默认信息
         if not messages:
             default_message = dict(resultType=0,
+                                   resultTypeName='html',
                                    values=dict(content='很抱歉，HR小姐姐还没告诉我答案，我暂时不能帮你回答问题哦。',
                                                compoundContent=None))
             default_result_message = yield self.make_response(default_message, current_user)
