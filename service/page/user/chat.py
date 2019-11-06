@@ -45,7 +45,7 @@ class ChatPageService(PageService):
             raise gen.Return(records)
 
         # 过滤hr_ids
-        for r in user_chatroom_page.data.currentPageData:
+        for r in user_chatroom_page.data.current_page_data:
             if r.hr_id not in hr_ids:
                 hr_ids.append(r.hr_id)
 
@@ -66,7 +66,7 @@ class ChatPageService(PageService):
             self.logger.error("get_user_chatroom_page get_company_list error, company_ids:{}".format(company_ids))
             raise gen.Return(records)
 
-        for d in user_chatroom_page.data.currentPageData:
+        for d in user_chatroom_page.data.current_page_data:
             hr = get_hr_info(d.hr_id)
             company = get_company_info(hr['company_id'])
             if not hr or not company:
