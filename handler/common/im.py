@@ -385,9 +385,9 @@ class ChatHandler(BaseHandler):
     @gen.coroutine
     def get_chatrooms(self):
         """获得 C 端用户的聊天室列表"""
-        page_no = self.params.page_no or 1
+        page_no = self.params.page_num or 1
         page_size = self.params.page_size or 10
-        res = yield self.chat_ps.get_chatrooms(self.current_user.sysuser.id, page_no, page_size)
+        res = yield self.chat_ps.get_user_chatroom_page(self.current_user.sysuser.id, page_no, page_size)
         self.send_json_success(data=ObjectDict(
             records=res
         ))
