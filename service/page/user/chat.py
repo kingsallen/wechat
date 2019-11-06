@@ -58,6 +58,7 @@ class ChatPageService(PageService):
 
         # 过滤company_ids
         for hr in company_hr_list.data:
+            hr = ObjectDict(hr)
             if hr.company_id not in company_ids:
                 company_ids.append(hr.company_id)
 
