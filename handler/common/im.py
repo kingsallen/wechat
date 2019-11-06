@@ -835,14 +835,9 @@ class ChatHandler(BaseHandler):
             if bot_message.msg_type == '':
                 continue
 
-            if msg_type in const.INTERACTIVE_MSG:
-                compound_content.update(disabled=True)  # 可交互类型消息入库后自动标记为不可操作
-
             if msg_type == "cards":
                 # 只在c端展示，并且不保存
                 if bot_message:
-                    if msg_type in const.INTERACTIVE_MSG:
-                        compound_content.update(disabled=False)  # 可交互类型消息发送给各端时需标记为可以操作
                     message_body = json_dumps(ObjectDict(
                         compoundContent=compound_content,
                         content=bot_message.content,
@@ -877,9 +872,6 @@ class ChatHandler(BaseHandler):
             self.logger.debug("save chat by alphadog chat_params:{}".format(chat_params))
             chat_id = yield self.chat_ps.save_chat(chat_params)
             if bot_message:
-                if msg_type in const.INTERACTIVE_MSG:
-                    compound_content.update(disabled=False)  # 可交互类型消息发送给各端时需标记为可以操作
-
                 message_body = json_dumps(ObjectDict(
                     compoundContent=compound_content,
                     content=bot_message.content,

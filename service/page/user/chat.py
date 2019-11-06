@@ -387,7 +387,7 @@ class ChatPageService(PageService):
         content = ret.get("content", "")
         compoundContent = ret.get("compoundContent") or {}
         stats = ret.get("stats") or {}
-        msg_type = const.MSG_TYPE.get(res_type)
+        msg_type = message.get("resultTypeName")
         ret_message = ObjectDict()
         ret_message['content'] = content
         ret_message['compound_content'] = compoundContent
