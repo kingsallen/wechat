@@ -273,6 +273,7 @@ class PositionPageService(PageService):
 
         raise gen.Return(hr_account)
 
+    @log_time
     @gen.coroutine
     def __get_share_conf(self, conf_id):
         """获取职位自定义分享模板"""
