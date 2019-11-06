@@ -46,6 +46,7 @@ class ChatPageService(PageService):
 
         # 过滤hr_ids
         for r in user_chatroom_page.data.current_page_data:
+            r = ObjectDict(r)
             if r.hr_id not in hr_ids:
                 hr_ids.append(r.hr_id)
 
@@ -67,6 +68,7 @@ class ChatPageService(PageService):
             raise gen.Return(records)
 
         for d in user_chatroom_page.data.current_page_data:
+            d = ObjectDict(d)
             hr = get_hr_info(d.hr_id)
             company = get_company_info(hr['company_id'])
             if not hr or not company:
