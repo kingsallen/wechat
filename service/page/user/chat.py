@@ -69,8 +69,8 @@ class ChatPageService(PageService):
 
         for d in user_chatroom_page.data.current_page_data:
             d = ObjectDict(d)
-            hr = get_hr_info(d.hr_id)
-            company = get_company_info(hr['company_id'])
+            hr = get_hr_info(company_hr_list, d.hr_id)
+            company = get_company_info(company_list, hr['company_id'])
             if not hr or not company:
                 self.logger.warning("get_user_chatroom_page hr or company not exist, hr_id:{}".format(d.hr_id))
                 continue
