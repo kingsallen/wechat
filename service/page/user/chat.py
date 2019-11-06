@@ -21,26 +21,68 @@ class ChatPageService(PageService):
         super().__init__()
 
     @gen.coroutine
-    def get_chatrooms(self, user_id, page_no, page_size):
+    def get_user_chatroom_page(self, user_id, page_no, page_size):
         """获得聊天室列表"""
-        self.logger.debug("ChatPageService get_chatrooms user_id:{}, page_no:{}, page_size:{}".format(user_id, page_no,
-                                                                                                      page_size))
-        ret = yield self.thrift_chat_ds.get_chatrooms_list(user_id, page_no, page_size)
-        self.logger.debug("ChatPageService get_chatrooms ret:{}".format(ret))
-        obj_list = list()
-        if ret.rooms:
-            for e in ret.rooms:
-                room = ObjectDict()
-                room['id'] = e.id
-                room['hr_id'] = e.hrId
-                room['hr_name'] = e.name or "HR"
-                room['hr_headimg'] = make_static_url(e.headImgUrl or e.companyLogo or const.HR_HEADIMG)
-                room['company_name'] = e.companyName
-                room['chat_time'] = str_2_date(e.createTime, self.constant.TIME_FORMAT_MINUTE)
-                room['unread_num'] = e.unReadNum
-                obj_list.append(room)
-        self.logger.debug("ChatPageService get_chatrooms obj_list:{}".format(obj_list))
-        raise gen.Return(obj_list)
+        def get_hr_info(hrs, hr_id):
+            for h in hrs:
+                if h['id'] == hr_id:
+                    return ObjectDict(h)
+
+        def get_company_info(companys, company_id):
+            for c in companys:
+                if c['id'] == company_id:
+                    return ObjectDict(c)
+
+        records = []
+        hr_ids = []
+        company_ids = []
+
+        user_chatroom_page = yield self.infra_immobot_ds.get_user_chatroom_page(user_id, page_no, page_size)
+        self.logger.debug(user_chatroom_page)
+
+        if not user_chatroom_page.data.currentPageData:
+            raise gen.Return(records)
+
+        # 过滤hr_ids
+        for r in user_chatroom_page.data.currentPageData:
+            if r.hr_id not in hr_ids:
+                hr_ids.append(r.hr_id)
+
+        # 根据hrids批量获取hr信息
+        company_hr_list = yield self.infra_company_ds.get_company_hr_list(hr_ids)
+        if not company_hr_list.data:
+            self.logger.error("get_user_chatroom_page get_company_hr_list error, hr_ids:{}".format(hr_ids))
+            raise gen.Return(records)
+
+        # 过滤company_ids
+        for hr in company_hr_list.data:
+            if hr.company_id not in company_ids:
+                company_ids.append(hr.company_id)
+
+        # 根据company_ids批量获取公司信息
+        company_list = yield self.infra_company_ds.get_company_list(company_ids)
+        if not company_list.data:
+            self.logger.error("get_user_chatroom_page get_company_list error, company_ids:{}".format(company_ids))
+            raise gen.Return(records)
+
+        for d in user_chatroom_page.data.currentPageData:
+            hr = get_hr_info(d.hr_id)
+            company = get_company_info(hr['company_id'])
+            if not hr or not company:
+                self.logger.warning("get_user_chatroom_page hr or company not exist, hr_id:{}".format(d.hr_id))
+                continue
+
+            room = ObjectDict()
+            room['id'] = d.room_id
+            room['hr_id'] = d.hr_id
+            room['hr_name'] = hr.username or "HR"
+            room['hr_headimg'] = make_static_url(hr.headimgurl or company.logo or const.HR_HEADIMG)
+            room['company_name'] = company.abbreviation or company.name or ""
+            room['chat_time'] = str_2_date(d.create_time, self.constant.TIME_FORMAT_MINUTE)
+            room['unread_num'] = d.hr_have_unread_msg
+            records.append(room)
+
+        raise gen.Return(records)
 
     @gen.coroutine
     def get_chats(self, room_id, page_no, page_size):
