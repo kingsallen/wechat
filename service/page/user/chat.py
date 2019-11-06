@@ -40,7 +40,7 @@ class ChatPageService(PageService):
         user_chatroom_page = yield self.infra_immobot_ds.get_user_chatroom_page(user_id, page_no, page_size)
         self.logger.debug(user_chatroom_page)
 
-        if not user_chatroom_page.data.currentPageData:
+        if not user_chatroom_page.data.current_page_data:
             raise gen.Return(records)
 
         # 过滤hr_ids
