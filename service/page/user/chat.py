@@ -26,12 +26,12 @@ class ChatPageService(PageService):
 
         def get_hr_info(hrs, hr_id):
             for h in hrs:
-                if int(h['id']) == int(hr_id):
+                if h['id'] == hr_id:
                     return ObjectDict(h)
 
         def get_company_info(companys, company_id):
             for c in companys:
-                if int(c['id']) == int(company_id):
+                if c['id'] == company_id:
                     return ObjectDict(c)
 
         records = []
@@ -70,8 +70,8 @@ class ChatPageService(PageService):
 
         for d in user_chatroom_page.data.current_page_data:
             d = ObjectDict(d)
-            hr = get_hr_info(company_hr_list, d.hr_id)
-            company = get_company_info(company_list, hr['company_id'])
+            hr = get_hr_info(company_hr_list.data, d.hr_id)
+            company = get_company_info(company_list.data, hr['company_id'])
             if not hr or not company:
                 self.logger.warning("get_user_chatroom_page hr or company not exist, hr_id:{}".format(d.hr_id))
                 continue
