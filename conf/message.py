@@ -126,6 +126,6 @@ JOYWOK_AUTO_BIND_FAIL = "员工认证失败"
 
 # 员工和候选人聊天
 CHATTING_EMPLOYEE_RESIGNATION = "对方已不在公司，需要了解职位情况可以找HR或者其他员工沟通哦~"
-CHATTING_USER_UNSUBSCRIBE = "对方未关注企业公众号，暂时无法收到提醒！"
+CHATTING_USER_UNSUBSCRIBE = "对方未关注公众号，暂时无法收到提醒！"
 CHATTING_EMPLOYEE_RESIGNATION_TIPS = "员工已不在公司!"
 CHATTING_EMPLOYEE_EMPLOYEE_TIPS = "候选人已认证为本公司员工!"
