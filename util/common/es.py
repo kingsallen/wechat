@@ -34,9 +34,9 @@ class BaseES(object):
     def get_raw_es_client(self):
         return self._es
 
-    def search(self, index=None, doc_type=None, body=None):
+    def search(self, index=None, doc_type=None, body=None, timeout=10):
 
-        result = self._es.search(index, doc_type, json_dumps(body))
+        result = self._es.search(index, doc_type, json_dumps(body), request_timeout=timeout)
         return objectdictify(result)
 
 
