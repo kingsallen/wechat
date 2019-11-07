@@ -144,7 +144,7 @@ class ChatPageService(PageService):
         if mobot_conf_data.get('data'):
             mobot_conf = mobot_conf_data.get('data')
             mobot_info.name = mobot_conf['mobot_head_img'] or "小助手"
-            mobot_info.headimg = make_static_url(mobot_conf['mobot_head_img'] or const.HR_HEADIMG)
+            mobot_info.headimg = make_static_url(mobot_conf['mobot_head_img'] or hr_info.hr_headimg or const.HR_HEADIMG)
 
         user_info = ObjectDict()
         if ret.user:
