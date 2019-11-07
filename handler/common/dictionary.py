@@ -16,6 +16,19 @@ class DictCityHandler(BaseHandler):
         self.send_json_success(cities)
 
 
+class DictLBSCityHandler(BaseHandler):
+
+    @handle_response
+    @gen.coroutine
+    def get(self):
+        cities = yield self.dictionary_ps.get_cities(locale_display=None) # lbs高德地图只支持中文
+        for data in cities:
+            if data.get("text") == "港,澳,台":
+                cities.remove(data)
+                break
+        self.send_json_success(cities)
+
+
 class DictFunctionHandler(BaseHandler):
 
     @handle_response
