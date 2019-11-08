@@ -187,14 +187,23 @@ class NearbyStoresHandler(BaseHandler):
     def get(self):
         """获取附近店铺"""
         if self.params.longitude and self.params.latitude:
-            longitude = self.params.longitude
-            latitude = self.params.latitude
-        else:
-            ret = yield self.company_ps.get_lbs_ip_location(self.request.remote_ip)
-            longitude = ret.split(";")[0].split(",")[0]
-            latitude = ret.split(";")[0].split(",")[1]
+            radius = self.params.radius
 
-        stores_info = yield self.company_ps.get_nearby_stores(self.current_user.company.id, longitude, latitude, self.params.radius)
+            params = ObjectDict({
+                "company_id": self.current_user.company.id,
+                "longitude": self.params.longitude,
+                "latitude": self.params.latitude,
+                "radius": int(radius) / 1000 if radius and int(radius) else 1
+            })
+        else:
+            params = ObjectDict({
+                "company_id": self.current_user.company.id
+            })
+            # ret = yield self.company_ps.get_lbs_ip_location(self.request.remote_ip)
+            # longitude = ret.split(";")[0].split(",")[0]
+            # latitude = ret.split(";")[0].split(",")[1]
+
+        stores_info = yield self.company_ps.get_nearby_stores(params)
 
         if stores_info.data and stores_info.data.stores:
             for store in stores_info.data.stores:
@@ -209,13 +218,22 @@ class PositionLbsHandler(BaseHandler):
     def get(self, position_id):
         """根据职位id获取职位的LBS信息"""
         if self.params.longitude and self.params.latitude:
-            longitude = self.params.longitude
-            latitude = self.params.latitude
+            radius = self.params.radius
+            params = ObjectDict({
+                "company_id": self.current_user.company.id,
+                "longitude": self.params.longitude,
+                "latitude": self.params.latitude,
+                "radius": int(radius) / 1000 if radius and int(radius) else 1
+            })
         else:
-            ret = yield self.company_ps.get_lbs_ip_location(self.request.remote_ip)
-            longitude = ret.split(";")[0].split(",")[0]
-            latitude = ret.split(";")[0].split(",")[1]
-        stores_info = yield self.company_ps.get_position_lbs_info(self.current_user.company.id, longitude, latitude, self.params.radius, position_id)
+            params = ObjectDict({
+                "company_id": self.current_user.company.id
+            })
+        #     ret = yield self.company_ps.get_lbs_ip_location(self.request.remote_ip)
+        #     longitude = ret.split(";")[0].split(",")[0]
+        #     latitude = ret.split(";")[0].split(",")[1]
+
+        stores_info = yield self.company_ps.get_position_lbs_info(params, position_id)
 
         if stores_info.data and stores_info.data.stores:
             for store in stores_info.data.stores:
