@@ -358,12 +358,12 @@ class CompanyPageService(PageService):
         return res
 
     @gen.coroutine
-    def get_nearby_stores(self, company_id, longitude, latitude, radius):
+    def get_nearby_stores(self, params):
         """
         获取用户指定范围内门店位置
         :return:
         """
-        ret = yield self.infra_company_ds.get_nearby_stores(company_id, longitude, latitude, radius)
+        ret = yield self.infra_company_ds.get_nearby_stores(params)
         if ret.code != const.NEWINFRA_API_SUCCESS:
             raise InfraOperationError(ret.message)
         return ret

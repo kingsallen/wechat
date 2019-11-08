@@ -127,17 +127,11 @@ class InfraCompanyDataService(DataService):
         return ret
 
     @gen.coroutine
-    def get_nearby_stores(self, company_id, longitude, latitude, radius):
+    def get_nearby_stores(self, params):
         """
         获取用户指定范围内门店位置
         :param params : {'companyId': 123, 'longitude': 120.749991, 'latitude': 30.770423, 'radius': }
         """
-        params = ObjectDict({
-            "company_id": company_id,
-            "longitude": longitude,
-            "latitude": latitude,
-            "radius": int(radius)/1000 if radius and int(radius)  else 1
-        })
         ret = yield http_get_v2(company.COMPANY_NEARBY_STORES, company_service, params)
         return ret
 

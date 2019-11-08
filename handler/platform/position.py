@@ -915,10 +915,10 @@ class PositionListInfraParamsMixin(BaseHandler):
                 if self.params.longitude and self.params.latitude:
                     infra_params.longitude = self.params.longitude
                     infra_params.latitude = self.params.latitude
-                else:
-                    ret = yield self.company_ps.get_lbs_ip_location(self.request.remote_ip)
-                    infra_params.longitude = ret.split(";")[0].split(",")[0]
-                    infra_params.latitude = ret.split(";")[0].split(",")[1]
+                # else:
+                #     ret = yield self.company_ps.get_lbs_ip_location(self.request.remote_ip)
+                #     infra_params.longitude = ret.split(";")[0].split(",")[0]
+                #     infra_params.latitude = ret.split(";")[0].split(",")[1]
 
         if self.params.did:
             infra_params.did = self.params.did
