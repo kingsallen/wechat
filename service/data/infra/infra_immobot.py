@@ -21,7 +21,7 @@ class InfraImmobotDataService(DataService):
             "pageSize": page_size,
         })
 
-        ret = yield http_get_v2(im_mobot.GET_USER_CHATROOM_PAGE, im_service, params)
+        ret = yield http_get_v2(im_mobot.GET_USER_CHATROOM_PAGE, im_service, params, timeout=5)
         raise gen.Return(ret)
 
     @gen.coroutine
@@ -38,5 +38,5 @@ class InfraImmobotDataService(DataService):
             "isQxWechat": is_qx_wechat,
         })
 
-        ret = yield http_put_v2(im_mobot.USER_ENTER_CHATROOM, im_service, params)
+        ret = yield http_put_v2(im_mobot.USER_ENTER_CHATROOM, im_service, params, timeout=5)
         raise gen.Return(ret)
