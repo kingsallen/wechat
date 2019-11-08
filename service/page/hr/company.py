@@ -369,12 +369,12 @@ class CompanyPageService(PageService):
         return ret
 
     @gen.coroutine
-    def get_position_lbs_info(self, company_id, longitude, latitude, radius, pid):
+    def get_position_lbs_info(self, params, pid):
         """
         根据职位id获取职位的LBS信息
         :return:
         """
-        ret = yield self.infra_company_ds.get_position_lbs_info(company_id, longitude, latitude, radius, pid)
+        ret = yield self.infra_company_ds.get_position_lbs_info(params, pid)
         if ret.code != const.NEWINFRA_API_SUCCESS:
             raise InfraOperationError(ret.message)
         return ret
