@@ -124,55 +124,62 @@ class ChatPageService(PageService):
             room['compoundContent'] = btn_content
 
     @gen.coroutine
-    def get_chatroom(self, user_id, hr_id, company_id, position_id, room_id, qxuser, is_gamma, mobot_enable,
-                     recom, is_employee):
+    def get_chatroom(self, sysuser, hr_id, position_id, room_id, qxuser, is_gamma, mobot_enable, recom, is_employee):
         """进入聊天室"""
         hr_info = ObjectDict()
         mobot_info = ObjectDict(enable=mobot_enable, name='', headimg='')
 
-        ret = yield self.thrift_chat_ds.enter_chatroom(user_id, hr_id, position_id, room_id, is_gamma)
-        if ret.hr:
+        user_info = ObjectDict(
+            user_id=sysuser.id,
+            user_name=sysuser.name,
+            user_headimg=make_static_url(sysuser.headimg or const.SYSUSER_HEADIMG)
+        )
+        ret = yield self.infra_immobot_ds.user_enter_chatroom(room_id, sysuser.id, hr_id, position_id, is_gamma)
+        if not ret.data:
+            raise gen.Return("")
+
+        room = ObjectDict(ret.data)
+        if room.hr_account:
+            hr_account = ObjectDict(room.hr_account)
             hr_info = ObjectDict(
-                hr_id=ret.hr.hrId,
-                hr_name=ret.hr.hrName or "HR",
-                hr_headimg=make_static_url(ret.hr.hrHeadImg or const.HR_HEADIMG),
-                deleted=ret.hr.isDelete
+                hr_id=hr_account.id,
+                hr_name=hr_account.username or "HR",
+                hr_headimg=make_static_url(hr_account.headimgurl or const.HR_HEADIMG),
+                deleted=(hr_account.disable == 0)
             )
 
-        mobot_conf_data = yield self.infra_company_ds.get_company_mobot_conf(company_id)
-        if mobot_conf_data.get('data'):
-            mobot_conf = mobot_conf_data.get('data')
-            mobot_info.name = mobot_conf['mobot_head_img'] or "小助手"
-            mobot_info.headimg = make_static_url(mobot_conf['mobot_head_img'] or hr_info.hr_headimg or const.HR_HEADIMG)
-
-        user_info = ObjectDict()
-        if ret.user:
-            user_info = ObjectDict(
-                user_id=ret.user.userId,
-                user_name=ret.user.userName,
-                user_headimg=make_static_url(ret.user.userHeadImg or const.SYSUSER_HEADIMG)
-            )
+        if room.company_conf:
+            company_conf = ObjectDict(room.company_conf)
+            mobot_info.name = company_conf.mobot_name or "小助手"
+            mobot_info.headimg = make_static_url(company_conf.mobot_head_img or hr_info.hr_headimg or const.HR_HEADIMG)
 
         position_info = ObjectDict()
-        if ret.position:
+        if room.position:
+            full_position = ObjectDict(room.position)
+            position = ObjectDict(full_position.position)
+            company = ObjectDict(full_position.company)
+            team = ObjectDict(full_position.team)
+            salary = ObjectDict(full_position.salary_data)
+            team_name = team.name if team else position.department
+
             position_info = ObjectDict(
-                pid=ret.position.positionId,
-                title=ret.position.positionTitle,
-                company_name=ret.position.companyName,
+                pid=position.id,
+                title=position.title,
+                company_name=company.name,
                 city=ret.position.city,
-                salary=gen_salary(ret.position.salaryTop, ret.position.salaryBottom),
-                update=str_2_date(ret.position.updateTime, const.TIME_FORMAT_MINUTE),
-                status=ret.position.status,
-                team=ret.position.team
+                salary=gen_salary(salary.salary_top, salary.salary_bottom),
+                update=str_2_date(position.update_time, const.TIME_FORMAT_MINUTE),
+                status=position.status,
+                team=team_name
             )
         res = ObjectDict(
             hr=hr_info,
             mobot=mobot_info,
             user=user_info,
             position=position_info,
-            chat_debut=ret.chatDebut,
+            chat_debut=room.is_new_created,
             follow_qx=qxuser.is_subscribe == 1,
-            room_id=ret.roomId,
+            room_id=room.room_id,
             show_position_info=(len(position_info) > 0 and not mobot_enable),
             recom=recom,
             is_employee=is_employee

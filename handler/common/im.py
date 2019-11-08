@@ -457,22 +457,22 @@ class ChatHandler(BaseHandler):
 
         mobot_enable = yield self.chat_ps.get_mobot_hosting_status(self.hr_id)
 
-        user_hr_account = yield self.chat_ps.get_hr_info(self.hr_id)
-        company_id = user_hr_account.company_id
-
         recom = self.position_ps._make_recom(self.current_user.sysuser.id)
 
         is_employee = bool(self.current_user.employee if self.current_user else None)
 
-        res = yield self.chat_ps.get_chatroom(self.current_user.sysuser.id,
+        res = yield self.chat_ps.get_chatroom(self.current_user.sysuser,
                                               self.params.hr_id,
-                                              company_id,
                                               pid, room_id,
                                               self.current_user.qxuser,
                                               is_gamma,
                                               mobot_enable,
                                               recom,
                                               is_employee)
+
+        if not res:
+            self.send_json_error(message="获取数据失败")
+            return
 
         # 需要判断用户是否进入自己的聊天室
         if res.user.user_id != self.current_user.sysuser.id:
