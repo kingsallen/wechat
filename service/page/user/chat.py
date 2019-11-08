@@ -407,9 +407,7 @@ class ChatPageService(PageService):
                     messages.append(ret_message)
         except Exception as e:
             self.logger.error("mobot api error: %s, params: %s" % (e, params))
-
-        # 没有返回内容，回复默认信息
-        if not messages:
+            # 回复默认信息
             default_message = dict(resultType=0,
                                    resultTypeName='html',
                                    values=dict(content='很抱歉，HR小姐姐还没告诉我答案，我暂时不能帮你回答问题哦。',
