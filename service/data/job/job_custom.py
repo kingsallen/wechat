@@ -6,12 +6,12 @@ from tornado import gen
 from service.data.base import DataService
 from util.common.decorator import cache
 from util.common import ObjectDict
-from util.common.decorator import log_time
+from util.common.decorator import log_time, log_time_params
 
 
 class JobCustomDataService(DataService):
 
-    @log_time
+    @log_time_params(20)
     @cache(ttl=60)
     @gen.coroutine
     def get_custom(self, conds, fields=None):

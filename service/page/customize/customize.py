@@ -5,7 +5,7 @@ import conf.path as path
 from service.page.base import PageService
 from util.common import ObjectDict
 from util.tool.url_tool import make_url
-from util.common.decorator import log_time
+from util.common.decorator import log_time, log_time_common_func_params
 import conf.common as const
 
 
@@ -32,7 +32,6 @@ class CustomizePageService(PageService):
     def __init__(self):
         super().__init__()
 
-    @gen.coroutine
     def is_suppress_apply_company(self, company_id):
         """诺华集团定制"""
         if company_id not in self._SUPPRESS_APPLY_CIDS:
@@ -40,7 +39,6 @@ class CustomizePageService(PageService):
         else:
             return True
 
-    @gen.coroutine
     def _is_suppress_apply(self, position_info):
         if position_info.company_id not in self._SUPPRESS_APPLY_CIDS:
             return False, None
@@ -55,8 +53,7 @@ class CustomizePageService(PageService):
             return (True, {"custom_field": position_info.job_custom or "",
                            "job_number": position_info.jobnumber or ""})
 
-    @log_time
-    @gen.coroutine
+    @log_time_common_func_params(20)
     def get_suppress_apply(self, position_info):
         """
         诺华集团定制。
@@ -64,7 +61,7 @@ class CustomizePageService(PageService):
         :param position_info:
         :return:
         """
-        is_suppress_apply, suppress_apply_data = yield self._is_suppress_apply(position_info)
+        is_suppress_apply, suppress_apply_data = self._is_suppress_apply(position_info)
         return ObjectDict({
             "is_suppress_apply": is_suppress_apply,
             "suppress_apply_data": suppress_apply_data
@@ -81,8 +78,7 @@ class CustomizePageService(PageService):
             return True
         return False
 
-    @log_time
-    @gen.coroutine
+    @log_time_common_func_params(20)
     def get_delegate_drop(self, current_wechat, current_employee, params):
         return ObjectDict({
             'is_delegate_drop': self._is_edx_wechat(current_wechat, current_employee),

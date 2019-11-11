@@ -11,7 +11,7 @@ from service.page.base import PageService
 from util.tool.url_tool import make_static_url
 from util.tool.dict_tool import sub_dict
 from util.tool.str_tool import is_odd, split, gen_salary, set_literl
-from util.common.decorator import log_time
+from util.common.decorator import log_time, log_time_params
 
 cached_company_sug_wechat = None
 
@@ -134,6 +134,7 @@ class CompanyPageService(PageService):
         positions_list = yield self.hr_company_ds.get_companys_list(conds, fields, options, appends)
         raise gen.Return(positions_list)
 
+    @log_time
     @gen.coroutine
     def get_only_referral_reward(self, company_id):
         """获取公司是否开启只内推职位推荐产生积分"""
@@ -144,7 +145,7 @@ class CompanyPageService(PageService):
             data = ObjectDict()
         return data
 
-    @log_time
+    @log_time_params(20)
     @gen.coroutine
     def get_real_company_id(self, publisher, company_id):
         """获得职位所属公司id
@@ -336,6 +337,7 @@ class CompanyPageService(PageService):
 
         return ret
 
+    @log_time_params(20)
     @gen.coroutine
     def get_crucial_info_state(self, company_id):
         """

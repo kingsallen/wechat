@@ -1,12 +1,13 @@
 # coding=utf-8
 
 from tornado import gen
+from tornado.gen import multi
 
 import conf.common as const
 from service.page.base import PageService
 from util.common import ObjectDict
 from util.common.cipher import encode_id
-from util.common.decorator import log_time
+from util.common.decorator import log_time, log_time_params
 from util.tool.date_tool import jd_update_date, str_2_date
 from util.tool.str_tool import gen_salary, split, set_literl, gen_degree, gen_experience
 from util.tool.temp_data_tool import make_position_detail_cms, make_team, template3
@@ -21,13 +22,11 @@ class PositionPageService(PageService):
     @gen.coroutine
     def get_position(self, position_id, display_locale=None):
         position = ObjectDict()
-        position_res = yield self.job_position_ds.get_position({
-            'id': position_id
-        })
-
-        position_ext_res = yield self.job_position_ext_ds.get_position_ext({
-            "pid": position_id
-        })
+        dict_of_tasks = ObjectDict()
+        position_res, position_ext_res = yield [
+            self.job_position_ds.get_position({'id': position_id}),
+            self.job_position_ext_ds.get_position_ext({"pid": position_id})
+        ]
 
         if not position_res:
             raise gen.Return(position)
@@ -88,22 +87,32 @@ class PositionPageService(PageService):
         if position_res.share_tpl_id:
             position.share_title = ""
             position.share_description = ""
-
-            share_conf = yield self.__get_share_conf(position_res.share_tpl_id)
-            if share_conf.id > 3:  # 隐藏逻辑， id为1-3的话，说明是写死在数据库中的模版, 需要做国际化处理
-                position.share_title = share_conf.title
-                position.share_description = share_conf.description
+            dict_of_tasks.update(share_conf=self.__get_share_conf(position_res.share_tpl_id))
 
         # 职能自定义字段（自定义字段 job_occupation）
         if position_ext_res.job_occupation_id:
-            job_occupation_res = yield self.job_occupation_ds.get_occupation(
-                conds={"id": position_ext_res.job_occupation_id})
-            position.job_occupation = job_occupation_res.name
+            dict_of_tasks.update(job_occupation_res=self.job_occupation_ds.get_occupation(
+                conds={"id": position_ext_res.job_occupation_id}))
 
         # 属性自定义字段（自定义字段 job_custom）
         if position_ext_res.job_custom_id:
-            job_custom_res = yield self.job_custom_ds.get_custom(conds={"id": position_ext_res.job_custom_id})
-            position.job_custom = job_custom_res.name
+            dict_of_tasks.update(job_custom_res=self.job_custom_ds.get_custom(conds={"id": position_ext_res.job_custom_id}))
+
+        # 并行处理自定义分享模板、职能自定义字段、属性自定义字段
+        if dict_of_tasks:
+            res = yield multi(dict_of_tasks)
+            res = ObjectDict(res)
+            share_conf = res.get("share_conf")
+            job_occupation_res = res.get("job_occupation_res")
+            job_custom_res = res.get("job_custom_res")
+            if share_conf and share_conf.id > 3:  #隐藏逻辑， id为1-3的话，说明是写死在数据库中的模版, 需要做国际化处理
+                position.share_title = share_conf.title
+                position.share_description = share_conf.description
+
+            if job_occupation_res:
+                position.job_occupation = job_occupation_res.name
+            if job_custom_res:
+                position.job_custom = job_custom_res.name
 
         # 从 ES 中拉取职位的城市信息 （以后全部放到基础服务获取）
         data = {
@@ -140,6 +149,7 @@ class PositionPageService(PageService):
 
         raise gen.Return(position)
 
+    @log_time_params(20)
     @gen.coroutine
     def get_position_custom_list(self, position_id_list):
         # 获取职位信息扩展信息列表
@@ -224,7 +234,7 @@ class PositionPageService(PageService):
         positions_list = yield self.job_position_ds.get_positions_list(conds, fields, options, appends)
         raise gen.Return(positions_list)
 
-    @log_time
+    @log_time_params(20)
     @gen.coroutine
     def is_position_stared_by(self, user_id, position_id):
         """返回用户是否收藏了职位"""
@@ -273,7 +283,7 @@ class PositionPageService(PageService):
 
         raise gen.Return(hr_account)
 
-    @log_time
+    @log_time_params(20)
     @gen.coroutine
     def __get_share_conf(self, conf_id):
         """获取职位自定义分享模板"""
@@ -282,7 +292,7 @@ class PositionPageService(PageService):
         })
         raise gen.Return(ret)
 
-    @log_time
+    @log_time_params(20)
     @gen.coroutine
     def get_recommend_positions(self, position_id):
         """获得 JD 页推荐职位
@@ -431,7 +441,7 @@ class PositionPageService(PageService):
                 position_list.append(position)
         return position_list
 
-    @log_time
+    @log_time_params(20)
     @gen.coroutine
     def infra_get_position_list_rp_ext(self, position_list):
         """获取职位的红包信息"""
@@ -547,6 +557,7 @@ class PositionPageService(PageService):
             return position_list, res.data[0]['total_num'] if res.data else 0
         return res
 
+    @log_time_params(20)
     @gen.coroutine
     def get_teamid_names_dict(self, company_id):
         """获取 {<team_id>: <team_name>} 字典"""
@@ -561,6 +572,7 @@ class PositionPageService(PageService):
         team_name_dict = {e.id: e.name for e in res_team_names}
         return team_name_dict
 
+    @log_time_params(20)
     @gen.coroutine
     def get_pid_teamid_dict(self, company_id, list_of_pid=None):
         """获取 {<position_id>: <team_id>} 字典
@@ -609,6 +621,7 @@ class PositionPageService(PageService):
 
         return res_list
 
+    @log_time_params(20)
     @gen.coroutine
     def get_position_feature(self, position_id):
         result, data = yield self.infra_position_ds.get_position_feature(position_id)
@@ -639,6 +652,7 @@ class PositionPageService(PageService):
         ret = yield self.infra_position_ds.patch_position_search_history(user_id, app_id)
         raise gen.Return(ret)
 
+    @log_time_params(20)
     @gen.coroutine
     def get_position_bonus(self, pid):
         """获取职位奖金"""
