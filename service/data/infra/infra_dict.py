@@ -591,7 +591,8 @@ class InfraDictDataService(DataService):
         for province in data:
             if province.get("name") in ["全国", "海外"]:
                 data.remove(province)
-                continue
+
+        for province in data:
             if province.get("cities"):
                 for city in province.get("cities"):
                     if city.get("cities"):
