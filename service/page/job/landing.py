@@ -211,7 +211,6 @@ class LandingPageService(PageService):
 
         result_list = response.hits.hits
         self.logger.debug(result_list)
-        self.logger.debug("@@@@@@@@ response.hits: {}".format(response.hits))
 
         # 获取筛选项
         key_list = self.make_key_list(conf_search_seq)
