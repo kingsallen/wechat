@@ -28,7 +28,7 @@ from service.page.hr.company import CompanyPageService
 from service.page.job.position import PositionPageService
 from setting import settings
 from util.common import ObjectDict
-from util.common.decorator import log_time
+from util.common.decorator import log_core
 from util.tool.str_tool import set_literl, trunc, generate_nonce_str, to_bytes, to_str
 from util.tool.url_tool import make_url
 from util.wechat.template import (
@@ -65,7 +65,7 @@ class RedpacketPageService(PageService):
         })
         return ret
 
-    @log_time
+    @log_core
     @gen.coroutine
     def __get_card_by_cardno(self, cardno):
         """根据 cardno 获取 scratch card"""
@@ -74,7 +74,7 @@ class RedpacketPageService(PageService):
         })
         raise gen.Return(ret)
 
-    @log_time
+    @log_core
     @gen.coroutine
     def __make_card_no(self):
         """创建新的 scratch card no"""
@@ -90,7 +90,7 @@ class RedpacketPageService(PageService):
             else:
                 raise gen.Return(cardno)
 
-    @log_time
+    @log_core
     @gen.coroutine
     def __create_new_card(self, wechat_id, qx_openid, hb_config_id,
                           hb_item_id=0, amount=0.0):
@@ -112,7 +112,7 @@ class RedpacketPageService(PageService):
 
         raise gen.Return(ret)
 
-    @log_time
+    @log_core
     @gen.coroutine
     def __get_hb_config_by_position(self, position, trigger_way):
         """获取红包配置"""
@@ -387,7 +387,7 @@ class RedpacketPageService(PageService):
         )
         self.logger.debug("[RP]员工认证红包发送成功")
 
-    @log_time
+    @log_core
     @gen.coroutine
     def handle_red_packet_recom(self, recom_current_user, recom_record_id, redislocker,
                                 realname, position_title):
@@ -520,7 +520,7 @@ class RedpacketPageService(PageService):
 
         self.logger.debug("[RP]推荐红包发送成功")
 
-    @log_time
+    @log_core
     @gen.coroutine
     def handle_red_packet_screen_profile(self,
                                          current_user,
@@ -700,7 +700,7 @@ class RedpacketPageService(PageService):
         except Exception as e:
             self.logger.error(traceback.format_exc())
 
-    @log_time
+    @log_core
     @gen.coroutine
     def handle_red_packet_position_related(self,
                                            current_user,
@@ -831,7 +831,7 @@ class RedpacketPageService(PageService):
         except Exception as e:
             self.logger.error(traceback.format_exc())
 
-    @log_time
+    @log_core
     @gen.coroutine
     def handle_red_packet_card_sending(self,
                                        current_user,
@@ -913,7 +913,7 @@ class RedpacketPageService(PageService):
                     position_title=position.title,
                     send_to_employee=send_to_employee)
 
-    @log_time
+    @log_core
     @gen.coroutine
     def __checked_maliciousness_passed(self, hb_config_id, recom_wxuser_id,
                                        trigger_wxuser_id):
@@ -926,7 +926,7 @@ class RedpacketPageService(PageService):
         })
         return not item
 
-    @log_time
+    @log_core
     @gen.coroutine
     def __non_employee_rp_check_passed(
         self, hb_config, recom_user_id, recom_qx_wxuser_id):
@@ -951,7 +951,7 @@ class RedpacketPageService(PageService):
 
             raise gen.Return(not item)
 
-    @log_time
+    @log_core
     @gen.coroutine
     def __get_sent_item_by_qx_wxuser_id(self, hb_config_id, wxuser_id):
         """获取 item"""
@@ -961,7 +961,7 @@ class RedpacketPageService(PageService):
         })
         raise gen.Return(item)
 
-    @log_time
+    @log_core
     @gen.coroutine
     def __recom_matches(self, rp_config, recom_user, wechat, **kwargs):
         """返回 recom 是否符合发送红包对象的要求
@@ -997,7 +997,7 @@ class RedpacketPageService(PageService):
                     sharechain_ps = None
                     raise gen.Return(is_1degree)
 
-    @log_time
+    @log_core
     @gen.coroutine
     def __check_throttle_passed(self, red_packet_config, wxuser_id,
                                 next_rp_item):
@@ -1028,7 +1028,7 @@ class RedpacketPageService(PageService):
 
         return ret
 
-    @log_time
+    @log_core
     @gen.coroutine
     def __get_amount_sum_config_id_and_wxuser_id(self, hb_config_id, wxuser_id):
         """返回某人已经在某次活动中获得的金额总数"""
@@ -1045,7 +1045,7 @@ class RedpacketPageService(PageService):
 
             raise gen.Return(ret)
 
-    @log_time
+    @log_core
     @gen.coroutine
     def __get_next_rp_item(self, hb_config_id, hb_config_type, position_id=None):
         """获取下个待发红包信息"""
@@ -1072,7 +1072,7 @@ class RedpacketPageService(PageService):
             }, appends=["order by rand()", "limit 1"])
         return next_item
 
-    @log_time
+    @log_core
     @gen.coroutine
     def __update_wxuser_id_into_hb_items(self, qx_openid, current_wxuser_id, rp_item):
         """更新 hb items 写入发送信息"""
@@ -1098,7 +1098,7 @@ class RedpacketPageService(PageService):
     def __hit_red_packet(probability):
         return probability == 100 or random.uniform(0, 100) < probability
 
-    @log_time
+    @log_core
     @gen.coroutine
     def __send_red_packet_card(self,
                                recom_openid,
@@ -1277,7 +1277,7 @@ class RedpacketPageService(PageService):
 
         raise gen.Return(result)
 
-    @log_time
+    @log_core
     @gen.coroutine
     def __update_hb_item_status_with_id(self, hb_item_id, to, refresh_open_time=False):
         conds = {"id": hb_item_id}
@@ -1286,7 +1286,7 @@ class RedpacketPageService(PageService):
             fields.update(open_time=datetime.now())
         yield self.hr_hb_items_ds.update_hb_items(conds=conds, fields=fields)
 
-    @log_time
+    @log_core
     @gen.coroutine
     def __update_hb_scratch_card_status(self, cardno, status):
         conds = ObjectDict(cardno=cardno)
@@ -1300,7 +1300,7 @@ class RedpacketPageService(PageService):
             "hb_item_id": hb_item_id
         })
 
-    @log_time
+    @log_core
     @gen.coroutine
     def __send_zero_amount_card(
         self, recom_openid, recom_wechat_id, red_packet_config,
@@ -1360,7 +1360,7 @@ class RedpacketPageService(PageService):
 
         raise gen.Return(result)
 
-    @log_time
+    @log_core
     @gen.coroutine
     def __update_position_hb_status(self, position_id, current_hb_status, hb_config_type):
         """更新 hb_status 至没有参加当前类型红包活动的状态
@@ -1383,7 +1383,7 @@ class RedpacketPageService(PageService):
             "hb_status": next_status
         })
 
-    @log_time
+    @log_core
     @gen.coroutine
     def __get_running_positions_by_config_id(self, config):
         """查询这个红包活动中还有没发完红包的职位
@@ -1406,7 +1406,7 @@ class RedpacketPageService(PageService):
         else:
             return None
 
-    @log_time
+    @log_core
     @gen.coroutine
     def __finish_hb_config(self, hb_config_id):
         """
@@ -1419,7 +1419,7 @@ class RedpacketPageService(PageService):
             fields={"status": const.HB_CONFIG_FINISHED}
         )
 
-    @log_time
+    @log_core
     @gen.coroutine
     def __send_message_template_with_card_url(
         self, red_packet_config, card, openid, wechat, **kwargs):
@@ -1496,7 +1496,7 @@ class RedpacketPageService(PageService):
 
         raise gen.Return(res)
 
-    @log_time
+    @log_core
     @gen.coroutine
     def __insert_0_amount_sent_history(self, hb_config_id, recom_qx_openid,
                                        trigger_qx_user_id):
@@ -1518,7 +1518,7 @@ class RedpacketPageService(PageService):
         })
         return item_id
 
-    @log_time
+    @log_core
     @gen.coroutine
     def __send_red_packet(self, rp_config, wechat_id, openid, amount, hb_item_id):
         """
@@ -1691,7 +1691,7 @@ class RedpacketPageService(PageService):
                 ret.update({node.tagName: node.childNodes[0].data})
         return ret
 
-    @log_time
+    @log_core
     @gen.coroutine
     def __insert_red_packet_sent_record(self, args_dict, hb_item_id):
         """插入红包发送记录"""
@@ -1712,7 +1712,7 @@ class RedpacketPageService(PageService):
             "hb_item_id": hb_item_id
         })
 
-    @log_time
+    @log_core
     @gen.coroutine
     def get_last_running_hongbao_config_by_position(self, position_id):
         """
@@ -1726,7 +1726,7 @@ class RedpacketPageService(PageService):
         )
         raise gen.Return(share_info.data)
 
-    @log_time
+    @log_core
     @gen.coroutine
     def get_position_title_by_recom_record_id(self, recom_record_id):
         ret = ''
@@ -1740,7 +1740,7 @@ class RedpacketPageService(PageService):
         finally:
             return ret
 
-    @log_time
+    @log_core
     @gen.coroutine
     def __bind_0_amount_hb2card(self, card, hb_item_id):
         conds = ObjectDict(cardno=card.cardno)
