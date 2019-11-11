@@ -154,8 +154,8 @@ class LandingPageService(PageService):
                                 {"match": {key_a: value_a}}
                             ],
                             "should": [
-                                {"range": {"salaryData.salaryTop": {"lte": salary_dict.get('salary_top'), "gte": salary_dict.get('salary_bottom')}}},
-                                {"range": {"salaryData.salaryBottom": {"lte": salary_dict.get('salary_top'), "gte": salary_dict.get('salary_bottom')}}}
+                                {"range": {"position.salaryTop": {"lte": salary_dict.get('salary_top'), "gte": salary_dict.get('salary_bottom')}}},
+                                {"range": {"position.salaryBottom": {"lte": salary_dict.get('salary_top'), "gte": salary_dict.get('salary_bottom')}}}
                             ],
                             "minimum_should_match": 1
                         }
@@ -178,8 +178,8 @@ class LandingPageService(PageService):
                                 {"match": {key_b: value_b}}
                             ],
                             "should": [
-                                {"range": {"salaryData.salaryTop": {"lte": salary_dict.get('salary_top'), "gte": salary_dict.get('salary_bottom')}}},
-                                {"range": {"salaryData.salaryBottom": {"lte": salary_dict.get('salary_top'), "gte": salary_dict.get('salary_bottom')}}}
+                                {"range": {"position.salaryTop": {"lte": salary_dict.get('salary_top'), "gte": salary_dict.get('salary_bottom')}}},
+                                {"range": {"position.salaryBottom": {"lte": salary_dict.get('salary_top'), "gte": salary_dict.get('salary_bottom')}}}
                             ],
                             "minimum_should_match": 1
                         }
@@ -195,8 +195,8 @@ class LandingPageService(PageService):
                             {"match": {"position.status": const.OLD_YES}}
                         ],
                         "should": [
-                            {"range": {"salaryData.salaryTop": {"lte": salary_dict.get('salary_top'), "gte": salary_dict.get('salary_bottom')}}},
-                            {"range": {"salaryData.salaryBottom": {"lte": salary_dict.get('salary_top'), "gte": salary_dict.get('salary_bottom')}}}
+                            {"range": {"position.salaryTop": {"lte": salary_dict.get('salary_top'), "gte": salary_dict.get('salary_bottom')}}},
+                            {"range": {"position.salaryBottom": {"lte": salary_dict.get('salary_top'), "gte": salary_dict.get('salary_bottom')}}}
                         ],
                         "minimum_should_match": 1
                     }

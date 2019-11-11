@@ -40,7 +40,7 @@ LANDING = ObjectDict({
                                                   "salary_bottom"],
                                   "display_key": "salary",
                                   "form_name":   "salary",
-                                  "es_key":      ["salaryData.salaryTop","salaryData.salaryBottom"]},
+                                  "es_key":      ["position.salaryTop","position.salaryBottom"]},
     LANDING_INDEX_OCCUPATION:    {"name":        "职位职能", "chpe": "职能",
                                   "key":         "occupation",
                                   "display_key": "occupation",
