@@ -25,7 +25,7 @@ class DictLBSCityHandler(BaseHandler):
         for data in cities:
             if data.get("text") == "港,澳,台":
                 cities.remove(data)
-                cities.append({"list": [{"name": "香港", "code": 810000}, {"name": "澳门", "code": 820000}], "text": "港,澳"})
+                cities.append({"list": [{"name": "香港", "code": 810000}, {"name": "澳门", "code": 820000}, {"name": "中国台湾", "code": ""}], "text": "港,澳,台"})
                 break
         self.send_json_success(cities)
 
