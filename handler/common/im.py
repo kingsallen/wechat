@@ -9,7 +9,6 @@ from tornado import gen, websocket, ioloop
 
 import conf.common as const
 import conf.message as msg
-import conf.message as msg_const
 from cache.user.chat_session import ChatCache
 from conf.protocol import WebSocketCloseCode
 from globals import logger
@@ -22,7 +21,7 @@ from util.common import ObjectDict
 from util.common.decorator import handle_response, authenticated
 from util.common.decorator import relate_user_and_former_employee
 from util.tool.date_tool import curr_now_minute
-from util.tool.json_tool import encode_json_dumps, json_dumps
+from util.tool.json_tool import json_dumps
 from util.tool.pubsub_tool import Subscriber
 from util.tool.str_tool import to_str, match_session_id
 
@@ -227,39 +226,6 @@ class ChatRoomHandler(BaseHandler):
 
         to = self.make_url('/mobot', self.params)
         self.redirect(to)
-
-        return
-
-    @gen.coroutine
-    def _render(self, template_name,
-                data,
-                status_code=const.API_SUCCESS,
-                message=msg_const.RESPONSE_SUCCESS,
-                meta_title=const.PAGE_META_TITLE,
-                http_code=200,
-                config=None):
-        """render 页面"""
-        self.log_info = {"res_type": "html", "status_code": status_code}
-        self.set_status(http_code)
-
-        try:
-            render_json = encode_json_dumps({
-                "status": status_code,
-                "message": message,
-                "data": data
-            })
-        except TypeError as e:
-            self.logger.error(e)
-            render_json = encode_json_dumps({
-                "status": const.API_FAILURE,
-                "message": msg_const.RESPONSE_FAILURE,
-                "data": None
-            })
-        super().render(
-            template_name=template_name,
-            render_json=render_json,
-            meta_title=meta_title,
-            jsapi=config)
         return
 
 
@@ -548,7 +514,6 @@ class ChatHandler(BaseHandler):
 
         :return:
         """
-
         self.room_id = self.params.roomId
         self.user_id = match_session_id(to_str(self.get_secure_cookie(const.COOKIE_SESSIONID)))
         self.hr_id = self.params.hrId
@@ -565,9 +530,8 @@ class ChatHandler(BaseHandler):
         create_new_context = self.json_args.get("create_new_context") or False
         from_textfield = self.json_args.get("from_textfield") or False
 
-
-        self.logger.debug('post_message  flag:{}'.format(self.flag))
-        self.logger.debug('post_message  create_new_context:{}'.format(create_new_context))
+        self.logger.debug('post_message flag:{}'.format(self.flag))
+        self.logger.debug('post_message create_new_context:{}'.format(create_new_context))
 
         mobot_enable = yield self.chat_ps.get_mobot_hosting_status(self.hr_id)
         self.logger.debug('post_message mobot_enable:{}'.format(mobot_enable))
@@ -575,20 +539,15 @@ class ChatHandler(BaseHandler):
         self.chatroom_channel = const.CHAT_CHATROOM_CHANNEL.format(self.hr_id, self.user_id)
         self.hr_channel = const.CHAT_HR_CHANNEL.format(self.hr_id)
 
-        chat_params = ChatVO(
-            msgType=msg_type,
-            compoundContent=ujson.dumps(compoundContent),
-            content=content,
-            speaker=const.CHAT_SPEAKER_USER,
-            origin=const.ORIGIN_USER_OR_HR,
-            roomId=int(self.room_id),
-            positionId=int(self.position_id),
-            serverId=server_id,
-            duration=int(duration),
-            createTime=curr_now_minute()
-        )
-        self.logger.debug("save chat by alphadog chat_params:{}".format(chat_params))
-        chat_id = yield self.chat_ps.save_chat(chat_params)
+        company_id = self.current_user.company.parent_id if self.current_user.company.parent_id > 0 else self.current_user.company.id
+        chat = yield self.chat_ps.save_chat(company_id, int(self.room_id), self.current_user.sysuser.id, msg_type,
+                                            const.ORIGIN_USER_OR_HR, int(self.position_id), content,
+                                            ujson.dumps(compoundContent), const.CHAT_SPEAKER_USER,
+                                            server_id, int(duration))
+        if not chat:
+            logger.error("post_message save_chat failed, user.id:{} msg_type:{}".format(self.current_user.sysuser.id, msg_type))
+            self.send_json_error(message=msg.OPERATE_FAILURE)
+            return
 
         message_body = json_dumps(ObjectDict(
             msgType=msg_type,
@@ -599,8 +558,9 @@ class ChatHandler(BaseHandler):
             pid=int(self.position_id),
             createTime=curr_now_minute(),
             origin=const.ORIGIN_USER_OR_HR,
-            id=chat_id,
+            id=chat.id,
         ))
+
         self.logger.debug("publish chat by redis message_body:{}".format(message_body))
         self.redis_client.publish(self.hr_channel, message_body)
         try:
@@ -753,24 +713,24 @@ class ChatHandler(BaseHandler):
             msg_type = bot_message.msg_type
             compound_content = bot_message.compound_content
             if bot_message.msg_type == '':
+                logger.warning("_handle_chatbot_message msg_type is null")
                 continue
 
             if msg_type == "cards":
                 # 只在c端展示，并且不保存
-                if bot_message:
-                    message_body = json_dumps(ObjectDict(
-                        compoundContent=compound_content,
-                        content=bot_message.content,
-                        msgType=msg_type,
-                        speaker=const.CHAT_SPEAKER_BOT,
-                        cid=int(self.room_id),
-                        pid=int(self.position_id),
-                        createTime=curr_now_minute(),
-                        origin=const.ORIGIN_CHATBOT
-                    ))
-                    # 聊天室广播
-                    self.redis_client.publish(self.chatroom_channel, message_body)
-                    return
+                message_body = json_dumps(ObjectDict(
+                    compoundContent=compound_content,
+                    content=bot_message.content,
+                    msgType=msg_type,
+                    speaker=const.CHAT_SPEAKER_BOT,
+                    cid=int(self.room_id),
+                    pid=int(self.position_id),
+                    createTime=curr_now_minute(),
+                    origin=const.ORIGIN_CHATBOT
+                ))
+                # 聊天室广播
+                self.redis_client.publish(self.chatroom_channel, message_body)
+                return
 
             # 员工认证自定义配置字段太大了，不用存储到mysql中，直接通过socket发送到客户端即可
             # 特此新起变量处理， 变量compoundContent 只用作save
@@ -779,37 +739,32 @@ class ChatHandler(BaseHandler):
             else:
                 compoundContent = ujson.dumps(compound_content)
 
-            chat_params = ChatVO(
-                compoundContent=compoundContent,
-                content=bot_message.content,
-                speaker=const.CHAT_SPEAKER_BOT,
-                origin=const.ORIGIN_CHATBOT,
-                msgType=msg_type,
-                roomId=int(self.room_id),
-                positionId=int(self.position_id),
-                stats=ujson.dumps(bot_message.stats),
-            )
-            self.logger.debug("save chat by alphadog chat_params:{}".format(chat_params))
-            chat_id = yield self.chat_ps.save_chat(chat_params)
-            if bot_message:
-                message_body = json_dumps(ObjectDict(
-                    compoundContent=compound_content,
-                    content=bot_message.content,
-                    stats=bot_message.stats,
-                    msgType=msg_type,
-                    speaker=const.CHAT_SPEAKER_BOT,
-                    cid=int(self.room_id),
-                    pid=int(self.position_id),
-                    createTime=curr_now_minute(),
-                    origin=const.ORIGIN_CHATBOT,
-                    id=chat_id
-                ))
-                self.logger.debug("publish chat by redis message_body:{}".format(message_body))
-                # hr 端广播
-                self.redis_client.publish(self.hr_channel, message_body)
+            chat = yield self.chat_ps.save_chat(company_id, int(self.room_id), self.current_user.sysuser.id,
+                                                msg_type,
+                                                const.ORIGIN_CHATBOT, int(self.position_id), bot_message.content,
+                                                compoundContent, const.CHAT_SPEAKER_BOT, 0, 0)
+            if not chat:
+                logger.warning("_handle_chatbot_message save_chat chat is null")
+                continue
 
-                # 聊天室广播
-                self.redis_client.publish(self.chatroom_channel, message_body)
+            message_body = json_dumps(ObjectDict(
+                compoundContent=compound_content,
+                content=bot_message.content,
+                stats=bot_message.stats,
+                msgType=msg_type,
+                speaker=const.CHAT_SPEAKER_BOT,
+                cid=int(self.room_id),
+                pid=int(self.position_id),
+                createTime=curr_now_minute(),
+                origin=const.ORIGIN_CHATBOT,
+                id=chat.id
+            ))
+            self.logger.debug("publish chat by redis message_body:{}".format(message_body))
+            # hr 端广播
+            self.redis_client.publish(self.hr_channel, message_body)
+
+            # 聊天室广播
+            self.redis_client.publish(self.chatroom_channel, message_body)
 
 
 class MobotHandler(BaseHandler):

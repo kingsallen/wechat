@@ -4,7 +4,8 @@ from conf.newinfra_service_conf.im import im_mobot
 from conf.newinfra_service_conf.service_info import im_service
 from service.data.base import DataService
 from util.common import ObjectDict
-from util.tool.http_tool import http_get_v2, http_put_v2
+from util.tool.http_tool import http_get_v2, http_post_v2, http_put_v2
+from util.tool.date_tool import curr_now_minute
 
 
 class InfraImmobotDataService(DataService):
@@ -54,4 +55,29 @@ class InfraImmobotDataService(DataService):
         })
         route = im_mobot.GET_USER_CHAT_HISTORY_RECORD_PAGE.format(room_id=room_id)
         ret = yield http_get_v2(route, im_service, params, timeout=5)
+        raise gen.Return(ret)
+
+    @gen.coroutine
+    def save_chat_record(self, company_id, room_id, user_id, msg_type, origin, pid, content, compound_content, speaker,
+                         voice_server_id, voice_duration):
+        """
+        保存聊天内容
+        curl -X POST 'http://api-t2.dqprism.com/im/v4/user/room/30780/history/page?interfaceid=A11037001&appid=A11037&sysuserId=5399884&hraccountId=82752&pageSize=20&currentPage=1'
+        """
+        params = ObjectDict({
+            "companyId": company_id,
+            "chatlistId": room_id,
+            "sysuserId": user_id,
+            "msgType": msg_type,
+            "content": content,
+            "compoundContent": compound_content,
+            "speaker": speaker,
+            "origin": origin,
+            "createTime": curr_now_minute(),
+            "pid": pid,
+            "duration": voice_duration or 0,
+            "serverId": voice_server_id or 0
+        })
+        route = im_mobot.SAVE_CHAT_RECORD.format(room_id=room_id)
+        ret = yield http_post_v2(route, im_service, params, timeout=5)
         raise gen.Return(ret)
