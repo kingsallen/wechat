@@ -255,7 +255,7 @@ class LandingPageService(PageService):
                             citys.append(city.get(es_key.split(".")[1]))
                         ret.update({key: citys})
                     else:
-                        ret.update({key: value.get(es_key.split(".")[1])})
+                        ret.update({key: "" if value.get(es_key.split(".")[1]) is None else value.get(es_key.split(".")[1])})
                 else:
                     ret.update({key: ""})
             # ret = {k: somedict.get(k, default) for k in somekeys}
@@ -264,7 +264,7 @@ class LandingPageService(PageService):
             es_key = self.get_by_value_dict(key, platform_const.LANDING)
             value = somedict.get(es_key.split(".")[0])
             if value:
-                ret = {key: value.get(es_key.split(".")[1])}
+                ret = {key: "" if value.get(es_key.split(".")[1]) is None else value.get(es_key.split(".")[1])}
             else:
                 ret = {key: ""}
         else:
