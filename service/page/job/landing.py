@@ -224,6 +224,7 @@ class LandingPageService(PageService):
 
             # 使用 key_list 来筛选 source
             source = ObjectDict(self.sub_nested_dict(source, key_list))
+            self.logger.debug("@@@@@@@@@@-1 source :{}".format(source))
 
             if 'salary_top' in key_list:
                 # 对 salary 做特殊处理 (salary_top, salary_bottom) -> salary
@@ -251,10 +252,10 @@ class LandingPageService(PageService):
                     if key in ["city", "city_ename"]:
                         citys = []
                         for city in value:
-                            citys.append(city.get(es_key.split(".")[1]) or '')
+                            citys.append(city.get(es_key.split(".")[1]))
                         ret.update({key: citys})
                     else:
-                        ret.update({key: value.get(es_key.split(".")[1]) or ''})
+                        ret.update({key: value.get(es_key.split(".")[1])})
                 else:
                     ret.update({key: ""})
             # ret = {k: somedict.get(k, default) for k in somekeys}
@@ -263,7 +264,7 @@ class LandingPageService(PageService):
             es_key = self.get_by_value_dict(key, platform_const.LANDING)
             value = somedict.get(es_key.split(".")[0])
             if value:
-                ret = {key: value.get(es_key.split(".")[1]) or ''}
+                ret = {key: value.get(es_key.split(".")[1])}
             else:
                 ret = {key: ""}
         else:
