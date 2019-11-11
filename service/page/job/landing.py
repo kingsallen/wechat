@@ -229,8 +229,8 @@ class LandingPageService(PageService):
                 # 对 salary 做特殊处理 (salary_top, salary_bottom) -> salary
                 salary = [
                     v.get("name") for v in platform_const.SALARY.values()
-                    if v.salary_bottom == source.salary_bottom and
-                    v.salary_top == source.salary_top
+                    if v.salary_bottom == source.salaryData.get("salaryBottom") and
+                    v.salary_top == source.salaryData.get("salaryTop")
                     ]
 
                 source.salary = salary[0] if salary else ''
