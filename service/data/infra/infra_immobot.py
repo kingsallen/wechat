@@ -5,7 +5,7 @@ from conf.newinfra_service_conf.service_info import im_service
 from service.data.base import DataService
 from util.common import ObjectDict
 from util.tool.http_tool import http_get_v2, http_post_v2, http_put_v2
-from util.tool.date_tool import curr_now_minute
+from util.tool.date_tool import curr_now
 
 
 class InfraImmobotDataService(DataService):
@@ -62,7 +62,7 @@ class InfraImmobotDataService(DataService):
                          voice_server_id, voice_duration):
         """
         保存聊天内容
-        curl -X POST 'http://api-t2.dqprism.com/im/v4/user/room/30780/history/page?interfaceid=A11037001&appid=A11037&sysuserId=5399884&hraccountId=82752&pageSize=20&currentPage=1'
+        curl -X POST 'http://api-t2.dqprism.com/im/v4/user/room/30780/chat/content?interfaceid=A11037001&appid=A11037'
         """
         params = ObjectDict({
             "companyId": company_id,
@@ -73,7 +73,7 @@ class InfraImmobotDataService(DataService):
             "compoundContent": compound_content,
             "speaker": speaker,
             "origin": origin,
-            "createTime": curr_now_minute(),
+            "createTime": curr_now(),
             "pid": pid,
             "duration": voice_duration or 0,
             "serverId": voice_server_id or 0
