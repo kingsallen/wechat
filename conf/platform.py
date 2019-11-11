@@ -132,4 +132,4 @@ SEARCH_DEGREE = ObjectDict({
 
 POSITION_LIST_TITLE_DEFAULT = "job_hotjobs"
 POSITION_LIST_TITLE_RECOMLIST = "job_recomfriend"
-LBS_POSITION_LIST_TITLE_DEFAULT = "lbs_retailjobs"
+LBS_POSITION_LIST_TITLE = "lbs_retailjobs"
