@@ -224,6 +224,7 @@ class LandingPageService(PageService):
 
             # 使用 key_list 来筛选 source
             source = ObjectDict(self.sub_nested_dict(source, key_list))
+            self.logger.debug("@@@@@@@@@@-1 source :{}".format(source))
 
             if 'salary_top' in key_list:
                 # 对 salary 做特殊处理 (salary_top, salary_bottom) -> salary
@@ -233,6 +234,7 @@ class LandingPageService(PageService):
                     v.salary_top == (source.position or {}).get("salaryTop")
                     ]
 
+                self.logger.debug("@@@@@@@@@@-2 salary :{}".format(salary))
                 source.salary = salary[0] if salary else ''
                 source.pop("salary_top", None)
                 source.pop("salary_bottom", None)
