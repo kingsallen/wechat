@@ -129,10 +129,13 @@ class PositionHandler(BaseHandler):
             )
             if lbs_oms.status != const.API_SUCCESS:
                 raise InfraOperationError(lbs_oms.message)
+
+            stores_info = yield self.company_ps.get_position_lbs_info({"company_id": self.current_user.company.id}, position_id)
+
             header = yield self._make_json_header(
                 position_info, company_info, star, application, endorse,
                 can_apply, team.id if team else 0, did, teamname_custom,
-                reward, share_reward, has_point_reward, bonus, switch, conf_response, lbs_oms.data.get('valid'))
+                reward, share_reward, has_point_reward, bonus, switch, conf_response, lbs_oms.data.get('valid'), stores_info.data and stores_info.data.stores)
             module_job_description = self._make_json_job_description(position_info)
             module_job_need = self._make_json_job_need(position_info)
             position_feature = yield self.position_ps.get_position_feature(position_id)
@@ -414,7 +417,7 @@ class PositionHandler(BaseHandler):
     @gen.coroutine
     def _make_json_header(self, position_info, company_info, star, application,
                           endorse, can_apply, team_id, did, teamname_custom, reward, share_reward, has_point_reward,
-                          bonus, switch, conf_response, lbs_oms):
+                          bonus, switch, conf_response, lbs_oms, has_store):
         """构造头部 header 信息"""
 
         # 获得母公司配置信息
@@ -448,6 +451,7 @@ class PositionHandler(BaseHandler):
             "bonus": bonus,
             "recom_info_switch": switch,
             "lbs_oms": lbs_oms,
+            "has_store": has_store,
             "emp_bind_config": bool(conf_response.exists if conf_response else None)  # 是否拥有员工认证配置项
             # "team": position_info.department.lower() if position_info.department else ""
         })
@@ -1392,7 +1396,9 @@ class LbsPositionListHandler(BaseHandler):
             self.write_error(http_code=404)
             return
 
-        self.render_page(meta_title='', template_name="position/lbs-job-list.html", data=ObjectDict())
+        lbs_position_title = self.locale.translate(const_platform.LBS_POSITION_LIST_TITLE)
+
+        self.render_page(meta_title=lbs_position_title, template_name="position/lbs-job-list.html", data=ObjectDict())
 
 
 class PositionRecomListHandler(PositionListInfraParamsMixin, BaseHandler):
