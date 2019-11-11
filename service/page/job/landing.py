@@ -52,6 +52,9 @@ class LandingPageService(PageService):
         key_list = []
         value_list = []
 
+        if search_condition_dict and search_condition_dict.get("candidate_source"):
+            search_condition_dict["candidate_source"] = const.CANDIDATE_SOURCE_SEARCH.get(str(search_condition_dict.get("candidate_source")))
+
         data = {
             "size": query_size,
             "query": {
