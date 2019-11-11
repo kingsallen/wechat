@@ -89,40 +89,39 @@ class ChatPageService(PageService):
         raise gen.Return(records)
 
     @gen.coroutine
-    def get_chats(self, room_id, page_no, page_size):
-        """获得聊天历史记录"""
+    def get_user_chat_history_record_page(self, room_id, user_id, page_no, page_size):
+        """获取用户聊天历史记录分页数据"""
+        records = []
+        user_chat_history_record_page = yield self.infra_immobot_ds.get_user_chat_history_record_page(
+            room_id, user_id, page_no, page_size)
 
-        ret = yield self.thrift_chat_ds.get_chats(room_id, page_no, page_size)
-        self.logger.debug(ret)
-        obj_list = list()
-        if ret.chatLogs:
-            for e in ret.chatLogs:
-                room = ObjectDict()
-                room['id'] = e.id
-                room['content'] = e.content or ''
-                room['chatTime'] = str_2_date(e.createTime, const.TIME_FORMAT)
-                room['speaker'] = e.speaker  # 0：求职者，1：HR
-                room['msgType'] = e.msgType
-                room['compoundContent'] = json.loads(e.compoundContent if e.compoundContent else '{}') or {}
-                room['stats'] = json.loads(e.stats if e.stats else '{}') or {}
-                self._compliant_chat_log(e, room)
-                obj_list.append(room)
+        # IM37006 数据权限校验失败
+        if user_chat_history_record_page.code != '0':
+            raise gen.Return(user_chat_history_record_page.code)
 
-        raise gen.Return(obj_list)
+        if not user_chat_history_record_page.data.current_page_data:
+            raise gen.Return(records)
 
-    @staticmethod
-    def _compliant_chat_log(message, room):
-        """兼容老的聊天字段"""
-        btn_content = json.loads(message.btnContent) if message.btnContent else message.btnContent
-        if btn_content and type(btn_content) == str:
-            btn_content = json.loads(btn_content)
-        duration = message.duration
-        server_id = message.serverId
-        asset_url = message.assetUrl
-        if type(room['compoundContent']) == dict:
-            room['compoundContent'].update(duration=duration, server_id=server_id, asset_url=asset_url)
-        if message.msgType == 'button':
-            room['compoundContent'] = btn_content
+        for c in user_chat_history_record_page.data.current_page_data:
+            c = ObjectDict(c)
+            if c.msg_type == 'voice':
+                compound_content = dict(duration=c.duration, server_id=c.server_id, asset_url=c.local_url)
+            else:
+                compound_content = json.loads(c.compound_content if c.compound_content else '{}') or {}
+
+            stats = json.loads(c.stats if c.stats else '{}') or {}
+
+            chat = ObjectDict()
+            chat['id'] = c.id
+            chat['content'] = c.content or ''
+            chat['chatTime'] = str_2_date(c.create_time, const.TIME_FORMAT)
+            chat['speaker'] = c.speaker  # 0：求职者，1：HR
+            chat['msgType'] = c.msg_type
+            chat['compoundContent'] = compound_content
+            chat['stats'] = stats
+            records.append(chat)
+
+        raise gen.Return(records)
 
     @gen.coroutine
     def get_chatroom(self, sysuser, hr_id, position_id, room_id, qxuser, is_gamma, mobot_enable, recom, is_employee):

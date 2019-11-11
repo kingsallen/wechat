@@ -397,25 +397,20 @@ class ChatHandler(BaseHandler):
     @gen.coroutine
     def get_messages(self):
         """获得指定聊天室的聊天历史记录"""
-
+        page_no = self.params.page_no or 1
+        page_size = self.params.page_size or 10
         if not self.params.room_id:
             self.send_json_error(message=msg.REQUEST_PARAM_ERROR)
             return
 
-        room_info = yield self.chat_ps.get_chatroom_info(self.params.room_id)
-
+        res = yield self.chat_ps.get_user_chat_history_record_page(self.params.room_id, self.current_user.sysuser.id,
+                                                                   page_no, page_size)
         # 需要判断用户是否进入自己的聊天室
-        if not room_info or room_info.sysuser_id != self.current_user.sysuser.id:
+        if isinstance(res, str) and res == 'IM37006':
             self.send_json_error(message=msg.NOT_AUTHORIZED)
             return
 
-        page_no = self.params.page_no or 1
-        page_size = self.params.page_size or 10
-
-        res = yield self.chat_ps.get_chats(self.params.room_id, page_no, page_size)
-        self.send_json_success(data=ObjectDict(
-            records=res
-        ))
+        self.send_json_success(data=ObjectDict(records=res))
 
     @handle_response
     @authenticated
