@@ -1392,7 +1392,7 @@ class LbsPositionListHandler(BaseHandler):
             self.write_error(http_code=404)
             return
 
-        self.render_page(template_name="position/lbs-job-list.html", data=ObjectDict())
+        self.render_page(meta_title='', template_name="position/lbs-job-list.html", data=ObjectDict())
 
 
 class PositionRecomListHandler(PositionListInfraParamsMixin, BaseHandler):
