@@ -198,15 +198,17 @@ class ChatPageService(PageService):
         raise gen.Return(ret)
 
     @gen.coroutine
-    def save_chat(self, params):
+    def save_chat(self, company_id, room_id, user_id, msg_type, origin, pid, content, compound_content, speaker,
+                  voice_server_id, voice_duration):
         """
-        记录聊天内容
-        :param params:
-        :return:
+        保存聊天记录
         """
+        ret = yield self.infra_immobot_ds.save_chat_record(company_id, room_id, user_id, msg_type, origin, pid, content,
+                                                           compound_content, speaker, voice_server_id, voice_duration)
+        if not ret.data:
+            raise gen.Return({})
 
-        ret = yield self.thrift_chat_ds.save_chat(params)
-        raise gen.Return(ret)
+        raise gen.Return(ret.data)
 
     @gen.coroutine
     def get_chatroom_info(self, room_id):
