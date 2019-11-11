@@ -227,11 +227,14 @@ class LandingPageService(PageService):
             self.logger.debug("@@@@@@@@@@-1 source :{}".format(source))
 
             if 'salary_top' in key_list:
+                salary_bottom = int(source.position.get("salaryBottom")) if source.position and source.position.get("salaryBottom") else ""
+                salary_top = int(source.position.get("salaryTop")) if source.position and source.position.get("salaryTop") else ""
+
                 # 对 salary 做特殊处理 (salary_top, salary_bottom) -> salary
                 salary = [
                     v.get("name") for v in platform_const.SALARY.values()
-                    if v.salary_bottom == (source.position or {}).get("salaryBottom") and
-                    v.salary_top == (source.position or {}).get("salaryTop")
+                    if v.salary_bottom == salary_bottom and
+                    v.salary_top == salary_top
                     ]
 
                 self.logger.debug("@@@@@@@@@@-2 salary :{}".format(salary))
