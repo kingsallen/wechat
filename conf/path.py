@@ -7,6 +7,7 @@ POSITION_PATH = '/position/{}'
 POSITION_LIST = '/position'
 POSITION_SHARE = "/position/share"
 POSITION_REFERRAL_LIST = '/position/recom'
+LBS_POSITION_LIST = '/lbs/position'
 RED_PACKET_CARD = '/mobile/redpack'
 TEAM_PATH = '/company/team/{}'
 COMPANY_TEAM = '/company/team'
