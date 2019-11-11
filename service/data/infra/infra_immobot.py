@@ -21,7 +21,7 @@ class InfraImmobotDataService(DataService):
             "pageSize": page_size,
         })
 
-        ret = yield http_get_v2(im_mobot.GET_USER_CHATROOM_PAGE, im_service, params)
+        ret = yield http_get_v2(im_mobot.GET_USER_CHATROOM_PAGE, im_service, params, timeout=5)
         raise gen.Return(ret)
 
     @gen.coroutine
@@ -38,5 +38,20 @@ class InfraImmobotDataService(DataService):
             "isQxWechat": is_qx_wechat,
         })
 
-        ret = yield http_put_v2(im_mobot.USER_ENTER_CHATROOM, im_service, params)
+        ret = yield http_put_v2(im_mobot.USER_ENTER_CHATROOM, im_service, params, timeout=5)
+        raise gen.Return(ret)
+
+    @gen.coroutine
+    def get_user_chat_history_record_page(self, room_id, user_id, page_no=1, page_size=20):
+        """
+        获取用户聊天历史记录分页数据
+        curl -X GET 'http://api-t2.dqprism.com/im/v4/user/room/30780/history/page?interfaceid=A11037001&appid=A11037&sysuserId=5399884&hraccountId=82752&pageSize=20&currentPage=1'
+        """
+        params = ObjectDict({
+            "sysuserId": user_id,
+            "currentPage": page_no,
+            "pageSize": page_size,
+        })
+        route = im_mobot.GET_USER_CHAT_HISTORY_RECORD_PAGE.format(room_id=room_id)
+        ret = yield http_get_v2(route, im_service, params, timeout=5)
         raise gen.Return(ret)
