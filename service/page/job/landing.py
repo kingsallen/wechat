@@ -52,10 +52,6 @@ class LandingPageService(PageService):
         key_list = []
         value_list = []
 
-        # if search_condition_dict and search_condition_dict.get("candidate_source"):
-        #     search_condition_dict["candidate_source"] = const.CANDIDATE_SOURCE_SEARCH.get(str(search_condition_dict.get("candidate_source")))
-        self.logger.debug("@@@@@@@@@@-1111 search_condition_dict :{}".format(search_condition_dict))
-
         data = {
             "size": query_size,
             "query": {
@@ -213,8 +209,6 @@ class LandingPageService(PageService):
         self.logger.debug(data)
         response = self.es.search(index='newpositions', body=data)
 
-        self.logger.debug("@@@@@@@@@@-2222 response :{}".format(response.hits))
-
         result_list = response.hits.hits
         self.logger.debug(result_list)
 
@@ -227,11 +221,9 @@ class LandingPageService(PageService):
 
         for e in result_list:
             source = e.get("_source")
-            self.logger.debug("@@@@@@@@@@-1 source :{}".format(source))
 
             # 使用 key_list 来筛选 source
             source = ObjectDict(self.sub_nested_dict(source, key_list))
-            self.logger.debug("@@@@@@@@@@-2 source :{}".format(source))
 
             if 'salary_top' in key_list:
                 # 对 salary 做特殊处理 (salary_top, salary_bottom) -> salary
@@ -246,8 +238,6 @@ class LandingPageService(PageService):
                 source.pop("salary_bottom", None)
 
             ret.append(source)
-
-        self.logger.debug("@@@@@@@@@@-3 ret :{}".format(ret))
 
         return ret
 
