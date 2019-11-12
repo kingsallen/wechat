@@ -424,9 +424,9 @@ class LandingPageService(PageService):
                     to_append.append(c_com)
 
                 elif k == 'candidate_source_name':
-                    text = locale.translate(const.CANDIDATE_SOURCE_SEARCH_LOCALE.get(e.get(k))) if e.get(k) else e.get(k)
+                    text = locale.translate(const.CANDIDATE_SOURCE.get(str(e.get(k)))) if str(e.get(k)) else e.get(k)
                     en = pinyin_initials(text)
-                    to_append.append({"text": text, "value": const.CANDIDATE_SOURCE_SEARCH_REVERSE.get(e.get(k)),
+                    to_append.append({"text": text, "value": str(e.get(k)),
                                       "en": en[0] if en else ""})
 
                 elif k == 'employment_type_name':
@@ -470,10 +470,10 @@ class LandingPageService(PageService):
                     to_append.append(c_com)
 
                 elif s == 'candidate_source_name':
-                    text = locale.translate(const.CANDIDATE_SOURCE_SEARCH_LOCALE.get(e.get(s))) if e.get(s) else e.get(
+                    text = locale.translate(const.CANDIDATE_SOURCE.get(str(e.get(s)))) if str(e.get(s)) else e.get(
                         s)
                     en = pinyin_initials(text)
-                    to_append.append({"text": text, "value": const.CANDIDATE_SOURCE_SEARCH_REVERSE.get(e.get(s)),
+                    to_append.append({"text": text, "value": str(e.get(s)),
                                       "en": en[0] if en else ""})
 
                 elif s == 'employment_type_name':
