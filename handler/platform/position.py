@@ -942,7 +942,7 @@ class PositionListInfraParamsMixin(BaseHandler):
                 # 如果用户自行修改了 GET 参数，不至于报错
                 infra_params.salary = ""
 
-        infra_params.update(cities=self.params.city if self.params.city else "")
+        infra_params.update(cities=self.params.city.replace("中国香港","香港").replace("中国澳门","澳门") if self.params.city else "")
 
         if self.params.degree:
             infra_params.degree = self.params.degree
