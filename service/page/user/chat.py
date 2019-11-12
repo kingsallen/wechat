@@ -11,7 +11,7 @@ from setting import settings
 from util.common import ObjectDict
 from util.common.decorator import log_time
 from util.tool.date_tool import str_2_date
-from util.tool.http_tool import http_post, http_get
+from util.tool.http_tool import http_post
 from util.tool.str_tool import gen_salary
 from util.tool.url_tool import make_static_url
 
@@ -336,13 +336,6 @@ class ChatPageService(PageService):
         raise gen.Return(position_list)
 
     @gen.coroutine
-    def get_fast_entry(self, company_id):
-        uri = 'company/{company_id}/fastentry/config'.format(company_id=company_id)
-        route = '{host}{uri}'.format(host=settings['chatbot_host'], uri=uri)
-        result = yield http_get(route=route, jdata=None, infra=False, timeout=5)
-        raise gen.Return(result)
-
-    @gen.coroutine
     def get_chatbot_reply(self, message, user_id, hr_id, position_id, flag, social, campus, create_new_context,
                           current_user, from_textfield, project_id):
         """ 调用 chatbot 返回机器人的回复信息
@@ -531,3 +524,46 @@ class ChatPageService(PageService):
         # HR聊天是否托管给智能招聘助手，0 不托管，1 托管
         mobot_enable = bool(hr_info.leave_to_mobot) if hr_info else False
         raise gen.Return(mobot_enable)
+
+    @gen.coroutine
+    def get_mobot_switch_status(self, company_id, mobot_type_key):
+        """
+        检查oms控制的一系列开关状态
+        :param company_id:
+        :param product_type: 1 社招 2 校招 3 我是员工
+        :return:
+        """
+        mobot_type = {'social': '社招版MoBot(人工+智能对话模式)',
+                      'campus': '校招MoBot(人工+智能对话模式)',
+                      'employee': '员工版MoBot(人工+智能对话模式)'}
+
+        res = yield self.infra_company_ds.get_oms_all_switch_status(company_id)
+        if not res.data:
+            self.logger.warning("get_mobot_switch_status is null, company.id:{}".format(company_id))
+            raise gen.Return(False)
+
+        for product in res.data:
+            if product['keyword'] == mobot_type[mobot_type_key]:
+                if product['valid'] == 1:
+                    raise gen.Return(True)
+
+        raise gen.Return(False)
+
+    @gen.coroutine
+    def get_mobot_tohr_switch_status(self, company_id):
+        """
+        获取请转HR开关
+        :param company_id:
+        :return:
+        """
+        res = yield self.infra_company_ds.get_oms_all_switch_status(company_id)
+        if not res.data:
+            self.logger.warning("get_mobot_switch_status is null, company.id:{}".format(company_id))
+            raise gen.Return(False)
+
+        for product in res.data:
+            if product['keyword'].find('请转HR') >= 0:
+                if product['valid'] == 1:
+                    raise gen.Return(True)
+
+        raise gen.Return(False)
