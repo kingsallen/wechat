@@ -221,9 +221,11 @@ class LandingPageService(PageService):
 
         for e in result_list:
             source = e.get("_source")
+            self.logger.debug("@@@@@@-111 source:{}".format(source))
 
             # 使用 key_list 来筛选 source
             source = ObjectDict(self.sub_nested_dict(source, key_list))
+            self.logger.debug("@@@@@@-222 source:{}".format(source))
 
             if 'salary_top' in key_list:
                 # 对 salary 做特殊处理 (salary_top, salary_bottom) -> salary
@@ -238,6 +240,8 @@ class LandingPageService(PageService):
                 source.pop("salary_bottom", None)
 
             ret.append(source)
+
+        self.logger.debug("@@@@@@-333 ret:{}".format(ret))
 
         return ret
 
