@@ -92,7 +92,7 @@ class SwitchHandler(BaseHandler):
         :return:
         """
         ret = yield self.company_ps.get_referral_rule_switch(self.current_user.company.id)
-        if not ret.status == API_SUCCESS:
+        if not ret.code == NEWINFRA_API_SUCCESS:
             self.send_json_error(message=ret.message)
             return
 
