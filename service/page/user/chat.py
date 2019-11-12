@@ -165,7 +165,7 @@ class ChatPageService(PageService):
                 pid=position.id,
                 title=position.title,
                 company_name=company.name,
-                city=ret.position.city,
+                city=position.city,
                 salary=gen_salary(salary.salary_top, salary.salary_bottom),
                 update=str_2_date(position.update_time, const.TIME_FORMAT_MINUTE),
                 status=position.status,
