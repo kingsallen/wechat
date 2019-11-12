@@ -2,6 +2,7 @@
 
 from tornado import gen
 
+from conf.common import COMPANY_SWITCH_MODULE_CHATTING
 from service.page.base import PageService
 
 
@@ -82,6 +83,17 @@ class ChattingPageService(PageService):
         """
 
         ret = yield self.infra_im_ds.get_switch(role, user_id, employee_id, company_id)
+        raise gen.Return(ret)
+
+    @gen.coroutine
+    def get_chatting_switch(self, company_id):
+        """
+        获取聊天开关的状态
+        :param company_id: 公司编号
+        :return: 开关状态
+        """
+
+        ret = yield self.infra_im_ds.get_chatting_switch(company_id, COMPANY_SWITCH_MODULE_CHATTING)
         raise gen.Return(ret)
 
     @gen.coroutine
