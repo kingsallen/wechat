@@ -211,36 +211,28 @@ class ChatPageService(PageService):
     @gen.coroutine
     def get_unread_chat_num(self, user_id, hr_id):
         """返回JD 页，求职者与 HR 之间的未读消息数"""
-
         if user_id is None or not hr_id:
             raise gen.Return(1)
-
-        chatroom = yield self.hr_wx_hr_chat_list_ds.get_chatroom(conds={
-            "hraccount_id": int(hr_id),
-            "sysuser_id": user_id
-        })
-        self.logger.debug("ChatPageService get_unread_chat_num chatroom:{}".format(chatroom))
-
+        res = yield self.infra_immobot_ds.get_user_chatroom_info(user_id, hr_id)
         # 若无聊天，则默认显示1条未读消息
-        if not chatroom:
+        if not res.data:
             raise gen.Return(1)
 
-        raise gen.Return(chatroom.user_unread_count)
+        room = ObjectDict(res.data)
+        raise gen.Return(room.user_unread_count)
 
     @gen.coroutine
     def get_all_unread_chat_num(self, user_id):
-
         """返回求职者所有的未读消息数，供侧边栏我的消息未读消息提示"""
-
         if user_id is None:
             raise gen.Return(0)
 
-        unread_count_total = yield self.hr_wx_hr_chat_list_ds.get_chat_unread_count_sum(conds={
-            "sysuser_id": user_id,
-        }, fields=["user_unread_count"])
-        if unread_count_total is None:
-            return gen.Return(0)
-        raise gen.Return(unread_count_total.sum_user_unread_count)
+        res = yield self.infra_immobot_ds.get_user_allchatroom_unread(user_id)
+        if not res.data:
+            raise gen.Return(0)
+
+        data = ObjectDict(res.data)
+        raise gen.Return(data.unread_total)
 
     @gen.coroutine
     def get_hr_info(self, publisher):

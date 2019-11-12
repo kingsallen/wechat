@@ -95,14 +95,6 @@ class InfraCompanyDataService(DataService):
         return res
 
     @gen.coroutine
-    def get_company_mobot_conf(self, company_id):
-        params = ObjectDict({
-            "company_id": company_id,
-        })
-        res = yield http_get(path.MOBOT_IMAGE, params)
-        return res
-
-    @gen.coroutine
     def check_oms_switch_status(self, company_id, module_name):
         """
         检查oms控制的一系列开关状态
@@ -169,3 +161,29 @@ class InfraCompanyDataService(DataService):
         """
         ret = yield http_get(path.LBS_IP_LOCATION.format(remote_ip), infra=False)
         return ret
+
+    @gen.coroutine
+    def get_company_conf(self, params):
+        """
+        根据company_ids批量获取公司列表数据
+        :param params : {'companyId': 1}
+        """
+        ret = yield http_put_v2(company.COMPANY_CONF, company_service, params)
+        return ret
+
+    @gen.coroutine
+    def get_company_mobot_conf(self, company_id):
+        params = ObjectDict({
+            "company_id": company_id,
+        })
+        res = yield self.get_company_conf(params)
+        if not res.data:
+            raise gen.Return({})
+
+        mobot_conf_info = ObjectDict(dict(name='', headimg='', welcome=''))
+        conf = ObjectDict(res.data)
+        mobot_conf_info.name = conf.mobot_name
+        mobot_conf_info.headimg = conf.mobot_head_img
+        mobot_conf_info.welcome = conf.mobot_welcome
+
+        raise gen.Return(mobot_conf_info)

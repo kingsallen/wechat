@@ -1,3 +1,5 @@
+GET_USER_ALLCHATROOM_UNREAD = "/v4/user/room/unread"
+GET_USER_CHATROOM_INFO = "/v4/user/room/info"
 GET_USER_CHATROOM_PAGE = "/v4/user/room/page"
 USER_ENTER_CHATROOM = "/v4/user/room/enter"
 USER_LEAVE_CHATROOM = "/v4/user/room/leave"

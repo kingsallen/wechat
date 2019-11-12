@@ -11,6 +11,31 @@ from util.tool.http_tool import http_get_v2, http_post_v2, http_put_v2
 class InfraImmobotDataService(DataService):
 
     @gen.coroutine
+    def get_user_allchatroom_unread(self, user_id):
+        """
+        获取聊天室信息
+        curl -X GET 'http://api-t2.dqprism.com/im/v4/user/room/unread?interfaceid=A11037001&appid=A11037&sysuserId=123&hraccountId=1'
+        """
+        params = ObjectDict({
+            "sysuserId": user_id,
+        })
+        ret = yield http_get_v2(im_mobot.GET_USER_ALLCHATROOM_UNREAD, im_service, params, timeout=5)
+        raise gen.Return(ret)
+
+    @gen.coroutine
+    def get_user_chatroom_info(self, user_id, hr_id):
+        """
+        获取聊天室信息
+        curl -X GET 'http://api-t2.dqprism.com/im/v4/user/room/info?interfaceid=A11037001&appid=A11037&sysuserId=123&hraccountId=1'
+        """
+        params = ObjectDict({
+            "sysuserId": user_id,
+            "hraccountId": hr_id,
+        })
+        ret = yield http_get_v2(im_mobot.GET_USER_CHATROOM_INFO, im_service, params, timeout=5)
+        raise gen.Return(ret)
+
+    @gen.coroutine
     def get_user_chatroom_page(self, user_id, page_no=1, page_size=20):
         """
         获取聊天室列表
