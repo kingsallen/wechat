@@ -52,8 +52,8 @@ class LandingPageService(PageService):
         key_list = []
         value_list = []
 
-        if search_condition_dict and search_condition_dict.get("candidate_source"):
-            search_condition_dict["candidate_source"] = const.CANDIDATE_SOURCE_SEARCH.get(str(search_condition_dict.get("candidate_source")))
+        # if search_condition_dict and search_condition_dict.get("candidate_source"):
+        #     search_condition_dict["candidate_source"] = const.CANDIDATE_SOURCE_SEARCH.get(str(search_condition_dict.get("candidate_source")))
         self.logger.debug("@@@@@@@@@@-1111 search_condition_dict :{}".format(search_condition_dict))
 
         data = {
@@ -213,6 +213,8 @@ class LandingPageService(PageService):
         self.logger.debug(data)
         response = self.es.search(index='newpositions', body=data)
 
+        self.logger.debug("@@@@@@@@@@-2222 response :{}".format(response.hits))
+
         result_list = response.hits.hits
         self.logger.debug(result_list)
 
@@ -259,7 +261,7 @@ class LandingPageService(PageService):
                             citys.append(city.get(es_key.split(".")[1]))
                         ret.update({key: citys})
                     else:
-                        ret.update({key: "" if value.get(es_key.split(".")[1]) is None else value.get(es_key.split(".")[1])})
+                        ret.update({key: value.get(es_key.split(".")[1])})
                 else:
                     ret.update({key: ""})
             # ret = {k: somedict.get(k, default) for k in somekeys}
@@ -268,7 +270,7 @@ class LandingPageService(PageService):
             es_key = self.get_by_value_dict(key, platform_const.LANDING)
             value = somedict.get(es_key.split(".")[0])
             if value:
-                ret = {key: "" if value.get(es_key.split(".")[1]) is None else value.get(es_key.split(".")[1])}
+                ret = {key: value.get(es_key.split(".")[1])}
             else:
                 ret = {key: ""}
         else:
