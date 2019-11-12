@@ -1417,7 +1417,7 @@ class LbsPositionListHandler(BaseHandler):
         escape = ["recomlist", "shareMongoliaFlag"]
         # cover = self.share_url(company_info.logo)
         cover = "https://cdn.moseeker.com/profile/lbs-share-cover.jpg"
-        title = "地图查看#" + company_info.abbreviation + "#" + self.locale.translate('job_hotjobs')
+        title = "地图查看" + company_info.abbreviation + self.locale.translate('job_hotjobs')
         description = self.locale.translate(msg.SHARE_DES_DEFAULT)
 
 
