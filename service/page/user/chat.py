@@ -156,10 +156,10 @@ class ChatPageService(PageService):
         position_info = ObjectDict()
         if room.position:
             full_position = ObjectDict(room.position)
-            position = ObjectDict(full_position.position)
-            company = ObjectDict(full_position.company)
-            team = ObjectDict(full_position.team)
-            salary = ObjectDict(full_position.salary_data)
+            position = ObjectDict(full_position.position) if full_position.position else ObjectDict()
+            company = ObjectDict(full_position.company) if full_position.company else ObjectDict()
+            team = ObjectDict(full_position.team) if full_position.team else ObjectDict()
+            salary = ObjectDict(full_position.salary_data) if full_position.salary_data else ObjectDict()
             team_name = team.name if team else position.department
 
             position_info = ObjectDict(
