@@ -428,7 +428,7 @@ class LandingPageService(PageService):
                     to_append.append(c_com)
 
                 elif k == 'candidate_source_name':
-                    text = locale.translate(const.CANDIDATE_SOURCE.get(e.get(k))) if e.get(k) else e.get(k)
+                    text = locale.translate(const.CANDIDATE_SOURCE.get(str(e.get(k)))) if not e.get(k) else e.get(k)
                     en = pinyin_initials(text)
                     to_append.append({"text": text, "value": str(e.get(k)),
                                       "en": en[0] if en else ""})
@@ -474,7 +474,7 @@ class LandingPageService(PageService):
                     to_append.append(c_com)
 
                 elif s == 'candidate_source_name':
-                    text = locale.translate(const.CANDIDATE_SOURCE.get(str(e.get(s)))) if e.get(s) else e.get(
+                    text = locale.translate(const.CANDIDATE_SOURCE.get(str(e.get(s)))) if not e.get(s) else e.get(
                         s)
                     en = pinyin_initials(text)
                     to_append.append({"text": text, "value": str(e.get(s)),
