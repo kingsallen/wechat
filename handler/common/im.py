@@ -145,15 +145,17 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
         self.chat_ps = ChatPageService()
 
     def open(self, room_id, *args, **kwargs):
-        logger.debug("------------ start open websocket --------------")
         self.room_id = room_id
         self.user_id = match_session_id(to_str(self.get_secure_cookie(const.COOKIE_SESSIONID)))
         self.hr_id = self.get_argument("hr_id")
         self.position_id = self.get_argument("pid", 0) or 0
 
+        logger.debug("IM WebSocket open start, room_id:{}, user_id:{}, hr_id:{}".format(room_id, self.user_id, self.hr_id))
+
         try:
             assert self.user_id and self.hr_id and self.room_id
         except AssertionError:
+            logger.warning("IM WebSocket open invalid arguments not authorized")
             self.close(WebSocketCloseCode.normal.value, "not authorized")
 
         self.set_nodelay(True)
@@ -177,35 +179,38 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
                         msgType=data.get("msgType"),
                         stats=data.get("stats")
                     )))
-                    logger.debug("----------websocket write finish----------")
+                    logger.debug("IM WebSocket open message_handler write finish")
             except websocket.WebSocketClosedError:
+                logger.error("IM WebSocket open message_handler WebSocketClosedError")
                 self.logger.error(traceback.format_exc())
                 self.close(WebSocketCloseCode.internal_error.value)
                 raise
 
-        logger.debug("---------- ready to subscribe -----------")
-        self.subscriber = Subscriber(
-            self.redis_client,
-            channel=self.chatroom_channel,
-            message_handler=message_handler)
-        logger.debug("------------- subscribe finish ---------------")
+        logger.debug("IM WebSocket open ready to subscribe, room_id:{}, user_id:{}, hr_id:{}".format(
+            room_id, self.user_id, self.hr_id))
+
+        self.subscriber = Subscriber(self.redis_client, channel=self.chatroom_channel, message_handler=message_handler)
+
+        logger.debug(
+            "IM WebSocket open subscribe finish, room_id:{}, user_id:{}, hr_id:{}".format(
+                room_id, self.user_id, self.hr_id))
+
         self.subscriber.start_run_in_thread()
 
     @gen.coroutine
     def on_message(self, message):
-        logger.debug("[websocket] received a message:{}".format(message))
+        logger.debug("IM WebSocket on_message received:{}, room_id:{}, user_id:{}, hr_id:{}".format(
+            message, self.room_id, self.user_id, self.hr_id))
         data = ujson.loads(message)
         if data.get("msgType") == 'ping':
             self.write_message(ujson.dumps({"msgType": 'pong'}))
 
     @gen.coroutine
     def on_close(self):
-        logger.debug("&=! {}".format("on_close, before stop_run_in_thread"))
+        logger.debug("IM WebSocket on_close, room_id:{}, user_id:{}, hr_id:{}".format(
+            self.room_id, self.user_id, self.hr_id))
         self.subscriber.stop_run_in_thread()
-        logger.debug("&=! {}".format("on_close, after stop_run_in_thread"))
-        logger.debug("&=! {}".format("on_close, before cleanup"))
         self.subscriber.cleanup()
-        logger.debug("&=! {}".format("on_close, after cleanup"))
 
         self.chat_session.mark_leave_chatroom(self.room_id)
         yield self.chat_ps.leave_chatroom(self.room_id, self.user_id)
