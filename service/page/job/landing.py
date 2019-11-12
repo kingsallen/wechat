@@ -213,6 +213,8 @@ class LandingPageService(PageService):
         self.logger.debug(data)
         response = self.es.search(index='newpositions', body=data)
 
+        self.logger.debug("@@@@@@@@@@-2222 response :{}".format(response.hits))
+
         result_list = response.hits.hits
         self.logger.debug(result_list)
 
