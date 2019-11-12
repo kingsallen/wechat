@@ -25,8 +25,7 @@ class DictLBSCityHandler(BaseHandler):
         for data in cities:
             if data.get("text") == "港,澳,台":
                 cities.remove(data)
-                # 高德地图不支持台湾.
-                cities.append({"list": [{"name": "香港", "code": 810000}, {"name": "澳门", "code": 820000}, {"name": "台湾", "code": "", "disable": 1}], "text": "港,澳,台"})
+                cities.append({"list": [{"name": "香港", "code": 810000}, {"name": "澳门", "code": 820000}, {"name": "中国台湾", "code": "", "disable": 1}], "text": "港,澳,台"})
                 break
         self.send_json_success(cities)
 
