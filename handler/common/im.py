@@ -16,7 +16,6 @@ from handler.base import BaseHandler
 from oauth.wechat import JsApi
 from service.page.user.chat import ChatPageService
 from setting import settings
-from thrift_gen.gen.chat.struct.ttypes import ChatVO
 from util.common import ObjectDict
 from util.common.decorator import handle_response, authenticated
 from util.common.decorator import relate_user_and_former_employee
@@ -209,7 +208,7 @@ class ChatWebSocketHandler(websocket.WebSocketHandler):
         logger.debug("&=! {}".format("on_close, after cleanup"))
 
         self.chat_session.mark_leave_chatroom(self.room_id)
-        yield self.chat_ps.leave_chatroom(self.room_id)
+        yield self.chat_ps.leave_chatroom(self.room_id, self.user_id)
 
 
 class ChatRoomHandler(BaseHandler):

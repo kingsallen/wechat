@@ -187,15 +187,13 @@ class ChatPageService(PageService):
         raise gen.Return(res)
 
     @gen.coroutine
-    def leave_chatroom(self, room_id, speaker=0):
+    def leave_chatroom(self, room_id, user_id, speaker=0):
         """
         离开聊天室
-        :param room_id:
         :param speaker: 0：求职者，1：HR
         :return:
         """
-
-        ret = yield self.thrift_chat_ds.leave_chatroom(room_id, speaker)
+        ret = yield self.infra_immobot_ds.user_leave_chatroom(room_id, user_id, speaker)
         raise gen.Return(ret)
 
     @gen.coroutine
