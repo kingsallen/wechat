@@ -227,10 +227,11 @@ class LandingPageService(PageService):
 
         for e in result_list:
             source = e.get("_source")
+            self.logger.debug("@@@@@@@@@@-1 source :{}".format(source))
 
             # 使用 key_list 来筛选 source
             source = ObjectDict(self.sub_nested_dict(source, key_list))
-            self.logger.debug("@@@@@@@@@@-1 source :{}".format(source))
+            self.logger.debug("@@@@@@@@@@-2 source :{}".format(source))
 
             if 'salary_top' in key_list:
                 # 对 salary 做特殊处理 (salary_top, salary_bottom) -> salary
@@ -246,6 +247,8 @@ class LandingPageService(PageService):
 
             ret.append(source)
 
+        self.logger.debug("@@@@@@@@@@-3 ret :{}".format(ret))
+
         return ret
 
     def sub_nested_dict(self, somedict, somekeys):
@@ -260,6 +263,8 @@ class LandingPageService(PageService):
                         for city in value:
                             citys.append(city.get(es_key.split(".")[1]))
                         ret.update({key: citys})
+                    elif key == "position_type":
+                        ret.update({key: 0 if value.get(es_key.split(".")[1]) is None else value.get(es_key.split(".")[1])}) # position_type是新增属性，老数据没有这个属性
                     else:
                         ret.update({key: value.get(es_key.split(".")[1])})
                 else:
@@ -270,7 +275,10 @@ class LandingPageService(PageService):
             es_key = self.get_by_value_dict(key, platform_const.LANDING)
             value = somedict.get(es_key.split(".")[0])
             if value:
-                ret = {key: value.get(es_key.split(".")[1])}
+                if key == "position_type":
+                    ret = {key: 0 if value.get(es_key.split(".")[1]) is None else value.get(es_key.split(".")[1])}
+                else:
+                    ret = {key: value.get(es_key.split(".")[1])}
             else:
                 ret = {key: ""}
         else:
