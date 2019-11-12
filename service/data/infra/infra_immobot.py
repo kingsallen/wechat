@@ -4,8 +4,8 @@ from conf.newinfra_service_conf.im import im_mobot
 from conf.newinfra_service_conf.service_info import im_service
 from service.data.base import DataService
 from util.common import ObjectDict
-from util.tool.http_tool import http_get_v2, http_post_v2, http_put_v2
 from util.tool.date_tool import curr_now
+from util.tool.http_tool import http_get_v2, http_post_v2, http_put_v2
 
 
 class InfraImmobotDataService(DataService):
@@ -40,6 +40,22 @@ class InfraImmobotDataService(DataService):
         })
 
         ret = yield http_put_v2(im_mobot.USER_ENTER_CHATROOM, im_service, params, timeout=5)
+        raise gen.Return(ret)
+
+    @gen.coroutine
+    def user_leave_chatroom(self, room_id, user_id, speaker=0):
+        """
+        用户离开聊天室
+        curl -X PUT 'http://api-t2.dqprism.com/im/v4/user/room/leave?interfaceid=A11037001&appid=A11037&roomId=30780&userId=5399884&hrId=82752&positionId=0&isQxWechat=false'
+        """
+        params = ObjectDict({
+            "roomId": room_id,
+            "userId": user_id,
+            "leaveTime": curr_now(),
+            "speaker": speaker,
+        })
+
+        ret = yield http_put_v2(im_mobot.USER_LEAVE_CHATROOM, im_service, params, timeout=5)
         raise gen.Return(ret)
 
     @gen.coroutine

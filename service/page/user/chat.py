@@ -155,10 +155,10 @@ class ChatPageService(PageService):
         position_info = ObjectDict()
         if room.position:
             full_position = ObjectDict(room.position)
-            position = ObjectDict(full_position.position)
-            company = ObjectDict(full_position.company)
-            team = ObjectDict(full_position.team)
-            salary = ObjectDict(full_position.salary_data)
+            position = ObjectDict(full_position.position) if full_position.position else ObjectDict()
+            company = ObjectDict(full_position.company) if full_position.company else ObjectDict()
+            team = ObjectDict(full_position.team) if full_position.team else ObjectDict()
+            salary = ObjectDict(full_position.salary_data) if full_position.salary_data else ObjectDict()
             team_name = team.name if team else position.department
 
             position_info = ObjectDict(
@@ -186,15 +186,13 @@ class ChatPageService(PageService):
         raise gen.Return(res)
 
     @gen.coroutine
-    def leave_chatroom(self, room_id, speaker=0):
+    def leave_chatroom(self, room_id, user_id, speaker=0):
         """
         离开聊天室
-        :param room_id:
         :param speaker: 0：求职者，1：HR
         :return:
         """
-
-        ret = yield self.thrift_chat_ds.leave_chatroom(room_id, speaker)
+        ret = yield self.infra_immobot_ds.user_leave_chatroom(room_id, user_id, speaker)
         raise gen.Return(ret)
 
     @gen.coroutine
@@ -209,16 +207,6 @@ class ChatPageService(PageService):
             raise gen.Return({})
 
         raise gen.Return(ret.data)
-
-    @gen.coroutine
-    def get_chatroom_info(self, room_id):
-
-        """返回JD 页，求职者与 HR 之间的未读消息数"""
-        chatroom = yield self.hr_wx_hr_chat_list_ds.get_chatroom(conds={
-            "id": int(room_id),
-        })
-
-        raise gen.Return(chatroom)
 
     @gen.coroutine
     def get_unread_chat_num(self, user_id, hr_id):
