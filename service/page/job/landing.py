@@ -52,6 +52,10 @@ class LandingPageService(PageService):
         key_list = []
         value_list = []
 
+        if search_condition_dict and search_condition_dict.get("candidate_source"):
+            search_condition_dict["candidate_source"] = const.CANDIDATE_SOURCE_SEARCH.get(str(search_condition_dict.get("candidate_source")))
+        self.logger.debug("@@@@@@@@@@-1111 search_condition_dict :{}".format(search_condition_dict))
+
         data = {
             "size": query_size,
             "query": {
@@ -154,8 +158,8 @@ class LandingPageService(PageService):
                                 {"match": {key_a: value_a}}
                             ],
                             "should": [
-                                {"range": {"salaryData.salaryTop": {"lte": salary_dict.get('salary_top'), "gte": salary_dict.get('salary_bottom')}}},
-                                {"range": {"salaryData.salaryBottom": {"lte": salary_dict.get('salary_top'), "gte": salary_dict.get('salary_bottom')}}}
+                                {"range": {"position.salaryTop": {"lte": salary_dict.get('salary_top'), "gte": salary_dict.get('salary_bottom')}}},
+                                {"range": {"position.salaryBottom": {"lte": salary_dict.get('salary_top'), "gte": salary_dict.get('salary_bottom')}}}
                             ],
                             "minimum_should_match": 1
                         }
@@ -178,8 +182,8 @@ class LandingPageService(PageService):
                                 {"match": {key_b: value_b}}
                             ],
                             "should": [
-                                {"range": {"salaryData.salaryTop": {"lte": salary_dict.get('salary_top'), "gte": salary_dict.get('salary_bottom')}}},
-                                {"range": {"salaryData.salaryBottom": {"lte": salary_dict.get('salary_top'), "gte": salary_dict.get('salary_bottom')}}}
+                                {"range": {"position.salaryTop": {"lte": salary_dict.get('salary_top'), "gte": salary_dict.get('salary_bottom')}}},
+                                {"range": {"position.salaryBottom": {"lte": salary_dict.get('salary_top'), "gte": salary_dict.get('salary_bottom')}}}
                             ],
                             "minimum_should_match": 1
                         }
@@ -195,8 +199,8 @@ class LandingPageService(PageService):
                             {"match": {"position.status": const.OLD_YES}}
                         ],
                         "should": [
-                            {"range": {"salaryData.salaryTop": {"lte": salary_dict.get('salary_top'), "gte": salary_dict.get('salary_bottom')}}},
-                            {"range": {"salaryData.salaryBottom": {"lte": salary_dict.get('salary_top'), "gte": salary_dict.get('salary_bottom')}}}
+                            {"range": {"position.salaryTop": {"lte": salary_dict.get('salary_top'), "gte": salary_dict.get('salary_bottom')}}},
+                            {"range": {"position.salaryBottom": {"lte": salary_dict.get('salary_top'), "gte": salary_dict.get('salary_bottom')}}}
                         ],
                         "minimum_should_match": 1
                     }
@@ -224,13 +228,14 @@ class LandingPageService(PageService):
 
             # 使用 key_list 来筛选 source
             source = ObjectDict(self.sub_nested_dict(source, key_list))
+            self.logger.debug("@@@@@@@@@@-1 source :{}".format(source))
 
             if 'salary_top' in key_list:
                 # 对 salary 做特殊处理 (salary_top, salary_bottom) -> salary
                 salary = [
                     v.get("name") for v in platform_const.SALARY.values()
-                    if v.salary_bottom == (source.salaryData or {}).get("salaryBottom") and
-                    v.salary_top == (source.salaryData or {}).get("salaryTop")
+                    if v.salary_bottom == source.get("salary_bottom") and
+                    v.salary_top == source.get("salary_top")
                     ]
 
                 source.salary = salary[0] if salary else ''
@@ -254,7 +259,7 @@ class LandingPageService(PageService):
                             citys.append(city.get(es_key.split(".")[1]))
                         ret.update({key: citys})
                     else:
-                        ret.update({key: value.get(es_key.split(".")[1])})
+                        ret.update({key: "" if value.get(es_key.split(".")[1]) is None else value.get(es_key.split(".")[1])})
                 else:
                     ret.update({key: ""})
             # ret = {k: somedict.get(k, default) for k in somekeys}
@@ -263,7 +268,7 @@ class LandingPageService(PageService):
             es_key = self.get_by_value_dict(key, platform_const.LANDING)
             value = somedict.get(es_key.split(".")[0])
             if value:
-                ret = {key: value.get(es_key.split(".")[1])}
+                ret = {key: "" if value.get(es_key.split(".")[1]) is None else value.get(es_key.split(".")[1])}
             else:
                 ret = {key: ""}
         else:
