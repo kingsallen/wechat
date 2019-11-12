@@ -55,7 +55,7 @@ LANDING = ObjectDict({
                                   "key":         "candidate_source_name",
                                   "display_key": "candidate_source_name",
                                   "form_name":   "candidate_source",
-                                  "es_key":      "candidateData.name"},
+                                  "es_key":      "position.candidateSource"},
     LANDING_INDEX_EMPLOYMENT:    {"name":        "工作性质", "chpe": "性质",
                                   "key":         "employment_type_name",
                                   "display_key": "employment_type_name",
