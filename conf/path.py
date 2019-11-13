@@ -7,6 +7,7 @@ POSITION_PATH = '/position/{}'
 POSITION_LIST = '/position'
 POSITION_SHARE = "/position/share"
 POSITION_REFERRAL_LIST = '/position/recom'
+LBS_POSITION_LIST = '/lbs/position'
 RED_PACKET_CARD = '/mobile/redpack'
 TEAM_PATH = '/company/team/{}'
 COMPANY_TEAM = '/company/team'
@@ -292,3 +293,5 @@ LINKEDIN_AUTH = "/oauth/v2/authorization"
 MAIMAI_ACCESSTOKEN = "https://maimai.cn/oauth_login?appid={appid}&{cusdata}&login=1"
 LIEPIN_ACCESSTOKEN = 'https://passport.liepin.cn/mc/authlogin?state={}'
 JOYWOK_JMIS_AUTH = 'https://jmis.mcd.com.cn/jmis/NoLoginService'
+
+LBS_IP_LOCATION = "https://restapi.amap.com/v3/ip?key=e9698c1e0ee5dd69fb37ecd65440134c&ip={}"

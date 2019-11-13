@@ -8,7 +8,7 @@ from tornado import gen, websocket, ioloop
 
 import conf.common as const
 from conf.message import CHATTING_EMPLOYEE_RESIGNATION, CHATTING_EMPLOYEE_RESIGNATION_TIPS, \
-    CHATTING_EMPLOYEE_EMPLOYEE_TIPS
+    CHATTING_EMPLOYEE_EMPLOYEE_TIPS, CHATTING_USER_UNSUBSCRIBE
 from conf.protocol import WebSocketCloseCode
 from conf.sensors import CHATTING_SEND_MESSAGE
 from globals import logger
@@ -212,18 +212,25 @@ class EmployeeChattingHandler(BaseHandler):
     @gen.coroutine
     def get_totalunread(self):
         """
-        获取聊天室列表
+        获取未读聊天消息
         :return: 聊天室列表
         """
         ret = yield self.chatting_ps.get_employee_chatting_unread_count(self.params.room_id or 0, self.role,
                                                                         self.user_id, self.employee_id,
                                                                         self.current_user.company.id)
-        chat_num = yield self.chat_ps.get_all_unread_chat_num(self.current_user.sysuser.id)
+        if self.role == "employee":
 
-        if ret and ret.code and (ret.code == "0" or ret.code == 0):
-            self.send_json_success({"unread": ret.data + (chat_num if chat_num else 0)})
+            if ret and ret.code and (ret.code == "0" or ret.code == 0):
+                self.send_json_success({"unread": ret.data})
+            else:
+                self.send_json_error({"unread": ret.data if ret.data else 0}, ret.message)
         else:
-            self.send_json_error({"unread": (ret.data if ret.data else 0) + (chat_num if chat_num else 0)}, ret.message)
+            chat_num = yield self.chat_ps.get_all_unread_chat_num(self.current_user.sysuser.id)
+
+            if ret and ret.code and (ret.code == "0" or ret.code == 0):
+                self.send_json_success({"unread": ret.data + (chat_num if chat_num else 0)})
+            else:
+                self.send_json_error({"unread": (ret.data if ret.data else 0) + (chat_num if chat_num else 0)}, ret.message)
 
     @handle_response
     @gen.coroutine
@@ -446,6 +453,25 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
                     content=CHATTING_EMPLOYEE_RESIGNATION,
                     compound_content=None,
                     speaker=1,
+                    cid=int(self.room_id),
+                    pid=int(self.position_id) if self.position_id else 0,
+                    create_time=create_time,
+                    id=chat_id.get("data"),
+                ))
+                self.write_message(message_body)
+            except websocket.WebSocketClosedError:
+                logger.error(traceback.format_exc())
+                self.close(WebSocketCloseCode.internal_error.value)
+                raise
+            return
+
+        if role == "employee" and chat_id and chat_id.code == "US305074":
+            try:
+                message_body = json_dumps(ObjectDict(
+                    msg_type=const.CHATTING_EMPLOYEE_MSG_TYPE_RESIGNATION,
+                    content=CHATTING_USER_UNSUBSCRIBE,
+                    compound_content=None,
+                    speaker=0,
                     cid=int(self.room_id),
                     pid=int(self.position_id) if self.position_id else 0,
                     create_time=create_time,
