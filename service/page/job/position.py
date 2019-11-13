@@ -725,7 +725,8 @@ class PositionPageService(PageService):
                       '1': ['校招MoBot(人工对话模式)', '校招MoBot(人工+智能对话模式)'],
                       '9': ['社招版MoBot(人工对话模式)', '社招版MoBot(人工+智能对话模式)',
                             '校招MoBot(人工对话模式)', '校招MoBot(人工+智能对话模式)',
-                            '员工版MoBot(人工对话模式)', '员工版MoBot(人工+智能对话模式)']}
+                            '员工版MoBot(人工对话模式)', '员工版MoBot(人工+智能对话模式)',
+                            '内推IM']}
 
         if candidate_source not in ['0', '1', '9']:
             raise gen.Return(False)
