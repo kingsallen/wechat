@@ -496,4 +496,4 @@ class InfraEmployeeDataService(DataService):
             "user_id": sysuser_id
         })
         ret = yield http_get(path.INFRA_GET_EMPLOYEE_MOBILE_INFO, params)
-        raise gen.Return(ObjectDict(ret.data.get("data")))
+        raise gen.Return(eval(ret.data.get("data")))
