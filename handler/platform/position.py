@@ -452,7 +452,8 @@ class PositionHandler(BaseHandler):
             "recom_info_switch": switch,
             "lbs_oms": lbs_oms,
             "has_store": has_store,
-            "emp_bind_config": bool(conf_response.exists if conf_response else None)  # 是否拥有员工认证配置项
+            "emp_bind_config": bool(conf_response.exists if conf_response else None),  # 是否拥有员工认证配置项
+            "hr_chat_switch": position_info.hr_chat_switch
             # "team": position_info.department.lower() if position_info.department else ""
         })
 

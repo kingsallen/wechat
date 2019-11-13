@@ -347,15 +347,17 @@ class ChatHandler(BaseHandler):
         })
         self.logger.debug("get_environ get jssdk config:{}".format(config))
 
-        get_fast_entry = yield self.chat_ps.get_fast_entry(self.current_user.company.id)
+        fast_entry = []
+        switch_open = yield self.chat_ps.get_mobot_tohr_switch_status(self.current_user.company.id)
+        if switch_open:
+            fast_entry = [{"msg_type": "html", "content": "请转HR"}]
 
         self.current_user.wechat.jsapi = config
-
         self.send_json_success(data=ObjectDict(
             locale_code=self.locale.code,
             user=self.current_user,
             env={"client_env": self._client_env},
-            fast_entry=get_fast_entry.data,
+            fast_entry=fast_entry,
             show_privacy_agreement=bool(data_privacy)
         ))
 
@@ -404,6 +406,7 @@ class ChatHandler(BaseHandler):
         self.hr_id = self.params.hr_id
         pid = self.params.pid or 0
         room_id = self.params.room_id or 0
+        mobot_type_key = self.params.mobot_type_key or 'social'
 
         # gamma 项目 hr 欢迎导语不同
         is_gamma = False
@@ -415,7 +418,7 @@ class ChatHandler(BaseHandler):
             (self.current_user.sysuser.id, self.params.hr_id, pid, room_id, self.current_user.qxuser, is_gamma)
         )
 
-        mobot_enable = yield self.chat_ps.get_mobot_hosting_status(self.hr_id)
+        mobot_enable = yield self.chat_ps.get_mobot_switch_status(self.current_user.company.id, mobot_type_key)
 
         recom = self.position_ps._make_recom(self.current_user.sysuser.id)
 
@@ -510,10 +513,7 @@ class ChatHandler(BaseHandler):
 
         @:param flag int(1) 0:社招 1:校招 2:meet mobot, 3:智能推荐, 4:{{data}}, 5: {{decodeURIComponent(data)}}
                 scene emp_chat 我是员工
-        @:param msgType str(50) 消息类型  ping, pong, html, text, image, voice, job, voice-preview, cards, job-sender,
-                                         button_radio, teamSelect, textPlaceholder, satisfaction, textList, citySelect,
-                                         industrySelect, positionSelect, jobCard, jobSelect, employeeBind, redirect,
-                                         uploadResume
+        @:param msgType str(50) 消息类型
         @:param serverId str(256) 微信语音内容，微信服务器生成的serverId
         @:param duration int(1) 微信语音时长
         @:param create_new_context boolean 是否创建了新的会话
@@ -533,6 +533,7 @@ class ChatHandler(BaseHandler):
         self.position_id = self.params.get("pid") or 0
         self.flag = int(self.params.get("flag")) or None
         self.project_id = self.params.get("project_id") or 0
+        mobot_type_key = self.params.get("mobot_type_key") or 'social'
 
         content = self.json_args.get("content") or ""
         compoundContent = self.json_args.get("compoundContent") or {}
@@ -543,16 +544,17 @@ class ChatHandler(BaseHandler):
         create_new_context = self.json_args.get("create_new_context") or False
         from_textfield = self.json_args.get("from_textfield") or False
 
+        company_id = self.current_user.company.parent_id if self.current_user.company.parent_id > 0 else self.current_user.company.id
+
         self.logger.debug('post_message flag:{}'.format(self.flag))
         self.logger.debug('post_message create_new_context:{}'.format(create_new_context))
 
-        mobot_enable = yield self.chat_ps.get_mobot_hosting_status(self.hr_id)
+        mobot_enable = yield self.chat_ps.get_mobot_switch_status(company_id, mobot_type_key)
         self.logger.debug('post_message mobot_enable:{}'.format(mobot_enable))
 
         self.chatroom_channel = const.CHAT_CHATROOM_CHANNEL.format(self.hr_id, self.user_id)
         self.hr_channel = const.CHAT_HR_CHANNEL.format(self.hr_id)
 
-        company_id = self.current_user.company.parent_id if self.current_user.company.parent_id > 0 else self.current_user.company.id
         chat = yield self.chat_ps.save_chat(company_id, int(self.room_id), self.current_user.sysuser.id, msg_type,
                                             const.ORIGIN_USER_OR_HR, int(self.position_id), content,
                                             ujson.dumps(compoundContent), const.CHAT_SPEAKER_USER,
@@ -581,7 +583,8 @@ class ChatHandler(BaseHandler):
                 # 由于没有延迟的发送导致hr端轮训无法订阅到publish到redis的消息　所以这里做下延迟处理
                 # delay_robot = functools.partial(self._handle_chatbot_message, user_message)
                 # ioloop.IOLoop.current().call_later(1, delay_robot)
-                yield self._handle_chatbot_message(user_message, create_new_context, from_textfield, self.project_id)
+                yield self._handle_chatbot_message(mobot_type_key, user_message, create_new_context, from_textfield,
+                                                   self.project_id)
         except Exception as e:
             self.logger.error(e)
 
@@ -627,6 +630,7 @@ class ChatHandler(BaseHandler):
         self.position_id = self.params.get("pid") or 0
         self.flag = self.params.get("flag") or 0
         self.project_id = self.params.get("project_id") or 0
+        mobot_type_key = self.params.get("mobot_type_key") or 'social'
 
         content = self.json_args.get("content") or ""
         compoundContent = self.json_args.get("compoundContent") or {}
@@ -637,7 +641,7 @@ class ChatHandler(BaseHandler):
 
         self.logger.debug('post_trigger  create_new_context:{}'.format(create_new_context))
 
-        mobot_enable = yield self.chat_ps.get_mobot_hosting_status(self.hr_id)
+        mobot_enable = yield self.chat_ps.get_mobot_switch_status(self.current_user.company.id, mobot_type_key)
         self.logger.debug('post_trigger mobot_enable:{}'.format(mobot_enable))
 
         self.chatroom_channel = const.CHAT_CHATROOM_CHANNEL.format(self.hr_id, self.user_id)
@@ -648,7 +652,8 @@ class ChatHandler(BaseHandler):
                 # 由于没有延迟的发送导致hr端轮训无法订阅到publish到redis的消息　所以这里做下延迟处理
                 # delay_robot = functools.partial(self._handle_chatbot_message, user_message)
                 # ioloop.IOLoop.current().call_later(1, delay_robot)
-                yield self._handle_chatbot_message(user_message, create_new_context, from_textfield, self.project_id)
+                yield self._handle_chatbot_message(mobot_type_key, user_message, create_new_context, from_textfield,
+                                                   self.project_id)
         except Exception as e:
             self.logger.error(e)
 
@@ -693,9 +698,12 @@ class ChatHandler(BaseHandler):
 
 
     @gen.coroutine
-    def _handle_chatbot_message(self, user_message, create_new_context, from_textfield, project_id):
-        """处理 chatbot message
+    def _handle_chatbot_message(self, mobot_type_key, user_message, create_new_context, from_textfield, project_id):
+        """
+        处理 chatbot message
         获取消息 -> pub消息 -> 入库
+
+        :param mobot_type_key mobot区分标识 social, campus, employee
         """
         # 聚合号入口应该使用对应hr对应所在的company_id
         company_id = self.current_user.company.id
@@ -703,25 +711,20 @@ class ChatHandler(BaseHandler):
         if hr_info and hr_info.company_id:
             company_id = hr_info.company_id
 
-        social = yield self.company_ps.check_oms_switch_status(company_id, "社招")
-        campus = yield self.company_ps.check_oms_switch_status(company_id, "校招")
         bot_messages = yield self.chat_ps.get_chatbot_reply(
+            mobot_type_key=mobot_type_key,
             current_user=self.current_user,
             message=user_message,
             user_id=self.user_id,
             hr_id=self.hr_id,
             position_id=self.position_id,
-            flag=self.flag,
             create_new_context=create_new_context,
             from_textfield=from_textfield,
-            social=social['data']['valid'],
-            campus=campus['data']['valid'],
             project_id=project_id
         )
-        self.logger.debug('_handle_chatbot_message  flag:{}, project_id:{}'.format(self.flag, project_id))
-        self.logger.debug('_handle_chatbot_message  social_switch:{}'.format(social['data']['valid']))
-        self.logger.debug('_handle_chatbot_message  campus_switch:{}'.format(campus['data']['valid']))
-        self.logger.debug('_handle_chatbot_message  create_new_context{}'.format(create_new_context))
+        self.logger.debug('_handle_chatbot_message mobot_type_key:{}, flag:{}, user_id:{}'.format(
+            mobot_type_key, self.flag, self.user_id))
+
         for bot_message in bot_messages:
             msg_type = bot_message.msg_type
             compound_content = bot_message.compound_content

@@ -110,6 +110,20 @@ class InfraCompanyDataService(DataService):
         return res
 
     @gen.coroutine
+    def get_oms_all_switch_status(self, company_id):
+        """
+        获取oms开关状态
+        :param company_id: 公司id
+        :return:
+        """
+        params = ObjectDict({
+            "companyId": company_id,
+            "appid": 102,
+        })
+        res = yield http_get(path.OMS_SWITCH_ALL, params)
+        return res
+
+    @gen.coroutine
     def get_company_hr_info(self, params):
         """
         根据hrId获取HR信息
