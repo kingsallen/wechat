@@ -349,7 +349,7 @@ class MetaBaseHandler(AtomHandler):
                 http_code=http_code
             )
         else:
-            message = kwargs.get('message') or msg_const.UNKNOWN_DEFAULT
+            message = msg_const.UNKNOWN_DEFAULT
             self.render_page(
                 template,
                 data={
