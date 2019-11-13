@@ -201,3 +201,12 @@ class InfraCompanyDataService(DataService):
         mobot_conf_info.welcome = conf.mobot_welcome
 
         raise gen.Return(mobot_conf_info)
+
+    @gen.coroutine
+    def get_referral_rule_switch(self, company_id):
+        params = ObjectDict({
+            "company_id": company_id
+        })
+        ret = yield http_get_v2(company.REFERRAL_RULE_SWITCH, company_service, params)
+        return ret
+

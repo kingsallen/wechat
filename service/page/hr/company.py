@@ -389,3 +389,13 @@ class CompanyPageService(PageService):
         if not ret.rectangle:
             raise InfraOperationError(ret.info)
         return ret.rectangle
+
+    @gen.coroutine
+    def get_referral_rule_switch(self, company_id):
+        """
+        获取内推方式开关
+        :param company_id:
+        :return:
+        """
+        res = yield self.infra_company_ds.get_referral_rule_switch(company_id)
+        return res
