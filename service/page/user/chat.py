@@ -336,20 +336,18 @@ class ChatPageService(PageService):
         raise gen.Return(position_list)
 
     @gen.coroutine
-    def get_chatbot_reply(self, message, user_id, hr_id, position_id, flag, social, campus, create_new_context,
+    def get_chatbot_reply(self, mobot_type_key, message, user_id, hr_id, position_id, create_new_context,
                           current_user, from_textfield, project_id):
-        """ 调用 chatbot 返回机器人的回复信息
-               https://wiki.moseeker.com/chatbot.md
+        """
+        调用MoBot QA接口
+
+        :param mobot_type_key mobot区分标识 social, campus, employee
         :param message: 用户发送到文本内容
         :param user_id: 当前用户id
         :param hr_id: 聊天对象hrid
         :param position_id 当前职位id，不存在则为0
-        :param flag: 0:社招 1:校招 2:meet mobot 3: 智能推荐
-        :param create_new_context: meet mobot标识
-        :param current_user:
-        :param from_textfield:
-        :param social:社招判断开关 1：开启；
-        :param campus:校招判断开关 1：开启；
+        :param create_new_context: 是否需要开启新的会话
+        :param from_textfield: 非法分支输入标识
         :param project_id: MoPlan预约项目ID
         """
         messages = []
@@ -361,19 +359,14 @@ class ChatPageService(PageService):
             position_id=position_id,
             create_new_context=create_new_context,
             from_textfield=from_textfield,
-            project_id=project_id
+            project_id=project_id,
+            mobot_type_key=mobot_type_key
         )
-        self.logger.debug("get_chatbot_reply==>create_new_context:{} ".format(create_new_context))
-        self.logger.debug("chabot_params:flag:%s, social:%s, capmpus:%s" % (flag, social, campus))
-        self.logger.debug("chabot_params type :flag:%s, social:%s, capmpus:%s"
-                          % (type(flag), type(social), type(campus)))
-        flag = int(flag) if flag else None
+        self.logger.debug("get_chatbot_reply mobot_type_key:{}, user_id:{}, create_new_context:{}".format(
+            mobot_type_key, user_id, create_new_context))
+
         try:
-            if flag == 1:
-                res = yield http_post(
-                    route='{host}{uri}'.format(host=settings['chatbot_host'], uri='campus_qa.api'), jdata=params,
-                    infra=False)
-            elif flag is None and social == 0 and campus == 1:
+            if mobot_type_key == 'campus':
                 res = yield http_post(
                     route='{host}{uri}'.format(host=settings['chatbot_host'], uri='campus_qa.api'), jdata=params,
                     infra=False)
@@ -384,12 +377,13 @@ class ChatPageService(PageService):
 
             self.logger.debug(res)
             if res.status == 0 and res.data.results:
-                results = res.data.results
-                for r in results:
+                for r in res.data.results:
                     ret_message = yield self.make_response(r, current_user)
                     messages.append(ret_message)
+            else:
+                self.logger.error("mobot {} api result:{}".format(mobot_type_key, res))
         except Exception as e:
-            self.logger.error("mobot api error: %s, params: %s" % (e, params))
+            self.logger.error("mobot %s api error: %s, params: %s" % (mobot_type_key, e, params))
             # 回复默认信息
             default_message = dict(resultType=0,
                                    resultTypeName='html',
@@ -408,8 +402,6 @@ class ChatPageService(PageService):
         """
         is_employee = bool(current_user.employee if current_user else None)
 
-        ids = []
-        res_type = message.get("resultType", "")
         ret = message.get("values", {})
         content = ret.get("content", "")
         compoundContent = ret.get("compoundContent") or {}

@@ -718,13 +718,16 @@ class PositionPageService(PageService):
         """
         获取是否显示联系HR的开关配置
         :param company_id:
-        :param candidate_source: 0 社招 1 校招
+        :param candidate_source: 0 社招 1 校招 9 全部(显示个人中心首页中我的消息)
         :return:
         """
         mobot_type = {'0': ['社招版MoBot(人工对话模式)', '社招版MoBot(人工+智能对话模式)'],
-                      '1': ['校招MoBot(人工对话模式)', '校招MoBot(人工+智能对话模式)']}
+                      '1': ['校招MoBot(人工对话模式)', '校招MoBot(人工+智能对话模式)'],
+                      '9': ['社招版MoBot(人工对话模式)', '社招版MoBot(人工+智能对话模式)',
+                            '校招MoBot(人工对话模式)', '校招MoBot(人工+智能对话模式)',
+                            '员工版MoBot(人工对话模式)', '员工版MoBot(人工+智能对话模式)']}
 
-        if candidate_source not in ['0', '1']:
+        if candidate_source not in ['0', '1', '9']:
             raise gen.Return(False)
 
         res = yield self.infra_company_ds.get_oms_all_switch_status(company_id)
@@ -733,10 +736,8 @@ class PositionPageService(PageService):
             raise gen.Return(False)
 
         for product in res.data:
-            keywords = mobot_type[candidate_source]
-            for k in keywords:
-                if product['keyword'] == k:
-                    if product['valid'] == 1:
-                        raise gen.Return(True)
+            if product['keyword'] in mobot_type[candidate_source]:
+                if product['valid'] == 1:
+                    raise gen.Return(True)
 
         raise gen.Return(False)

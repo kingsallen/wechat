@@ -58,6 +58,10 @@ class UsercenterHandler(BaseHandler):
             unread_praise = yield self.employee_ps.get_unread_praise(self.current_user.employee.id)
         else:
             unread_praise = 0
+
+        # 是否显示我的消息
+        hr_chat_switch = yield self.position_ps.get_hr_chat_switch_status(self.current_user.company.id)
+
         self.send_json_success(data=ObjectDict(
             headimg=self.static_url(res.data.headimg or const.SYSUSER_HEADIMG),
             name=res.data.name or res.data.nickname,
@@ -67,7 +71,8 @@ class UsercenterHandler(BaseHandler):
             bind_disable=employee_cert_conf.disable == const.OLD_NO,
             bind_status=fe_bind_status,
             has_password=bool(res.data.password),
-            unread_praise=unread_praise
+            unread_praise=unread_praise,
+            hr_chat_switch=hr_chat_switch
         ))
 
     @handle_response

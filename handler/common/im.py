@@ -574,7 +574,8 @@ class ChatHandler(BaseHandler):
                 # 由于没有延迟的发送导致hr端轮训无法订阅到publish到redis的消息　所以这里做下延迟处理
                 # delay_robot = functools.partial(self._handle_chatbot_message, user_message)
                 # ioloop.IOLoop.current().call_later(1, delay_robot)
-                yield self._handle_chatbot_message(user_message, create_new_context, from_textfield, self.project_id)
+                yield self._handle_chatbot_message(mobot_type_key, user_message, create_new_context, from_textfield,
+                                                   self.project_id)
         except Exception as e:
             self.logger.error(e)
 
@@ -642,7 +643,8 @@ class ChatHandler(BaseHandler):
                 # 由于没有延迟的发送导致hr端轮训无法订阅到publish到redis的消息　所以这里做下延迟处理
                 # delay_robot = functools.partial(self._handle_chatbot_message, user_message)
                 # ioloop.IOLoop.current().call_later(1, delay_robot)
-                yield self._handle_chatbot_message(user_message, create_new_context, from_textfield, self.project_id)
+                yield self._handle_chatbot_message(mobot_type_key, user_message, create_new_context, from_textfield,
+                                                   self.project_id)
         except Exception as e:
             self.logger.error(e)
 
@@ -687,9 +689,12 @@ class ChatHandler(BaseHandler):
 
 
     @gen.coroutine
-    def _handle_chatbot_message(self, user_message, create_new_context, from_textfield, project_id):
-        """处理 chatbot message
+    def _handle_chatbot_message(self, mobot_type_key, user_message, create_new_context, from_textfield, project_id):
+        """
+        处理 chatbot message
         获取消息 -> pub消息 -> 入库
+
+        :param mobot_type_key mobot区分标识 social, campus, employee
         """
         # 聚合号入口应该使用对应hr对应所在的company_id
         company_id = self.current_user.company.id
@@ -697,25 +702,20 @@ class ChatHandler(BaseHandler):
         if hr_info and hr_info.company_id:
             company_id = hr_info.company_id
 
-        social = yield self.company_ps.check_oms_switch_status(company_id, "社招")
-        campus = yield self.company_ps.check_oms_switch_status(company_id, "校招")
         bot_messages = yield self.chat_ps.get_chatbot_reply(
+            mobot_type_key=mobot_type_key,
             current_user=self.current_user,
             message=user_message,
             user_id=self.user_id,
             hr_id=self.hr_id,
             position_id=self.position_id,
-            flag=self.flag,
             create_new_context=create_new_context,
             from_textfield=from_textfield,
-            social=social['data']['valid'],
-            campus=campus['data']['valid'],
             project_id=project_id
         )
-        self.logger.debug('_handle_chatbot_message  flag:{}, project_id:{}'.format(self.flag, project_id))
-        self.logger.debug('_handle_chatbot_message  social_switch:{}'.format(social['data']['valid']))
-        self.logger.debug('_handle_chatbot_message  campus_switch:{}'.format(campus['data']['valid']))
-        self.logger.debug('_handle_chatbot_message  create_new_context{}'.format(create_new_context))
+        self.logger.debug('_handle_chatbot_message mobot_type_key:{}, flag:{}, user_id:{}'.format(
+            mobot_type_key, self.flag, self.user_id))
+
         for bot_message in bot_messages:
             msg_type = bot_message.msg_type
             compound_content = bot_message.compound_content
