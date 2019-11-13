@@ -1585,5 +1585,5 @@ class ApiEmployeeInfoHandler(BaseHandler):
     def get(self):
 
         data = yield self.employee_ps.get_employee_mobile_info(self.current_user.sysuser.id)
-        data["fullname"] = data["name"]
+        data["fullname"] = data["cname"]
         self.send_json_success(data)
