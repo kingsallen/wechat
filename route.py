@@ -304,6 +304,7 @@ platform_routes = [
     (r'/api/position/popup/?',                       handler.platform.user.PositionDetailPopupHandler,          {"event": "referral_position_detail_popup"}),
     (r'/api/position/repost/visitor_info/?',         handler.platform.user.PositionForwardFromEmpHandler,       {"event": "referral_position_forward_from"}),
     (r'/api/referral/recom_positions/?',             handler.platform.user.ReferralRelatedPositionHandler,      {"event": "referral_related_positions"}),
+    (r"/api/employee/info",                          handler.platform.user.ApiEmployeeInfoHandler,          {"event": "api_employee_info"}),
     (r"/api/switch[\/]*([a-z_]+)*",                  handler.platform.switch.SwitchHandler,                     {"event": "switch_"}),
     (r"/api/func/relation_tags/?",                   handler.platform.referral.ReferralCommentTagsHandler,      {"event": "referral_comment_tags"}),
     (r"/api/stores/nearby/?",                        handler.platform.companyrelation.NearbyStoresHandler,      {"event": "nearby_stores"}),
