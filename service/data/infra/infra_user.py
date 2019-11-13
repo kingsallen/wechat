@@ -489,16 +489,3 @@ class InfraUserDataService(DataService):
         if ret.code != const.NEWINFRA_API_SUCCESS:
             raise InfraOperationError(ret.message)
         raise gen.Return(ret.data)
-
-    @gen.coroutine
-    def get_employee_mobile_info(self, sysuser_id):
-        """
-        员工积分兑换回填手机号
-        :param params:
-        :return:
-        """
-        params = ObjectDict({
-            "user_id": sysuser_id
-        })
-        ret = yield http_get_v2(user.INFRA_GET_EMPLOYEE_MOBILE_INFO, user_service, params)
-        raise gen.Return(ret.data)

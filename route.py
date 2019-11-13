@@ -260,6 +260,7 @@ platform_routes = [
     (r"/api/employee/supply/list/?",                 handler.platform.employee.ApiEmployeeSupplyListHandler,    {"event": "api_employee_supply_list"}),
     (r"/api/employee/recommendrecords/?",            handler.platform.employee.RecommendRecordsHandler,         {"event": "employee_recommendrecords"}),
     (r"/api/employee/rewards/?",                     handler.platform.employee.AwardsHandler,                   {"event": "employee_awards"}),
+    (r"/api/employee/info",                          handler.platform.employee.ApiEmployeeInfoHandler,          {"event": "api_employee_info"}),
     (r"/api/employee/count-policy-want",             handler.platform.employee.EmployeeInterestReferralPolicyHandler, {"event": "count_interest_policy"}),
     (r"/api/position/empnotice/?",                   handler.platform.position.PositionEmpNoticeHandler,        {"event": "position_empnotice"}),
     (r"/api/employee/rewards/rank/?",                handler.platform.employee.AwardsLadderHandler,             {"event": "awards_ladder_api"}),
@@ -297,7 +298,6 @@ platform_routes = [
     (r'/api/position/popup/?',                       handler.platform.user.PositionDetailPopupHandler,          {"event": "referral_position_detail_popup"}),
     (r'/api/position/repost/visitor_info/?',         handler.platform.user.PositionForwardFromEmpHandler,       {"event": "referral_position_forward_from"}),
     (r'/api/referral/recom_positions/?',             handler.platform.user.ReferralRelatedPositionHandler,      {"event": "referral_related_positions"}),
-    (r"/api/employee/info",                          handler.platform.user.ApiEmployeeInfoHandler,          {"event": "api_employee_info"}),
     (r"/api/switch[\/]*([a-z_]+)*",                  handler.platform.switch.SwitchHandler,                     {"event": "switch_"}),
     (r"/api/func/relation_tags/?",                   handler.platform.referral.ReferralCommentTagsHandler,      {"event": "referral_comment_tags"}),
 

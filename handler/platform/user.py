@@ -910,14 +910,3 @@ class ReferralRelatedPositionHandler(BaseHandler):
         self.send_json_success(data={
             "list": data
         })
-
-class ApiEmployeeInfoHandler(BaseHandler):
-    """员工积分兑换回填手机号"""
-
-    @decorator.handle_response
-    @gen.coroutine
-    def get(self):
-
-        data = yield self.user_ps.get_employee_mobile_info(self.current_user.sysuser.id)
-        data["fullname"] = data["name"]
-        self.send_json_success(data)

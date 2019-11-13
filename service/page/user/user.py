@@ -697,13 +697,3 @@ class UserPageService(PageService):
         ret = yield self.infra_user_ds.get_custom_file(
             file_id, sysuser_id)
         return ret
-
-    @gen.coroutine
-    def get_employee_mobile_info(self, sysuser_id):
-        """
-        员工积分兑换回填手机号
-        :param params:
-        :return:
-        """
-        ret = yield self.infra_user_ds.get_employee_mobile_info(sysuser_id)
-        return ret
