@@ -132,6 +132,5 @@ class DictRegionHandler(BaseHandler):
     @handle_response
     @gen.coroutine
     def get(self):
-        locale_display = self.get_current_locale()
-        cities = yield self.dictionary_ps.get_dict_regions(locale_display)
+        cities = yield self.dictionary_ps.get_dict_regions(locale_display=None)
         self.send_json_success(cities)
