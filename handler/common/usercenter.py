@@ -60,7 +60,7 @@ class UsercenterHandler(BaseHandler):
             unread_praise = 0
 
         # 是否显示我的消息
-        hr_chat_switch = yield self.position_ps.get_hr_chat_switch_status(self.current_user.company.id)
+        hr_chat_switch = yield self.position_ps.get_hr_chat_switch_status(self.current_user.company.id, '9')
 
         self.send_json_success(data=ObjectDict(
             headimg=self.static_url(res.data.headimg or const.SYSUSER_HEADIMG),
