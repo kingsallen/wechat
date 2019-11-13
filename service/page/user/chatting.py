@@ -4,6 +4,7 @@ from tornado import gen
 
 from conf.common import COMPANY_SWITCH_MODULE_CHATTING
 from service.page.base import PageService
+from util.common import const
 
 
 class ChattingPageService(PageService):
@@ -93,8 +94,21 @@ class ChattingPageService(PageService):
         :return: 开关状态
         """
 
+        on = 0
         ret = yield self.infra_im_ds.get_chatting_switch(company_id, COMPANY_SWITCH_MODULE_CHATTING)
-        raise gen.Return(ret)
+
+        if ret and ret.code and (ret.code == const.NEWINFRA_API_SUCCESS):
+            if ret.data:
+                on = 1
+        condition = {
+            "company_id": company_id,
+        }
+        company_conf_res = yield self.hr_company_conf_ds.get_company_conf(condition)
+
+        if company_conf_res and company_conf_res.get("hr_chat") > 0:
+            on = on | 2
+
+        raise on
 
     @gen.coroutine
     def post_switch(self, role, user_id, employee_id, company_id, tpl_switch):

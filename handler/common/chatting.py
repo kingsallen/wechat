@@ -257,15 +257,8 @@ class EmployeeChattingHandler(BaseHandler):
         :return: 推送开关状态
         """
 
-        ret = yield self.chatting_ps.get_chatting_switch(self.current_user.company.id)
-        if ret and ret.code and (ret.code == const.NEWINFRA_API_SUCCESS):
-            if ret.data:
-                self.send_json_success(ObjectDict(on=1))
-            else:
-                self.send_json_success(ObjectDict(on=0))
-        else:
-            self.send_json_error()
-
+        on = yield self.chatting_ps.get_chatting_switch(self.current_user.company.id)
+        return self.send_json_success(ObjectDict(on=on))
 
     @handle_response
     @gen.coroutine
