@@ -423,7 +423,8 @@ class ChatHandler(BaseHandler):
                                 "openProductSpecificView",
                                 "addCard",
                                 "chooseCard",
-                                "openCard"
+                                "openCard",
+                                "openLocation"
                                 ]
         })
         self.logger.debug("get_environ get jssdk config:{}".format(config))
@@ -895,3 +896,4 @@ class MobotHandler(BaseHandler):
         # 确保页面中用到的post请求的api接口cookie中设置了_xsrf
         self.xsrf_token
         self.render(template_name='mobot/index.html')
+

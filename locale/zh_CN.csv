@@ -63,6 +63,9 @@
 "common_experienced","社招"
 "common_graduate","校招"
 
+"common_retail","店铺职位"
+"common_office","Office职位"
+
 "common_fulltime","全职"
 "common_parttime","兼职"
 "common_contractor","合同工"
@@ -79,6 +82,7 @@
 
 "job_hotjobs","热招职位"
 "job_recomfriend","我要推荐"
+"lbs_retailjobs","附近职位"
 "joblist_title","热招职位"
 "joblist_updated","更新"
 "joblist_view","人看过","singular"
@@ -153,6 +157,7 @@
 "search_job_type","工作性质"
 "search_education level","学历要求"
 "search_company","所属公司"
+"search_position_type","职位类型"
 
 "fill_out_your_resume","投个简历"
 "not_now","不了，谢谢"

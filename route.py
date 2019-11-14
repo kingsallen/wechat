@@ -21,6 +21,7 @@ import handler.common.app
 import handler.common.application
 import handler.common.cellphone
 import handler.common.im
+import handler.common.chatting
 import handler.common.interest
 import handler.common.jssdkerror
 import handler.common.jslog
@@ -110,6 +111,7 @@ common_routes = [
     (r"/image/?",                                    handler.common.image.ImageFetchHandler,                    {"event": "image_fetch"}),
     (r"/chat/room[\/]*([0-9]+)*",                    handler.common.im.ChatRoomHandler,                         {"event": "im_room"}),
     (r"/mobot",                                      handler.common.im.MobotHandler,                            {"event": "im_mobot"}),
+    (r"/chatting/index",                             handler.common.chatting.ChattingRoomsHandler,              {"event": "im_chat_rooms"}),
     (r"/im/laiye",                                   handler.common.laiye_im.LaiyeImHandler,                    {"event": "im laiye"}),
     (r"/resume/import/limit",                        handler.common.resume.ResumeImportLimit,                   {"event": "resume_import_limit"}),
     (r"/redirect",                                   handler.common.redirect.RedirectHandler,                   {"event": "redirect"}),
@@ -121,11 +123,13 @@ common_routes = [
 
     # websocket
     (r"/websocket/([A-Za-z0-9_]{1,32})",             handler.common.im.ChatWebSocketHandler),
+    (r"/ws/chatting/([A-Za-z0-9_]{1,32})",           handler.common.chatting.ChattingWebSocketHandler),
 
     (r"/api/send/vcode/?",                           handler.common.passport.SendValidCodeHandler,              {"event": "send_vcode"}),
     (r"/api/upload/recomprofile/?",                  handler.platform.referral.EmployeeRecomProfileHandler,     {"event": "upload_referral_profile"}),
     (r"/api/config[\/]?",                            handler.common.app.ConfigHandler,                          {"event": "wechat_config"}),
     (r"/api/dict/city/?",                            handler.common.dictionary.DictCityHandler,                 {"event": "dict_city"}),
+    (r"/api/dict/lbs_city/?",                        handler.common.dictionary.DictLBSCityHandler,              {"event": "dict_lbs_city"}),
     (r"/api/dict/industry/?",                        handler.common.dictionary.DictIndustryHandler,             {"event": "dict_industry"}),
     (r"/api/dict/industry/([a-z]+)*?",               handler.common.dictionary.DictCustomIndustryHandler,       {"event": "dict_custom_industry"}),
     (r"/api/dict/function/?",                        handler.common.dictionary.DictFunctionHandler,             {"event": "dict_function"}),
@@ -160,6 +164,7 @@ common_routes = [
     (r"/api/resume/import",                          handler.common.resume.ResumeImportHandler,                 {"event": "resume_import"}),
     (r"/api/sug/company",                            handler.common.suggest.SuggestCompanyHandler,              {"event": "sug_company"}),
     (r"/api/sug/college",                            handler.common.suggest.SuggestCollegeHandler,              {"event": "sug_college"}),
+    (r"/api/chatting[\/]*([a-z]+)*",                 handler.common.chatting.EmployeeChattingHandler,           {"event": "chatting_rooms_"}),
     (r"/api/chat[\/]*([a-z]+)*",                     handler.common.im.ChatHandler,                             {"event": "chat_"}),
     (r"/api/application",                            handler.common.application.ApplicationHandler,             {"event": "application_profile"}),
     (r"/api/JSSDKError",                             handler.common.jssdkerror.JSSDKErrorHandler,               {"event": "frontend_jssdkerror"}),
@@ -183,6 +188,7 @@ common_routes = [
 platform_routes = [
     (r"/position/(?P<position_id>\d+)",              handler.platform.position.PositionHandler,                 {"event": "position_info"}),
     (r"/position/?",                                 handler.platform.position.PositionListHandler,             {"event": "position_list"},      'position_list'),
+    (r"/lbs/position/?",                             handler.platform.position.LbsPositionListHandler,          {"event": "lbs_position_info"}),
     (r"/position/share?",                            handler.platform.position.PositionShareInBulkHandler,      {"event": "share_position_list"}),
     (r"/start/?",                                    handler.platform.landing.LandingHandler,                   {"event": "start_landing"}),
     (r"/company/(\d+)",                              handler.platform.companyrelation.CompanyInfoRedirectHandler, {"event": "company_old_info"}, "old_company_info_page"),
@@ -282,6 +288,7 @@ platform_routes = [
     (r"/api/position/share?",                        handler.platform.position.APIPositionShareInBulkHandler,   {"event": "api_share_position_list"}),
 
     (r"/api/func/wechat/?",                          handler.platform.employee.WechatSubInfoHandler,            {"event": "wechat_sub_info"}),
+    (r"/api/func/momo-graph/?",                      handler.platform.employee.MomoSwitchSubHandler,            {"event": "momo_switch_sub"}),
     (r'/api/user/survey/?',                          handler.platform.user.APIUserSurveyHandler,                {"event": "user_survey_api"}),
     (r'/api/position/recom/list/?',                  handler.platform.user.APIPositionRecomListHandler,         {"event": "position_ai-recomlist"}),
     (r'/api/recom/position/switch',                  handler.platform.user.APIPositionRecomListCloseHandler,    {"event": "position_ai-recom-position"}),
@@ -300,6 +307,8 @@ platform_routes = [
     (r'/api/referral/recom_positions/?',             handler.platform.user.ReferralRelatedPositionHandler,      {"event": "referral_related_positions"}),
     (r"/api/switch[\/]*([a-z_]+)*",                  handler.platform.switch.SwitchHandler,                     {"event": "switch_"}),
     (r"/api/func/relation_tags/?",                   handler.platform.referral.ReferralCommentTagsHandler,      {"event": "referral_comment_tags"}),
+    (r"/api/stores/nearby/?",                        handler.platform.companyrelation.NearbyStoresHandler,      {"event": "nearby_stores"}),
+    (r"/api/position/lbs/(?P<position_id>\d+)",      handler.platform.companyrelation.PositionLbsHandler,       {"event": "position_lbs"}),
 
     # 兼容老微信 url，进行302跳转
     (r"/.*",                                         handler.platform.compatible.CompatibleHandler,             {"event": "compatible"})

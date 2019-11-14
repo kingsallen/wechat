@@ -26,50 +26,62 @@ LANDING_INDEX_EMPLOYMENT = 6  # 工作性质
 LANDING_INDEX_DEGREE = 7
 LANDING_INDEX_CHILD_COMPANY = 8
 LANDING_INDEX_CUSTOM = 9
+LANDING_INDEX_POSITION_TYPE = 10 # 职位属性：店铺职位还是office职位
 
 # 栏目设置
 LANDING = ObjectDict({
     LANDING_INDEX_CITY:          {"name":        "工作地点", "chpe": "地区",
                                   "key":         "city",
                                   "display_key": "city",
-                                  "form_name":   "city"},
+                                  "form_name":   "city",
+                                  "es_key":      "citys.name"},
     LANDING_INDEX_SALARY:        {"name":        "薪资范围", "chpe": "薪资",
                                   "key":         ["salary_top",
                                                   "salary_bottom"],
                                   "display_key": "salary",
-                                  "form_name":   "salary"},
+                                  "form_name":   "salary",
+                                  "es_key":      ["position.salaryTop","position.salaryBottom"]},
     LANDING_INDEX_OCCUPATION:    {"name":        "职位职能", "chpe": "职能",
                                   "key":         "occupation",
                                   "display_key": "occupation",
-                                  "form_name":   "occupation"},
+                                  "form_name":   "occupation",
+                                  "es_key":      "jobOccupation.name"},
     LANDING_INDEX_DEPARTMENT:    {"name":        "所属部门", "chpe": "部门",
                                   "key":         "team_name",
                                   "display_key": "team_name",
-                                  "form_name":   "team_name"},
+                                  "form_name":   "team_name",
+                                  "es_key":      "team.name"},
     LANDING_INDEX_CANDIDATE:     {"name":        "招聘类型", "chpe": "类型",
                                   "key":         "candidate_source_name",
                                   "display_key": "candidate_source_name",
-                                  "form_name":   "candidate_source"},
+                                  "form_name":   "candidate_source",
+                                  "es_key":      "position.candidateSource"},
     LANDING_INDEX_EMPLOYMENT:    {"name":        "工作性质", "chpe": "性质",
                                   "key":         "employment_type_name",
                                   "display_key": "employment_type_name",
-                                  "form_name":   "employment_type"
-                                  },
+                                  "form_name":   "employment_type",
+                                  "es_key":      "employeeTypeData.name"},
     LANDING_INDEX_DEGREE:        {"name":        "学历要求", "chpe": "学历",
                                   "key":         "degree_name",
                                   "display_key": "degree_name",
-                                  "form_name":   "degree"},
+                                  "form_name":   "degree",
+                                  "es_key":      "degreeData.name"},
     LANDING_INDEX_CHILD_COMPANY: {"name":        "子公司名称", "chpe": "公司",
                                   "key":         "publisher_company_id",
                                   "display_key": "child_company_abbr",
-                                  "form_name":   "did"},
+                                  "form_name":   "did",
+                                  "es_key":      "company.id"},
     LANDING_INDEX_CUSTOM:        {"name":        "企业自定义字段", "chpe": "自定义",
                                   "key":         "custom",
                                   "display_key": "custom",
-                                  "form_name":   "custom"}
+                                  "form_name":   "custom",
+                                  "es_key":      "jobCustom.name"},
+    LANDING_INDEX_POSITION_TYPE: {"name": "职位类型", "chpe": "类型",
+                                  "key": "position_type",
+                                  "display_key": "position_type",
+                                  "form_name":   "position_type",
+                                  "es_key":      "position.notOffice"}
 })
-
-
 
 # 薪资范围搜索项
 SALARY = ObjectDict({
@@ -120,3 +132,4 @@ SEARCH_DEGREE = ObjectDict({
 
 POSITION_LIST_TITLE_DEFAULT = "job_hotjobs"
 POSITION_LIST_TITLE_RECOMLIST = "job_recomfriend"
+LBS_POSITION_LIST_TITLE = "lbs_retailjobs"

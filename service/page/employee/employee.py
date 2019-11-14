@@ -1114,7 +1114,8 @@ class EmployeePageService(PageService):
                     "connection": item.get('connection'),
                     "chain": item.get('chain'),
                     "chain_status": item.get('chain_status'),
-                    "connect_current_uid": 0
+                    "connect_current_uid": 0,
+                    "can_chat": item.get("can_chat"),
                 }
                 connect_current_uid = 0
                 for chain_user in item.get('chain', [])[::-1]:

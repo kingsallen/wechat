@@ -133,6 +133,7 @@ class ConfigHandler(BaseHandler):
                           "hideMenuItems",
                           "showMenuItems",
                           "hideAllNonBaseMenuItem",
-                          "showAllNonBaseMenuItem"]
+                          "showAllNonBaseMenuItem",
+                          "openLocation"]
         })
         self.send_json_success(data=config)
