@@ -271,9 +271,13 @@ class BaseHandler(MetaBaseHandler):
         conds = {'id': self._wechat.company_id}
         self._company = yield self.company_ps.get_company(conds=conds, need_conf=True)
         current_path = self.request.uri.split('?')[0]
+        self.logger.debug("+++++++++++++++++@@@@@@@@-111 +++++++++++++++++++++self._in_wechat: {}".format(self._in_wechat))
         if self._in_wechat == const.CLIENT_WORKWX:
+            self.logger.debug("+++++++++++++++++@@@@@@@@-222 +++++++++++++++++++++self._in_wechat: {}".format(self._in_wechat))
             self._workwx = yield self.workwx_ps.get_workwx(self._company.id, self._company.hraccount_id)
+            self.logger.debug("+++++++++++++++++@@@@@@@@-333 +++++++++++++++++++++ _workwx: {}".format(self._workwx))
             if not self._workwx or not self._workwx.corpid or not self._workwx.secret:
+                self.logger.debug("+++++++++++++++++@@@@@@@@-444 +++++++++++++++++++++")
                 self._workwx = None
                 non_employee = yield self._non_employee_or_workwx_config(current_path)
                 if non_employee:
