@@ -85,10 +85,11 @@ class ChattingPageService(PageService):
         raise gen.Return(ret)
 
     @gen.coroutine
-    def get_chatting_switch(self, company_id):
+    def get_chatting_switch(self, company_id, employee):
         """
         获取聊天开关的状态
         :param company_id: 公司编号
+        :param employee: 员工身份
         :return: 开关状态
         """
 
@@ -98,13 +99,15 @@ class ChattingPageService(PageService):
         if ret and ret.code and (ret.code == NEWINFRA_API_SUCCESS):
             if ret.data:
                 on = 2
-        condition = {
-            "company_id": company_id,
-        }
-        company_conf_res = yield self.hr_company_conf_ds.get_company_conf(condition)
 
-        if company_conf_res and company_conf_res.get("hr_chat") > 0:
-            on = on | 1
+        if not employee:
+            condition = {
+                "company_id": company_id,
+            }
+            company_conf_res = yield self.hr_company_conf_ds.get_company_conf(condition)
+
+            if company_conf_res and company_conf_res.get("hr_chat") > 0:
+                on = on | 1
 
         return on
 
