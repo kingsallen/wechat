@@ -708,3 +708,14 @@ class PositionPageService(PageService):
         })
         ret = yield self.infra_position_ds.get_position_template_by_pids(params)
         return ret
+
+    @gen.coroutine
+    def get_position_distance_batch(self, params):
+        """
+        职位列表：根据pids批量查询职位距离
+        :param pids:
+        :param user_id:
+        :return:
+        """
+        ret = yield self.infra_position_ds.get_position_distance_batch(params)
+        return ret

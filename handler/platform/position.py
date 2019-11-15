@@ -1637,3 +1637,31 @@ class APIPositionShareInBulkHandler(BaseHandler):
                                          "recom": self.position_ps._make_recom(self.current_user.sysuser.id)})
         else:
             self.send_json_error(message=res.message)
+
+
+class PositionDistanceBatchHandler(BaseHandler):
+    """职位列表：根据pids批量查询职位距离"""
+    @handle_response
+    @gen.coroutine
+    def post(self):
+
+        lbs_oms = yield self.company_ps.check_oms_switch_status(
+            self.current_user.company.id,
+            "LBS职位列表"
+        )
+        if lbs_oms.status == const.API_SUCCESS and lbs_oms.data.get('valid') and self.json_args.longitude and self.json_args.latitude:
+            params = ObjectDict({
+                "pids": self.json_args.pids,
+                "longitude": self.json_args.longitude,
+                "latitude": self.json_args.latitude
+            })
+        else:
+            params = ObjectDict({
+                "pids": self.json_args.pids
+            })
+
+        res = yield self.position_ps.get_position_distance_batch(params)
+        if res.code == const.NEWINFRA_API_SUCCESS:
+            self.send_json_success(data=)
+        else:
+            self.send_json_error(message=res.message)

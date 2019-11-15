@@ -233,6 +233,16 @@ class InfraPositionDataService(DataService):
         ret = yield http_get_v2(position.POSITION_TEMPLATE_BY_PIDS, position_service, params)
         return ret
 
+    @gen.coroutine
+    def get_position_distance_batch(self, params):
+        """
+        根据pids批量查询职位距离
+        :param params : {pids: [], longitude: 0, latitude: 0}
+        :return:
+        """
+        ret = yield http_get_v2(position.POSITION_LIST_GET_DISTANCE, position_service, params)
+        return ret
+
 
 class TestEmployeeService(AsyncTestCase):
     """Just for test(or try results) during development :)"""
