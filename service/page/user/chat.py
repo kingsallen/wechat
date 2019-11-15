@@ -123,8 +123,14 @@ class ChatPageService(PageService):
         raise gen.Return(records)
 
     @gen.coroutine
-    def get_chatroom(self, sysuser, hr_id, position_id, room_id, qxuser, is_gamma, mobot_enable, recom, is_employee):
-        """进入聊天室"""
+    def get_chatroom(self, mobot_type_key, sysuser, hr_id, position_id, room_id, qxuser, is_gamma, mobot_enable, recom,
+                     is_employee):
+        """
+        进入聊天室
+
+        房间类型，1：社招, 2：校招，3: 员工
+        mobot_type_key
+        """
         hr_info = ObjectDict()
         mobot_info = ObjectDict(enable=mobot_enable, name='', headimg='')
 
@@ -133,7 +139,8 @@ class ChatPageService(PageService):
             user_name=sysuser.name,
             user_headimg=make_static_url(sysuser.headimg or const.SYSUSER_HEADIMG)
         )
-        ret = yield self.infra_immobot_ds.user_enter_chatroom(room_id, sysuser.id, hr_id, position_id, is_gamma)
+        ret = yield self.infra_immobot_ds.user_enter_chatroom(mobot_type_key, room_id, sysuser.id, hr_id, position_id,
+                                                              is_gamma)
         if not ret.data:
             raise gen.Return("")
 
@@ -193,6 +200,14 @@ class ChatPageService(PageService):
         :return:
         """
         ret = yield self.infra_immobot_ds.user_leave_chatroom(room_id, user_id, speaker)
+        raise gen.Return(ret)
+
+    @gen.coroutine
+    def delete_chatroom(self, room_id, user_id):
+        """
+        删除聊天室
+        """
+        ret = yield self.infra_immobot_ds.user_delete_chatroom(room_id, user_id)
         raise gen.Return(ret)
 
     @gen.coroutine
