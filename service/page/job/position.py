@@ -392,6 +392,7 @@ class PositionPageService(PageService):
                                 team_name=p.team_name,
                                 total_bonus=p.total_bonus,
                                 city=p.city_name,
+                                has_store = p.has_store,
                                 total_num=res.data.total)
                 position.salary = gen_salary(position.salary_top, position.salary_bottom)
                 position.publish_date = jd_update_date(
