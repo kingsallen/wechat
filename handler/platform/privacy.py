@@ -69,4 +69,4 @@ class IsAgreePrivacyHandler(BaseHandler):
         if result:
             self.send_json_success(data=show_privacy_agreement)
         else:
-            self.send_json_error()
+            self.send_json_error(message=show_privacy_agreement.message)
