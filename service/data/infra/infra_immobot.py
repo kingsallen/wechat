@@ -5,7 +5,7 @@ from conf.newinfra_service_conf.service_info import im_service
 from service.data.base import DataService
 from util.common import ObjectDict
 from util.tool.date_tool import curr_now
-from util.tool.http_tool import http_get_v2, http_post_v2, http_put_v2
+from util.tool.http_tool import http_get_v2, http_post_v2, http_put_v2, http_delete_v2
 
 
 class InfraImmobotDataService(DataService):
@@ -51,17 +51,20 @@ class InfraImmobotDataService(DataService):
         raise gen.Return(ret)
 
     @gen.coroutine
-    def user_enter_chatroom(self, room_id, user_id, hr_id, position_id, is_qx_wechat):
+    def user_enter_chatroom(self, mobot_type_key, room_id, user_id, hr_id, position_id, is_qx_wechat):
         """
         用户进入聊天室
         curl -X PUT 'http://api-t2.dqprism.com/im/v4/user/room/enter?interfaceid=A11037001&appid=A11037&roomId=30780&userId=5399884&hrId=82752&positionId=0&isQxWechat=false'
         """
+        room_type_dict = {'social': 1, 'campus': 2, 'employee': 3}
+
         params = ObjectDict({
             "roomId": room_id,
             "userId": user_id,
             "hrId": hr_id,
             "positionId": position_id,
             "isQxWechat": is_qx_wechat,
+            "roomType": room_type_dict[mobot_type_key]
         })
 
         ret = yield http_put_v2(im_mobot.USER_ENTER_CHATROOM, im_service, params, timeout=5)
@@ -81,6 +84,19 @@ class InfraImmobotDataService(DataService):
         })
 
         ret = yield http_put_v2(im_mobot.USER_LEAVE_CHATROOM, im_service, params, timeout=5)
+        raise gen.Return(ret)
+
+    @gen.coroutine
+    def user_delete_chatroom(self, room_id, user_id):
+        """
+        用户离开聊天室
+        curl -X DELETE 'http://api-t2.dqprism.com/im/v4/user/room/{roomId}?interfaceid=A11037001&appid=A11037'
+        """
+        params = ObjectDict({
+            "sysuserId": user_id,
+        })
+
+        ret = yield http_delete_v2(im_mobot.USER_DELETE_CHATROOM.format(room_id), im_service, params, timeout=5)
         raise gen.Return(ret)
 
     @gen.coroutine

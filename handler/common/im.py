@@ -268,6 +268,16 @@ class ChatHandler(BaseHandler):
             self.write_error(404)
 
     @handle_response
+    @gen.coroutine
+    def delete(self, method):
+        try:
+            # 重置 event，准确描述
+            self._event = self._event + method
+            yield getattr(self, "delete_" + method)()
+        except Exception as e:
+            self.write_error(404)
+
+    @handle_response
     @authenticated
     @gen.coroutine
     def get_environ(self):
@@ -415,7 +425,8 @@ class ChatHandler(BaseHandler):
 
         is_employee = bool(self.current_user.employee if self.current_user else None)
 
-        res = yield self.chat_ps.get_chatroom(self.current_user.sysuser,
+        res = yield self.chat_ps.get_chatroom(mobot_type_key,
+                                              self.current_user.sysuser,
                                               self.params.hr_id,
                                               pid, room_id,
                                               self.current_user.qxuser,
@@ -434,6 +445,15 @@ class ChatHandler(BaseHandler):
             return
 
         self.send_json_success(data=res)
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def delete_room(self):
+        """删除聊天室"""
+        room_id = self.params.room_id or 0
+        yield self.chat_ps.delete_chatroom(room_id, self.current_user.sysuser.id)
+        self.send_json_success(data={})
 
     @handle_response
     @authenticated
