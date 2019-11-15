@@ -97,14 +97,14 @@ class ChattingPageService(PageService):
 
         if ret and ret.code and (ret.code == NEWINFRA_API_SUCCESS):
             if ret.data:
-                on = 1
+                on = 2
         condition = {
             "company_id": company_id,
         }
         company_conf_res = yield self.hr_company_conf_ds.get_company_conf(condition)
 
         if company_conf_res and company_conf_res.get("hr_chat") > 0:
-            on = on | 2
+            on = on | 1
 
         return on
 
