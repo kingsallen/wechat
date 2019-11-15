@@ -240,7 +240,7 @@ class InfraPositionDataService(DataService):
         :param params : {pids: [], longitude: 0, latitude: 0}
         :return:
         """
-        ret = yield http_get_v2(position.POSITION_LIST_GET_DISTANCE, position_service, params)
+        ret = yield http_post_v2(position.POSITION_LIST_GET_DISTANCE, position_service, params)
         return ret
 
 

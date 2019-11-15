@@ -1645,23 +1645,12 @@ class PositionDistanceBatchHandler(BaseHandler):
     @gen.coroutine
     def post(self):
 
-        lbs_oms = yield self.company_ps.check_oms_switch_status(
-            self.current_user.company.id,
-            "LBS职位列表"
-        )
-        if lbs_oms.status == const.API_SUCCESS and lbs_oms.data.get('valid') and self.json_args.longitude and self.json_args.latitude:
-            params = ObjectDict({
-                "pids": self.json_args.pids,
-                "longitude": self.json_args.longitude,
-                "latitude": self.json_args.latitude
-            })
-        else:
-            params = ObjectDict({
-                "pids": self.json_args.pids
-            })
-
-        res = yield self.position_ps.get_position_distance_batch(params)
+        res = yield self.position_ps.get_position_distance_batch(self.json_args.pids, self.json_args.longitude, self.json_args.latitude)
         if res.code == const.NEWINFRA_API_SUCCESS:
-            self.send_json_success(data=)
+            ret = []
+            if res.data:
+                for k, v in res.data.items():
+                    ret.append({"id": k, "distance": v})
+            self.send_json_success(data={"list": ret})
         else:
             self.send_json_error(message=res.message)

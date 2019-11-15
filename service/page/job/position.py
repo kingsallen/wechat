@@ -710,12 +710,17 @@ class PositionPageService(PageService):
         return ret
 
     @gen.coroutine
-    def get_position_distance_batch(self, params):
+    def get_position_distance_batch(self, pids, longitude, latitude):
         """
         职位列表：根据pids批量查询职位距离
         :param pids:
         :param user_id:
         :return:
         """
+        params = ObjectDict({
+            "pids": pids,
+            "longitude": longitude,
+            "latitude": latitude
+        })
         ret = yield self.infra_position_ds.get_position_distance_batch(params)
         return ret
