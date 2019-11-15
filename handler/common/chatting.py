@@ -256,7 +256,7 @@ class EmployeeChattingHandler(BaseHandler):
         获取聊天开关的状态
         :return: 推送开关状态
         """
-
+        self.logger.debug("EmployeeChattingHandler get_im_switch company_id:{}".format(self.current_user.company.id))
         on = yield self.chatting_ps.get_chatting_switch(self.current_user.company.id)
         return self.send_json_success(ObjectDict(on=on))
 

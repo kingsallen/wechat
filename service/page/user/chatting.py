@@ -2,10 +2,8 @@
 
 from tornado import gen
 
-from conf.common import COMPANY_SWITCH_MODULE_CHATTING
+from conf.common import COMPANY_SWITCH_MODULE_CHATTING, NEWINFRA_API_SUCCESS
 from service.page.base import PageService
-from util.common import const
-
 
 class ChattingPageService(PageService):
     def __init__(self):
@@ -97,7 +95,7 @@ class ChattingPageService(PageService):
         on = 0
         ret = yield self.infra_im_ds.get_chatting_switch(company_id, COMPANY_SWITCH_MODULE_CHATTING)
 
-        if ret and ret.code and (ret.code == const.NEWINFRA_API_SUCCESS):
+        if ret and ret.code and (ret.code == NEWINFRA_API_SUCCESS):
             if ret.data:
                 on = 1
         condition = {
