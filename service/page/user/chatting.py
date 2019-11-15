@@ -106,7 +106,7 @@ class ChattingPageService(PageService):
         if company_conf_res and company_conf_res.get("hr_chat") > 0:
             on = on | 2
 
-        raise on
+        return on
 
     @gen.coroutine
     def post_switch(self, role, user_id, employee_id, company_id, tpl_switch):
