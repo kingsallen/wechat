@@ -484,3 +484,16 @@ class InfraEmployeeDataService(DataService):
         """
         ret = yield http_get(path.INFRA_OMS_SWITCH_WORKWX.format(company_id))
         return ret
+
+    @gen.coroutine
+    def get_employee_mobile_info(self, sysuser_id):
+        """
+        员工积分兑换回填手机号
+        :param params:
+        :return:
+        """
+        params = ObjectDict({
+            "user_id": sysuser_id
+        })
+        ret = yield http_get(path.INFRA_GET_EMPLOYEE_MOBILE_INFO, params)
+        raise gen.Return(eval(ret.data.get("data")))

@@ -567,3 +567,37 @@ class InfraDictDataService(DataService):
         })
         res = yield http_get_v2(dictionary.NEWINFRA_DICT_HOPE_JOB_TREE, dict_service, params)
         return res.data
+
+    @gen.coroutine
+    def get_dict_regions(self, locale_display=None):
+        """
+        获取全国的省市
+        :param
+        :return:
+        """
+        res = yield http_get_v2(dictionary.NEWINFRA_DICT_REGION, dict_service)
+        ret = yield self.internationalize_result(res.data, locale_display)
+        return ret
+
+    @staticmethod
+    @gen.coroutine
+    def internationalize_result(data, locale_display=None):  # self._LEVEL1_CITY_CODES
+        if locale_display == "en_US":
+            sub_name = ['code', 'ename', 'children']
+        else:
+            sub_name = ['code', 'name', 'children']
+        rename_mapping = {'ename': 'name'}
+
+        for province in data:
+            if province.get("name") in ["全国", "海外"]:
+                data.remove(province)
+
+        for province in data:
+            if province.get("cities"):
+                for city in province.get("cities"):
+                    if city.get("cities"):
+                        city["children"] = list(map(lambda x: rename_keys(sub_dict(x, sub_name), rename_mapping), city.get("cities")))
+
+                province["children"] = list(map(lambda x: rename_keys(sub_dict(x, sub_name), rename_mapping), province.get("cities")))
+        data = list(map(lambda x: rename_keys(sub_dict(x, sub_name), rename_mapping), data))
+        return data

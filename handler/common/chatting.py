@@ -7,7 +7,8 @@ import redis
 from tornado import gen, websocket, ioloop
 
 import conf.common as const
-from conf.message import CHATTING_EMPLOYEE_RESIGNATION, CHATTING_EMPLOYEE_RESIGNATION_TIPS
+from conf.message import CHATTING_EMPLOYEE_RESIGNATION, CHATTING_EMPLOYEE_RESIGNATION_TIPS, \
+    CHATTING_EMPLOYEE_EMPLOYEE_TIPS, CHATTING_USER_UNSUBSCRIBE
 from conf.protocol import WebSocketCloseCode
 from conf.sensors import CHATTING_SEND_MESSAGE
 from globals import logger
@@ -155,8 +156,20 @@ class EmployeeChattingHandler(BaseHandler):
             self._send_json(data={}, status_code=30500, message=CHATTING_EMPLOYEE_RESIGNATION_TIPS, http_code=200)
             return
 
+        if self.role == "user" and self.user_id == 0:
+            self._send_json(data={}, status_code=305072, message=CHATTING_EMPLOYEE_EMPLOYEE_TIPS, http_code=200)
+            return
+
         ret = yield self.chatting_ps.get_employee_chatrooms(self.user_id, self.role, self.employee_id,
                                                             self.current_user.company.id, page_no, page_size)
+
+        if ret and ret.code:
+            if self.role == "user" and ret.code == "US305072":
+                self._send_json(data={}, status_code=305072, message=CHATTING_EMPLOYEE_EMPLOYEE_TIPS, http_code=200)
+                return
+            elif self.role == "employee" and ret.code == "US30500":
+                self._send_json(data={}, status_code=30500, message=CHATTING_EMPLOYEE_RESIGNATION_TIPS, http_code=200)
+                return
 
         self.un_box(ret)
 
@@ -199,18 +212,25 @@ class EmployeeChattingHandler(BaseHandler):
     @gen.coroutine
     def get_totalunread(self):
         """
-        获取聊天室列表
+        获取未读聊天消息
         :return: 聊天室列表
         """
         ret = yield self.chatting_ps.get_employee_chatting_unread_count(self.params.room_id or 0, self.role,
                                                                         self.user_id, self.employee_id,
                                                                         self.current_user.company.id)
-        chat_num = yield self.chat_ps.get_all_unread_chat_num(self.current_user.sysuser.id)
+        if self.role == "employee":
 
-        if ret and ret.code and (ret.code == "0" or ret.code == 0):
-            self.send_json_success({"unread": ret.data + (chat_num if chat_num else 0)})
+            if ret and ret.code and (ret.code == "0" or ret.code == 0):
+                self.send_json_success({"unread": ret.data})
+            else:
+                self.send_json_error({"unread": ret.data if ret.data else 0}, ret.message)
         else:
-            self.send_json_error({"unread": (ret.data if ret.data else 0) + (chat_num if chat_num else 0)}, ret.message)
+            chat_num = yield self.chat_ps.get_all_unread_chat_num(self.current_user.sysuser.id)
+
+            if ret and ret.code and (ret.code == "0" or ret.code == 0):
+                self.send_json_success({"unread": ret.data + (chat_num if chat_num else 0)})
+            else:
+                self.send_json_error({"unread": (ret.data if ret.data else 0) + (chat_num if chat_num else 0)}, ret.message)
 
     @handle_response
     @gen.coroutine
@@ -258,6 +278,9 @@ class EmployeeChattingHandler(BaseHandler):
 
         if self.role == "employee" and ret and ret.code == "US30500":
             self._send_json(data={}, status_code=30500, message=CHATTING_EMPLOYEE_RESIGNATION_TIPS, http_code=200)
+            return
+        if self.role == "user" and ret and ret.code == "US305072":
+            self._send_json(data={}, status_code=305072, message=CHATTING_EMPLOYEE_EMPLOYEE_TIPS, http_code=200)
             return
         self.un_box(ret)
 
@@ -430,6 +453,25 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
                     content=CHATTING_EMPLOYEE_RESIGNATION,
                     compound_content=None,
                     speaker=1,
+                    cid=int(self.room_id),
+                    pid=int(self.position_id) if self.position_id else 0,
+                    create_time=create_time,
+                    id=chat_id.get("data"),
+                ))
+                self.write_message(message_body)
+            except websocket.WebSocketClosedError:
+                logger.error(traceback.format_exc())
+                self.close(WebSocketCloseCode.internal_error.value)
+                raise
+            return
+
+        if role == "employee" and chat_id and chat_id.code == "US305074":
+            try:
+                message_body = json_dumps(ObjectDict(
+                    msg_type=const.CHATTING_EMPLOYEE_MSG_TYPE_RESIGNATION,
+                    content=CHATTING_USER_UNSUBSCRIBE,
+                    compound_content=None,
+                    speaker=0,
                     cid=int(self.room_id),
                     pid=int(self.position_id) if self.position_id else 0,
                     create_time=create_time,

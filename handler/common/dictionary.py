@@ -16,6 +16,20 @@ class DictCityHandler(BaseHandler):
         self.send_json_success(cities)
 
 
+class DictLBSCityHandler(BaseHandler):
+
+    @handle_response
+    @gen.coroutine
+    def get(self):
+        cities = yield self.dictionary_ps.get_cities(locale_display=None) # lbs高德地图只支持中文
+        for data in cities:
+            if data.get("text") == "港,澳,台":
+                cities.remove(data)
+                cities.append({"list": [{"name": "香港", "code": 810000}, {"name": "澳门", "code": 820000}, {"name": "中国台湾", "code": "", "disable": 1}], "text": "港,澳,台"})
+                break
+        self.send_json_success(cities)
+
+
 class DictFunctionHandler(BaseHandler):
 
     @handle_response
@@ -125,3 +139,12 @@ class DictHopeJobTreeHandler(BaseHandler):
         field_type = self.params.type
         hope_job_trees = yield self.dictionary_ps.get_hope_job_tree(field_type)
         self.send_json_success(hope_job_trees)
+
+
+class DictRegionHandler(BaseHandler):
+
+    @handle_response
+    @gen.coroutine
+    def get(self):
+        cities = yield self.dictionary_ps.get_dict_regions(locale_display=None)
+        self.send_json_success(cities)

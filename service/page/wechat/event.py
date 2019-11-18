@@ -842,7 +842,7 @@ class EventPageService(PageService):
                 _, company = yield self.infra_company_ds.get_company_by_id(company_params)
                 user = yield self.infra_user_ds.get_user(employee.sysuser_id)
 
-                if not (employee and user and user.data and position):
+                if not (employee and user and user.data):
                     return
 
                 if isinstance(company, list):
@@ -855,15 +855,25 @@ class EventPageService(PageService):
                                wechat_signature=wechat.get("signature"),
                                params={"employee_id": employee_id_str}
                                )
+                picurl = user.data.headimg if user.data and user.data.headimg else ""
+                if not picurl.startswith("http"):
+                    picurl = "https:" + settings["static_domain"] + "/" + picurl
 
                 # 组装发送图文消息的参数
+                if position:
+                    description = const.CONSTANT_CHATTING_NEWS_DESCRIPTION\
+                        .format(company.get("abbreviation") or "",
+                                employee_name,
+                                position.title or "")
+                else:
+                    description = const.CONSTANT_CHATTING_NEWS_DESCRIPTION_NONE_POSITION\
+                        .format(company.get("abbreviation") or "",
+                                employee_name)
                 params = ObjectDict(
                     title=const.CONSTANT_CHATTING_NEWS_TITLE,
-                    description=const.CONSTANT_CHATTING_NEWS_DESCRIPTION.format(company.get("abbreviation") or "",
-                                                                                employee_name,
-                                                                                position.title or ""),
+                    description=description,
                     url=url,
-                    picurl=user.data.headimg if user.data and user.data.headimg else ""
+                    picurl=picurl
                 )
                 # 发送客服消息
                 send_succession_news(wechat=wechat, open_id=msg.FromUserName, params=params)

@@ -129,6 +129,7 @@ common_routes = [
     (r"/api/upload/recomprofile/?",                  handler.platform.referral.EmployeeRecomProfileHandler,     {"event": "upload_referral_profile"}),
     (r"/api/config[\/]?",                            handler.common.app.ConfigHandler,                          {"event": "wechat_config"}),
     (r"/api/dict/city/?",                            handler.common.dictionary.DictCityHandler,                 {"event": "dict_city"}),
+    (r"/api/dict/lbs_city/?",                        handler.common.dictionary.DictLBSCityHandler,              {"event": "dict_lbs_city"}),
     (r"/api/dict/industry/?",                        handler.common.dictionary.DictIndustryHandler,             {"event": "dict_industry"}),
     (r"/api/dict/industry/([a-z]+)*?",               handler.common.dictionary.DictCustomIndustryHandler,       {"event": "dict_custom_industry"}),
     (r"/api/dict/function/?",                        handler.common.dictionary.DictFunctionHandler,             {"event": "dict_function"}),
@@ -138,6 +139,7 @@ common_routes = [
     (r"/api/dict/hopejobtree/?",                     handler.common.dictionary.DictHopeJobTreeHandler,          {"event": "dict_hopejobtree"}),
     (r"/api/dict/mainland/college/?",                handler.common.dictionary.DictMainlandCollegeHandler,      {"event": "dict_mainland_college"}),
     (r"/api/dict/overseas/college/?",                handler.common.dictionary.DictOverseasCollegeHandler,      {"event": "dict_overseas_college"}),
+    (r"/api/dict/region/?",                          handler.common.dictionary.DictRegionHandler,                 {"event": "dict_city"}),
     (r"/api/profile/edit/?",                         handler.common.profile.ProfileSectionHandler,              {"event": "profile_section"}),
     (r"/api/profile/new/?",                          handler.common.profile.ProfileNewHandler,                  {"event": "profile_new"}),
     (r"/api/profile/all/?",                          handler.common.profile.APIProfileHandler,                  {"event": "profile_all"}),
@@ -186,6 +188,7 @@ common_routes = [
 platform_routes = [
     (r"/position/(?P<position_id>\d+)",              handler.platform.position.PositionHandler,                 {"event": "position_info"}),
     (r"/position/?",                                 handler.platform.position.PositionListHandler,             {"event": "position_list"},      'position_list'),
+    (r"/lbs/position/?",                             handler.platform.position.LbsPositionListHandler,          {"event": "lbs_position_info"}),
     (r"/position/share?",                            handler.platform.position.PositionShareInBulkHandler,      {"event": "share_position_list"}),
     (r"/start/?",                                    handler.platform.landing.LandingHandler,                   {"event": "start_landing"}),
     (r"/company/(\d+)",                              handler.platform.companyrelation.CompanyInfoRedirectHandler, {"event": "company_old_info"}, "old_company_info_page"),
@@ -263,6 +266,7 @@ platform_routes = [
     (r"/api/employee/supply/list/?",                 handler.platform.employee.ApiEmployeeSupplyListHandler,    {"event": "api_employee_supply_list"}),
     (r"/api/employee/recommendrecords/?",            handler.platform.employee.RecommendRecordsHandler,         {"event": "employee_recommendrecords"}),
     (r"/api/employee/rewards/?",                     handler.platform.employee.AwardsHandler,                   {"event": "employee_awards"}),
+    (r"/api/employee/info",                          handler.platform.employee.ApiEmployeeInfoHandler,          {"event": "api_employee_info"}),
     (r"/api/employee/count-policy-want",             handler.platform.employee.EmployeeInterestReferralPolicyHandler, {"event": "count_interest_policy"}),
     (r"/api/position/empnotice/?",                   handler.platform.position.PositionEmpNoticeHandler,        {"event": "position_empnotice"}),
     (r"/api/employee/rewards/rank/?",                handler.platform.employee.AwardsLadderHandler,             {"event": "awards_ladder_api"}),
@@ -303,6 +307,8 @@ platform_routes = [
     (r'/api/referral/recom_positions/?',             handler.platform.user.ReferralRelatedPositionHandler,      {"event": "referral_related_positions"}),
     (r"/api/switch[\/]*([a-z_]+)*",                  handler.platform.switch.SwitchHandler,                     {"event": "switch_"}),
     (r"/api/func/relation_tags/?",                   handler.platform.referral.ReferralCommentTagsHandler,      {"event": "referral_comment_tags"}),
+    (r"/api/stores/nearby/?",                        handler.platform.companyrelation.NearbyStoresHandler,      {"event": "nearby_stores"}),
+    (r"/api/position/lbs/(?P<position_id>\d+)",      handler.platform.companyrelation.PositionLbsHandler,       {"event": "position_lbs"}),
 
     # 兼容老微信 url，进行302跳转
     (r"/.*",                                         handler.platform.compatible.CompatibleHandler,             {"event": "compatible"})
