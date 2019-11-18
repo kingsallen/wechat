@@ -47,13 +47,13 @@ class UnreadCountHandler(BaseHandler):
         """
         获得 JD 页未读消息数，未登录用户返回默认值1
         :param publisher:
+        :param room_type 房间类型，1：社招, 2：校招
         :return:
         """
-        self.logger.debug("UnreadCountHandler get_jd_unread publisher:{}, user_id:{}"
-                          .format(publisher, self.current_user.sysuser.id))
-        chat_num = yield self.chat_ps.get_unread_chat_num(self.current_user.sysuser.id, publisher)
-        self.logger.debug("UnreadCountHandler get_jd_unread chat_num:{}".format(chat_num))
-        self.logger.debug("UnreadCountHandler get_jd_unread is_platform:{}".format(self.is_platform))
+
+        room_type = self.params.get("room_type") or 1
+        chat_num = yield self.chat_ps.get_unread_chat_num(self.current_user.sysuser.id, publisher, room_type)
+
         if self.is_platform:
             self.send_json_success(data={
                 "unread": chat_num,
@@ -566,11 +566,10 @@ class ChatHandler(BaseHandler):
 
         company_id = self.current_user.company.parent_id if self.current_user.company.parent_id > 0 else self.current_user.company.id
 
-        self.logger.debug('post_message flag:{}'.format(self.flag))
-        self.logger.debug('post_message create_new_context:{}'.format(create_new_context))
+        self.logger.debug('post_message flag:{}, create_new_context:{}'.format(self.flag, create_new_context))
 
         mobot_enable = yield self.chat_ps.get_mobot_switch_status(company_id, mobot_type_key)
-        self.logger.debug('post_message mobot_enable:{}'.format(mobot_enable))
+        self.logger.debug('post_message mobot_enable:{}, company_id:{}'.format(mobot_enable, company_id))
 
         self.chatroom_channel = const.CHAT_CHATROOM_CHANNEL.format(self.hr_id, self.user_id)
         self.hr_channel = const.CHAT_HR_CHANNEL.format(self.hr_id)

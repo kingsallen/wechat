@@ -99,6 +99,7 @@ class ChatPageService(PageService):
             room['company_name'] = company.abbreviation or company.name or ""
             room['chat_time'] = str_2_date(d.update_time, self.constant.TIME_FORMAT_MINUTE)
             room['unread_num'] = d.user_have_unread_msg
+            room['room_type'] = d.room_type
             records.append(room)
 
         raise gen.Return(records)
@@ -240,11 +241,12 @@ class ChatPageService(PageService):
         raise gen.Return(ret.data)
 
     @gen.coroutine
-    def get_unread_chat_num(self, user_id, hr_id):
+    def get_unread_chat_num(self, user_id, hr_id, room_type):
         """返回JD 页，求职者与 HR 之间的未读消息数"""
         if user_id is None or not hr_id:
             raise gen.Return(1)
-        res = yield self.infra_immobot_ds.get_user_chatroom_info(user_id, hr_id)
+
+        res = yield self.infra_immobot_ds.get_user_chatroom_info(0, user_id, hr_id, room_type)
         # 若无聊天，则默认显示1条未读消息
         if not res.data:
             raise gen.Return(1)
