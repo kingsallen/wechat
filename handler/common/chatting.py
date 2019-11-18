@@ -8,7 +8,7 @@ from tornado import gen, websocket, ioloop
 
 import conf.common as const
 from conf.message import CHATTING_EMPLOYEE_RESIGNATION, CHATTING_EMPLOYEE_RESIGNATION_TIPS, \
-    CHATTING_EMPLOYEE_EMPLOYEE_TIPS
+    CHATTING_EMPLOYEE_EMPLOYEE_TIPS, CHATTING_USER_UNSUBSCRIBE
 from conf.protocol import WebSocketCloseCode
 from conf.sensors import CHATTING_SEND_MESSAGE
 from globals import logger
@@ -453,6 +453,25 @@ class ChattingWebSocketHandler(websocket.WebSocketHandler):
                     content=CHATTING_EMPLOYEE_RESIGNATION,
                     compound_content=None,
                     speaker=1,
+                    cid=int(self.room_id),
+                    pid=int(self.position_id) if self.position_id else 0,
+                    create_time=create_time,
+                    id=chat_id.get("data"),
+                ))
+                self.write_message(message_body)
+            except websocket.WebSocketClosedError:
+                logger.error(traceback.format_exc())
+                self.close(WebSocketCloseCode.internal_error.value)
+                raise
+            return
+
+        if role == "employee" and chat_id and chat_id.code == "US305074":
+            try:
+                message_body = json_dumps(ObjectDict(
+                    msg_type=const.CHATTING_EMPLOYEE_MSG_TYPE_RESIGNATION,
+                    content=CHATTING_USER_UNSUBSCRIBE,
+                    compound_content=None,
+                    speaker=0,
                     cid=int(self.room_id),
                     pid=int(self.position_id) if self.position_id else 0,
                     create_time=create_time,

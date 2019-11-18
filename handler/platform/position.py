@@ -28,6 +28,7 @@ from util.wechat.template import position_view_five_notice_tpl
 from util.common.decorator import log_time, log_time_common_func, log_time_params, log_time_common_func_params
 from util.common.mq import neo4j_position_forward
 from util.common.cipher import decode_id
+from util.common.exception import InfraOperationError
 
 
 class PositionHandler(BaseHandler):
@@ -90,7 +91,7 @@ class PositionHandler(BaseHandler):
             # 是否超出投递上限。每月每家公司一个人只能申请3次
             self.logger.debug("[JD]构建HR头像及底部转发文案, 处理投递上限")
             start = time.time()
-            endorse, can_apply, data, bonus, rpext_list, res_crucial_info_switch, conf_response, position_feature = yield [
+            endorse, can_apply, data, bonus, rpext_list, res_crucial_info_switch, conf_response, position_feature, lbs_oms, stores_info = yield [
                 self._make_endorse_info(position_info, company_info),  # JD 页左下角背书信息
                 self.application_ps.is_allowed_apply_position(self.current_user.sysuser.id, company_info.id, position_id),  # 投递上限
                 self.company_ps.get_only_referral_reward(self.current_user.company.id),  # 职位推荐简历积分
@@ -98,7 +99,9 @@ class PositionHandler(BaseHandler):
                 self.position_ps.infra_get_position_list_rp_ext([position_info]),  # 职位红包信息
                 self.company_ps.get_crucial_info_state(self.current_user.company.id),  # 推荐人才关键信息开关状态
                 self.employee_ps.get_employee_conf(self.current_user.company.id),
-                self.position_ps.get_position_feature(position_id)
+                self.position_ps.get_position_feature(position_id),
+                self.company_ps.check_oms_switch_status(self.current_user.company.id, "LBS职位列表"),
+                self.company_ps.get_position_lbs_info({"company_id": self.current_user.company.id}, position_id)
             ]
             end = time.time()
             if (end-start)*1000 > 20:
@@ -131,10 +134,13 @@ class PositionHandler(BaseHandler):
 
             # 获取推荐人才关键信息开关状态
             switch = res_crucial_info_switch.data
+            if lbs_oms.status != const.API_SUCCESS:
+                raise InfraOperationError(lbs_oms.message)
+
             header = yield self._make_json_header(
                 position_info, company_info, star, application, endorse,
                 can_apply, team.id if team else 0, did, teamname_custom,
-                reward, share_reward, has_point_reward, bonus, switch, conf_response)
+                reward, share_reward, has_point_reward, bonus, switch, conf_response, lbs_oms.data.get('valid'), stores_info.data and stores_info.data.stores)
             module_job_description = self._make_json_job_description(position_info)
             module_job_need = self._make_json_job_need(position_info)
             module_feature = self._make_json_job_feature(position_feature)
@@ -412,7 +418,7 @@ class PositionHandler(BaseHandler):
     @gen.coroutine
     def _make_json_header(self, position_info, company_info, star, application,
                           endorse, can_apply, team_id, did, teamname_custom, reward, share_reward, has_point_reward,
-                          bonus, switch, conf_response):
+                          bonus, switch, conf_response, lbs_oms, has_store):
         """构造头部 header 信息"""
 
         # 获得母公司配置信息
@@ -445,6 +451,8 @@ class PositionHandler(BaseHandler):
             "has_point_reward": has_point_reward,
             "bonus": bonus,
             "recom_info_switch": switch,
+            "lbs_oms": lbs_oms,
+            "has_store": has_store,
             "emp_bind_config": bool(conf_response.exists if conf_response else None)  # 是否拥有员工认证配置项
             # "team": position_info.department.lower() if position_info.department else ""
         })
@@ -904,6 +912,22 @@ class PositionListInfraParamsMixin(BaseHandler):
         infra_params.user_id = self.current_user.sysuser.id or 0
         infra_params.is_referral = 1 if self.params.is_referral and self.params.is_referral.isdigit() else -1
 
+        if self.params.store_id:
+            infra_params.update(store_id=self.params.store_id)
+        else:
+            lbs_oms = yield self.company_ps.check_oms_switch_status(
+                self.current_user.company.id,
+                "LBS职位列表"
+            )
+            if lbs_oms.status == const.API_SUCCESS and lbs_oms.data.get('valid'):
+                if self.params.longitude and self.params.latitude:
+                    infra_params.longitude = self.params.longitude
+                    infra_params.latitude = self.params.latitude
+                # else:
+                #     ret = yield self.company_ps.get_lbs_ip_location(self.request.remote_ip)
+                #     infra_params.longitude = ret.split(";")[0].split(",")[0]
+                #     infra_params.latitude = ret.split(";")[0].split(",")[1]
+
         if self.params.did:
             infra_params.did = self.params.did
 
@@ -920,7 +944,7 @@ class PositionListInfraParamsMixin(BaseHandler):
                 # 如果用户自行修改了 GET 参数，不至于报错
                 infra_params.salary = ""
 
-        infra_params.update(cities=self.params.city if self.params.city else "")
+        infra_params.update(cities=self.params.city.replace("中国香港","香港").replace("中国澳门","澳门") if self.params.city else "")
 
         if self.params.degree:
             infra_params.degree = self.params.degree
@@ -930,6 +954,9 @@ class PositionListInfraParamsMixin(BaseHandler):
         if self.params.employment_type:
             infra_params.employment_type = const.EMPLOYMENT_TYPE_SEARCH.get(self.params.employment_type, "") \
                 if self.params.employment_type.isdigit() else self.params.employment_type
+        if self.params.position_type:
+            infra_params.job_type = const.POSITION_TYPE_SEARCH.get(self.params.position_type, "") \
+                if self.params.position_type.isdigit() else self.params.position_type
 
         infra_params.update(
             teamName=self.params.team_name if self.params.team_name else "",
@@ -1081,6 +1108,7 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
             position_ex['bonus'] = pos.total_bonus
             position_ex['candidate_source'] = pos.candidate_source
             position_ex['job_need'] = pos.requirement
+            position_ex['distance'] = pos.distance
             position_ex['is_referral'] = bool(pos.is_referral) if self.current_user.employee else False
             if not data.flag or (data.flag and pos.is_referral):
                 has_point_reward = has_point_reward
@@ -1260,13 +1288,21 @@ class PositionListHandler(PositionListInfraParamsMixin, BaseHandler):
         company['scale_name'] = self.params.company.scale_name
         company['banner'] = self.params.company.banner
 
+        lbs_oms = yield self.company_ps.check_oms_switch_status(
+            self.current_user.company.id,
+            "LBS职位列表"
+        )
+        if lbs_oms.status != const.API_SUCCESS:
+            raise InfraOperationError(lbs_oms.message)
+
         self.render_page(
             template_name="position/index.html",
             meta_title=position_title,
             data=ObjectDict(
                 company=company,
                 use_neowx=bool(self.current_user.company.conf_newjd_status == 2),
-                teamname_custom=teamname_custom)
+                teamname_custom=teamname_custom,
+                lbs_oms=lbs_oms.data.get('valid'))
         )
 
     @gen.coroutine
@@ -1324,6 +1360,88 @@ class PositionListHandler(PositionListInfraParamsMixin, BaseHandler):
         else:
             link = self.make_url(
                 path.POSITION_LIST,
+                self.params,
+                recom=self.position_ps._make_recom(self.current_user.sysuser.id),
+                escape=escape)
+
+        self.params.share = ObjectDict({
+            "cover": cover,
+            "title": title,
+            "description": description,
+            "link": link
+        })
+
+
+class LbsPositionListHandler(BaseHandler):
+    @log_time
+    @handle_response
+    @check_employee
+    @gen.coroutine
+    def get(self):
+        """获取LBS职位列表页"""
+
+        lbs_oms = yield self.company_ps.check_oms_switch_status(
+            self.current_user.company.id,
+            "LBS职位列表"
+        )
+        if lbs_oms.status != const.API_SUCCESS:
+            raise InfraOperationError(lbs_oms.message)
+
+        if not lbs_oms.data.get('valid'):  # oms关闭
+            self.write_error(http_code=404)
+            return
+
+        lbs_position_title = self.locale.translate(const_platform.LBS_POSITION_LIST_TITLE)
+        # 构建 share 内容
+        did = 0
+        if self.params.did and self.params.did.isdigit():
+            did = int(self.params.did)
+        yield self._make_share_info(self.current_user.company.id, did)
+
+        self.render_page(meta_title=lbs_position_title, template_name="position/lbs-job-list.html", data=ObjectDict())
+
+    @gen.coroutine
+    def _make_share_info(self, company_id, did=None):
+        """构建 share 内容"""
+
+        company_info = yield self.company_ps.get_company(
+            conds={"id": did or company_id}, need_conf=True)
+
+        escape = ["recomlist", "shareMongoliaFlag"]
+        # cover = self.share_url(company_info.logo)
+        cover = "https://cdn.moseeker.com/profile/lbs-share-cover.jpg"
+        title = "地图查看-" + company_info.abbreviation + self.locale.translate('job_hotjobs')
+        description = self.locale.translate(msg.SHARE_DES_DEFAULT)
+
+
+        # transmit_from是判断场景值的字段，且场景值使用偶数表示，当员工通过活动页面跳转到该页面时，值为偶数，
+        # 当员工转发出去时需要+1，因此求职者打开员工转发的链接时该值为奇数。
+        transmit_from = self.params.transmit_from
+        if transmit_from is not None and transmit_from.isdigit():
+            transmit_from = int(transmit_from) if int(transmit_from) % 2 else int(transmit_from) + 1
+            self.params.update(transmit_from=transmit_from)
+
+        if self.params.forward_id:
+            self.params.pop('forward_id')
+
+        is_valid_employee = False
+        if self.current_user.sysuser.id:
+            is_valid_employee = yield self.employee_ps.is_valid_employee(
+                self.current_user.sysuser.id,
+                company_info.id
+            )
+        if is_valid_employee:
+            forward_id = re.sub('-', '', str(uuid.uuid1()))
+
+            link = self.make_url(
+                path.LBS_POSITION_LIST,
+                self.params,
+                recom=self.position_ps._make_recom(self.current_user.sysuser.id),
+                forward_id=forward_id,
+                escape=escape)
+        else:
+            link = self.make_url(
+                path.LBS_POSITION_LIST,
                 self.params,
                 recom=self.position_ps._make_recom(self.current_user.sysuser.id),
                 escape=escape)
