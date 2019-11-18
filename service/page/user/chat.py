@@ -34,6 +34,11 @@ class ChatPageService(PageService):
                 if c['id'] == company_id:
                     return ObjectDict(c)
 
+        def get_company_conf_info(company_confs, company_id):
+            for c in company_confs:
+                if c['company_id'] == company_id:
+                    return ObjectDict(c)
+
         records = []
         hr_ids = []
         company_ids = []
@@ -68,10 +73,21 @@ class ChatPageService(PageService):
             self.logger.error("get_user_chatroom_page get_company_list error, company_ids:{}".format(company_ids))
             raise gen.Return(records)
 
+        # 根据company_ids批量获取公司配置信息
+        company_conf_list = yield self.infra_company_ds.batch_get_company_conf(company_ids)
+        if not company_conf_list.data:
+            self.logger.debug("get_user_chatroom_page company_conf_list not conf, company_ids:{}".format(company_ids))
+
         for d in user_chatroom_page.data.current_page_data:
             d = ObjectDict(d)
             hr = get_hr_info(company_hr_list.data, d.hr_id)
             company = get_company_info(company_list.data, hr['company_id'])
+            company_conf = get_company_conf_info(company_conf_list.data, hr['company_id'])
+
+            # 如果配置了mobot信息优先显示mobot信息
+            mobot_name = company_conf.mobot_name if company_conf else None
+            mobot_head_img = company_conf.mobot_head_img if company_conf else None
+
             if not hr or not company:
                 self.logger.warning("get_user_chatroom_page hr or company not exist, hr_id:{}".format(d.hr_id))
                 continue
@@ -79,8 +95,8 @@ class ChatPageService(PageService):
             room = ObjectDict()
             room['id'] = d.room_id
             room['hr_id'] = d.hr_id
-            room['hr_name'] = hr.username or "HR"
-            room['hr_headimg'] = make_static_url(hr.headimgurl or company.logo or const.HR_HEADIMG)
+            room['hr_name'] = mobot_name or hr.username or "HR"
+            room['hr_headimg'] = make_static_url(mobot_head_img or hr.headimgurl or company.logo or const.HR_HEADIMG)
             room['company_name'] = company.abbreviation or company.name or ""
             room['chat_time'] = str_2_date(d.update_time, self.constant.TIME_FORMAT_MINUTE)
             room['unread_num'] = d.user_have_unread_msg
