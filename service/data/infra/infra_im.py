@@ -1,6 +1,7 @@
 from tornado import gen
 
-from conf.newinfra_service_conf.service_info import user_service
+from conf.newinfra_service_conf.company import company
+from conf.newinfra_service_conf.service_info import user_service, company_service
 from conf.newinfra_service_conf.user import user
 from service.data.base import DataService
 from util.common import ObjectDict
@@ -230,6 +231,23 @@ class InfraImDataService(DataService):
         })
 
         ret = yield http_get_v2(user.INFRA_GET_CHATTING_SWITCH.format(role=role), user_service, params)
+        raise gen.Return(ret)
+
+    @gen.coroutine
+    def get_chatting_switch(self, company_id, module):
+        """
+        获取聊天开关的状态
+        :param company_id: 角色
+        :param module: 开关类型
+        :return: 开关状态
+        """
+
+        params = ObjectDict({
+            "module": module,
+            "company_id": company_id,
+        })
+
+        ret = yield http_get_v2(company.COMPANY_CHATTING_SWITCH, company_service, params)
         raise gen.Return(ret)
 
     @gen.coroutine
