@@ -179,10 +179,22 @@ class InfraCompanyDataService(DataService):
     @gen.coroutine
     def get_company_conf(self, params):
         """
-        根据company_ids批量获取公司列表数据
+        根据company_id获取公司列表数据
         :param params : {'companyId': 1}
         """
         ret = yield http_put_v2(company.COMPANY_CONF, company_service, params)
+        return ret
+
+    @gen.coroutine
+    def batch_get_company_conf(self, company_ids):
+        """
+        根据company_id获取公司列表数据
+        :param params : companyIds: [1, 2, 3]
+        """
+        params = ObjectDict({
+            "companyIds": company_ids,
+        })
+        ret = yield http_get_v2(company.COMPANY_CONF_BY_COMPANY_IDS, company_service, params)
         return ret
 
     @gen.coroutine
@@ -209,4 +221,3 @@ class InfraCompanyDataService(DataService):
         })
         ret = yield http_get_v2(company.REFERRAL_RULE_SWITCH, company_service, params)
         return ret
-

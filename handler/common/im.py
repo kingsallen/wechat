@@ -596,7 +596,7 @@ class ChatHandler(BaseHandler):
             id=chat.id,
         ))
 
-        self.logger.debug("publish chat by redis message_body:{}".format(message_body))
+        self.logger.debug("post_message redis publish message_body:{}".format(message_body))
         self.redis_client.publish(self.hr_channel, message_body)
         try:
             if mobot_enable and msg_type != "job":
