@@ -23,14 +23,28 @@ class InfraImmobotDataService(DataService):
         raise gen.Return(ret)
 
     @gen.coroutine
-    def get_user_chatroom_info(self, user_id, hr_id):
+    def get_hr_allchatroom_unread(self, hr_id):
+        """
+        获取聊天室信息
+        curl -X GET 'http://api-t2.dqprism.com/im/v4/user/room/unread?interfaceid=A11037001&appid=A11037&sysuserId=123&hraccountId=1'
+        """
+        params = ObjectDict({
+            "hraccountId": hr_id,
+        })
+        ret = yield http_get_v2(im_mobot.GET_USER_ALLCHATROOM_UNREAD, im_service, params, timeout=5)
+        raise gen.Return(ret)
+
+    @gen.coroutine
+    def get_user_chatroom_info(self, room_id, user_id, hr_id, room_type):
         """
         获取聊天室信息
         curl -X GET 'http://api-t2.dqprism.com/im/v4/user/room/info?interfaceid=A11037001&appid=A11037&sysuserId=123&hraccountId=1'
         """
         params = ObjectDict({
+            "roomId": room_id,
             "sysuserId": user_id,
             "hraccountId": hr_id,
+            "roomType": room_type,
         })
         ret = yield http_get_v2(im_mobot.GET_USER_CHATROOM_INFO, im_service, params, timeout=5)
         raise gen.Return(ret)
