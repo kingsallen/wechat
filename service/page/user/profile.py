@@ -1240,8 +1240,8 @@ class ProfilePageService(PageService):
             # profile_import_zhilian=None,
             # set later.
             profile_import_liepin=None,
-            # profile_import_linkedin=make_url(path.RESUME_URL, params, m='authorization', way=const.RESUME_WAY_LINKEDIN),
-            profile_import_linkedin=None,
+            profile_import_linkedin=make_url(path.RESUME_URL, params, m='authorization', way=const.RESUME_WAY_LINKEDIN),
+            # profile_import_linkedin=None,
             # set later.
             profile_import_maimai=None,
             # set later
