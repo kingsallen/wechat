@@ -900,7 +900,7 @@ class PositionHandler(BaseHandler):
 
 class PositionListInfraParamsMixin(BaseHandler):
 
-    @log_time_common_func(threshold=20)
+    @log_time(threshold=20)
     @gen.coroutine
     def make_position_list_infra_params(self):
         """构建调用基础服务职位列表的 params"""
