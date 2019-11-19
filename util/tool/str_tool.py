@@ -224,7 +224,7 @@ def add_item(d, k, v=None, strict=True):
         raise TypeError('can only operate dict.')
     if strict is False:
         return d.setdefault(k, v) == v
-    if strict is True and v:
+    if strict is True and v is not None:
         return d.setdefault(k, v) == v
     return None
 
