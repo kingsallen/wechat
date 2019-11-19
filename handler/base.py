@@ -207,7 +207,7 @@ class BaseHandler(MetaBaseHandler):
                                 "description": "no env matched, how could it be?"}))
 
     # PUBLIC API
-    @log_time(50)
+    @log_time(threshold=50)
     @check_signature
     @cover_no_weixin
     @gen.coroutine
@@ -425,7 +425,7 @@ class BaseHandler(MetaBaseHandler):
         self.logger.debug("+++++++++++++++++PREPARE OVER+++++++++++++++++++++")
 
     # PROTECTED
-    @log_time(20)
+    @log_time(threshold=20)
     @gen.coroutine
     def _handle_user_info(self, userinfo):
         """
@@ -517,7 +517,7 @@ class BaseHandler(MetaBaseHandler):
             client_env.update({"jsapi": self._add_jsapi_to_workwx(self._workwx)})
         self.namespace = {"client_env": client_env}
 
-    @log_time(20)
+    @log_time(threshold=20)
     @gen.coroutine
     def _handle_ent_openid(self, openid, unionid):
         """根据企业号 openid 和 unionid 创建企业号微信用户"""
@@ -585,7 +585,7 @@ class BaseHandler(MetaBaseHandler):
         wechat = yield self._get_current_wechat(qx=True)
         raise gen.Return(wechat)
 
-    @log_time(20)
+    @log_time(threshold=20)
     @gen.coroutine
     def _get_user_info(self, code, is_qx=False):
         if is_qx:
@@ -606,7 +606,7 @@ class BaseHandler(MetaBaseHandler):
         except WeChatOauthError as e:
             raise gen.Return(None)
 
-    @log_time(20)
+    @log_time(threshold=20)
     @gen.coroutine
     def _get_user_openid(self, code):
         self._oauth_service.wechat = self._wechat
@@ -617,7 +617,7 @@ class BaseHandler(MetaBaseHandler):
         except WeChatOauthError as e:
             raise gen.Return(None)
 
-    @log_time(20)
+    @log_time(threshold=20)
     @gen.coroutine
     def _fetch_session(self):
         """尝试获取 session 并创建 current_user，如果获取失败走 oauth 流程"""
@@ -695,7 +695,7 @@ class BaseHandler(MetaBaseHandler):
             self._wechat.appid) + host_suffix + self.request.uri
         self._work_oauth_service.redirect_url = url_subtract_query(url, ['code', 'state', 'appid'])
 
-    @log_time(20)
+    @log_time(threshold=20)
     @gen.coroutine
     def _build_session(self):
         """用户确认向仟寻授权后的处理，构建 session"""
@@ -750,7 +750,7 @@ class BaseHandler(MetaBaseHandler):
 
         raise gen.Return(False)
 
-    @log_time(20)
+    @log_time(threshold=20)
     @gen.coroutine
     def _build_session_by_unionid(self, unionid):
         """从 unionid 构建 session"""
@@ -796,7 +796,7 @@ class BaseHandler(MetaBaseHandler):
 
         self.current_user = session
 
-    @log_time(20)
+    @log_time(threshold=20)
     @gen.coroutine
     def _add_company_info_to_session(self, session):
         """拼装 session 中的 company, employee
@@ -835,7 +835,7 @@ class BaseHandler(MetaBaseHandler):
 
         raise gen.Return(company)
 
-    @log_time(20)
+    @log_time(threshold=20)
     @gen.coroutine
     def _add_recom_to_session(self, session):
         """拼装 session 中的 recom"""
@@ -852,7 +852,7 @@ class BaseHandler(MetaBaseHandler):
 
         session.recom = recom
 
-    @log_time(20)
+    @log_time(threshold=20)
     @gen.coroutine
     def _add_sysuser_to_session(self, session, session_id):
         """拼装 session 中的 sysuser"""
@@ -1028,7 +1028,7 @@ class BaseHandler(MetaBaseHandler):
             lang = lang_from_ua or settings['default_locale']
             return locale.get(lang)
 
-    @log_time(20)
+    @log_time(threshold=20)
     def track(self, event, properties=None, distinct_id=0, is_login_id=False):
         """神策埋点"""
         try:
@@ -1052,7 +1052,7 @@ class BaseHandler(MetaBaseHandler):
                 self.current_user.sysuser.id or self.current_user.sc_cookie_id, event, properties, True if self.current_user.sysuser.id else False,
                 traceback.format_exc()))
 
-    @log_time(20)
+    @log_time(threshold=20)
     def profile_set(self, profiles, distinct_id=0, is_login_id=False, once=False):
         """设置用户属性"""
         try:

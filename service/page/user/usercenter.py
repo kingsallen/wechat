@@ -114,7 +114,7 @@ class UsercenterPageService(PageService):
             obj_list.append(fav_pos)
         raise gen.Return(obj_list)
 
-    @log_time(20)
+    @log_time(threshold=20)
     @gen.coroutine
     def get_user_position_stared_list(self, user_id, position_id_list):
         """返回用户感兴趣职位列表"""
@@ -130,7 +130,7 @@ class UsercenterPageService(PageService):
             fav_position_id_list = [e.position_id for e in fav_position_list]
         return fav_position_id_list
 
-    @log_time(20)
+    @log_time(threshold=20)
     @gen.coroutine
     def get_applied_applications_list(self, user_id, position_id_list):
         """返回用户求职记录列表"""

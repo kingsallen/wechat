@@ -146,7 +146,7 @@ class CompanyPageService(PageService):
             data = ObjectDict()
         return data
 
-    @log_time(20)
+    @log_time(threshold=20)
     @gen.coroutine
     def get_real_company_id(self, publisher, company_id):
         """获得职位所属公司id
@@ -338,7 +338,7 @@ class CompanyPageService(PageService):
 
         return ret
 
-    @log_time(20)
+    @log_time(threshold=20)
     @gen.coroutine
     def get_crucial_info_state(self, company_id):
         """

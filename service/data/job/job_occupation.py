@@ -11,7 +11,7 @@ from util.common.decorator import log_time, log_time
 
 class JobOccupationDataService(DataService):
 
-    @log_time(20)
+    @log_time(threshold=20)
     @cache(ttl=60)
     @gen.coroutine
     def get_occupation(self, conds, fields=None):
