@@ -90,7 +90,7 @@ class UserCompanyPageService(PageService):
                 )
             )
         else:
-            assert False # should not be here as we just support 2 above locales
+            assert False  # should not be here as we just support 2 above locales
 
         data.bottombar = teamname_custom
 

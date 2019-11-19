@@ -147,6 +147,7 @@ class PositionHandler(BaseHandler):
             add_item(position_data, "module_job_need", module_job_need)
             add_item(position_data, "module_feature", module_feature)
             add_item(position_data, "module_position_recommend", module_position_recommend)
+            add_item(position_data, "has_team", bool(team.is_show if team else 0))
 
             # 构建老微信样式所需要的数据
             self.logger.debug("[JD]是否显示新样式: {}".format(self.current_user.company.conf_newjd_status))
@@ -813,26 +814,23 @@ class PositionHandler(BaseHandler):
     def _add_team_data(self, position_data, team, company_id, position_id, teamname_custom):
 
         if team:
-            module_team_position = yield self._make_team_position(
-                team, position_id, company_id, teamname_custom)
-            if module_team_position:
-                add_item(position_data, "module_team_position",
-                         module_team_position)
-
-            # [hr3.4]team.is_show只是用来判断是否在团队列表显示
-            cms_page = yield self._make_cms_page(team.id)
-            if cms_page:
-                add_item(position_data, "module_mate_day", cms_page)
+            if team.is_show:
+                module_team_position = yield self._make_team_position(
+                    team, position_id, company_id, teamname_custom)
+                if module_team_position:
+                    add_item(position_data, "module_team_position",
+                             module_team_position)
                 # 玛氏定制
                 company_config = COMPANY_CONFIG.get(company_id)
                 if (
                     company_config and not company_config.no_jd_team) or not company_config:  # 不在职位详情页展示所属团队, 目前只有Mars有这个需求,
                     module_team = yield self._make_team(team, teamname_custom)
                     add_item(position_data, "module_team", module_team)
-            else:
-                module_team = yield self._make_team(team, teamname_custom)
-                if module_team:
-                    add_item(position_data, "module_mate_day", module_team)
+
+            # [hr3.4]team.is_show只是用来判断是否在团队列表显示
+            cms_page = yield self._make_cms_page(team.id)
+            if cms_page:
+                add_item(position_data, "module_mate_day", cms_page)
 
     @gen.coroutine
     def _make_team_position(self, team, position_id, company_id, teamname_custom):
@@ -1293,6 +1291,14 @@ class PositionListHandler(PositionListInfraParamsMixin, BaseHandler):
         if lbs_oms.status != const.API_SUCCESS:
             raise InfraOperationError(lbs_oms.message)
 
+        team = yield self.team_ps.get_team(ObjectDict({
+            "company_id": self.current_user.company.id,
+            "disable": const.OLD_YES,
+            "is_show": const.YES
+        }))
+
+        has_team = bool(team)
+
         self.render_page(
             template_name="position/index.html",
             meta_title=position_title,
@@ -1300,7 +1306,9 @@ class PositionListHandler(PositionListInfraParamsMixin, BaseHandler):
                 company=company,
                 use_neowx=bool(self.current_user.company.conf_newjd_status == 2),
                 teamname_custom=teamname_custom,
-                lbs_oms=lbs_oms.data.get('valid'))
+                lbs_oms=lbs_oms.data.get('valid'),
+                has_team=has_team
+            )
         )
 
     @gen.coroutine
