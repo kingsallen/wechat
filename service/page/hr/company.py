@@ -11,7 +11,7 @@ from service.page.base import PageService
 from util.tool.url_tool import make_static_url
 from util.tool.dict_tool import sub_dict
 from util.tool.str_tool import is_odd, split, gen_salary, set_literl
-from util.common.decorator import log_time, log_time_params
+from util.common.decorator import log_time, log_time
 from util.common.exception import InfraOperationError
 
 cached_company_sug_wechat = None
@@ -146,7 +146,7 @@ class CompanyPageService(PageService):
             data = ObjectDict()
         return data
 
-    @log_time_params(20)
+    @log_time(20)
     @gen.coroutine
     def get_real_company_id(self, publisher, company_id):
         """获得职位所属公司id
@@ -338,7 +338,7 @@ class CompanyPageService(PageService):
 
         return ret
 
-    @log_time_params(20)
+    @log_time(20)
     @gen.coroutine
     def get_crucial_info_state(self, company_id):
         """

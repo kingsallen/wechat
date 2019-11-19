@@ -7,7 +7,7 @@ import conf.common as const
 from service.page.base import PageService
 from util.common import ObjectDict
 from util.common.cipher import encode_id
-from util.common.decorator import log_time, log_time_params
+from util.common.decorator import log_time, log_time
 from util.tool.date_tool import jd_update_date, str_2_date
 from util.tool.str_tool import gen_salary, split, set_literl, gen_degree, gen_experience
 from util.tool.temp_data_tool import make_position_detail_cms, make_team, template3
@@ -149,7 +149,7 @@ class PositionPageService(PageService):
 
         raise gen.Return(position)
 
-    @log_time_params(20)
+    @log_time(20)
     @gen.coroutine
     def get_position_custom_list(self, position_id_list):
         # 获取职位信息扩展信息列表
@@ -234,7 +234,7 @@ class PositionPageService(PageService):
         positions_list = yield self.job_position_ds.get_positions_list(conds, fields, options, appends)
         raise gen.Return(positions_list)
 
-    @log_time_params(20)
+    @log_time(20)
     @gen.coroutine
     def is_position_stared_by(self, user_id, position_id):
         """返回用户是否收藏了职位"""
@@ -283,7 +283,7 @@ class PositionPageService(PageService):
 
         raise gen.Return(hr_account)
 
-    @log_time_params(20)
+    @log_time(20)
     @gen.coroutine
     def __get_share_conf(self, conf_id):
         """获取职位自定义分享模板"""
@@ -292,7 +292,7 @@ class PositionPageService(PageService):
         })
         raise gen.Return(ret)
 
-    @log_time_params(20)
+    @log_time(20)
     @gen.coroutine
     def get_recommend_positions(self, position_id):
         """获得 JD 页推荐职位
@@ -441,7 +441,7 @@ class PositionPageService(PageService):
                 position_list.append(position)
         return position_list
 
-    @log_time_params(20)
+    @log_time(20)
     @gen.coroutine
     def infra_get_position_list_rp_ext(self, position_list):
         """获取职位的红包信息"""
@@ -557,7 +557,7 @@ class PositionPageService(PageService):
             return position_list, res.data[0]['total_num'] if res.data else 0
         return res
 
-    @log_time_params(20)
+    @log_time(20)
     @gen.coroutine
     def get_teamid_names_dict(self, company_id):
         """获取 {<team_id>: <team_name>} 字典"""
@@ -572,7 +572,7 @@ class PositionPageService(PageService):
         team_name_dict = {e.id: e.name for e in res_team_names}
         return team_name_dict
 
-    @log_time_params(20)
+    @log_time(20)
     @gen.coroutine
     def get_pid_teamid_dict(self, company_id, list_of_pid=None):
         """获取 {<position_id>: <team_id>} 字典
@@ -621,7 +621,7 @@ class PositionPageService(PageService):
 
         return res_list
 
-    @log_time_params(20)
+    @log_time(20)
     @gen.coroutine
     def get_position_feature(self, position_id):
         result, data = yield self.infra_position_ds.get_position_feature(position_id)
@@ -652,7 +652,7 @@ class PositionPageService(PageService):
         ret = yield self.infra_position_ds.patch_position_search_history(user_id, app_id)
         raise gen.Return(ret)
 
-    @log_time_params(20)
+    @log_time(20)
     @gen.coroutine
     def get_position_bonus(self, pid):
         """获取职位奖金"""
