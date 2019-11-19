@@ -598,122 +598,77 @@ class NewJDStatusCheckerAddFlag(BaseNewJDStatusChecker):
         yield func(self._handler, *args, **kwargs)
 
 
-def log_time(func):
+def log_time(func=None, threshold=0):
+    """
+    记录协程运行时间的的装饰器
+    :param func:
+    :param threshold: 单位：毫秒， 如果有值，只有运行时间大于threshold的方法才会被记录时间
+    :return:
+    """
+
+    if func is None:
+        return functools.partial(log_time, threshold=threshold)
+
     @functools.wraps(func)
     @gen.coroutine
     def wrapper(self, *args, **kwargs):
-        start = time.time()
+        start = time.perf_counter()
         r = yield func(self, *args, **kwargs)
-        end = time.time()
-        c = {
-            "for": "[{}_log_time]".format(func.__qualname__.split(".")[0]),
-            "func_name": func.__name__,
-            "doc": func.__doc__,
-            "time": (end - start) * 1000,
-            "timestamp": time.time()
-        }
-        try:
-            c.update({
-                "args": str(args),
-                "kwargs": str(kwargs)
-            })
-            self.logger.info(json_dumps(c))
-        except Exception as e:
-            self.logger.warning("log_time error:{}".format(traceback.format_exc()))
-        finally:
-            self.logger.info(json_dumps(c))
+        end = time.perf_counter()
+        func_time = (end - start) * 1000
+        if threshold <= 0 or func_time > threshold:
+            c = {
+                "for": "[{}_log_time]".format(func.__qualname__.split(".")[0]),
+                "func_name": func.__name__,
+                "doc": func.__doc__,
+                "time": func_time,
+                "timestamp": end
+            }
+            try:
+                c.update({
+                    "args": str(args),  # 防止有些奇怪的对象string的时候报错
+                    "kwargs": str(kwargs)
+                })
+            except Exception as e:
+                self.logger.warning("log_time error:{}".format(traceback.format_exc()))
+            finally:
+                self.logger.info(json_dumps(c))
         return r
 
     return wrapper
 
 
-def log_time_params(threshold=0):
-    """
-    记录协程运行时间的的装饰器
-    :param threshold: 如果有值，只有运行时间大于threshold的方法才会被记录时间
-    :return:
-    """
-    def log_time_inner(func):
-        @functools.wraps(func)
-        @gen.coroutine
-        def wrapper(self, *args, **kwargs):
-            start = time.time()
-            r = yield func(self, *args, **kwargs)
-            end = time.time()
-            func_time = (end - start) * 1000
-            if threshold == 0 or (threshold != 0 and func_time > threshold):
-                c = {
-                    "for": "[{}_log_time]".format(func.__qualname__.split(".")[0]),
-                    "func_name": func.__name__,
-                    "doc": func.__doc__,
-                    "time": (end - start) * 1000,
-                    "timestamp": time.time()
-                }
-                try:
-                    c.update({"args": str(args), "kwargs": str(kwargs)})
-                    self.logger.info(json_dumps(c))
-                except Exception as e:
-                    self.logger.warning("log_time_params error:{}".format(traceback.format_exc()))
-                finally:
-                    self.logger.info(json_dumps(c))
-            return r
-        return wrapper
-    return log_time_inner
-
-
-def log_time_common_func_params(threshold=0):
+def log_time_common_func(func=None, threshold=0):
     """
     记录普通方法运行时间的的装饰器
-    :param threshold: 如果有值，只有运行时间大于threshold的方法才会被记录时间
+    :param func:
+    :param threshold: 单位：毫秒，如果有值，只有运行时间大于threshold的方法才会被记录时间，
     :return:
     """
-    def log_time_inner(func):
-        @functools.wraps(func)
-        def wrapper(self, *args, **kwargs):
-            start = time.time()
-            r = func(self, *args, **kwargs)
-            end = time.time()
-            func_time = (end - start) * 1000
-            if threshold == 0 or (threshold != 0 and func_time > threshold):
-                c = {
-                    "for": "[{}_log_time]".format(func.__qualname__.split(".")[0]),
-                    "func_name": func.__name__,
-                    "doc": func.__doc__,
-                    "time": (end - start) * 1000,
-                    "timestamp": time.time()
-                }
-                try:
-                    c.update({"args": str(args), "kwargs": str(kwargs)})
-                    self.logger.info(json_dumps(c))
-                except Exception as e:
-                    self.logger.warning("log_time_common_func_params error:{}".format(traceback.format_exc()))
-                finally:
-                    self.logger.info(json_dumps(c))
-            return r
-        return wrapper
-    return log_time_inner
 
+    if func is None:
+        return functools.partial(log_time, threshold=threshold)
 
-def log_time_common_func(func):
     @functools.wraps(func)
     def wrapper(self, *args, **kwargs):
-        start = time.time()
+        start = time.perf_counter()
         r = func(self, *args, **kwargs)
-        end = time.time()
-        c = {
-            "for": "[{}_log_time]".format(func.__qualname__.split(".")[0]),
-            "func_name": func.__name__,
-            "doc": func.__doc__,
-            "time": (end - start) * 1000,
-            "timestamp": time.time()
-        }
-        try:
-            c.update({"args": str(args), "kwargs": str(kwargs)})
-            self.logger.info(json_dumps(c))
-        except Exception as e:
-            self.logger.warning("log_time_common_func error:{}".format(traceback.format_exc()))
-        finally:
-            self.logger.info(json_dumps(c))
+        end = time.perf_counter()
+        func_time = (end - start) * 1000
+        if threshold <= 0 or func_time > threshold:
+            c = {
+                "for": "[{}_log_time]".format(func.__qualname__.split(".")[0]),
+                "func_name": func.__name__,
+                "doc": func.__doc__,
+                "time": func_time,
+                "timestamp": end
+            }
+            try:
+                c.update({"args": str(args), "kwargs": str(kwargs)})  # 防止有些奇怪的对象string的时候报错
+            except Exception as e:
+                self.logger.warning("log_time_common_func error:{}".format(traceback.format_exc()))
+            finally:
+                self.logger.info(json_dumps(c))
         return r
 
     return wrapper

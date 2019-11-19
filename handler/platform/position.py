@@ -25,7 +25,7 @@ from util.tool.str_tool import gen_salary, add_item, split, gen_degree_v2, gen_e
 from util.tool.url_tool import url_append_query
 from util.tool.date_tool import subtract_design_time_ts, str_2_date
 from util.wechat.template import position_view_five_notice_tpl
-from util.common.decorator import log_time, log_time_common_func, log_time_params, log_time_common_func_params
+from util.common.decorator import log_time, log_time_common_func, log_time, log_time_common_func
 from util.common.mq import neo4j_position_forward
 from util.common.cipher import decode_id
 from util.common.exception import InfraOperationError
@@ -278,7 +278,7 @@ class PositionHandler(BaseHandler):
             "update_time": position_info.update_time_ori,
         })
 
-    @log_time_params(30)
+    @log_time(30)
     @gen.coroutine
     def _make_share_info(self, position_info, company_info):
         """构建 share 内容"""
@@ -349,7 +349,7 @@ class PositionHandler(BaseHandler):
         hr_account, hr_wx_user = yield self.position_ps.get_hr_info(publisher)
         raise gen.Return((hr_account, hr_wx_user))
 
-    @log_time_params(30)
+    @log_time(30)
     @gen.coroutine
     def _make_endorse_info(self, position_info, company_info):
         """构建 JD 页左下角背书信息"""
@@ -378,7 +378,7 @@ class PositionHandler(BaseHandler):
 
         raise gen.Return(endorse)
 
-    @log_time_common_func_params(20)
+    @log_time_common_func(20)
     def _make_recommend_positions(self, locale, positions):
         """处理相似职位推荐"""
         if not positions:
@@ -419,7 +419,7 @@ class PositionHandler(BaseHandler):
 
         return res
 
-    @log_time_params(20)
+    @log_time(20)
     @gen.coroutine
     def _make_json_header(self, position_info, company_info, star, application,
                           endorse, can_apply, team_id, did, teamname_custom, reward, share_reward, has_point_reward,
@@ -787,7 +787,7 @@ class PositionHandler(BaseHandler):
             self.redirect(redirect_url)
             return
 
-    @log_time_params(20)
+    @log_time(20)
     @gen.coroutine
     def _make_send_publish_template(self, position_info):
         """浏览量达到5次后，向 HR 发布模板消息
@@ -904,7 +904,7 @@ class PositionHandler(BaseHandler):
 
 class PositionListInfraParamsMixin(BaseHandler):
 
-    @log_time_common_func_params(20)
+    @log_time_common_func(20)
     @gen.coroutine
     def make_position_list_infra_params(self):
         """构建调用基础服务职位列表的 params"""
