@@ -80,6 +80,9 @@ class EmployeeChattingHandler(BaseHandler):
 
         try:
             # 重置 event，准确描述
+            if method and isinstance(method, str):
+                method = method.replace("-", "_")
+
             self._event = self._event + method
             yield getattr(self, "get_" + method)()
         except Exception as e:
@@ -124,6 +127,9 @@ class EmployeeChattingHandler(BaseHandler):
 
         try:
             # 重置 event，准确描述
+            if method and isinstance(method, str):
+                method = method.replace("-", "_")
+
             self._event = self._event + method
             yield getattr(self, "post_" + method)()
         except Exception as e:
@@ -242,6 +248,17 @@ class EmployeeChattingHandler(BaseHandler):
 
         switch = yield self.chatting_ps.get_switch(self.role, self.user_id, self.employee_id, self.current_user.company.id)
         self.un_box(switch)
+
+    @handle_response
+    @gen.coroutine
+    def get_im_switch(self):
+        """
+        获取聊天开关的状态
+        :return: 推送开关状态
+        """
+        self.logger.debug("EmployeeChattingHandler get_im_switch company_id:{}".format(self.current_user.company.id))
+        on = yield self.chatting_ps.get_chatting_switch(self.current_user.company.id, self.current_user.employee)
+        return self.send_json_success(ObjectDict(on=on))
 
     @handle_response
     @gen.coroutine
