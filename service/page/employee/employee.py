@@ -359,7 +359,7 @@ class EmployeePageService(PageService):
 
         return True, binding_params
 
-    @log_time(20)
+    @log_time(threshold=20)
     @gen.coroutine
     def get_employee_conf(self, company_id):
         """获取员工绑定配置"""
