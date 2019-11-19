@@ -901,6 +901,7 @@ class PositionHandler(BaseHandler):
 class PositionListInfraParamsMixin(BaseHandler):
 
     @log_time_common_func(threshold=20)
+    @gen.coroutine
     def make_position_list_infra_params(self):
         """构建调用基础服务职位列表的 params"""
 
@@ -979,7 +980,7 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
     @gen.coroutine
     def get(self):
 
-        infra_params = self.make_position_list_infra_params()
+        infra_params = yield self.make_position_list_infra_params()
         display_locale = self.get_current_locale()
         # 校验一下可能出现的参数：
         # hb_c: 红包活动id
@@ -1234,7 +1235,7 @@ class PositionListHandler(PositionListInfraParamsMixin, BaseHandler):
     def get(self):
         """获取职位列表页"""
 
-        infra_params = self.make_position_list_infra_params()
+        infra_params = yield self.make_position_list_infra_params()
 
         # 校验一下可能出现的参数：
         # hb_c: 红包活动id
@@ -1521,7 +1522,7 @@ class PositionListSugHandler(PositionListInfraParamsMixin, BaseHandler):
         :return:
         """
 
-        infra_params = self.make_position_list_infra_params()
+        infra_params = yield self.make_position_list_infra_params()
 
         is_referral = 0
         if self.params.is_referral and self.params.is_referral.isdigit():
