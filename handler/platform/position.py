@@ -942,7 +942,7 @@ class PositionListInfraParamsMixin(BaseHandler):
                 # 如果用户自行修改了 GET 参数，不至于报错
                 infra_params.salary = ""
 
-        infra_params.update(cities=self.params.city if self.params.city else "")
+        infra_params.update(cities=self.params.city.replace("中国香港","香港").replace("中国澳门","澳门") if self.params.city else "")
 
         if self.params.degree:
             infra_params.degree = self.params.degree
@@ -1399,8 +1399,66 @@ class LbsPositionListHandler(BaseHandler):
             return
 
         lbs_position_title = self.locale.translate(const_platform.LBS_POSITION_LIST_TITLE)
+        # 构建 share 内容
+        did = 0
+        if self.params.did and self.params.did.isdigit():
+            did = int(self.params.did)
+        yield self._make_share_info(self.current_user.company.id, did)
 
         self.render_page(meta_title=lbs_position_title, template_name="position/lbs-job-list.html", data=ObjectDict())
+
+    @gen.coroutine
+    def _make_share_info(self, company_id, did=None):
+        """构建 share 内容"""
+
+        company_info = yield self.company_ps.get_company(
+            conds={"id": did or company_id}, need_conf=True)
+
+        escape = ["recomlist", "shareMongoliaFlag"]
+        # cover = self.share_url(company_info.logo)
+        cover = "https://cdn.moseeker.com/profile/lbs-share-cover.jpg"
+        title = "地图查看-" + company_info.abbreviation + self.locale.translate('job_hotjobs')
+        description = self.locale.translate(msg.SHARE_DES_DEFAULT)
+
+
+        # transmit_from是判断场景值的字段，且场景值使用偶数表示，当员工通过活动页面跳转到该页面时，值为偶数，
+        # 当员工转发出去时需要+1，因此求职者打开员工转发的链接时该值为奇数。
+        transmit_from = self.params.transmit_from
+        if transmit_from is not None and transmit_from.isdigit():
+            transmit_from = int(transmit_from) if int(transmit_from) % 2 else int(transmit_from) + 1
+            self.params.update(transmit_from=transmit_from)
+
+        if self.params.forward_id:
+            self.params.pop('forward_id')
+
+        is_valid_employee = False
+        if self.current_user.sysuser.id:
+            is_valid_employee = yield self.employee_ps.is_valid_employee(
+                self.current_user.sysuser.id,
+                company_info.id
+            )
+        if is_valid_employee:
+            forward_id = re.sub('-', '', str(uuid.uuid1()))
+
+            link = self.make_url(
+                path.LBS_POSITION_LIST,
+                self.params,
+                recom=self.position_ps._make_recom(self.current_user.sysuser.id),
+                forward_id=forward_id,
+                escape=escape)
+        else:
+            link = self.make_url(
+                path.LBS_POSITION_LIST,
+                self.params,
+                recom=self.position_ps._make_recom(self.current_user.sysuser.id),
+                escape=escape)
+
+        self.params.share = ObjectDict({
+            "cover": cover,
+            "title": title,
+            "description": description,
+            "link": link
+        })
 
 
 class PositionRecomListHandler(PositionListInfraParamsMixin, BaseHandler):

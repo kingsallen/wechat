@@ -154,8 +154,8 @@ class LandingPageService(PageService):
                                 {"match": {key_a: value_a}}
                             ],
                             "should": [
-                                {"range": {"salaryData.salaryTop": {"lte": salary_dict.get('salary_top'), "gte": salary_dict.get('salary_bottom')}}},
-                                {"range": {"salaryData.salaryBottom": {"lte": salary_dict.get('salary_top'), "gte": salary_dict.get('salary_bottom')}}}
+                                {"range": {"position.salaryTop": {"lte": salary_dict.get('salary_top'), "gte": salary_dict.get('salary_bottom')}}},
+                                {"range": {"position.salaryBottom": {"lte": salary_dict.get('salary_top'), "gte": salary_dict.get('salary_bottom')}}}
                             ],
                             "minimum_should_match": 1
                         }
@@ -178,8 +178,8 @@ class LandingPageService(PageService):
                                 {"match": {key_b: value_b}}
                             ],
                             "should": [
-                                {"range": {"salaryData.salaryTop": {"lte": salary_dict.get('salary_top'), "gte": salary_dict.get('salary_bottom')}}},
-                                {"range": {"salaryData.salaryBottom": {"lte": salary_dict.get('salary_top'), "gte": salary_dict.get('salary_bottom')}}}
+                                {"range": {"position.salaryTop": {"lte": salary_dict.get('salary_top'), "gte": salary_dict.get('salary_bottom')}}},
+                                {"range": {"position.salaryBottom": {"lte": salary_dict.get('salary_top'), "gte": salary_dict.get('salary_bottom')}}}
                             ],
                             "minimum_should_match": 1
                         }
@@ -195,8 +195,8 @@ class LandingPageService(PageService):
                             {"match": {"position.status": const.OLD_YES}}
                         ],
                         "should": [
-                            {"range": {"salaryData.salaryTop": {"lte": salary_dict.get('salary_top'), "gte": salary_dict.get('salary_bottom')}}},
-                            {"range": {"salaryData.salaryBottom": {"lte": salary_dict.get('salary_top'), "gte": salary_dict.get('salary_bottom')}}}
+                            {"range": {"position.salaryTop": {"lte": salary_dict.get('salary_top'), "gte": salary_dict.get('salary_bottom')}}},
+                            {"range": {"position.salaryBottom": {"lte": salary_dict.get('salary_top'), "gte": salary_dict.get('salary_bottom')}}}
                         ],
                         "minimum_should_match": 1
                     }
@@ -229,8 +229,8 @@ class LandingPageService(PageService):
                 # 对 salary 做特殊处理 (salary_top, salary_bottom) -> salary
                 salary = [
                     v.get("name") for v in platform_const.SALARY.values()
-                    if v.salary_bottom == source.salaryData.get("salaryBottom") and
-                    v.salary_top == source.salaryData.get("salaryTop")
+                    if v.salary_bottom == source.get("salary_bottom") and
+                    v.salary_top == source.get("salary_top")
                     ]
 
                 source.salary = salary[0] if salary else ''
@@ -253,6 +253,8 @@ class LandingPageService(PageService):
                         for city in value:
                             citys.append(city.get(es_key.split(".")[1]))
                         ret.update({key: citys})
+                    elif key == "position_type":
+                        ret.update({key: 0 if value.get(es_key.split(".")[1]) is None else value.get(es_key.split(".")[1])}) # position_type是新增属性，老数据没有这个属性
                     else:
                         ret.update({key: value.get(es_key.split(".")[1])})
                 else:
@@ -263,7 +265,10 @@ class LandingPageService(PageService):
             es_key = self.get_by_value_dict(key, platform_const.LANDING)
             value = somedict.get(es_key.split(".")[0])
             if value:
-                ret = {key: value.get(es_key.split(".")[1])}
+                if key == "position_type":
+                    ret = {key: 0 if value.get(es_key.split(".")[1]) is None else value.get(es_key.split(".")[1])}
+                else:
+                    ret = {key: value.get(es_key.split(".")[1])}
             else:
                 ret = {key: ""}
         else:
@@ -419,9 +424,9 @@ class LandingPageService(PageService):
                     to_append.append(c_com)
 
                 elif k == 'candidate_source_name':
-                    text = locale.translate(const.CANDIDATE_SOURCE_SEARCH_LOCALE.get(e.get(k))) if e.get(k) else e.get(k)
+                    text = locale.translate(const.CANDIDATE_SOURCE.get(str(e.get(k)))) if str(e.get(k)) else e.get(k)
                     en = pinyin_initials(text)
-                    to_append.append({"text": text, "value": const.CANDIDATE_SOURCE_SEARCH_REVERSE.get(e.get(k)),
+                    to_append.append({"text": text, "value": str(e.get(k)),
                                       "en": en[0] if en else ""})
 
                 elif k == 'employment_type_name':
@@ -465,10 +470,10 @@ class LandingPageService(PageService):
                     to_append.append(c_com)
 
                 elif s == 'candidate_source_name':
-                    text = locale.translate(const.CANDIDATE_SOURCE_SEARCH_LOCALE.get(e.get(s))) if e.get(s) else e.get(
+                    text = locale.translate(const.CANDIDATE_SOURCE.get(str(e.get(s)))) if str(e.get(s)) else e.get(
                         s)
                     en = pinyin_initials(text)
-                    to_append.append({"text": text, "value": const.CANDIDATE_SOURCE_SEARCH_REVERSE.get(e.get(s)),
+                    to_append.append({"text": text, "value": str(e.get(s)),
                                       "en": en[0] if en else ""})
 
                 elif s == 'employment_type_name':
