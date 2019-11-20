@@ -923,6 +923,7 @@ class PositionListInfraParamsMixin(BaseHandler):
                     infra_params.latitude = self.params.latitude
                 else:
                     ret = yield self.company_ps.get_lbs_ip_location(self.request.remote_ip)
+                    self.logger.debug("@@@@@-get_lbs_ip_location: %s" % ret)
                     infra_params.longitude = ret.get("location").get("lng")
                     infra_params.latitude = ret.get("location").get("lat")
 
