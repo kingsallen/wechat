@@ -10,7 +10,7 @@ from util.common import ObjectDict
 
 class HrTeamDataService(DataService):
 
-    @cache(ttl=300)
+    # @cache(ttl=300)
     @gen.coroutine
     def get_team(self, conds, fields=None):
 
@@ -27,7 +27,7 @@ class HrTeamDataService(DataService):
         response = yield self.hr_team_dao.get_record_by_conds(conds, fields)
         raise gen.Return(response)
 
-    @cache(ttl=300)
+    # @cache(ttl=300)
     @gen.coroutine
     def get_team_list(self, conds, fields=None):
 

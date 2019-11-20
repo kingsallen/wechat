@@ -28,7 +28,7 @@ class JobPositionDataService(DataService):
         response = yield self.job_position_dao.get_record_by_conds(conds, fields, appends)
         raise gen.Return(response)
 
-    @cache(ttl=60)
+    # @cache(ttl=60)
     @gen.coroutine
     def get_positions_list(self, conds, fields=None, options=None, appends=None, index='', params=None):
 
