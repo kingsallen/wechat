@@ -295,4 +295,6 @@ MAIMAI_ACCESSTOKEN = "https://maimai.cn/oauth_login?appid={appid}&{cusdata}&logi
 LIEPIN_ACCESSTOKEN = 'https://passport.liepin.cn/mc/authlogin?state={}'
 JOYWOK_JMIS_AUTH = 'https://jmis.mcd.com.cn/jmis/NoLoginService'
 
-LBS_IP_LOCATION = "https://restapi.amap.com/v3/ip?key=e9698c1e0ee5dd69fb37ecd65440134c&ip={}"
+# LBS_IP_LOCATION = "https://restapi.amap.com/v3/ip?key=e9698c1e0ee5dd69fb37ecd65440134c&ip={}"
+LBS_IP_LOCATION = "https://apis.map.qq.com/ws/location/v1/ip?ip={}&key=22FBZ-35UC4-N2XUS-DGGWV-A67GT-WPFLE"
+
