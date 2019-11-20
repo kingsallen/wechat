@@ -358,6 +358,16 @@ class CompanyPageService(PageService):
         return res
 
     @gen.coroutine
+    def get_referral_rule_switch(self, company_id):
+        """
+        获取内推方式开关
+        :param company_id:
+        :return:
+        """
+        res = yield self.infra_company_ds.get_referral_rule_switch(company_id)
+        return res
+
+    @gen.coroutine
     def get_nearby_stores(self, params):
         """
         获取用户指定范围内门店位置
