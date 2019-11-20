@@ -926,7 +926,7 @@ class PositionListInfraParamsMixin(BaseHandler):
                     self.logger.debug("@@@@@-get_lbs_ip_location: %s" % ret)
                     infra_params.longitude = ret.get("location").get("lng")
                     infra_params.latitude = ret.get("location").get("lat")
-                    self.logger.debug("@@@@@-get_lbs_ip_location: {}, --{}" % (infra_params.longitude, infra_params.latitude))
+                    self.logger.debug("@@@@@-get_lbs_ip_location: {}, --{}".format(infra_params.longitude, infra_params.latitude))
 
         if self.params.did:
             infra_params.did = self.params.did
