@@ -647,7 +647,7 @@ def log_time_common_func(func=None, threshold=0):
     """
 
     if func is None:
-        return functools.partial(log_time, threshold=threshold)
+        return functools.partial(log_time_common_func, threshold=threshold)
 
     @functools.wraps(func)
     def wrapper(self, *args, **kwargs):
