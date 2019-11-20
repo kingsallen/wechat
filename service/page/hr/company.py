@@ -396,6 +396,6 @@ class CompanyPageService(PageService):
         :return:
         """
         ret = yield self.infra_company_ds.get_lbs_ip_location(remote_ip)
-        if not ret.rectangle:
-            raise InfraOperationError(ret.info)
-        return ret.rectangle
+        if ret.status != const.API_SUCCESS:
+            raise InfraOperationError(ret.message)
+        return ret.result
