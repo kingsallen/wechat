@@ -201,7 +201,7 @@ class NearbyStoresHandler(BaseHandler):
                 "company_id": self.current_user.company.id,
                 "longitude": self.params.longitude,
                 "latitude": self.params.latitude,
-                "radius": int(radius) / 1000 if radius and int(radius) else 1
+                "radius": float(radius) / 1000 if radius and float(radius) else 1
             })
         else:
             params = ObjectDict({
@@ -231,7 +231,7 @@ class PositionLbsHandler(BaseHandler):
                 "company_id": self.current_user.company.id,
                 "longitude": self.params.longitude,
                 "latitude": self.params.latitude,
-                "radius": int(radius) / 1000 if radius and int(radius) else 1
+                "radius": float(radius) / 1000 if radius and float(radius) else 1
             })
         else:
             params = ObjectDict({
