@@ -1106,6 +1106,7 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
             position_ex['candidate_source'] = pos.candidate_source
             position_ex['job_need'] = pos.requirement
             position_ex['distance'] = pos.distance
+            position_ex['has_store'] = pos.has_store
             position_ex['is_referral'] = bool(pos.is_referral) if self.current_user.employee else False
             if not data.flag or (data.flag and pos.is_referral):
                 has_point_reward = has_point_reward
@@ -1635,5 +1636,22 @@ class APIPositionShareInBulkHandler(BaseHandler):
         if res.code == const.NEWINFRA_API_SUCCESS:
             self.send_json_success(data={"share_id": res.data,
                                          "recom": self.position_ps._make_recom(self.current_user.sysuser.id)})
+        else:
+            self.send_json_error(message=res.message)
+
+
+class PositionDistanceBatchHandler(BaseHandler):
+    """职位列表：根据pids批量查询职位距离"""
+    @handle_response
+    @gen.coroutine
+    def post(self):
+
+        res = yield self.position_ps.get_position_distance_batch(self.json_args.pids, self.json_args.longitude, self.json_args.latitude)
+        if res.code == const.NEWINFRA_API_SUCCESS:
+            ret = []
+            if res.data:
+                for k, v in res.data.items():
+                    ret.append({"id": k, "distance": v})
+            self.send_json_success(data={"list": ret})
         else:
             self.send_json_error(message=res.message)

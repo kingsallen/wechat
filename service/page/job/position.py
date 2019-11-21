@@ -392,6 +392,7 @@ class PositionPageService(PageService):
                                 team_name=p.team_name,
                                 total_bonus=p.total_bonus,
                                 city=p.city_name,
+                                has_store = p.has_store,
                                 total_num=res.data.total)
                 position.salary = gen_salary(position.salary_top, position.salary_bottom)
                 position.publish_date = jd_update_date(
@@ -707,4 +708,20 @@ class PositionPageService(PageService):
             "position_ids": pid
         })
         ret = yield self.infra_position_ds.get_position_template_by_pids(params)
+        return ret
+
+    @gen.coroutine
+    def get_position_distance_batch(self, pids, longitude, latitude):
+        """
+        职位列表：根据pids批量查询职位距离
+        :param pids:
+        :param user_id:
+        :return:
+        """
+        params = ObjectDict({
+            "pids": pids,
+            "longitude": longitude,
+            "latitude": latitude
+        })
+        ret = yield self.infra_position_ds.get_position_distance_batch(params)
         return ret
