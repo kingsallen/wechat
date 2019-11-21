@@ -832,7 +832,7 @@ class PositionHandler(BaseHandler):
             cms_page = yield self._make_cms_page(team.id)
             if cms_page:
                 add_item(position_data, "module_mate_day", cms_page)
-            else:
+            elif team.is_show:
                 add_item(position_data, "module_mate_day", module_team)
 
     @gen.coroutine
