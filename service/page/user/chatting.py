@@ -2,8 +2,8 @@
 
 from tornado import gen
 
+from conf.common import COMPANY_SWITCH_MODULE_CHATTING, NEWINFRA_API_SUCCESS
 from service.page.base import PageService
-
 
 class ChattingPageService(PageService):
     def __init__(self):
@@ -83,6 +83,33 @@ class ChattingPageService(PageService):
 
         ret = yield self.infra_im_ds.get_switch(role, user_id, employee_id, company_id)
         raise gen.Return(ret)
+
+    @gen.coroutine
+    def get_chatting_switch(self, company_id, employee):
+        """
+        获取聊天开关的状态
+        :param company_id: 公司编号
+        :param employee: 员工身份
+        :return: 开关状态
+        """
+
+        on = 0
+        ret = yield self.infra_im_ds.get_chatting_switch(company_id, COMPANY_SWITCH_MODULE_CHATTING)
+
+        if ret and ret.code and (ret.code == NEWINFRA_API_SUCCESS):
+            if ret.data:
+                on = 2
+
+        if not employee:
+            condition = {
+                "company_id": company_id,
+            }
+            company_conf_res = yield self.hr_company_conf_ds.get_company_conf(condition)
+
+            if company_conf_res and company_conf_res.get("hr_chat") > 0:
+                on = on | 1
+
+        return on
 
     @gen.coroutine
     def post_switch(self, role, user_id, employee_id, company_id, tpl_switch):
