@@ -71,12 +71,12 @@ class Publisher(object):
 
         logger.debug('PikaClient Publisher: Channel open, Declaring exchange {}'.format(const.REDPACKET_EXCHANGE))
 
-    def publish_message(self, message):
+    def publish_message(self, message, routing_key):
         properties = pika.BasicProperties(app_id=const.APPID[env],
                                           content_type='application/json',
                                           delivery_mode=2 if self.durable else 1)
 
-        self.channel.basic_publish(self.exchange, self.routing_key,
+        self.channel.basic_publish(self.exchange, routing_key,
                                    json.dumps(message, ensure_ascii=False),
                                    properties)
 
@@ -84,6 +84,72 @@ class Publisher(object):
         logger.warning('Publisher Channel closed, reopening in 1 seconds: (%s) %s',
                        reply_code, reply_text)
         self.channel.close()
+
+
+award_publisher = Publisher(
+    exchange="user_action_topic_exchange",
+    exchange_type="topic",
+)
+
+data_userprofile_publisher = Publisher(
+    exchange="data.user_profile",
+    exchange_type="direct",
+)
+
+# 用户关注公众号后恢复用户员工身份
+user_follow_wechat_publisher = Publisher(
+    exchange="user_follow_wechat_exchange",
+    exchange_type="direct",
+)
+
+# 用户取消关注公众号后取消员工身份
+user_unfollow_wechat_publisher = Publisher(
+    exchange="user_unfollow_wechat_exchange",
+    exchange_type="direct",
+)
+
+# 所有未读赞的数量置空
+unread_praise_publisher = Publisher(
+    exchange="employee_view_leader_board_exchange",
+    exchange_type="direct",
+)
+
+# 转发职位被点击
+jd_click_publisher = Publisher(
+    exchange="retransmit_click_exchange",
+    exchange_type="topic",
+)
+
+# 转发职位被申请
+jd_apply_publisher = Publisher(
+    exchange="retransmit_apply_exchange",
+    exchange_type="topic",
+)
+
+
+neo4j_position_forward = Publisher(
+    exchange="employee_neo4j_exchange",
+    exchange_type="direct",
+)
+
+
+# 为了兼容过去的代码，这里不优雅的实现了所有的connect
+consumer_list = [
+    award_publisher,
+    data_userprofile_publisher,
+    user_follow_wechat_publisher,
+    user_unfollow_wechat_publisher,
+    unread_praise_publisher,
+    jd_click_publisher,
+    jd_apply_publisher,
+    neo4j_position_forward
+]
+
+
+def connect_all_client():
+    for c in consumer_list:
+        c.connect()
+
 
 
 
@@ -204,67 +270,7 @@ amqp_url = 'amqp://{}:{}@{}:{}/%2F?connection_attempts={}&heartbeat_interval={}'
     settings['rabbitmq_heartbeat_interval']
     )
 
-award_publisher = AwardsMQPublisher(
-    amqp_url=amqp_url,
-    exchange="user_action_topic_exchange",
-    exchange_type="topic",
-    appid=6
-)
 
-data_userprofile_publisher = MQPublisher(
-    amqp_url=amqp_url,
-    exchange="data.user_profile",
-    exchange_type="direct",
-    appid=6
-)
-
-# 用户关注公众号后恢复用户员工身份
-user_follow_wechat_publisher = MQPublisher(
-    amqp_url=amqp_url,
-    exchange="user_follow_wechat_exchange",
-    exchange_type="direct",
-    appid=6
-)
-
-# 用户取消关注公众号后取消员工身份
-user_unfollow_wechat_publisher = MQPublisher(
-    amqp_url=amqp_url,
-    exchange="user_unfollow_wechat_exchange",
-    exchange_type="direct",
-    appid=6
-)
-
-# 所有未读赞的数量置空
-unread_praise_publisher = MQPublisher(
-    amqp_url=amqp_url,
-    exchange="employee_view_leader_board_exchange",
-    exchange_type="direct",
-    appid=6
-)
-
-# 转发职位被点击
-jd_click_publisher = MQPublisher(
-    amqp_url=amqp_url,
-    exchange="retransmit_click_exchange",
-    exchange_type="topic",
-    appid=6
-)
-
-# 转发职位被申请
-jd_apply_publisher = MQPublisher(
-    amqp_url=amqp_url,
-    exchange="retransmit_apply_exchange",
-    exchange_type="topic",
-    appid=6
-)
-
-
-neo4j_position_forward = MQPublisher(
-    amqp_url=amqp_url,
-    exchange="employee_neo4j_exchange",
-    exchange_type="direct",
-    appid=6
-)
 
 
 def main():
