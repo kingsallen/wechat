@@ -122,7 +122,6 @@ common_routes = [
     (r"/health_check",                               handler.common.health_check.HealthcheckHandler,            {"event": "health_check"}),
 
     # websocket
-    (r"/websocket/([A-Za-z0-9_]{1,32})",             handler.common.im.ChatWebSocketHandler),
     (r"/ws/chatting/([A-Za-z0-9_]{1,32})",           handler.common.chatting.ChattingWebSocketHandler),
 
     (r"/api/send/vcode/?",                           handler.common.passport.SendValidCodeHandler,              {"event": "send_vcode"}),
