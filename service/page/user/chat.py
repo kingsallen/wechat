@@ -1,5 +1,7 @@
 # coding=utf-8
 import json
+import time
+import hashlib
 
 import pypinyin
 from pypinyin import lazy_pinyin
@@ -11,12 +13,28 @@ from setting import settings
 from util.common import ObjectDict
 from util.common.decorator import log_time
 from util.tool.date_tool import str_2_date
-from util.tool.http_tool import http_post
+from util.tool.http_tool import http_post, http_get
 from util.tool.str_tool import gen_salary
 from util.tool.url_tool import make_static_url
 
+def md5(str):
+    m = hashlib.md5()
+    m.update(str.encode("utf8"))
+    return m.hexdigest()
+
+
+def gen_signature(timestamp, md5_key):
+    if not timestamp or not md5_key:
+        return ''
+
+    signature = md5('{timestamp}{md5_key}'.format(timestamp=timestamp, md5_key=md5_key))
+    return signature
+
 
 class ChatPageService(PageService):
+
+    INTERNAL_SYSTEM_ACCESS_MD5_KEY = '2Ze0SnNMS27j2'
+
     def __init__(self):
         super().__init__()
 
@@ -591,3 +609,45 @@ class ChatPageService(PageService):
                     raise gen.Return(True)
 
         raise gen.Return(False)
+
+    @gen.coroutine
+    def get_sokcet_token(self, user_id):
+        """
+        获取socket访问token
+        """
+        timestamp = int(time.time())
+        signature = gen_signature(timestamp, self.INTERNAL_SYSTEM_ACCESS_MD5_KEY)
+        data = dict(signature=signature, timestamp=timestamp, system=1)
+        route = '{}{}'.format(settings.get('im_server_api'), '/user/{user_id}/socket/token'.format(user_id=user_id))
+        res = yield http_get(route=route, jdata=data, timeout=5)
+        raise gen.Return(res)
+
+    @gen.coroutine
+    def get_user_online_status(self, user_id):
+        """
+        获取用户socket连接的在线状态
+        """
+        timestamp = int(time.time())
+        signature = gen_signature(timestamp, self.INTERNAL_SYSTEM_ACCESS_MD5_KEY)
+        data = dict(signature=signature, timestamp=timestamp, system=1)
+        route = '{}{}'.format(settings.get('im_server_api'), '/user/{user_id}/online/status'.format(user_id=user_id))
+        res = yield http_get(route=route, jdata=data, timeout=5)
+        raise gen.Return(res)
+
+    @gen.coroutine
+    def send_message(self, user_id, hr_id, room_id, send_data):
+        """
+        发送socket通知消息数据
+        """
+        timestamp = int(time.time())
+        signature = gen_signature(timestamp, self.INTERNAL_SYSTEM_ACCESS_MD5_KEY)
+        meta_data = dict(signature=signature, timestamp=timestamp)
+        data = dict(meta_data=meta_data, system=1, user_id=user_id, hr_id=hr_id, room_id=room_id,
+                    send_data=send_data)
+        route = '{}{}'.format(settings.get('im_server_api'), '/send/message')
+        res = yield http_post(route=route, jdata=data, timeout=5)
+        raise gen.Return(res)
+
+    def get_room_type(self, mobot_type_key):
+        room_type = {'social': 1, 'campus': 2, 'employee': 3}
+        return room_type[mobot_type_key]
