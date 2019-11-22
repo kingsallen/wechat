@@ -865,7 +865,7 @@ class EventPageService(PageService):
                 url = make_url(path.EMPLOYEE_CHATTING_ROOMS,
                                host=settings["platform_host"],
                                wechat_signature=wechat.get("signature"),
-                               params={"employee_id": employee_id_str}
+                               params={"employee_id": employee_id_str, "speaker": 0}
                                )
                 picurl = user.data.headimg if user.data and user.data.headimg else ""
                 self.logger.debug("EventPageService _do_weixin_qrcode picurl:{} ".format(picurl))
