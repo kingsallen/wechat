@@ -326,6 +326,15 @@ class EmployeeChattingHandler(BaseHandler):
         :return: 推送开关状态
         """
         self.logger.debug("enter room. employee_id:{}, user_id:{}".format(self.employee_id, self.user_id))
+
+        if (not self.json_args.get("room_id") or int(self.json_args.get("room_id")) == 0) and (self.user_id == 0 or self.employee_id == 0):
+            if self.role == "employee":
+                self._send_json(data={}, status_code=30500, message=CHATTING_EMPLOYEE_RESIGNATION_TIPS, http_code=200)
+                return
+            if self.role == "user":
+                self._send_json(data={}, status_code=305072, message=CHATTING_EMPLOYEE_EMPLOYEE_TIPS, http_code=200)
+                return
+
         user_id = self.user_id
         employee_id = self.employee_id
         if (self.json_args.get("room_id") and int(self.json_args.get("room_id")) > 0) and (self.user_id == 0 or
