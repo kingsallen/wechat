@@ -75,7 +75,7 @@ def make_app():
 def sig_handler(sig, frame, sensors_sa, server):
     """信号处理函数
     """
-    logger.info('HR Server  sig handler ...')
+    logger.info('Neoweixinrefer Server  sig handler ...')
     tornado.ioloop.IOLoop.instance().add_callback(partial(shutdown, sensors_sa=sensors_sa, server=server))
 
 
@@ -83,9 +83,9 @@ def shutdown(sensors_sa, server):
     """进程关闭处理
     """
     # 停止接受Client连接
-    logger.info('HR Server Shutdown ...')
+    logger.info('Neoweixinrefer Server Shutdown ...')
     sensors_sa.close()
-    logger.info('HR Server sensors sa in Shutdown ...')
+    logger.info('Neoweixinrefer Server sensors sa in Shutdown ...')
     server.stop()
 
     io_loop = tornado.ioloop.IOLoop.instance()
@@ -114,9 +114,8 @@ def main():
             settings.blocking_log_threshold)
 
         http_server = tornado.httpserver.HTTPServer(application, xheaders=True)
-        # sc = RedPacketConsumer()
-        # application.sc = sc
-        # application.sc.connect()
+
+        connect_all_client()
 
         signal_handler = partial(sig_handler,
                                  sensors_sa=sa,
