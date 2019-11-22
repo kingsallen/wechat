@@ -81,6 +81,13 @@ class EmployeeChattingHandler(BaseHandler):
         self.logger.debug("EmployeeChattingHandler get params role:{}, employee_id:{}, user_id:{}"
                           .format(self.role, self.employee_id, self.user_id))
 
+        if self.role == "employee" and not self.current_user.employee:
+            self._send_json(data={}, status_code=30500, message=CHATTING_EMPLOYEE_RESIGNATION_TIPS, http_code=200)
+            return
+        if self.role == "user" and self.current_user.employee:
+            self._send_json(data={}, status_code=305072, message=CHATTING_EMPLOYEE_EMPLOYEE_TIPS, http_code=200)
+            return
+
         try:
             # 重置 event，准确描述
             if method and isinstance(method, str):
@@ -130,6 +137,13 @@ class EmployeeChattingHandler(BaseHandler):
 
         self.logger.debug("EmployeeChattingHandler get params role:{}, employee_id:{}, user_id:{}"
                           .format(self.role, self.employee_id, self.user_id))
+
+        if self.role == "employee" and not self.current_user.employee:
+            self._send_json(data={}, status_code=30500, message=CHATTING_EMPLOYEE_RESIGNATION_TIPS, http_code=200)
+            return
+        if self.role == "user" and self.current_user.employee:
+            self._send_json(data={}, status_code=305072, message=CHATTING_EMPLOYEE_EMPLOYEE_TIPS, http_code=200)
+            return
 
         try:
             # 重置 event，准确描述
