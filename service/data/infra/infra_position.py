@@ -244,6 +244,17 @@ class InfraPositionDataService(DataService):
         :return:
         """
         ret = yield http_post_v2(position.POSITION_LIST_GET_DISTANCE, position_service, params)
+
+    @gen.coroutine
+    def get_es_position_by_id(self, params):
+        """根据id查询es中的职位信息"""
+        ret = yield http_get_v2(position.POSITION_ES_BY_ID, position_service, params)
+        return ret
+
+    @gen.coroutine
+    def get_es_positions(self, params):
+        """查询es中的职位信息"""
+        ret = yield http_get_v2(position.POSITION_LIST_ES, position_service, params)
         return ret
 
 

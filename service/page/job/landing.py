@@ -16,8 +16,6 @@ import pypinyin
 
 class LandingPageService(PageService):
 
-    es = BaseES()
-
     def __init__(self):
         super().__init__()
 
@@ -45,171 +43,17 @@ class LandingPageService(PageService):
         """ 从 ES 获取全部职位信息
         可以正确解析 salary
         """
-        # todo es的搜索语句重构掉，使用dict的update，不要直接写死dict
         ret = []
-        query_size = platform_const.LANDING_QUERY_SIZE
 
-        key_list = []
-        value_list = []
+        result_list = yield self.infra_position_ds.get_es_positions(ObjectDict({
+            "company_id": company_id,
+            "query_size": platform_const.LANDING_QUERY_SIZE,
+            "referral": bool(is_referral),
+            "salary_bottom": salary_dict.get("salary_bottom"),
+            "salary_top": salary_dict.get("salary_top"),
+            "search_condition": search_condition_dict
+        }))
 
-        data = {
-            "size": query_size,
-            "query": {
-                "bool": {
-                    "must": [
-                        {"match": {"position.companyId": company_id}},
-                        {"match": {"position.status": const.OLD_YES}}
-                    ]
-                }
-            }
-        }
-        # occupation使用term搜索
-        pop_occupation = False
-        occupation_value = ''
-        if search_condition_dict:
-            for key, value in search_condition_dict.items():
-                if key == 'occupation':
-                    pop_occupation = True
-                    occupation_value = value
-            if pop_occupation:
-                search_condition_dict.pop("occupation")
-
-        # 默认最多可以附带三个链接筛选条件
-        if search_condition_dict and not salary_dict:
-            for key, value in search_condition_dict.items():
-                key_list.append(key)
-                value_list.append(value)
-            if len(key_list) == 1:
-                key_a, value_a = key_list[0], value_list[0]
-                key_a = self.get_by_value_dict(key_a, platform_const.LANDING)
-
-                data = {
-                    "size": query_size,
-                    "query": {
-                        "bool": {
-                            "must": [
-                                {"match": {"position.companyId": company_id}},
-                                {"match": {"position.status": const.OLD_YES}},
-                                {"match": {key_a: value_a}}
-                            ]
-                        }
-                    }
-                }
-            elif len(key_list) == 2:
-                key_a, value_a = key_list[0], value_list[0]
-                key_b, value_b = key_list[1], value_list[1]
-                key_a = self.get_by_value_dict(key_a, platform_const.LANDING)
-                key_b = self.get_by_value_dict(key_b, platform_const.LANDING)
-
-                data = {
-                    "size": query_size,
-                    "query": {
-                        "bool": {
-                            "must": [
-                                {"match": {"position.companyId": company_id}},
-                                {"match": {"position.status": const.OLD_YES}},
-                                {"match": {key_a: value_a}},
-                                {"match": {key_b: value_b}}
-                            ]
-                        }
-                    }
-                }
-            elif len(key_list) == 3:
-                key_a, value_a = key_list[0], value_list[0]
-                key_b, value_b = key_list[1], value_list[1]
-                key_c, value_c = key_list[2], value_list[2]
-                key_a = self.get_by_value_dict(key_a, platform_const.LANDING)
-                key_b = self.get_by_value_dict(key_b, platform_const.LANDING)
-                key_c = self.get_by_value_dict(key_c, platform_const.LANDING)
-
-                data = {
-                    "size": query_size,
-                    "query": {
-                        "bool": {
-                            "must": [
-                                {"match": {"position.companyId": company_id}},
-                                {"match": {"position.status": const.OLD_YES}},
-                                {"match": {key_a: value_a}},
-                                {"match": {key_b: value_b}},
-                                {"match": {key_c: value_c}}
-                            ]
-                        }
-                    }
-                }
-        elif search_condition_dict and salary_dict:
-            for key, value in search_condition_dict.items():
-                key_list.append(key)
-                value_list.append(value)
-            if len(key_list) == 1:
-                key_a, value_a = key_list[0], value_list[0]
-                key_a = self.get_by_value_dict(key_a, platform_const.LANDING)
-
-                data = {
-                    "size": query_size,
-                    "query": {
-                        "bool": {
-                            "must": [
-                                {"match": {"position.companyId": company_id}},
-                                {"match": {"position.status": const.OLD_YES}},
-                                {"match": {key_a: value_a}}
-                            ],
-                            "should": [
-                                {"range": {"position.salaryTop": {"lte": salary_dict.get('salary_top'), "gte": salary_dict.get('salary_bottom')}}},
-                                {"range": {"position.salaryBottom": {"lte": salary_dict.get('salary_top'), "gte": salary_dict.get('salary_bottom')}}}
-                            ],
-                            "minimum_should_match": 1
-                        }
-                    }
-                }
-            elif len(key_list) == 2:
-                key_a, value_a = key_list[0], value_list[0]
-                key_b, value_b = key_list[1], value_list[1]
-                key_a = self.get_by_value_dict(key_a, platform_const.LANDING)
-                key_b = self.get_by_value_dict(key_b, platform_const.LANDING)
-
-                data = {
-                    "size": query_size,
-                    "query": {
-                        "bool": {
-                            "must": [
-                                {"match": {"position.companyId": company_id}},
-                                {"match": {"position.status": const.OLD_YES}},
-                                {"match": {key_a: value_a}},
-                                {"match": {key_b: value_b}}
-                            ],
-                            "should": [
-                                {"range": {"position.salaryTop": {"lte": salary_dict.get('salary_top'), "gte": salary_dict.get('salary_bottom')}}},
-                                {"range": {"position.salaryBottom": {"lte": salary_dict.get('salary_top'), "gte": salary_dict.get('salary_bottom')}}}
-                            ],
-                            "minimum_should_match": 1
-                        }
-                    }
-                }
-        elif salary_dict and not search_condition_dict:
-            data = {
-                "size": query_size,
-                "query": {
-                    "bool": {
-                        "must": [
-                            {"match": {"position.companyId": company_id}},
-                            {"match": {"position.status": const.OLD_YES}}
-                        ],
-                        "should": [
-                            {"range": {"position.salaryTop": {"lte": salary_dict.get('salary_top'), "gte": salary_dict.get('salary_bottom')}}},
-                            {"range": {"position.salaryBottom": {"lte": salary_dict.get('salary_top'), "gte": salary_dict.get('salary_bottom')}}}
-                        ],
-                        "minimum_should_match": 1
-                    }
-                }
-            }
-        if is_referral:
-            data.get("query").get("bool").get("must").append({"match": {"position.isReferral": const.YES}})
-        if pop_occupation:
-            data.get("query").get("bool").get("must").append({"term": {"jobOccupation.name": occupation_value}})
-        self.logger.debug(data)
-        response = self.es.search(index='newpositions', body=data)
-
-        result_list = response.hits.hits
         self.logger.debug(result_list)
 
         # 获取筛选项
