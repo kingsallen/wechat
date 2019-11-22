@@ -78,8 +78,8 @@ class EmployeeChattingHandler(BaseHandler):
         if self.user_id == 0 and not self.current_user.employee:
             self.user_id = self.current_user.sysuser.id or 0
 
-        self.logger.debug("EmployeeChattingHandler get params role:{}, employee_id:{}, user_id:{}"
-                          .format(self.role, self.employee_id, self.user_id))
+        self.logger.debug("EmployeeChattingHandler get params role:{}, employee_id:{}, user_id:{}, method:{}"
+                          .format(self.role, self.employee_id, self.user_id, method))
 
         if self.role == "employee" and not self.current_user.employee:
             self._send_json(data={}, status_code=30500, message=CHATTING_EMPLOYEE_RESIGNATION_TIPS, http_code=200)
@@ -135,8 +135,8 @@ class EmployeeChattingHandler(BaseHandler):
         if self.user_id == 0 and not self.current_user.employee:
             self.user_id = self.current_user.sysuser.id or 0
 
-        self.logger.debug("EmployeeChattingHandler get params role:{}, employee_id:{}, user_id:{}"
-                          .format(self.role, self.employee_id, self.user_id))
+        self.logger.debug("EmployeeChattingHandler post params role:{}, employee_id:{}, user_id:{}, method:{}"
+                          .format(self.role, self.employee_id, self.user_id, method))
 
         if self.role == "employee" and not self.current_user.employee:
             self._send_json(data={}, status_code=30500, message=CHATTING_EMPLOYEE_RESIGNATION_TIPS, http_code=200)
