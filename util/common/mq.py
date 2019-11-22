@@ -2,7 +2,7 @@
 
 import pika
 from pika import TornadoConnection
-import pika_pool
+import time
 
 import json
 from globals import logger, env
@@ -75,13 +75,16 @@ class Publisher(object):
         properties = pika.BasicProperties(app_id=const.APPID[env],
                                           content_type='application/json',
                                           delivery_mode=2 if self.durable else 1)
-
+        logger.debug("publisher message: {}, exchange: {}, routing_key: {}".format(message, self.exchange, routing_key))
+        start = time.perf_counter()
         self.channel.basic_publish(
             self.exchange,
             routing_key or self.routing_key,
             json.dumps(message, ensure_ascii=False),
             properties
         )
+        end = time.perf_counter()
+        logger.info("publisher message time: {}".format((end-start)*1000))
 
     def on_channel_closed(self, channel, reply_code, reply_text):
         logger.warning('Publisher Channel closed, reopening in 1 seconds: (%s) %s',
