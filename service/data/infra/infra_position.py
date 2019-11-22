@@ -254,7 +254,7 @@ class InfraPositionDataService(DataService):
     @gen.coroutine
     def get_es_positions(self, params):
         """查询es中的职位信息"""
-        ret = yield http_get_v2(position.POSITION_LIST_ES, position_service, params)
+        ret = yield http_post_v2(position.POSITION_LIST_ES, position_service, params)
         return ret
 
 

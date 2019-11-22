@@ -45,7 +45,7 @@ class LandingPageService(PageService):
         """
         ret = []
 
-        result_list = yield self.infra_position_ds.get_es_positions(ObjectDict({
+        res = yield self.infra_position_ds.get_es_positions(ObjectDict({
             "company_id": company_id,
             "query_size": platform_const.LANDING_QUERY_SIZE,
             "referral": bool(is_referral),
@@ -53,7 +53,7 @@ class LandingPageService(PageService):
             "salary_top": salary_dict.get("salary_top"),
             "search_condition": search_condition_dict
         }))
-
+        result_list = res.data
         self.logger.debug(result_list)
 
         # 获取筛选项
