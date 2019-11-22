@@ -815,6 +815,8 @@ class PositionHandler(BaseHandler):
 
         if team:
             module_team = yield self._make_team(team, teamname_custom)
+            # [hr3.4]team.is_show只是用来判断是否在团队列表显示
+            cms_page = yield self._make_cms_page(team.id)
             if team.is_show:
                 module_team_position = yield self._make_team_position(
                     team, position_id, company_id, teamname_custom)
@@ -823,12 +825,10 @@ class PositionHandler(BaseHandler):
                              module_team_position)
                 # 玛氏定制
                 company_config = COMPANY_CONFIG.get(company_id)
-                if (
-                    company_config and not company_config.no_jd_team) or not company_config:  # 不在职位详情页展示所属团队, 目前只有Mars有这个需求,
+                if ((
+                    company_config and not company_config.no_jd_team) or not company_config) and cms_page:  # 不在职位详情页展示所属团队, 目前只有Mars有这个需求,
                     add_item(position_data, "module_team", module_team)
 
-            # [hr3.4]team.is_show只是用来判断是否在团队列表显示
-            cms_page = yield self._make_cms_page(team.id)
             if cms_page:
                 add_item(position_data, "module_mate_day", cms_page)
             elif team.is_show:
