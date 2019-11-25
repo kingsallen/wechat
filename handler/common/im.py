@@ -286,13 +286,15 @@ class ChatHandler(BaseHandler):
         if switch_open:
             fast_entry = [{"msg_type": "html", "content": "请转HR"}]
 
+        im_socket_url = '{}/socket/hr/chat'.format(settings.get('im_server_api').replace('http:', 'wss:'))
+
         self.current_user.wechat.jsapi = config
         self.send_json_success(data=ObjectDict(
             locale_code=self.locale.code,
             user=self.current_user,
             env={"client_env": self._client_env},
             fast_entry=fast_entry,
-            im_socket_url=settings.get('im_server_api').replace('http:', 'wss:'),
+            im_socket_url=im_socket_url,
             show_privacy_agreement=bool(data_privacy)
         ))
 
