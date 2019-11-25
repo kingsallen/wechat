@@ -75,7 +75,7 @@ class IsAgreePrivacyHandler(BaseHandler):
         注意：第一、三种用户跟以前一致，只有第二种情况需要再分情况：user_privacy_record没有记录【已经同意老协议】，如果已经同意新协议无需再弹层，如果拒绝新协议，不同页面需要做不同处理
         """
         user_id = self.current_user.sysuser.id
-        # 获取用户仟寻隐私协议状态
+        # 获取仟寻隐私协议状态
         result, show_privacy_agreement = yield self.privacy_ps.if_privacy_agreement_window(user_id)
 
         # 获取客户自定义隐私协议开关
@@ -105,4 +105,4 @@ class IsAgreePrivacyHandler(BaseHandler):
                                   custom_privacy=None)
                 self.send_json_success(data=data)
         else:
-            self.send_json_error()
+            self.send_json_error(message="获取仟寻隐私协议状态失败")
