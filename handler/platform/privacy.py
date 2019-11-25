@@ -3,7 +3,6 @@
 from tornado import gen
 
 import conf.common as const
-
 from handler.base import BaseHandler
 from util.common.decorator import handle_response, authenticated
 from util.common.exception import InfraOperationError
@@ -35,14 +34,21 @@ class PrivacyHandler(BaseHandler):
         status = self.json_args.get('qx_agree')
         custom_agree = self.json_args.get('custom_agree')
 
-        result = yield self.privacy_ps.if_agree_privacy(user_id, status)
-        if custom_agree: # 用户同意"客户自定义隐私协议"，插入记录
+        # 同意"仟寻隐私协议"
+        if status is None:
+            result = ObjectDict(status=0)
+        else:
+            result = yield self.privacy_ps.if_agree_privacy(user_id, status)
+        # 用户同意"客户自定义隐私协议"，插入记录
+        if custom_agree:
             custom_privacy = yield self.privacy_ps.if_agree_custom_privacy(user_id, self.current_user.company.id)
+        else:  # custom_agree为None[同意"仟寻隐私协议"]或者为0【不同意，不需要插入数据】
+            custom_privacy = ObjectDict(code='0')
 
-        if result.status == const.API_SUCCESS:
+        if result.status == const.API_SUCCESS and custom_privacy.code == const.NEWINFRA_API_SUCCESS:
             self.send_json_success()
         else:
-            self.send_json_error(message=result.message)
+            self.send_json_error(message=result.message or custom_privacy.message)
 
 
 class IsAgreePrivacyHandler(BaseHandler):

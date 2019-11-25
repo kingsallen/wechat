@@ -103,6 +103,4 @@ class InfraPrivacyDataService(DataService):
             "company_id": company_id
         })
         ret = yield http_post_v2(user.INFRA_IF_AGREE_CUSTOM_PRIVACY, user_service, params)
-        if ret.code != const.NEWINFRA_API_SUCCESS:
-            raise InfraOperationError(ret.message)
         return ret
