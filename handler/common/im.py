@@ -1,28 +1,22 @@
 # coding=utf-8
 
-import traceback
 from urllib.parse import unquote
 
-import redis
 import ujson
-from tornado import gen, websocket, ioloop
+from tornado import gen
 
 import conf.common as const
 import conf.message as msg
-from cache.user.chat_session import ChatCache
-from conf.protocol import WebSocketCloseCode
 from globals import logger
 from handler.base import BaseHandler
 from oauth.wechat import JsApi
-from service.page.user.chat import ChatPageService
-from setting import settings
 from util.common import ObjectDict
 from util.common.decorator import handle_response, authenticated
 from util.common.decorator import relate_user_and_former_employee
 from util.tool.date_tool import curr_now_minute
 from util.tool.json_tool import json_dumps
-from util.tool.pubsub_tool import Subscriber
 from util.tool.str_tool import to_str, match_session_id
+from setting import settings
 
 
 class UnreadCountHandler(BaseHandler):
@@ -127,103 +121,6 @@ class UnreadCountHandler(BaseHandler):
         return g_event
 
 
-class ChatWebSocketHandler(websocket.WebSocketHandler):
-    """处理 Chat 的各种 webSocket 传输，直接继承 tornado 的 WebSocketHandler
-    """
-
-    _pool = redis.ConnectionPool(
-        host=settings["store_options"]["redis_host"],
-        port=settings["store_options"]["redis_port"],
-        max_connections=settings["store_options"]["max_connections"])
-
-    _redis = redis.StrictRedis(connection_pool=_pool)
-
-    def __init__(self, application, request, **kwargs):
-        super(ChatWebSocketHandler, self).__init__(application, request, **kwargs)
-        self.redis_client = self._redis
-        self.chatroom_channel = ''
-        self.hr_channel = ''
-        self.hr_id = 0
-        self.room_id = 0
-        self.user_id = 0
-        self.position_id = 0
-        self.io_loop = ioloop.IOLoop.current()
-
-        self.chat_session = ChatCache()
-        self.chat_ps = ChatPageService()
-
-    def open(self, room_id, *args, **kwargs):
-        self.room_id = room_id
-        self.user_id = match_session_id(to_str(self.get_secure_cookie(const.COOKIE_SESSIONID)))
-        self.hr_id = self.get_argument("hr_id")
-        self.position_id = self.get_argument("pid", 0) or 0
-
-        logger.debug("IM WebSocket open start, room_id:{}, user_id:{}, hr_id:{}".format(room_id, self.user_id, self.hr_id))
-
-        try:
-            assert self.user_id and self.hr_id and self.room_id
-        except AssertionError:
-            logger.warning("IM WebSocket open invalid arguments not authorized")
-            self.close(WebSocketCloseCode.normal.value, "not authorized")
-
-        self.set_nodelay(True)
-
-        self.chatroom_channel = const.CHAT_CHATROOM_CHANNEL.format(self.hr_id, self.user_id)
-        self.hr_channel = const.CHAT_HR_CHANNEL.format(self.hr_id)
-        self.chat_session.mark_enter_chatroom(self.room_id)
-
-        def message_handler(message):
-            # 处理 sub 接受到的消息
-            nonlocal self
-            try:
-                data = ujson.loads(message.get("data"))
-                logger.debug("websocket data:{}".format(data))
-                if data:
-                    self.write_message(json_dumps(ObjectDict(
-                        content=data.get("content"),
-                        compoundContent=data.get("compoundContent"),
-                        chatTime=data.get("createTime"),
-                        speaker=data.get("speaker"),
-                        msgType=data.get("msgType"),
-                        stats=data.get("stats")
-                    )))
-                    logger.debug("IM WebSocket open message_handler write finish")
-            except websocket.WebSocketClosedError:
-                logger.error("IM WebSocket open message_handler WebSocketClosedError")
-                self.logger.error(traceback.format_exc())
-                self.close(WebSocketCloseCode.internal_error.value)
-                raise
-
-        logger.debug("IM WebSocket open ready to subscribe, room_id:{}, user_id:{}, hr_id:{}".format(
-            room_id, self.user_id, self.hr_id))
-
-        self.subscriber = Subscriber(self.redis_client, channel=self.chatroom_channel, message_handler=message_handler)
-
-        logger.debug(
-            "IM WebSocket open subscribe finish, room_id:{}, user_id:{}, hr_id:{}".format(
-                room_id, self.user_id, self.hr_id))
-
-        self.subscriber.start_run_in_thread()
-
-    @gen.coroutine
-    def on_message(self, message):
-        logger.debug("IM WebSocket on_message received:{}, room_id:{}, user_id:{}, hr_id:{}".format(
-            message, self.room_id, self.user_id, self.hr_id))
-        data = ujson.loads(message)
-        if data.get("msgType") == 'ping':
-            self.write_message(ujson.dumps({"msgType": 'pong'}))
-
-    @gen.coroutine
-    def on_close(self):
-        logger.debug("IM WebSocket on_close, room_id:{}, user_id:{}, hr_id:{}".format(
-            self.room_id, self.user_id, self.hr_id))
-        self.subscriber.stop_run_in_thread()
-        self.subscriber.cleanup()
-
-        self.chat_session.mark_leave_chatroom(self.room_id)
-        yield self.chat_ps.leave_chatroom(self.room_id, self.user_id)
-
-
 class ChatRoomHandler(BaseHandler):
     """聊天页面"""
 
@@ -241,28 +138,43 @@ class ChatRoomHandler(BaseHandler):
         return
 
 
+class ChatSocketTokenHandler(BaseHandler):
+
+    @handle_response
+    @gen.coroutine
+    def get(self):
+        """获取socket访问的token信息
+
+        - path: api/chat/socket/token
+        - method: GET
+        - return:
+        ```
+            {
+              "status": 0,
+              "message": "success",
+              "data": {'token': 'xxxx', 'expire': 600}
+            }
+        ```
+        """
+
+        get_sokcet_token = yield self.chat_ps.get_sokcet_token(self.current_user.sysuser.id)
+        if get_sokcet_token.get('status', -1) > 0:
+            self.send_json_error(message="获取数据失败")
+            return
+
+        self.send_json_success(data=get_sokcet_token.get('data', {}))
+
+
 class ChatHandler(BaseHandler):
     """聊天相关处理"""
 
-    # 这里的聊天使用redis有问题，请不要在其他地方使用这个redis连接池
-    _pool = redis.ConnectionPool(
-        host=settings["store_options"]["redis_host"],
-        port=settings["store_options"]["redis_port"],
-        max_connections=settings["store_options"]["max_connections"])
-
-    _redis = redis.StrictRedis(connection_pool=_pool)
-
     def __init__(self, application, request, **kwargs):
         super(ChatHandler, self).__init__(application, request, **kwargs)
-        self.redis_client = self._redis
-        self.chatroom_channel = ''
-        self.hr_channel = ''
         self.hr_id = 0
         self.room_id = 0
         self.user_id = 0
         self.position_id = 0
         self.flag = 0
-        # self.bot_enabled = False 废弃全局变量，设置1次托管后，全局变量会一直为True，在设置HR不托管MoBot的时候导致数据状态不一致
 
     @handle_response
     @gen.coroutine
@@ -272,6 +184,17 @@ class ChatHandler(BaseHandler):
             # 重置 event，准确描述
             self._event = self._event + method
             yield getattr(self, "get_" + method)()
+        except Exception as e:
+            self.write_error(404)
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def post(self, method):
+        try:
+            # 重置 event，准确描述
+            self._event = self._event + method
+            yield getattr(self, "post_" + method)()
         except Exception as e:
             self.write_error(404)
 
@@ -368,6 +291,7 @@ class ChatHandler(BaseHandler):
             user=self.current_user,
             env={"client_env": self._client_env},
             fast_entry=fast_entry,
+            im_socket_url=settings.get('im_server_api').replace('http:', 'wss:'),
             show_privacy_agreement=bool(data_privacy)
         ))
 
@@ -461,7 +385,12 @@ class ChatHandler(BaseHandler):
     def delete_room(self):
         """删除聊天室"""
         room_id = self.params.room_id or 0
-        yield self.chat_ps.delete_chatroom(room_id, self.current_user.sysuser.id)
+        res = yield self.chat_ps.delete_chatroom(room_id, self.current_user.sysuser.id)
+
+        if res.code != const.NEWINFRA_API_SUCCESS:
+            self.send_json_error(message=msg.NOT_AUTHORIZED)
+            return
+
         self.send_json_success(data={})
 
     @handle_response
@@ -483,17 +412,6 @@ class ChatHandler(BaseHandler):
         self.set_header("Content-Length", voice_size)
         self.write(result)
         self.finish()
-
-    @handle_response
-    @authenticated
-    @gen.coroutine
-    def post(self, method):
-        try:
-            # 重置 event，准确描述
-            self._event = self._event + method
-            yield getattr(self, "post_" + method)()
-        except Exception as e:
-            self.write_error(404)
 
     @handle_response
     @authenticated
@@ -554,6 +472,7 @@ class ChatHandler(BaseHandler):
         self.flag = int(self.params.get("flag")) or None
         self.project_id = self.params.get("project_id") or 0
         mobot_type_key = self.params.get("mobot_type_key") or 'social'
+        self.room_type = self.chat_ps.get_room_type(mobot_type_key)
 
         content = self.json_args.get("content") or ""
         compoundContent = self.json_args.get("compoundContent") or {}
@@ -570,9 +489,6 @@ class ChatHandler(BaseHandler):
 
         mobot_enable = yield self.chat_ps.get_mobot_switch_status(company_id, mobot_type_key)
         self.logger.debug('post_message mobot_enable:{}, company_id:{}'.format(mobot_enable, company_id))
-
-        self.chatroom_channel = const.CHAT_CHATROOM_CHANNEL.format(self.hr_id, self.user_id)
-        self.hr_channel = const.CHAT_HR_CHANNEL.format(self.hr_id)
 
         chat = yield self.chat_ps.save_chat(company_id, int(self.room_id), self.current_user.sysuser.id, msg_type,
                                             const.ORIGIN_USER_OR_HR, int(self.position_id), content,
@@ -593,15 +509,14 @@ class ChatHandler(BaseHandler):
             createTime=curr_now_minute(),
             origin=const.ORIGIN_USER_OR_HR,
             id=chat.id,
+            roomType=self.room_type
         ))
 
         self.logger.debug("post_message redis publish message_body:{}".format(message_body))
-        self.redis_client.publish(self.hr_channel, message_body)
+        yield self.chat_ps.send_message(self.user_id, self.hr_id, self.room_id, message_body)
+
         try:
             if mobot_enable and msg_type != "job":
-                # 由于没有延迟的发送导致hr端轮训无法订阅到publish到redis的消息　所以这里做下延迟处理
-                # delay_robot = functools.partial(self._handle_chatbot_message, user_message)
-                # ioloop.IOLoop.current().call_later(1, delay_robot)
                 yield self._handle_chatbot_message(mobot_type_key, user_message, create_new_context, from_textfield,
                                                    self.project_id)
         except Exception as e:
@@ -632,12 +547,13 @@ class ChatHandler(BaseHandler):
             speaker=const.CHAT_SPEAKER_HR,
             cid=int(self.room_id),
             pid=int(self.position_id),
-            createTime=curr_now_minute()
+            createTime=curr_now_minute(),
+            roomType=self.room_type
         ))
         self.logger.debug("publish chat by redis message_body:{}".format(message_body))
 
-        # 聊天室广播
-        self.redis_client.publish(self.chatroom_channel, message_body)
+        # 发送给求职者
+        yield self.chat_ps.send_message(self.user_id, 0, self.room_id, message_body)
 
     @handle_response
     @authenticated
@@ -668,9 +584,6 @@ class ChatHandler(BaseHandler):
 
         try:
             if mobot_enable and msg_type != "job":
-                # 由于没有延迟的发送导致hr端轮训无法订阅到publish到redis的消息　所以这里做下延迟处理
-                # delay_robot = functools.partial(self._handle_chatbot_message, user_message)
-                # ioloop.IOLoop.current().call_later(1, delay_robot)
                 yield self._handle_chatbot_message(mobot_type_key, user_message, create_new_context, from_textfield,
                                                    self.project_id)
         except Exception as e:
@@ -708,12 +621,13 @@ class ChatHandler(BaseHandler):
             speaker=const.CHAT_SPEAKER_HR,
             cid=int(self.room_id),
             pid=int(self.position_id),
-            createTime=curr_now_minute()
+            createTime=curr_now_minute(),
+            roomType=self.room_type
         ))
         self.logger.debug("publish chat by redis message_body:{}".format(message_body))
 
-        # 聊天室广播
-        self.redis_client.publish(self.chatroom_channel, message_body)
+        # 发送给求职者
+        yield self.chat_ps.send_message(self.user_id, 0, self.room_id, message_body)
 
 
     @gen.coroutine
@@ -761,10 +675,11 @@ class ChatHandler(BaseHandler):
                     cid=int(self.room_id),
                     pid=int(self.position_id),
                     createTime=curr_now_minute(),
-                    origin=const.ORIGIN_CHATBOT
+                    origin=const.ORIGIN_CHATBOT,
+                    roomType=self.room_type
                 ))
-                # 聊天室广播
-                self.redis_client.publish(self.chatroom_channel, message_body)
+                # 发送给求职者
+                yield self.chat_ps.send_message(self.user_id, 0, self.room_id, message_body)
                 return
 
             # 员工认证自定义配置字段太大了，不用存储到mysql中，直接通过socket发送到客户端即可
@@ -792,14 +707,13 @@ class ChatHandler(BaseHandler):
                 pid=int(self.position_id),
                 createTime=curr_now_minute(),
                 origin=const.ORIGIN_CHATBOT,
-                id=chat.id
+                id=chat.id,
+                roomType=self.room_type
             ))
             self.logger.debug("publish chat by redis message_body:{}".format(message_body))
-            # hr 端广播
-            self.redis_client.publish(self.hr_channel, message_body)
 
-            # 聊天室广播
-            self.redis_client.publish(self.chatroom_channel, message_body)
+            # 发送给两方
+            yield self.chat_ps.send_message(self.user_id, self.hr_id, self.room_id, message_body)
 
 
 class MobotHandler(BaseHandler):
