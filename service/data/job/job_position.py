@@ -6,12 +6,12 @@ from tornado import gen
 from service.data.base import DataService
 from util.common.decorator import cache
 from util.common import ObjectDict
-from util.common.decorator import log_time
+from util.common.decorator import log_time, log_time
 
 
 class JobPositionDataService(DataService):
 
-    @log_time
+    @log_time(threshold=20)
     @gen.coroutine
     def get_position(self, conds, fields=None, appends=None):
 

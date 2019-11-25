@@ -18,7 +18,7 @@ from util.tool.url_tool import make_static_url, make_url
 from util.tool.str_tool import gen_salary, gen_experience_v2
 from util.wechat.core import get_temporary_qrcode
 from util.common.mq import unread_praise_publisher
-from util.common.decorator import log_time
+from util.common.decorator import log_time, log_time
 from util.common.exception import InfraOperationError
 from util.tool.dict_tool import objectdictify
 from util.tool.str_tool import json_hump2underline
@@ -359,6 +359,7 @@ class EmployeePageService(PageService):
 
         return True, binding_params
 
+    @log_time(threshold=20)
     @gen.coroutine
     def get_employee_conf(self, company_id):
         """获取员工绑定配置"""
@@ -432,6 +433,7 @@ class EmployeePageService(PageService):
         result, data = yield self.infra_employee_ds.get_bind_reward(company_id)
         return data
 
+    @log_time
     @gen.coroutine
     def get_bind_reward(self, company_id, type=None):
         """获取指定规则的积分配置, 如果未指定规则，则获取该公司是否有带积分奖励的积分规则"""

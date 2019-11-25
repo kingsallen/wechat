@@ -11,12 +11,12 @@ from tornado import gen
 from service.data.base import DataService
 from util.common.decorator import cache
 from util.common import ObjectDict
-from util.common.decorator import log_time
+from util.common.decorator import log_time, log_time
 
 
 class JobPositionExtDataService(DataService):
 
-    @log_time
+    @log_time(threshold=20)
     @cache(ttl=60)
     @gen.coroutine
     def get_position_ext(self, conds, fields=None):
