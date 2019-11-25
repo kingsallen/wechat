@@ -169,7 +169,6 @@ class ChatHandler(BaseHandler):
         self.user_id = 0
         self.position_id = 0
         self.flag = 0
-        # self.bot_enabled = False 废弃全局变量，设置1次托管后，全局变量会一直为True，在设置HR不托管MoBot的时候导致数据状态不一致
 
     @handle_response
     @gen.coroutine
@@ -179,6 +178,17 @@ class ChatHandler(BaseHandler):
             # 重置 event，准确描述
             self._event = self._event + method
             yield getattr(self, "get_" + method)()
+        except Exception as e:
+            self.write_error(404)
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def post(self, method):
+        try:
+            # 重置 event，准确描述
+            self._event = self._event + method
+            yield getattr(self, "post_" + method)()
         except Exception as e:
             self.write_error(404)
 
@@ -368,7 +378,12 @@ class ChatHandler(BaseHandler):
     def delete_room(self):
         """删除聊天室"""
         room_id = self.params.room_id or 0
-        yield self.chat_ps.delete_chatroom(room_id, self.current_user.sysuser.id)
+        res = yield self.chat_ps.delete_chatroom(room_id, self.current_user.sysuser.id)
+
+        if res.code != const.NEWINFRA_API_SUCCESS:
+            self.send_json_error(message=msg.NOT_AUTHORIZED)
+            return
+
         self.send_json_success(data={})
 
     @handle_response
@@ -390,17 +405,6 @@ class ChatHandler(BaseHandler):
         self.set_header("Content-Length", voice_size)
         self.write(result)
         self.finish()
-
-    @handle_response
-    @authenticated
-    @gen.coroutine
-    def post(self, method):
-        try:
-            # 重置 event，准确描述
-            self._event = self._event + method
-            yield getattr(self, "post_" + method)()
-        except Exception as e:
-            self.write_error(404)
 
     @handle_response
     @authenticated
@@ -479,9 +483,6 @@ class ChatHandler(BaseHandler):
         mobot_enable = yield self.chat_ps.get_mobot_switch_status(company_id, mobot_type_key)
         self.logger.debug('post_message mobot_enable:{}, company_id:{}'.format(mobot_enable, company_id))
 
-        self.chatroom_channel = const.CHAT_CHATROOM_CHANNEL.format(self.hr_id, self.user_id)
-        self.hr_channel = const.CHAT_HR_CHANNEL.format(self.hr_id)
-
         chat = yield self.chat_ps.save_chat(company_id, int(self.room_id), self.current_user.sysuser.id, msg_type,
                                             const.ORIGIN_USER_OR_HR, int(self.position_id), content,
                                             ujson.dumps(compoundContent), const.CHAT_SPEAKER_USER,
@@ -490,7 +491,6 @@ class ChatHandler(BaseHandler):
             logger.error("post_message save_chat failed, user.id:{} msg_type:{}".format(self.current_user.sysuser.id, msg_type))
             self.send_json_error(message=msg.OPERATE_FAILURE)
             return
-
 
         message_body = json_dumps(ObjectDict(
             msgType=msg_type,
@@ -510,9 +510,6 @@ class ChatHandler(BaseHandler):
 
         try:
             if mobot_enable and msg_type != "job":
-                # 由于没有延迟的发送导致hr端轮训无法订阅到publish到redis的消息　所以这里做下延迟处理
-                # delay_robot = functools.partial(self._handle_chatbot_message, user_message)
-                # ioloop.IOLoop.current().call_later(1, delay_robot)
                 yield self._handle_chatbot_message(mobot_type_key, user_message, create_new_context, from_textfield,
                                                    self.project_id)
         except Exception as e:
@@ -580,9 +577,6 @@ class ChatHandler(BaseHandler):
 
         try:
             if mobot_enable and msg_type != "job":
-                # 由于没有延迟的发送导致hr端轮训无法订阅到publish到redis的消息　所以这里做下延迟处理
-                # delay_robot = functools.partial(self._handle_chatbot_message, user_message)
-                # ioloop.IOLoop.current().call_later(1, delay_robot)
                 yield self._handle_chatbot_message(mobot_type_key, user_message, create_new_context, from_textfield,
                                                    self.project_id)
         except Exception as e:

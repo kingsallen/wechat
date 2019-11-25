@@ -163,7 +163,7 @@ common_routes = [
     (r"/api/sug/college",                            handler.common.suggest.SuggestCollegeHandler,              {"event": "sug_college"}),
     (r"/api/chatting[\/]*([a-z]+)*",                 handler.common.chatting.EmployeeChattingHandler,           {"event": "chatting_rooms_"}),
     (r"/api/chat[\/]*([a-z]+)*",                     handler.common.im.ChatHandler,                             {"event": "chat_"}),
-    (r"api/chat/socket/token",                       handler.common.im.ChatSocketTokenHandler,                  {"event": "chat_"}),
+    (r"/api/chat/socket/token",                      handler.common.im.ChatSocketTokenHandler,                  {"event": "chat_"}),
     (r"/api/application",                            handler.common.application.ApplicationHandler,             {"event": "application_profile"}),
     (r"/api/JSSDKError",                             handler.common.jssdkerror.JSSDKErrorHandler,               {"event": "frontend_jssdkerror"}),
     (r"/api/jslog",                                  handler.common.jslog.JSLogHandler,                         {"event": "frontend_jslog"}),
