@@ -502,7 +502,7 @@ class ChatHandler(BaseHandler):
             self.send_json_error(message=msg.OPERATE_FAILURE)
             return
 
-        message_body = json_dumps(ObjectDict(
+        message_body = dict(
             msgType=msg_type,
             content=content,
             compoundContent=compoundContent,
@@ -513,10 +513,11 @@ class ChatHandler(BaseHandler):
             origin=const.ORIGIN_USER_OR_HR,
             id=chat.id,
             roomType=self.room_type
-        ))
+        )
 
         self.logger.debug("post_message redis publish message_body:{}".format(message_body))
-        yield self.chat_ps.send_message(self.user_id, self.hr_id, self.room_id, message_body)
+        # 发送给HR
+        yield self.chat_ps.send_message(0, self.hr_id, self.room_id, message_body)
 
         try:
             if mobot_enable and msg_type != "job":
@@ -542,7 +543,7 @@ class ChatHandler(BaseHandler):
         """
         content = "已收到您的消息，请耐心等待HR小姐姐给您回复哦😘~！"
 
-        message_body = json_dumps(ObjectDict(
+        message_body = dict(
             compoundContent="",
             content=content,
             stats=0,
@@ -552,7 +553,7 @@ class ChatHandler(BaseHandler):
             pid=int(self.position_id),
             createTime=curr_now_minute(),
             roomType=self.room_type
-        ))
+        )
         self.logger.debug("publish chat by redis message_body:{}".format(message_body))
 
         # 发送给求职者
@@ -582,9 +583,6 @@ class ChatHandler(BaseHandler):
 
         mobot_enable = yield self.chat_ps.get_mobot_switch_status(self.current_user.company.id, mobot_type_key)
         self.logger.debug('post_trigger mobot_enable:{}'.format(mobot_enable))
-
-        self.chatroom_channel = const.CHAT_CHATROOM_CHANNEL.format(self.hr_id, self.user_id)
-        self.hr_channel = const.CHAT_HR_CHANNEL.format(self.hr_id)
 
         try:
             if mobot_enable and msg_type != "job":
@@ -617,7 +615,7 @@ class ChatHandler(BaseHandler):
             content = "您好，我是{company_name}HR，关于职位和公司信息有任何问题请随时和我沟通。".format(
                 company_name=self.current_user.company.abbreviation or self.current_user.company.name)
 
-        message_body = json_dumps(ObjectDict(
+        message_body = dict(
             compoundContent="",
             content=content,
             stats=0,
@@ -627,7 +625,7 @@ class ChatHandler(BaseHandler):
             pid=int(self.position_id),
             createTime=curr_now_minute(),
             roomType=self.room_type
-        ))
+        )
         self.logger.debug("publish chat by redis message_body:{}".format(message_body))
 
         # 发送给求职者
@@ -671,7 +669,7 @@ class ChatHandler(BaseHandler):
 
             if msg_type == "cards":
                 # 只在c端展示，并且不保存
-                message_body = json_dumps(ObjectDict(
+                message_body = dict(
                     compoundContent=compound_content,
                     content=bot_message.content,
                     msgType=msg_type,
@@ -681,7 +679,7 @@ class ChatHandler(BaseHandler):
                     createTime=curr_now_minute(),
                     origin=const.ORIGIN_CHATBOT,
                     roomType=self.room_type
-                ))
+                )
                 # 发送给求职者
                 yield self.chat_ps.send_message(self.user_id, 0, self.room_id, message_body)
                 return
@@ -701,7 +699,7 @@ class ChatHandler(BaseHandler):
                 logger.warning("_handle_chatbot_message save_chat chat is null")
                 continue
 
-            message_body = json_dumps(ObjectDict(
+            message_body = dict(
                 compoundContent=compound_content,
                 content=bot_message.content,
                 stats=bot_message.stats,
@@ -713,7 +711,7 @@ class ChatHandler(BaseHandler):
                 origin=const.ORIGIN_CHATBOT,
                 id=chat.id,
                 roomType=self.room_type
-            ))
+            )
             self.logger.debug("publish chat by redis message_body:{}".format(message_body))
 
             # 发送给两方
