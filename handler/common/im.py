@@ -169,6 +169,7 @@ class ChatHandler(BaseHandler):
         self.user_id = 0
         self.position_id = 0
         self.flag = 0
+        self.room_type = 1
 
     @handle_response
     @gen.coroutine
@@ -559,6 +560,7 @@ class ChatHandler(BaseHandler):
         self.flag = self.params.get("flag") or 0
         self.project_id = self.params.get("project_id") or 0
         mobot_type_key = self.params.get("mobot_type_key") or 'social'
+        self.room_type = self.chat_ps.get_room_type(mobot_type_key)
 
         content = self.json_args.get("content") or ""
         compoundContent = self.json_args.get("compoundContent") or {}
