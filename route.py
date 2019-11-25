@@ -21,6 +21,7 @@ import handler.common.app
 import handler.common.application
 import handler.common.cellphone
 import handler.common.im
+import handler.common.chatting
 import handler.common.interest
 import handler.common.jssdkerror
 import handler.common.jslog
@@ -110,6 +111,7 @@ common_routes = [
     (r"/image/?",                                    handler.common.image.ImageFetchHandler,                    {"event": "image_fetch"}),
     (r"/chat/room[\/]*([0-9]+)*",                    handler.common.im.ChatRoomHandler,                         {"event": "im_room"}),
     (r"/mobot",                                      handler.common.im.MobotHandler,                            {"event": "im_mobot"}),
+    (r"/chatting/index",                             handler.common.chatting.ChattingRoomsHandler,              {"event": "im_chat_rooms"}),
     (r"/im/laiye",                                   handler.common.laiye_im.LaiyeImHandler,                    {"event": "im laiye"}),
     (r"/resume/import/limit",                        handler.common.resume.ResumeImportLimit,                   {"event": "resume_import_limit"}),
     (r"/redirect",                                   handler.common.redirect.RedirectHandler,                   {"event": "redirect"}),
@@ -121,11 +123,13 @@ common_routes = [
 
     # websocket
     (r"/websocket/([A-Za-z0-9_]{1,32})",             handler.common.im.ChatWebSocketHandler),
+    (r"/ws/chatting/([A-Za-z0-9_]{1,32})",           handler.common.chatting.ChattingWebSocketHandler),
 
     (r"/api/send/vcode/?",                           handler.common.passport.SendValidCodeHandler,              {"event": "send_vcode"}),
     (r"/api/upload/recomprofile/?",                  handler.platform.referral.EmployeeRecomProfileHandler,     {"event": "upload_referral_profile"}),
     (r"/api/config[\/]?",                            handler.common.app.ConfigHandler,                          {"event": "wechat_config"}),
     (r"/api/dict/city/?",                            handler.common.dictionary.DictCityHandler,                 {"event": "dict_city"}),
+    (r"/api/dict/lbs_city/?",                        handler.common.dictionary.DictLBSCityHandler,              {"event": "dict_lbs_city"}),
     (r"/api/dict/industry/?",                        handler.common.dictionary.DictIndustryHandler,             {"event": "dict_industry"}),
     (r"/api/dict/industry/([a-z]+)*?",               handler.common.dictionary.DictCustomIndustryHandler,       {"event": "dict_custom_industry"}),
     (r"/api/dict/function/?",                        handler.common.dictionary.DictFunctionHandler,             {"event": "dict_function"}),
@@ -135,9 +139,11 @@ common_routes = [
     (r"/api/dict/hopejobtree/?",                     handler.common.dictionary.DictHopeJobTreeHandler,          {"event": "dict_hopejobtree"}),
     (r"/api/dict/mainland/college/?",                handler.common.dictionary.DictMainlandCollegeHandler,      {"event": "dict_mainland_college"}),
     (r"/api/dict/overseas/college/?",                handler.common.dictionary.DictOverseasCollegeHandler,      {"event": "dict_overseas_college"}),
+    (r"/api/dict/region/?",                          handler.common.dictionary.DictRegionHandler,                 {"event": "dict_city"}),
     (r"/api/profile/edit/?",                         handler.common.profile.ProfileSectionHandler,              {"event": "profile_section"}),
     (r"/api/profile/new/?",                          handler.common.profile.ProfileNewHandler,                  {"event": "profile_new"}),
     (r"/api/profile/all/?",                          handler.common.profile.APIProfileHandler,                  {"event": "profile_all"}),
+    (r"/api/profile/completeness/?",                 handler.common.profile.APIProfileCompletenessHandler,      {"event": "profile_completeness"}),
     (r"/api/customcv/?",                             handler.common.profile.ProfileAPICustomCVHandler,          {"event": "profile_customcv"}),
     (r"/api/position/star/?",                        handler.common.position.PositionStarHandler,               {"event": "position_star"}),
     (r"/api/resume/upload",                          handler.common.resume.APIResumeUploadHandler,              {"event": "api_resume_upload"}),
@@ -146,6 +152,7 @@ common_routes = [
     (r"/api/position/list/?",                        handler.platform.position.PositionListDetailHandler,       {"event": "api_position_list"}),
     (r"/api/position/list/sug",                      handler.platform.position.PositionListSugHandler,          {"event": "position_list_sug"}),
     (r"/api/position/search/history",                handler.platform.position.PositionSearchHistoryHandler,    {"event": "position_search_history"}),
+    (r"/api/position/distance_batch",                handler.platform.position.PositionDistanceBatchHandler,    {"event": "api_position_distance_batch"}),
     (r"/api/chat/unread[\/]*([0-9]+)*",              handler.common.im.UnreadCountHandler,                      {"event": "chat_"}),
     (r"/api/mobilebinded",                           handler.common.usercenter.UserMobileBindedHandler,         {"event": "user_usermobilebinded"}),
     (r"/api/cellphone[\/]*([a-z_]+)*",               handler.common.cellphone.CellphoneBindHandler,             {"event": "cellphone_"}),
@@ -158,6 +165,7 @@ common_routes = [
     (r"/api/resume/import",                          handler.common.resume.ResumeImportHandler,                 {"event": "resume_import"}),
     (r"/api/sug/company",                            handler.common.suggest.SuggestCompanyHandler,              {"event": "sug_company"}),
     (r"/api/sug/college",                            handler.common.suggest.SuggestCollegeHandler,              {"event": "sug_college"}),
+    (r"/api/chatting[\/]*([a-z\-]+)*",                 handler.common.chatting.EmployeeChattingHandler,           {"event": "chatting_rooms_"}),
     (r"/api/chat[\/]*([a-z]+)*",                     handler.common.im.ChatHandler,                             {"event": "chat_"}),
     (r"/api/application",                            handler.common.application.ApplicationHandler,             {"event": "application_profile"}),
     (r"/api/JSSDKError",                             handler.common.jssdkerror.JSSDKErrorHandler,               {"event": "frontend_jssdkerror"}),
@@ -181,6 +189,7 @@ common_routes = [
 platform_routes = [
     (r"/position/(?P<position_id>\d+)",              handler.platform.position.PositionHandler,                 {"event": "position_info"}),
     (r"/position/?",                                 handler.platform.position.PositionListHandler,             {"event": "position_list"},      'position_list'),
+    (r"/lbs/position/?",                             handler.platform.position.LbsPositionListHandler,          {"event": "lbs_position_info"}),
     (r"/position/share?",                            handler.platform.position.PositionShareInBulkHandler,      {"event": "share_position_list"}),
     (r"/start/?",                                    handler.platform.landing.LandingHandler,                   {"event": "start_landing"}),
     (r"/company/(\d+)",                              handler.platform.companyrelation.CompanyInfoRedirectHandler, {"event": "company_old_info"}, "old_company_info_page"),
@@ -258,6 +267,7 @@ platform_routes = [
     (r"/api/employee/supply/list/?",                 handler.platform.employee.ApiEmployeeSupplyListHandler,    {"event": "api_employee_supply_list"}),
     (r"/api/employee/recommendrecords/?",            handler.platform.employee.RecommendRecordsHandler,         {"event": "employee_recommendrecords"}),
     (r"/api/employee/rewards/?",                     handler.platform.employee.AwardsHandler,                   {"event": "employee_awards"}),
+    (r"/api/employee/info",                          handler.platform.employee.ApiEmployeeInfoHandler,          {"event": "api_employee_info"}),
     (r"/api/employee/count-policy-want",             handler.platform.employee.EmployeeInterestReferralPolicyHandler, {"event": "count_interest_policy"}),
     (r"/api/position/empnotice/?",                   handler.platform.position.PositionEmpNoticeHandler,        {"event": "position_empnotice"}),
     (r"/api/employee/rewards/rank/?",                handler.platform.employee.AwardsLadderHandler,             {"event": "awards_ladder_api"}),
@@ -279,6 +289,7 @@ platform_routes = [
     (r"/api/position/share?",                        handler.platform.position.APIPositionShareInBulkHandler,   {"event": "api_share_position_list"}),
 
     (r"/api/func/wechat/?",                          handler.platform.employee.WechatSubInfoHandler,            {"event": "wechat_sub_info"}),
+    (r"/api/func/momo-graph/?",                      handler.platform.employee.MomoSwitchSubHandler,            {"event": "momo_switch_sub"}),
     (r'/api/user/survey/?',                          handler.platform.user.APIUserSurveyHandler,                {"event": "user_survey_api"}),
     (r'/api/position/recom/list/?',                  handler.platform.user.APIPositionRecomListHandler,         {"event": "position_ai-recomlist"}),
     (r'/api/recom/position/switch',                  handler.platform.user.APIPositionRecomListCloseHandler,    {"event": "position_ai-recom-position"}),
@@ -297,6 +308,8 @@ platform_routes = [
     (r'/api/referral/recom_positions/?',             handler.platform.user.ReferralRelatedPositionHandler,      {"event": "referral_related_positions"}),
     (r"/api/switch[\/]*([a-z_]+)*",                  handler.platform.switch.SwitchHandler,                     {"event": "switch_"}),
     (r"/api/func/relation_tags/?",                   handler.platform.referral.ReferralCommentTagsHandler,      {"event": "referral_comment_tags"}),
+    (r"/api/stores/nearby/?",                        handler.platform.companyrelation.NearbyStoresHandler,      {"event": "nearby_stores"}),
+    (r"/api/position/lbs/(?P<position_id>\d+)",      handler.platform.companyrelation.PositionLbsHandler,       {"event": "position_lbs"}),
 
     # 兼容老微信 url，进行302跳转
     (r"/.*",                                         handler.platform.compatible.CompatibleHandler,             {"event": "compatible"})

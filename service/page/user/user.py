@@ -310,9 +310,12 @@ class UserPageService(PageService):
         :param user_id: 当前用户id
         :param company_id: 当前公众号的 company_id
         """
-
-        check_group_passed = yield self.infra_user_ds.is_valid_employee(
-            user_id, company_id)
+        try:
+            check_group_passed = yield self.infra_user_ds.is_valid_employee(
+                user_id, company_id, timeout=3)
+        except Exception as e:
+            self.logger.error("check employee type error: {}".format(e))
+            return ObjectDict()
 
         if not check_group_passed:
             return ObjectDict()
@@ -431,6 +434,23 @@ class UserPageService(PageService):
         ret = yield \
             self.thrift_searchcondition_ds.create_collect_position(user_id, position_id)
         raise gen.Return(ret.status)
+
+    @gen.coroutine
+    def favorite_referral_position(self, user_id, employee_id, position_id, psc):
+        """用户收藏员工推荐的职位的粒子操作
+        :param user_id: user_id
+        :param employee_id: 员工编号
+        :param position_id: 职位id
+        :param psc: 分享链路
+        """
+        params = {
+            "user_id": user_id,
+            "position_id": position_id,
+            "employee_id": employee_id,
+            "psc": psc
+        }
+        ret = yield self.infra_user_ds.infra_create_collect_position(params)
+        raise gen.Return(ret.data.status)
 
     @gen.coroutine
     def unfavorite_position(self, user_id, position_id):

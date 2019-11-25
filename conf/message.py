@@ -45,7 +45,7 @@ REQUEST_PARAM_ERROR = "请求参数错误"
 
 NOT_AUTHORIZED = "用户未被授权请求"
 NO_DATA = "404!Ta在地球上消失了"
-UNKNOWN_DEFAULT = "正在努力处理您的问题"
+UNKNOWN_DEFAULT = "系统维护中"
 
 POSITION_FORWARD_MESSAGE = "点击右上角\n将职位推送给朋友,\n或者直接分享到朋友圈吧!"
 SHARE_DES_DEFAULT = "share_des_default"
@@ -123,3 +123,9 @@ REFERRAL_PROGRESS_DESCRIPTION = '快来看看你的应聘进度吧~'
 JOYWOK_AUTO_BIND_SUCCESS = "员工认证成功，微信绑定已完成，快去转发职位吧"
 JOYWOK_AUTO_BIND_EMPLOYEE_INFO_IS_GONE = "该员工信息已被认证"
 JOYWOK_AUTO_BIND_FAIL = "员工认证失败"
+
+# 员工和候选人聊天
+CHATTING_EMPLOYEE_RESIGNATION = "对方已不在公司，需要了解职位情况可以找HR或者其他员工沟通哦~"
+CHATTING_USER_UNSUBSCRIBE = "对方未关注公众号，暂时无法收到提醒！"
+CHATTING_EMPLOYEE_RESIGNATION_TIPS = "员工已不在公司!"
+CHATTING_EMPLOYEE_EMPLOYEE_TIPS = "候选人已认证为本公司员工!"

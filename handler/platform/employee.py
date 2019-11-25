@@ -147,6 +147,30 @@ class WechatSubInfoHandler(BaseHandler):
         return
 
 
+class MomoSwitchSubHandler(BaseHandler):
+    """
+    momo动图是否需要展示：
+    首先，判断momo开关是否开启
+    momo开启之后判断是否已经关注公众号
+    """
+
+    @handle_response
+    @gen.coroutine
+    def get(self):
+        pattern_id = self.params.scene or 99
+
+        momo_switch = yield self.company_ps.check_oms_switch_status(
+            self.current_user.company.id,
+            "MOMO微信端"
+        )
+        if momo_switch.data.get('valid'):
+            subscribed = True if not self.in_wechat or self.current_user.wechat.type == 0 or self.current_user.wxuser.is_subscribe else False
+            self.send_json_success(data=ObjectDict({"momo": subscribed})) # momo开关开启，根据当前账号是否已经关注公众号 显示momo动图
+        else:
+            self.send_json_success(data=ObjectDict({"momo": True})) # momo开关关闭，True不显示momo动图
+        return
+
+
 class PraiseHandler(BaseHandler):
     """
     点赞操作
@@ -1497,7 +1521,6 @@ class ReferralRadarCardJobViewHandler(BaseHandler):
 
 
 class ReferralRadarCardPositionHandler(BaseHandler):
-
     @handle_response
     @authenticated
     @gen.coroutine
@@ -1575,3 +1598,15 @@ class ReferralExpiredPageHandler(BaseHandler):
                         self.params)
                 }
             })
+
+
+class ApiEmployeeInfoHandler(BaseHandler):
+    """员工积分兑换回填手机号"""
+
+    @handle_response
+    @gen.coroutine
+    def get(self):
+
+        data = yield self.employee_ps.get_employee_mobile_info(self.current_user.sysuser.id)
+        data["fullname"] = data["cname"]
+        self.send_json_success(data)

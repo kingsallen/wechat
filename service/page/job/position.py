@@ -1,19 +1,16 @@
 # coding=utf-8
 
-import json
-
-from tornado import gen, httpclient
+from tornado import gen
 
 import conf.common as const
 from service.page.base import PageService
-from setting import settings
 from util.common import ObjectDict
 from util.common.cipher import encode_id
+from util.common.decorator import log_time
 from util.tool.date_tool import jd_update_date, str_2_date
-from util.tool.str_tool import gen_salary, split, set_literl, gen_degree, gen_experience, to_str
+from util.tool.str_tool import gen_salary, split, set_literl, gen_degree, gen_experience
 from util.tool.temp_data_tool import make_position_detail_cms, make_team, template3
 from util.tool.url_tool import make_static_url
-from util.common.decorator import log_time
 
 
 class PositionPageService(PageService):
@@ -120,7 +117,7 @@ class PositionPageService(PageService):
         }
         # 防止因为es的不稳定导致的职位详情页无法访问的情况。
         try:
-            response = self.es.search(index='index', body=data)
+            response = self.es.search(index='index', body=data, timeout=1)
             result_list = response.hits.hits
         except Exception as e:
             self.logger.error("position info es search error: {}".format(e))
@@ -276,6 +273,7 @@ class PositionPageService(PageService):
 
         raise gen.Return(hr_account)
 
+    @log_time
     @gen.coroutine
     def __get_share_conf(self, conf_id):
         """获取职位自定义分享模板"""
@@ -394,6 +392,7 @@ class PositionPageService(PageService):
                                 team_name=p.team_name,
                                 total_bonus=p.total_bonus,
                                 city=p.city_name,
+                                has_store = p.has_store,
                                 total_num=res.data.total)
                 position.salary = gen_salary(position.salary_top, position.salary_bottom)
                 position.publish_date = jd_update_date(
@@ -709,4 +708,20 @@ class PositionPageService(PageService):
             "position_ids": pid
         })
         ret = yield self.infra_position_ds.get_position_template_by_pids(params)
+        return ret
+
+    @gen.coroutine
+    def get_position_distance_batch(self, pids, longitude, latitude):
+        """
+        职位列表：根据pids批量查询职位距离
+        :param pids:
+        :param user_id:
+        :return:
+        """
+        params = ObjectDict({
+            "pids": pids,
+            "longitude": longitude,
+            "latitude": latitude
+        })
+        ret = yield self.infra_position_ds.get_position_distance_batch(params)
         return ret

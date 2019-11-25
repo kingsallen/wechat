@@ -194,6 +194,20 @@ class APIProfileHandler(BaseHandler):
                 self.send_json_success(data=profile)
 
 
+class APIProfileCompletenessHandler(BaseHandler):
+
+    @handle_response
+    @tornado.gen.coroutine
+    def get(self):
+        user_id = self.current_user.sysuser.id if self.current_user.sysuser else 0
+        if not user_id:
+            self.send_json_error()
+        else:
+            completeness = yield self.profile_ps.get_profile_completeness(user_id, timeout=3)
+            if completeness:
+                self.send_json_success(data=completeness)
+
+
 class ProfilePreviewHandler(BaseHandler):
 
     @handle_response

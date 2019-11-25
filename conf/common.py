@@ -102,7 +102,7 @@ STATUS_UNUSE = 0
 # 页面 meta 属性
 PAGE_META_TITLE = "仟寻招聘"
 PAGE_POSITION_INFO = "职位详情"
-PAGE_COMPANY_INFO = "公司详情"
+PAGE_COMPANY_INFO = "关于我们"
 PAGE_REGISTER = "注册"
 PAGE_FORGET_PASSWORD = "忘记密码"
 PROFILE_PREVIEW = "预览个人档案"
@@ -141,6 +141,9 @@ CONFIRM_REFERRAL_MOBILE = "referral_mobile_{}_{}"
 TEMPLATE_JOB_SEND_FINISH_MSGID = "template_message_receipt_id"
 # joywok绑定授权验证码
 JOYWOK_IDENTIFY_CODE = "joywok_identify_{}"
+
+# C端用户监听频道
+CHAT_CHATTING_CHANNEL = "chatting_{0}_{1}"
 
 # ++++++++++业务常量+++++++++++
 # Cookie name
@@ -236,6 +239,22 @@ EMPLOYMENT_TYPE_SEARCH_REVERSE = {
 MANAGEMENT_EXP = {
     "0": "common_need",
     "1": "common_no_need"
+}
+
+# 职位类型
+POSITION_TYPE = {
+    "0": "Office职位",
+    "1": "店铺职位"
+}
+
+POSITION_TYPE_LOCALE = {
+    "店铺职位": "common_retail",
+    "Office职位": "common_office"
+}
+
+POSITION_TYPE_SEARCH = {
+    "0": "office",
+    "1": "outlets"
 }
 
 # 工作状态
@@ -337,7 +356,8 @@ SEARCH_CONDITION = {
     "5": "search_recruitment_type",
     "6": "search_job_type",
     "7": "search_education level",
-    "8": "search_company"
+    "8": "search_company",
+    "10": "search_position_type"
 }
 
 # 及以上 工作经验、学历中使用
@@ -395,6 +415,7 @@ MSG_TYPE = {
     16: "toHrHumanAnswer",
     17: "moplanAppointmentProject",
     18: "moplanUserModifyAppointmentMobile",
+    19: "uploadImage",
 }
 
 # 积分配置类型
@@ -410,7 +431,7 @@ REWARD_UPLOAD_PROFILE = "员工上传人才简历"
 # 操作的聊天类型
 INTERACTIVE_MSG = ["employeeBind", "jobSelect", "teamSelect", "citySelect", "jobCard", "positionSelect",
                    "industrySelect", "uploadResume", "shareReport", "positionSubscribe", "moplanAppointmentProject",
-                   "moplanUserModifyAppointmentMobile"]
+                   "moplanUserModifyAppointmentMobile", "uploadImage"]
 
 # 默认图标
 SYSUSER_HEADIMG = "weixin/images/hr-avatar-default.png"
@@ -787,6 +808,11 @@ TEMPORARY_CODE_STR_SCENE = "{}_{}"
 STR_SCENE_JOYWOK = "JOYWOK"
 STR_SCENE_MRAS_WELCOME = "PCAPPLICATION"
 STR_SCENE_WORKWX = "WORKWX"
+# 员工候选人聊天。
+STR_SCENE_EMPLOYEE_CHATTING = "EMPLOYEECHATTING"
+CONSTANT_CHATTING_NEWS_TITLE = "开始聊一聊吧"
+CONSTANT_CHATTING_NEWS_DESCRIPTION = "{}员工 {}期待和你沟通内推职位：{}"
+CONSTANT_CHATTING_NEWS_DESCRIPTION_NONE_POSITION = "{}员工 {}期待和你沟通内推职位"
 
 # 临时二维码的生成来源依据
 SCAN_FROM = 'pc_referral'
@@ -892,3 +918,9 @@ PATHS_FOR_NOWEIXIN = [ path.POSITION_LIST, path.WECHAT_COMPANY, path.COMPANY_TEA
                        path.JOYWOK_HOME_PAGE, path.JOYWOK_AUTO_AUTH,
                        path.REFERRAL_UPLOAD_PCLOGIN, path.IMAGE_URL
                      ]
+
+# 员工离职的消息类型
+CHATTING_EMPLOYEE_MSG_TYPE_RESIGNATION = "employee_off"
+
+# 开关模块
+COMPANY_SWITCH_MODULE_CHATTING = 30

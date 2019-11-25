@@ -21,6 +21,7 @@ from urllib.parse import urlencode
 from util.common.cache import BaseRedis
 from util.tool.dict_tool import objectdictify
 from util.tool.str_tool import json_hump2underline
+from util.common.decorator import cache
 import ujson
 import ast
 
@@ -107,7 +108,7 @@ class ProfilePageService(PageService):
     })
 
     @gen.coroutine
-    def has_profile(self, user_id, locale=None, locale_display=None):
+    def has_profile(self, user_id, locale=None, locale_display=None, timeout=30):
         """
         判断 user_user 是否有 profile (profile_profile 表数据)
         :param user_id:
@@ -117,7 +118,7 @@ class ProfilePageService(PageService):
         profile = has_profile[1]
         """
 
-        result, profile = yield self.infra_profile_ds.get_profile(user_id)
+        result, profile = yield self.infra_profile_ds.get_profile(user_id, timeout=timeout)
         if locale:
             profile = self.__translate_profile(profile, locale, locale_display)
         return result, profile
@@ -150,6 +151,12 @@ class ProfilePageService(PageService):
                             industry['industry_name'] = (INDUSTRY.get(industry.get('industry_name')) if locale_display == "en_US" else INDUSTRY_REVERSE.get(industry.get('industry_name'))) or industry.get('industry_name')
         self.logger.debug("translate_profile:{}".format(profile))
         return profile
+
+    @cache(ttl=30)
+    @gen.coroutine
+    def get_profile_completeness(self, user_id, timeout=30):
+        res = yield self.infra_profile_ds.get_profile_completeness(user_id, timeout=timeout)
+        return res.data or 0
 
     @gen.coroutine
     def has_profile_basic(self, profile_id):
