@@ -619,7 +619,7 @@ class ChatPageService(PageService):
         signature = gen_signature(timestamp, self.INTERNAL_SYSTEM_ACCESS_MD5_KEY)
         data = dict(signature=signature, timestamp=timestamp, system=1)
         route = '{}{}'.format(settings.get('im_server_api'), '/user/{user_id}/socket/token'.format(user_id=user_id))
-        res = yield http_get(route=route, jdata=data, timeout=5)
+        res = yield http_get(route=route, jdata=data, timeout=5, infra=False)
         raise gen.Return(res)
 
     @gen.coroutine
@@ -631,7 +631,7 @@ class ChatPageService(PageService):
         signature = gen_signature(timestamp, self.INTERNAL_SYSTEM_ACCESS_MD5_KEY)
         data = dict(signature=signature, timestamp=timestamp, system=1)
         route = '{}{}'.format(settings.get('im_server_api'), '/user/{user_id}/online/status'.format(user_id=user_id))
-        res = yield http_get(route=route, jdata=data, timeout=5)
+        res = yield http_get(route=route, jdata=data, timeout=5, infra=False)
         raise gen.Return(res)
 
     @gen.coroutine
@@ -645,7 +645,7 @@ class ChatPageService(PageService):
         data = dict(meta_data=meta_data, system=1, user_id=user_id, hr_id=hr_id, room_id=room_id,
                     send_data=send_data)
         route = '{}{}'.format(settings.get('im_server_api'), '/send/message')
-        res = yield http_post(route=route, jdata=data, timeout=5)
+        res = yield http_post(route=route, jdata=data, timeout=5, infra=False)
         raise gen.Return(res)
 
     def get_room_type(self, mobot_type_key):
