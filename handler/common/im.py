@@ -482,7 +482,7 @@ class ChatHandler(BaseHandler):
 
         self.logger.debug('post_message flag:{}, create_new_context:{}'.format(self.flag, create_new_context))
 
-        mobot_enable = yield self.chat_ps.get_mobot_switch_status(company_id, room_type)
+        mobot_enable = yield self.chat_ps.get_mobot_switch_status(company_id, self.room_type)
         self.logger.debug('post_message mobot_enable:{}, company_id:{}'.format(mobot_enable, company_id))
 
         chat = yield self.chat_ps.save_chat(company_id, int(self.room_id), self.current_user.sysuser.id, msg_type,
@@ -513,7 +513,7 @@ class ChatHandler(BaseHandler):
 
         try:
             if mobot_enable and msg_type != "job":
-                yield self._handle_chatbot_message(room_type, user_message, create_new_context, from_textfield,
+                yield self._handle_chatbot_message(self.room_type, user_message, create_new_context, from_textfield,
                                                    self.project_id)
         except Exception as e:
             self.logger.error(e)
