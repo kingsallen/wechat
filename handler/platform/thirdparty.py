@@ -172,9 +172,27 @@ class EmployeeQrcodeHandler(BaseHandler):
             self.current_user.sysuser.id, company_id=self.current_user.wechat.company_id)
 
         if int(workwx_user_record.sys_user_id) > 0 and workwx_user_record.sys_user_id != self.current_user.sysuser.id:
-            raise MyException("该企业微信号已绑定其他仟寻账号！")
+            # raise MyException("该企业微信号已绑定其他仟寻账号！")
+            self.render_page(
+                'system/info.html',
+                data={
+                    'code': 500,
+                    'message': "该企业微信号已绑定其他仟寻账号！"
+                },
+                http_code=500
+            )
+            return
         elif int(workwx_user_record.sys_user_id) <= 0 and sysuser_workwx_user:
-            raise MyException("该微信号已绑定其他账号！")
+            # raise MyException("该微信号已绑定其他账号！")
+            self.render_page(
+                'system/info.html',
+                data={
+                    'code': 500,
+                    'message': "该微信号已绑定其他账号！"
+                },
+                http_code=500
+            )
+            return
 
         #如果已经关注公众号，说明已经做完员工认证，生成员工信息，跳转3s跳转页，再跳转到职位列表
         if self.current_user.wxuser.is_subscribe:
