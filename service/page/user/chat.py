@@ -577,9 +577,9 @@ class ChatPageService(PageService):
         :param product_type: 1 社招 2 校招 3 我是员工
         :return:
         """
-        mobot_type = {'social': '社招版MoBot(人工+智能对话模式)',
-                      'campus': '校招MoBot(人工+智能对话模式)',
-                      'employee': '员工版MoBot(人工+智能对话模式)'}
+        mobot_type = {1: '社招版MoBot(人工+智能对话模式)',
+                      2: '校招MoBot(人工+智能对话模式)',
+                      3: '员工版MoBot(人工+智能对话模式)'}
 
         res = yield self.infra_company_ds.get_oms_all_switch_status(company_id)
         if not res.data:
@@ -649,7 +649,3 @@ class ChatPageService(PageService):
         route = '{}{}'.format(settings.get('im_server_api'), '/send/message')
         res = yield http_post(route=route, jdata=data, timeout=5, infra=False)
         raise gen.Return(res)
-
-    def get_room_type(self, room_type):
-        room_type = {'social': 1, 'campus': 2, 'employee': 3}
-        return room_type[room_type]
