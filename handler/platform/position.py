@@ -91,7 +91,7 @@ class PositionHandler(BaseHandler):
             # 是否超出投递上限。每月每家公司一个人只能申请3次
             self.logger.debug("[JD]构建HR头像及底部转发文案, 处理投递上限")
             start = time.time()
-            endorse, can_apply, data, bonus, rpext_list, res_crucial_info_switch, conf_response, position_feature = yield [
+            endorse, can_apply, data, bonus, rpext_list, res_crucial_info_switch, conf_response, position_feature, lbs_oms, stores_info = yield [
                 self._make_endorse_info(position_info, company_info),  # JD 页左下角背书信息
                 self.application_ps.is_allowed_apply_position(self.current_user.sysuser.id, company_info.id, position_id),  # 投递上限
                 self.company_ps.get_only_referral_reward(self.current_user.company.id),  # 职位推荐简历积分
@@ -99,7 +99,9 @@ class PositionHandler(BaseHandler):
                 self.position_ps.infra_get_position_list_rp_ext([position_info]),  # 职位红包信息
                 self.company_ps.get_crucial_info_state(self.current_user.company.id),  # 推荐人才关键信息开关状态
                 self.employee_ps.get_employee_conf(self.current_user.company.id),
-                self.position_ps.get_position_feature(position_id)
+                self.position_ps.get_position_feature(position_id),
+                self.company_ps.check_oms_switch_status(self.current_user.company.id, "LBS职位列表"),
+                self.company_ps.get_position_lbs_info({"company_id": self.current_user.company.id}, position_id)
             ]
             end = time.time()
             if (end-start)*1000 > 20:
@@ -132,14 +134,8 @@ class PositionHandler(BaseHandler):
 
             # 获取推荐人才关键信息开关状态
             switch = res_crucial_info_switch.data
-            lbs_oms = yield self.company_ps.check_oms_switch_status(
-                self.current_user.company.id,
-                "LBS职位列表"
-            )
             if lbs_oms.status != const.API_SUCCESS:
                 raise InfraOperationError(lbs_oms.message)
-
-            stores_info = yield self.company_ps.get_position_lbs_info({"company_id": self.current_user.company.id}, position_id)
 
             header = yield self._make_json_header(
                 position_info, company_info, star, application, endorse,
