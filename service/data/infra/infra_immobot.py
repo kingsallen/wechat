@@ -70,15 +70,13 @@ class InfraImmobotDataService(DataService):
         用户进入聊天室
         curl -X PUT 'http://api-t2.dqprism.com/im/v4/user/room/enter?interfaceid=A11037001&appid=A11037&roomId=30780&userId=5399884&hrId=82752&positionId=0&isQxWechat=false'
         """
-        room_type_dict = {'social': 1, 'campus': 2, 'employee': 3}
-
         params = ObjectDict({
             "roomId": room_id,
             "userId": user_id,
             "hrId": hr_id,
             "positionId": position_id,
             "isQxWechat": is_qx_wechat,
-            "roomType": room_type_dict[room_type]
+            "roomType": room_type
         })
 
         ret = yield http_put_v2(im_mobot.USER_ENTER_CHATROOM, im_service, params, timeout=5)
