@@ -191,3 +191,19 @@ class ChattingPageService(PageService):
         ret = yield self.infra_im_ds.post_message(room_id, role, user_id, employee_id, company_id, content, msg_type,
                                                   chat_time)
         raise gen.Return(ret)
+
+    @gen.coroutine
+    def post_invite_message(self, company_id, employee_id, position_id, user_id, entry_type, psc):
+        """
+        通知后端发送模板消息
+        :param company_id: 公司编号
+        :param employee_id: 员工编号
+        :param position_id: 职位编号
+        :param user_id: 用户编号
+        :param entry_type: 来源
+        :param psc: 分享链路编号
+        :return: 操作结果
+        """
+
+        ret = yield self.infra_im_ds.post_invite_message(company_id, employee_id, position_id, user_id, entry_type, psc)
+        raise gen.Return(ret)

@@ -288,10 +288,33 @@ class EmployeeChattingHandler(BaseHandler):
         :return: 推送开关状态
         """
 
-        tpl_switch = self.json_args.get("tpl_switch");
+        tpl_switch = self.json_args.get("tpl_switch")
         switch = yield self.chatting_ps.post_switch(self.role, self.user_id, self.employee_id, self.current_user.company.id,
                                                     tpl_switch)
         self.un_box(switch)
+
+    @handle_response
+    @gen.coroutine
+    def post_invite_message(self):
+        """
+
+        通知后端发送联系员工和候选人的消息模板
+        该场景给联系HR使用。
+        :return: 操作结果
+        """
+
+        entry_type = self.json_args.get("entry_type", 1)
+        psc = self.json_args.get("psc", 0)
+
+        ret = yield self.chatting_ps.post_invite_message(
+            self.current_user.company.id,
+            self.json_args("employee_id"),
+            self.json_args("position_id"),
+            self.current_user.sysuser.id,
+            entry_type,
+            psc
+        )
+        self.un_box(ret)
 
     @handle_response
     @gen.coroutine
