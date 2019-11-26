@@ -53,6 +53,9 @@ class ChatPageService(PageService):
                     return ObjectDict(c)
 
         def get_company_conf_info(company_confs, company_id):
+            if not company_confs:
+                return None
+
             for c in company_confs:
                 if c['company_id'] == company_id:
                     return ObjectDict(c)
