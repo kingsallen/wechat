@@ -127,7 +127,7 @@ class ChattingPageService(PageService):
         raise gen.Return(ret)
 
     @gen.coroutine
-    def enter_the_room(self, room_id, role, user_id, employee_id, company_id, position_id):
+    def enter_the_room(self, room_id, role, user_id, employee_id, company_id, position_id, entry_type):
         """
         进入聊天室
         :param room_id: 聊天室编号

@@ -19,6 +19,7 @@ from service.page.user.chatting import ChattingPageService
 from service.page.user.user import UserPageService
 from setting import settings
 from util.common import ObjectDict
+from util.common.cipher import decode_id
 from util.common.decorator import handle_response, authenticated
 from util.tool.date_tool import curr_now
 from util.tool.json_tool import json_dumps
@@ -307,7 +308,9 @@ class EmployeeChattingHandler(BaseHandler):
         psc = self.json_args.get("psc", 0)
         recom = self.json_args.get("recom", 0)
         if recom:
-            _, employee_info = yield self.employee_ps.get_employee_info(recom, self.current_user.company.id)
+            recom_id = decode_id(recom)
+            self.logger.debug("ChattingRoomsHandler post_invite_message recom_id:{}".format(recom_id))
+            _, employee_info = yield self.employee_ps.get_employee_info(recom_id, self.current_user.company.id)
             employee_id = employee_info.id
             ret = yield self.chatting_ps.post_invite_message(
                 self.current_user.company.id,
@@ -349,7 +352,8 @@ class EmployeeChattingHandler(BaseHandler):
                 employee_id = room_info.data.employee_id
 
         ret = yield self.chatting_ps.enter_the_room(self.json_args.get("room_id") or 0, self.role, user_id, employee_id,
-                                                    self.current_user.company.id, self.json_args.get("pid") or 0)
+                                                    self.current_user.company.id, self.json_args.get("pid") or 0,
+                                                    self.json_args.get("entry_type"))
 
         if self.role == "employee" and ret and ret.code == "US30500":
             self._send_json(data={}, status_code=30500, message=CHATTING_EMPLOYEE_RESIGNATION_TIPS, http_code=200)
