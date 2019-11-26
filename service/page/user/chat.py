@@ -161,13 +161,13 @@ class ChatPageService(PageService):
         raise gen.Return(records)
 
     @gen.coroutine
-    def get_chatroom(self, mobot_type_key, sysuser, hr_id, position_id, room_id, qxuser, is_gamma, mobot_enable, recom,
+    def get_chatroom(self, room_type, sysuser, hr_id, position_id, room_id, qxuser, is_gamma, mobot_enable, recom,
                      is_employee):
         """
         进入聊天室
 
         房间类型，1：社招, 2：校招，3: 员工
-        mobot_type_key
+        room_type
         """
         hr_info = ObjectDict()
         mobot_info = ObjectDict(enable=mobot_enable, name='', headimg='')
@@ -177,7 +177,7 @@ class ChatPageService(PageService):
             user_name=sysuser.name,
             user_headimg=make_static_url(sysuser.headimg or const.SYSUSER_HEADIMG)
         )
-        ret = yield self.infra_immobot_ds.user_enter_chatroom(mobot_type_key, room_id, sysuser.id, hr_id, position_id,
+        ret = yield self.infra_immobot_ds.user_enter_chatroom(room_type, room_id, sysuser.id, hr_id, position_id,
                                                               is_gamma)
         if not ret.data:
             raise gen.Return("")
@@ -388,12 +388,12 @@ class ChatPageService(PageService):
         raise gen.Return(position_list)
 
     @gen.coroutine
-    def get_chatbot_reply(self, mobot_type_key, message, user_id, hr_id, position_id, create_new_context,
+    def get_chatbot_reply(self, room_type, message, user_id, hr_id, position_id, create_new_context,
                           current_user, from_textfield, project_id):
         """
         调用MoBot QA接口
 
-        :param mobot_type_key mobot区分标识 social, campus, employee
+        :param room_type mobot区分标识 social, campus, employee
         :param message: 用户发送到文本内容
         :param user_id: 当前用户id
         :param hr_id: 聊天对象hrid
@@ -412,13 +412,13 @@ class ChatPageService(PageService):
             create_new_context=create_new_context,
             from_textfield=from_textfield,
             project_id=project_id,
-            mobot_type_key=mobot_type_key
+            room_type=room_type
         )
-        self.logger.debug("get_chatbot_reply mobot_type_key:{}, user_id:{}, create_new_context:{}".format(
-            mobot_type_key, user_id, create_new_context))
+        self.logger.debug("get_chatbot_reply room_type:{}, user_id:{}, create_new_context:{}".format(
+            room_type, user_id, create_new_context))
 
         try:
-            if mobot_type_key == 'campus':
+            if room_type == 'campus':
                 res = yield http_post(
                     route='{host}{uri}'.format(host=settings['chatbot_host'], uri='campus_qa.api'), jdata=params,
                     infra=False)
@@ -433,9 +433,9 @@ class ChatPageService(PageService):
                     ret_message = yield self.make_response(r, current_user)
                     messages.append(ret_message)
             else:
-                self.logger.error("mobot {} api result:{}".format(mobot_type_key, res))
+                self.logger.error("mobot {} api result:{}".format(room_type, res))
         except Exception as e:
-            self.logger.error("mobot %s api error: %s, params: %s" % (mobot_type_key, e, params))
+            self.logger.error("mobot %s api error: %s, params: %s" % (room_type, e, params))
             # 回复默认信息
             default_message = dict(resultType=0,
                                    resultTypeName='html',
@@ -570,7 +570,7 @@ class ChatPageService(PageService):
         raise gen.Return(mobot_enable)
 
     @gen.coroutine
-    def get_mobot_switch_status(self, company_id, mobot_type_key):
+    def get_mobot_switch_status(self, company_id, room_type):
         """
         检查oms控制的一系列开关状态
         :param company_id:
@@ -587,7 +587,7 @@ class ChatPageService(PageService):
             raise gen.Return(False)
 
         for product in res.data:
-            if product['keyword'] == mobot_type[mobot_type_key]:
+            if product['keyword'] == mobot_type[room_type]:
                 if product['valid'] == 1:
                     raise gen.Return(True)
 
@@ -650,6 +650,6 @@ class ChatPageService(PageService):
         res = yield http_post(route=route, jdata=data, timeout=5, infra=False)
         raise gen.Return(res)
 
-    def get_room_type(self, mobot_type_key):
+    def get_room_type(self, room_type):
         room_type = {'social': 1, 'campus': 2, 'employee': 3}
-        return room_type[mobot_type_key]
+        return room_type[room_type]

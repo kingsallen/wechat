@@ -10,13 +10,12 @@ import conf.message as msg
 from globals import logger
 from handler.base import BaseHandler
 from oauth.wechat import JsApi
+from setting import settings
 from util.common import ObjectDict
 from util.common.decorator import handle_response, authenticated
 from util.common.decorator import relate_user_and_former_employee
 from util.tool.date_tool import curr_now_minute
-from util.tool.json_tool import json_dumps
 from util.tool.str_tool import to_str, match_session_id
-from setting import settings
 
 
 class UnreadCountHandler(BaseHandler):
@@ -343,7 +342,8 @@ class ChatHandler(BaseHandler):
         self.hr_id = self.params.hr_id
         pid = self.params.pid or 0
         room_id = self.params.room_id or 0
-        mobot_type_key = self.params.mobot_type_key or 'social'
+
+        self.room_type = self.params.room_type or 1
 
         # gamma 项目 hr 欢迎导语不同
         is_gamma = False
@@ -355,13 +355,13 @@ class ChatHandler(BaseHandler):
             (self.current_user.sysuser.id, self.params.hr_id, pid, room_id, self.current_user.qxuser, is_gamma)
         )
 
-        mobot_enable = yield self.chat_ps.get_mobot_switch_status(self.current_user.company.id, mobot_type_key)
+        mobot_enable = yield self.chat_ps.get_mobot_switch_status(self.current_user.company.id, self.room_type)
 
         recom = self.position_ps._make_recom(self.current_user.sysuser.id)
 
         is_employee = bool(self.current_user.employee if self.current_user else None)
 
-        res = yield self.chat_ps.get_chatroom(mobot_type_key,
+        res = yield self.chat_ps.get_chatroom(self.room_type,
                                               self.current_user.sysuser,
                                               self.params.hr_id,
                                               pid, room_id,
@@ -474,8 +474,7 @@ class ChatHandler(BaseHandler):
         self.position_id = self.params.get("pid") or 0
         self.flag = int(self.params.get("flag")) or None
         self.project_id = self.params.get("project_id") or 0
-        mobot_type_key = self.params.get("mobot_type_key") or 'social'
-        self.room_type = self.chat_ps.get_room_type(mobot_type_key)
+        self.room_type = self.params.get("room_type") or 1
 
         content = self.json_args.get("content") or ""
         compoundContent = self.json_args.get("compoundContent") or {}
@@ -490,7 +489,7 @@ class ChatHandler(BaseHandler):
 
         self.logger.debug('post_message flag:{}, create_new_context:{}'.format(self.flag, create_new_context))
 
-        mobot_enable = yield self.chat_ps.get_mobot_switch_status(company_id, mobot_type_key)
+        mobot_enable = yield self.chat_ps.get_mobot_switch_status(company_id, room_type)
         self.logger.debug('post_message mobot_enable:{}, company_id:{}'.format(mobot_enable, company_id))
 
         chat = yield self.chat_ps.save_chat(company_id, int(self.room_id), self.current_user.sysuser.id, msg_type,
@@ -521,7 +520,7 @@ class ChatHandler(BaseHandler):
 
         try:
             if mobot_enable and msg_type != "job":
-                yield self._handle_chatbot_message(mobot_type_key, user_message, create_new_context, from_textfield,
+                yield self._handle_chatbot_message(room_type, user_message, create_new_context, from_textfield,
                                                    self.project_id)
         except Exception as e:
             self.logger.error(e)
@@ -569,8 +568,7 @@ class ChatHandler(BaseHandler):
         self.position_id = self.params.get("pid") or 0
         self.flag = self.params.get("flag") or 0
         self.project_id = self.params.get("project_id") or 0
-        mobot_type_key = self.params.get("mobot_type_key") or 'social'
-        self.room_type = self.chat_ps.get_room_type(mobot_type_key)
+        self.room_type = self.params.get("room_type") or 1
 
         content = self.json_args.get("content") or ""
         compoundContent = self.json_args.get("compoundContent") or {}
@@ -581,12 +579,12 @@ class ChatHandler(BaseHandler):
 
         self.logger.debug('post_trigger  create_new_context:{}'.format(create_new_context))
 
-        mobot_enable = yield self.chat_ps.get_mobot_switch_status(self.current_user.company.id, mobot_type_key)
+        mobot_enable = yield self.chat_ps.get_mobot_switch_status(self.current_user.company.id, self.room_type)
         self.logger.debug('post_trigger mobot_enable:{}'.format(mobot_enable))
 
         try:
             if mobot_enable and msg_type != "job":
-                yield self._handle_chatbot_message(mobot_type_key, user_message, create_new_context, from_textfield,
+                yield self._handle_chatbot_message(self.room_type, user_message, create_new_context, from_textfield,
                                                    self.project_id)
         except Exception as e:
             self.logger.error(e)
@@ -633,12 +631,12 @@ class ChatHandler(BaseHandler):
 
 
     @gen.coroutine
-    def _handle_chatbot_message(self, mobot_type_key, user_message, create_new_context, from_textfield, project_id):
+    def _handle_chatbot_message(self, room_type, user_message, create_new_context, from_textfield, project_id):
         """
         处理 chatbot message
         获取消息 -> pub消息 -> 入库
 
-        :param mobot_type_key mobot区分标识 social, campus, employee
+        :param room_type mobot区分标识 social, campus, employee
         """
         # 聚合号入口应该使用对应hr对应所在的company_id
         company_id = self.current_user.company.id
@@ -647,7 +645,7 @@ class ChatHandler(BaseHandler):
             company_id = hr_info.company_id
 
         bot_messages = yield self.chat_ps.get_chatbot_reply(
-            mobot_type_key=mobot_type_key,
+            room_type=room_type,
             current_user=self.current_user,
             message=user_message,
             user_id=self.user_id,
@@ -657,8 +655,8 @@ class ChatHandler(BaseHandler):
             from_textfield=from_textfield,
             project_id=project_id
         )
-        self.logger.debug('_handle_chatbot_message mobot_type_key:{}, flag:{}, user_id:{}'.format(
-            mobot_type_key, self.flag, self.user_id))
+        self.logger.debug('_handle_chatbot_message room_type:{}, flag:{}, user_id:{}'.format(
+            room_type, self.flag, self.user_id))
 
         for bot_message in bot_messages:
             msg_type = bot_message.msg_type
