@@ -1236,8 +1236,8 @@ class ProfilePageService(PageService):
         importer = ObjectDict(
             # profile_import_51job=None,
             profile_import_51job=make_url(path.RESUME_URL, params, m='authorization', way=const.RESUME_WAY_51JOB),
-            profile_import_zhilian=make_url(path.RESUME_URL, params, m='authorization', way=const.RESUME_WAY_ZHILIAN),
-            # profile_import_zhilian=None,
+            # profile_import_zhilian=make_url(path.RESUME_URL, params, m='authorization', way=const.RESUME_WAY_ZHILIAN),
+            profile_import_zhilian=None,
             # set later.
             profile_import_liepin=None,
             profile_import_linkedin=make_url(path.RESUME_URL, params, m='authorization', way=const.RESUME_WAY_LINKEDIN),
