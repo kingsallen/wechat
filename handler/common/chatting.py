@@ -315,7 +315,7 @@ class EmployeeChattingHandler(BaseHandler):
         ret = yield self.chatting_ps.post_invite_message(
             self.current_user.company.id,
             employee_id,
-            self.json_args("position_id"),
+            self.json_args.get("position_id", 0),
             self.current_user.sysuser.id,
             entry_type,
             psc
