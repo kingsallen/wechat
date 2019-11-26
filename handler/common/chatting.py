@@ -307,7 +307,7 @@ class EmployeeChattingHandler(BaseHandler):
         psc = self.json_args.get("psc", 0)
         recom = self.json_args.get("recom", 0)
         if recom:
-            _, employee_info = yield employee_ps.get_employee_info(recom, self.current_user.company.id)
+            _, employee_info = yield self.employee_ps.get_employee_info(recom, self.current_user.company.id)
             employee_id = employee_info.id
             ret = yield self.chatting_ps.post_invite_message(
                 self.current_user.company.id,
