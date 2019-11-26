@@ -136,10 +136,12 @@ class ChattingPageService(PageService):
         :param employee_id:  员工编号
         :param company_id: 公司编号
         :param position_id: 职位
+        :param entry_type: 场景
         :return: 操作结果
         """
 
-        ret = yield self.infra_im_ds.enter_the_room(room_id, role, user_id, employee_id, company_id, position_id)
+        ret = yield self.infra_im_ds.enter_the_room(room_id, role, user_id, employee_id, company_id, position_id,
+                                                    entry_type)
         raise gen.Return(ret)
 
     @gen.coroutine
