@@ -962,6 +962,8 @@ class ProfilePageService(PageService):
             experience_item.logo = w.get("company_logo", "")
             start_date = w.get("start_date", "")
             end_date = w.get("end_date", "")
+            if not end_date and not start_date:
+                experience_item.time = ""
             if not end_date or int(w.get("end_until_now", 0)):
                 experience_item.time = start_date[:7] + " " + locale.translate(const.UNTIL_NOW) if locale else "至今"
             else:
