@@ -118,7 +118,7 @@ class ChatPageService(PageService):
             room['hr_name'] = mobot_name or hr.username or "HR"
             room['hr_headimg'] = make_static_url(mobot_head_img or hr.headimgurl or company.logo or const.HR_HEADIMG)
             room['company_name'] = company.abbreviation or company.name or ""
-            room['chat_time'] = str_2_date(d.update_time, self.constant.TIME_FORMAT_MINUTE)
+            room['chat_time'] = str_2_date(d.last_chat_time, self.constant.TIME_FORMAT_MINUTE)
             room['unread_num'] = d.user_have_unread_msg
             room['room_type'] = d.room_type
             records.append(room)

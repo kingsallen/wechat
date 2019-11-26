@@ -108,7 +108,7 @@ class InfraImmobotDataService(DataService):
             "sysuserId": user_id,
         })
 
-        ret = yield http_delete_v2(im_mobot.USER_DELETE_CHATROOM.format(room_id), im_service, params, timeout=5)
+        ret = yield http_delete_v2(im_mobot.USER_DELETE_CHATROOM.format(room_id=room_id), im_service, params, timeout=5)
         raise gen.Return(ret)
 
     @gen.coroutine
