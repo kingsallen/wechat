@@ -578,6 +578,7 @@ class ChatPageService(PageService):
         :param product_type: 1 社招 2 校招 3 我是员工
         :return:
         """
+        room_type = int(room_type)
         mobot_type = {1: '社招版MoBot(人工+智能对话模式)',
                       2: '校招MoBot(人工+智能对话模式)',
                       3: '员工版MoBot(人工+智能对话模式)'}
