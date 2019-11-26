@@ -65,7 +65,7 @@ class InfraImmobotDataService(DataService):
         raise gen.Return(ret)
 
     @gen.coroutine
-    def user_enter_chatroom(self, mobot_type_key, room_id, user_id, hr_id, position_id, is_qx_wechat):
+    def user_enter_chatroom(self, room_type, room_id, user_id, hr_id, position_id, is_qx_wechat):
         """
         用户进入聊天室
         curl -X PUT 'http://api-t2.dqprism.com/im/v4/user/room/enter?interfaceid=A11037001&appid=A11037&roomId=30780&userId=5399884&hrId=82752&positionId=0&isQxWechat=false'
@@ -78,7 +78,7 @@ class InfraImmobotDataService(DataService):
             "hrId": hr_id,
             "positionId": position_id,
             "isQxWechat": is_qx_wechat,
-            "roomType": room_type_dict[mobot_type_key]
+            "roomType": room_type_dict[room_type]
         })
 
         ret = yield http_put_v2(im_mobot.USER_ENTER_CHATROOM, im_service, params, timeout=5)
