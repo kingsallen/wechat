@@ -511,7 +511,7 @@ class ChatHandler(BaseHandler):
             createTime=curr_now_minute(),
             origin=const.ORIGIN_USER_OR_HR,
             id=chat.id,
-            roomType=self.room_type
+            roomType=int(self.room_type)
         )
 
         self.logger.debug("post_message redis publish message_body:{}".format(message_body))
@@ -551,7 +551,7 @@ class ChatHandler(BaseHandler):
             cid=int(self.room_id),
             pid=int(self.position_id),
             createTime=curr_now_minute(),
-            roomType=self.room_type
+            roomType=int(self.room_type)
         )
         self.logger.debug("publish chat by redis message_body:{}".format(message_body))
 
@@ -622,7 +622,7 @@ class ChatHandler(BaseHandler):
             cid=int(self.room_id),
             pid=int(self.position_id),
             createTime=curr_now_minute(),
-            roomType=self.room_type
+            roomType=int(self.room_type)
         )
         self.logger.debug("publish chat by redis message_body:{}".format(message_body))
 
@@ -676,7 +676,7 @@ class ChatHandler(BaseHandler):
                     pid=int(self.position_id),
                     createTime=curr_now_minute(),
                     origin=const.ORIGIN_CHATBOT,
-                    roomType=self.room_type
+                    roomType=int(self.room_type)
                 )
                 # 发送给求职者
                 yield self.chat_ps.send_message(self.user_id, 0, self.room_id, message_body)
@@ -708,7 +708,7 @@ class ChatHandler(BaseHandler):
                 createTime=curr_now_minute(),
                 origin=const.ORIGIN_CHATBOT,
                 id=chat.id,
-                roomType=self.room_type
+                roomType=int(self.room_type)
             )
             self.logger.debug("publish chat by redis message_body:{}".format(message_body))
 
