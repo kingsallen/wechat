@@ -6,12 +6,12 @@ from tornado import gen
 from service.data.base import DataService
 from util.common.decorator import cache
 from util.common import ObjectDict
-from util.common.decorator import log_core, log_core
+from util.common.decorator import log_coro, log_coro
 
 
 class JobOccupationDataService(DataService):
 
-    @log_core(threshold=20)
+    @log_coro(threshold=20)
     @cache(ttl=60)
     @gen.coroutine
     def get_occupation(self, conds, fields=None):

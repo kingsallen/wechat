@@ -598,7 +598,7 @@ class NewJDStatusCheckerAddFlag(BaseNewJDStatusChecker):
         yield func(self._handler, *args, **kwargs)
 
 
-def log_core(func=None, threshold=0):
+def log_coro(func=None, threshold=0):
     """
     记录协程运行时间的的装饰器
     :param func:
@@ -607,7 +607,7 @@ def log_core(func=None, threshold=0):
     """
 
     if func is None:
-        return functools.partial(log_core, threshold=threshold)
+        return functools.partial(log_coro, threshold=threshold)
 
     @functools.wraps(func)
     @gen.coroutine
