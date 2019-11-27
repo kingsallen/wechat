@@ -5,7 +5,7 @@ import conf.path as path
 from service.page.base import PageService
 from util.common import ObjectDict
 from util.tool.url_tool import make_url
-from util.common.decorator import log_core, log_time
+from util.common.decorator import log_coro, log_time
 import conf.common as const
 
 

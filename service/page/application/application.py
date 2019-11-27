@@ -21,7 +21,7 @@ from util.tool.json_tool import json_dumps
 from util.tool.iter_tool import first
 from util.tool.str_tool import trunc
 from util.tool.url_tool import make_static_url
-from util.common.decorator import log_core, log_core
+from util.common.decorator import log_coro, log_coro
 
 
 class ApplicationPageService(PageService):
@@ -30,7 +30,7 @@ class ApplicationPageService(PageService):
         super().__init__()
         self.email_apply_session = EmailApplyCache()
 
-    @log_core(threshold=20)
+    @log_coro(threshold=20)
     @gen.coroutine
     def get_application(self, position_id, user_id):
         """返回用户申请的职位"""
@@ -60,7 +60,7 @@ class ApplicationPageService(PageService):
 
         raise gen.Return(response)
 
-    @log_core(threshold=30)
+    @log_coro(threshold=30)
     @gen.coroutine
     def is_allowed_apply_position(self, user_id, company_id, position_id):
         """获取一个月内该用户的申请数量
@@ -91,7 +91,7 @@ class ApplicationPageService(PageService):
 
         raise gen.Return(bool_res)
 
-    @log_core(threshold=20)
+    @log_coro(threshold=20)
     @gen.coroutine
     def get_application_apply_status(self, user_id, company_id):
         """

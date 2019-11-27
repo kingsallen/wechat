@@ -25,7 +25,7 @@ from util.tool.str_tool import gen_salary, add_item, split, gen_degree_v2, gen_e
 from util.tool.url_tool import url_append_query
 from util.tool.date_tool import subtract_design_time_ts, str_2_date
 from util.wechat.template import position_view_five_notice_tpl
-from util.common.decorator import log_core, log_time, log_core, log_time
+from util.common.decorator import log_coro, log_time, log_coro, log_time
 from util.common.mq import neo4j_position_forward
 from util.common.cipher import decode_id
 from util.common.exception import InfraOperationError
@@ -33,7 +33,7 @@ from util.common.context_manager import log_this
 
 
 class PositionHandler(BaseHandler):
-    @log_core
+    @log_coro
     @handle_response
     @NewJDStatusCheckerAddFlag()
     @authenticated
@@ -258,7 +258,7 @@ class PositionHandler(BaseHandler):
         properties = ObjectDict({'origin': origin, 'has_career_story': bool(self.flag_should_display_newjd), "depth": depth})
         self.track("cJobDetailPageview", properties)
 
-    @log_core
+    @log_coro
     @gen.coroutine
     def _make_position_visitnum(self, position_info):
         """更新职位浏览量"""
@@ -269,7 +269,7 @@ class PositionHandler(BaseHandler):
             "update_time": position_info.update_time_ori,
         })
 
-    @log_core(threshold=30)
+    @log_coro(threshold=30)
     @gen.coroutine
     def _make_share_info(self, position_info, company_info):
         """构建 share 内容"""
@@ -340,7 +340,7 @@ class PositionHandler(BaseHandler):
         hr_account, hr_wx_user = yield self.position_ps.get_hr_info(publisher)
         raise gen.Return((hr_account, hr_wx_user))
 
-    @log_core(threshold=30)
+    @log_coro(threshold=30)
     @gen.coroutine
     def _make_endorse_info(self, position_info, company_info):
         """构建 JD 页左下角背书信息"""
@@ -410,7 +410,7 @@ class PositionHandler(BaseHandler):
 
         return res
 
-    @log_core(threshold=20)
+    @log_coro(threshold=20)
     @gen.coroutine
     def _make_json_header(self, position_info, company_info, star, application,
                           endorse, can_apply, team_id, did, teamname_custom, reward, share_reward, has_point_reward,
@@ -641,7 +641,7 @@ class PositionHandler(BaseHandler):
 
         return data
 
-    @log_core
+    @log_coro
     @gen.coroutine
     def _make_refresh_share_chain(self, position_info):
         """构造刷新链路, 并在链路中触发转发被点击红包"""
@@ -715,7 +715,7 @@ class PositionHandler(BaseHandler):
 
         return last_employee_user_id, last_employee_id, inserted_share_chain_id, depth
 
-    @log_core
+    @log_coro
     @gen.coroutine
     def _make_share_record(self, position_info, recom_user_id):
         """插入 position share record 的原子操作"""
@@ -740,7 +740,7 @@ class PositionHandler(BaseHandler):
 
         yield self.sharechain_ps.create_share_record(params)
 
-    @log_core
+    @log_coro
     @gen.coroutine
     def _refresh_share_chain(self, presentee_user_id, position_id, last_psc=None):
         """刷新链路的原子操作"""
@@ -752,7 +752,7 @@ class PositionHandler(BaseHandler):
         )
         return inserted_share_chain_id, depth
 
-    @log_core
+    @log_coro
     @gen.coroutine
     def _redirect_when_recom_is_openid(self, position_info):
         """当recom是openid时，刷新链路，改变recom的值，跳转"""
@@ -778,7 +778,7 @@ class PositionHandler(BaseHandler):
             self.redirect(redirect_url)
             return
 
-    @log_core(threshold=20)
+    @log_coro(threshold=20)
     @gen.coroutine
     def _make_send_publish_template(self, position_info):
         """浏览量达到5次后，向 HR 发布模板消息
@@ -805,7 +805,7 @@ class PositionHandler(BaseHandler):
                                                     link, position_info.title,
                                                     position_info.salary, current_wechat_id=self.current_user.wechat.id)
 
-    @log_core
+    @log_coro
     @gen.coroutine
     def _add_team_data(self, position_data, team, company_id, position_id, teamname_custom):
 
@@ -852,7 +852,7 @@ class PositionHandler(BaseHandler):
         res = yield self.position_ps.get_team_data(team, more_link, teamname_custom, self.locale)
         raise gen.Return(res)
 
-    @log_core
+    @log_coro
     @gen.coroutine
     def _insert_into_kafka(self, position_id):
         radar_event_emitter = RadarEventEmitter(kafka_producer)
@@ -895,7 +895,7 @@ class PositionHandler(BaseHandler):
 
 class PositionListInfraParamsMixin(BaseHandler):
 
-    @log_core(threshold=20)
+    @log_coro(threshold=20)
     @gen.coroutine
     def make_position_list_infra_params(self):
         """构建调用基础服务职位列表的 params"""
@@ -969,7 +969,7 @@ class PositionListInfraParamsMixin(BaseHandler):
 class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
     """获取职位列表"""
 
-    @log_core
+    @log_coro
     @handle_response
     @check_employee
     @gen.coroutine
@@ -1221,7 +1221,7 @@ class PositionEmpNoticeHandler(BaseHandler):
 
 
 class PositionListHandler(PositionListInfraParamsMixin, BaseHandler):
-    @log_core
+    @log_coro
     @handle_response
     @check_employee
     @gen.coroutine
@@ -1377,7 +1377,7 @@ class PositionListHandler(PositionListInfraParamsMixin, BaseHandler):
 
 
 class LbsPositionListHandler(BaseHandler):
-    @log_core
+    @log_coro
     @handle_response
     @check_employee
     @gen.coroutine
@@ -1459,7 +1459,7 @@ class LbsPositionListHandler(BaseHandler):
 
 
 class PositionRecomListHandler(PositionListInfraParamsMixin, BaseHandler):
-    @log_core
+    @log_coro
     @handle_response
     @check_employee_common
     @gen.coroutine
@@ -1515,7 +1515,7 @@ class PositionRecomListHandler(PositionListInfraParamsMixin, BaseHandler):
 
 
 class PositionListSugHandler(PositionListInfraParamsMixin, BaseHandler):
-    @log_core
+    @log_coro
     @handle_response
     @check_employee
     @gen.coroutine
@@ -1546,7 +1546,7 @@ class PositionListSugHandler(PositionListInfraParamsMixin, BaseHandler):
 
 
 class PositionSearchHistoryHandler(BaseHandler):
-    @log_core
+    @log_coro
     @handle_response
     @authenticated
     @gen.coroutine
@@ -1561,7 +1561,7 @@ class PositionSearchHistoryHandler(BaseHandler):
         )
         self.write(res)
 
-    @log_core
+    @log_coro
     @handle_response
     @authenticated
     @gen.coroutine
