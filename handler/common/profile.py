@@ -812,7 +812,7 @@ class ProfileSectionHandler(BaseHandler):
                     if symbol in e.get("name"):
                         self.send_json_error(message='请删除标签中的特殊字符')
                         return
-                if len(self.get_bit_count(e.get("name"), 40)) > 40: # 中文20个包含20个，其他40个
+                if self.get_bit_count(e.get("name"), 40) > 40: # 中文20个包含20个，其他40个
                     self.send_json_error(message='请填写20个字以内')
                     return
 
@@ -847,7 +847,7 @@ class ProfileSectionHandler(BaseHandler):
                     if symbol in e.get("name"):
                         self.send_json_error(message='请删除标签中的特殊字符')
                         return
-                if len(self.get_bit_count(e.get("name"), 40)) > 40:
+                if self.get_bit_count(e.get("name"), 40) > 40:
                     self.send_json_error(message='请填写20个字以内')
                     return
 
