@@ -663,17 +663,14 @@ class ApplicationPageService(PageService):
             if employee_info:
                 recommender_employee_id = employee_info.id
 
-            # 候选人投递积分处理
-            message = {
-                'companyId':     application.company_id,
-                'positionId':    application.position_id,
-                'recomUserId':   recommender_user_id,
-                'berecomUserId': current_user.sysuser.id,
-                'employeeId':    recommender_employee_id,
-                'templateId':    const.RECRUIT_STATUS_APPLY_ID,
-                'applicationId': apply_id
-            }
-            award_publisher.publish_message(message, routing_key="sharejd.job_applied")
+            award_publisher.add_awards_apply(
+                company_id=application.company_id,
+                position_id=application.position_id,
+                employee_id=recommender_employee_id,
+                recom_user_id=recommender_user_id,
+                be_recom_user_id=current_user.sysuser.id,
+                application_id=apply_id
+            )
 
         self.logger.debug("[opt_add_reward]end")
 

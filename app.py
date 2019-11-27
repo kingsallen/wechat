@@ -37,7 +37,7 @@ from setting import settings
 import conf.common as constant
 from route import platform_routes, qx_routes, help_routes
 from handler.common.navmenu import NavMenuModule
-from util.common.mq import connect_all_client
+from util.common.mq_receiver import RedPacketConsumer
 
 from globals import env, logger, redis, es, sa
 
@@ -75,7 +75,7 @@ def make_app():
 def sig_handler(sig, frame, sensors_sa, server):
     """信号处理函数
     """
-    logger.info('Neoweixinrefer Server  sig handler ...')
+    logger.info('HR Server  sig handler ...')
     tornado.ioloop.IOLoop.instance().add_callback(partial(shutdown, sensors_sa=sensors_sa, server=server))
 
 
@@ -83,9 +83,9 @@ def shutdown(sensors_sa, server):
     """进程关闭处理
     """
     # 停止接受Client连接
-    logger.info('Neoweixinrefer Server Shutdown ...')
+    logger.info('HR Server Shutdown ...')
     sensors_sa.close()
-    logger.info('Neoweixinrefer Server sensors sa in Shutdown ...')
+    logger.info('HR Server sensors sa in Shutdown ...')
     server.stop()
 
     io_loop = tornado.ioloop.IOLoop.instance()
@@ -114,8 +114,9 @@ def main():
             settings.blocking_log_threshold)
 
         http_server = tornado.httpserver.HTTPServer(application, xheaders=True)
-
-        connect_all_client()
+        # sc = RedPacketConsumer()
+        # application.sc = sc
+        # application.sc.connect()
 
         signal_handler = partial(sig_handler,
                                  sensors_sa=sa,

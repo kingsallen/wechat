@@ -222,16 +222,14 @@ class PositionHandler(BaseHandler):
                 # 转发积分
                 if last_employee_user_id:
                     self.logger.debug("[JD]转发积分操作")
-                    # 候选人投递积分处理
-                    message = {
-                        'companyId': position_info.company_id,
-                        'positionId': position_id,
-                        'recomUserId': last_employee_user_id,
-                        'berecomUserId': self.current_user.sysuser.id,
-                        'employeeId': last_employee_id,
-                        'templateId': const.RECRUIT_STATUS_APPLY_ID
-                    }
-                    award_publisher.publish_message(message, routing_key="sharejd.jd_clicked")
+
+                    award_publisher.add_awards_click_jd(
+                        company_id=position_info.company_id,
+                        position_id=position_id,
+                        employee_id=last_employee_id,
+                        recom_user_id=last_employee_user_id,
+                        be_recom_user_id=self.current_user.sysuser.id
+                    )
 
             self.logger.debug("[JD]更新职位浏览量")
             yield self._make_position_visitnum(position_info)
