@@ -25,7 +25,7 @@ from util.tool.str_tool import gen_salary, add_item, split, gen_degree_v2, gen_e
 from util.tool.url_tool import url_append_query
 from util.tool.date_tool import subtract_design_time_ts, str_2_date
 from util.wechat.template import position_view_five_notice_tpl
-from util.common.decorator import log_coro, log_time, log_coro, log_time
+from util.common.decorator import log_coro, log_time
 from util.common.mq import neo4j_position_forward
 from util.common.cipher import decode_id
 from util.common.exception import InfraOperationError
