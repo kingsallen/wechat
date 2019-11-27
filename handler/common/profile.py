@@ -786,7 +786,7 @@ class ProfileSectionHandler(BaseHandler):
         model = [sub_dict(s, self.profile_ps.SKILL_KEYS) for s in skills]
         self.send_json_success(data=self._make_json_data(route, model))
 
-    def get_bit_count(str_value, max_length):
+    def get_bit_count(self, str_value, max_length):
         '包含汉字的占2个位，其他一个占一个'
         bit_count = 0
         for c in str_value:
