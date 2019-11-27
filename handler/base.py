@@ -428,7 +428,7 @@ class BaseHandler(MetaBaseHandler):
             self.logger.debug("+++++++++++++++++PREPARE OVER+++++++++++++++++++++")
         except Exception as e:
             self.logger.error("BaseHandler prepare error current_user: {}, error message: {}".format(
-                self.current, traceback.format_exc()))
+                self.current_user, traceback.format_exc()))
             raise e
 
     # PROTECTED
