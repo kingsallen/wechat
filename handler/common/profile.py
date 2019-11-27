@@ -786,6 +786,18 @@ class ProfileSectionHandler(BaseHandler):
         model = [sub_dict(s, self.profile_ps.SKILL_KEYS) for s in skills]
         self.send_json_success(data=self._make_json_data(route, model))
 
+    def get_bit_count(str_value, max_length):
+        '包含汉字的占2个位，其他一个占一个'
+        bit_count = 0
+        for c in str_value:
+            if bit_count > max_length:
+                break
+            if '\u4e00' <= c <= '\u9fa5':
+                bit_count += 2
+            else:
+                bit_count += 1
+        return bit_count
+
     @tornado.gen.coroutine
     def post_skill(self):
         profile_id = self._get_profile_id()
@@ -800,7 +812,7 @@ class ProfileSectionHandler(BaseHandler):
                     if symbol in e.get("name"):
                         self.send_json_error(message='请删除标签中的特殊字符')
                         return
-                if len(e.get("name")) >= 20:
+                if len(self.get_bit_count(e.get("name"), 40)) > 40: # 中文20个包含20个，其他40个
                     self.send_json_error(message='请填写20个字以内')
                     return
 
@@ -835,7 +847,7 @@ class ProfileSectionHandler(BaseHandler):
                     if symbol in e.get("name"):
                         self.send_json_error(message='请删除标签中的特殊字符')
                         return
-                if len(e.get("name")) >= 20:
+                if len(self.get_bit_count(e.get("name"), 40)) > 40:
                     self.send_json_error(message='请填写20个字以内')
                     return
 
