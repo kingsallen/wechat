@@ -276,7 +276,7 @@ def unboxing_fetchone(http_response):
             if http_response.data and isinstance(http_response.data[0], dict):
                 data = ObjectDict(http_response.data[0])
         else:
-            data = http_response.data or ObjectDict()
+            data = http_response.data
 
     return data
 
@@ -286,7 +286,7 @@ def unboxing_v2(http_response):
 
     result = bool(http_response.code == constant.NEWINFRA_API_SUCCESS)
     data = ObjectDict()
-    if result and http_response.data is not None:
+    if result:
         data = http_response.data
 
     return data
