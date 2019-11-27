@@ -5,11 +5,11 @@ from tornado import gen
 
 from service.data.base import DataService
 from util.common import ObjectDict
-from util.common.decorator import log_core
+from util.common.decorator import log_coro
 
 
 class HrHbScratchCardDataService(DataService):
-    @log_core
+    @log_coro
     @gen.coroutine
     def get_scratch_card(self, conds, fields=None):
         fields = fields or []
@@ -27,7 +27,7 @@ class HrHbScratchCardDataService(DataService):
 
         raise gen.Return(response)
 
-    @log_core
+    @log_coro
     @gen.coroutine
     def create_scratch_card(self, fields, options=None):
         options = options or []
@@ -35,7 +35,7 @@ class HrHbScratchCardDataService(DataService):
         response = yield self.hr_hb_scratch_card_dao.insert_record(fields, options)
         raise gen.Return(response)
 
-    @log_core
+    @log_coro
     @gen.coroutine
     def update_scratch_card(self, conds=None, fields=None):
         if not conds or not fields:

@@ -5,7 +5,7 @@ from tornado import gen
 
 from service.data.base import DataService
 from util.common import ObjectDict
-from util.common.decorator import log_core
+from util.common.decorator import log_coro
 
 
 class HrHbConfigDataService(DataService):
@@ -28,7 +28,7 @@ class HrHbConfigDataService(DataService):
 
         raise gen.Return(response)
 
-    @log_core
+    @log_coro
     @gen.coroutine
     def get_hr_hb_config_list(self, conds, fields=None, options=None,
                               appends=None, index='', params=None):
