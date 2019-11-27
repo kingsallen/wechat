@@ -286,8 +286,8 @@ def unboxing_v2(http_response):
 
     result = bool(http_response.code == constant.NEWINFRA_API_SUCCESS)
     data = ObjectDict()
-    if result:
-        data = http_response.data or ObjectDict()
+    if result and http_response.data is not None:
+        data = http_response.data
 
     return data
 
