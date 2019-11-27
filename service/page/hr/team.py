@@ -14,7 +14,7 @@ from util.common import ObjectDict
 from util.tool import temp_data_tool, iterable_tool
 from util.tool.str_tool import gen_salary, split
 from util.tool.url_tool import make_url, make_static_url
-from util.common.decorator import log_coro, log_coro
+from util.common.decorator import log_coro
 
 
 class TeamPageService(PageService):

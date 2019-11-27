@@ -8,7 +8,7 @@ from util.common import ObjectDict
 from util.tool.str_tool import gen_salary, set_literl
 from util.tool.date_tool import jd_update_date, str_2_date
 import conf.common as const
-from util.common.decorator import log_coro, log_coro
+from util.common.decorator import log_coro
 
 
 class UsercenterPageService(PageService):
