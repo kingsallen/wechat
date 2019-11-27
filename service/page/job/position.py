@@ -7,7 +7,7 @@ import conf.common as const
 from service.page.base import PageService
 from util.common import ObjectDict
 from util.common.cipher import encode_id
-from util.common.decorator import log_coro, log_coro
+from util.common.decorator import log_coro
 from util.tool.date_tool import jd_update_date, str_2_date
 from util.tool.str_tool import gen_salary, split, set_literl, gen_degree, gen_experience
 from util.tool.temp_data_tool import make_position_detail_cms, make_team, template3

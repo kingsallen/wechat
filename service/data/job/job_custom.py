@@ -6,7 +6,7 @@ from tornado import gen
 from service.data.base import DataService
 from util.common.decorator import cache
 from util.common import ObjectDict
-from util.common.decorator import log_coro, log_coro
+from util.common.decorator import log_coro
 
 
 class JobCustomDataService(DataService):

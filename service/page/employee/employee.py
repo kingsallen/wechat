@@ -18,7 +18,7 @@ from util.tool.url_tool import make_static_url, make_url
 from util.tool.str_tool import gen_salary, gen_experience_v2
 from util.wechat.core import get_temporary_qrcode
 from util.common.mq import unread_praise_publisher
-from util.common.decorator import log_coro, log_coro
+from util.common.decorator import log_coro
 from util.common.exception import InfraOperationError
 from util.tool.dict_tool import objectdictify
 from util.tool.str_tool import json_hump2underline
