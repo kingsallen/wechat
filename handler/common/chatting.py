@@ -19,6 +19,7 @@ from service.page.user.chatting import ChattingPageService
 from service.page.user.user import UserPageService
 from setting import settings
 from util.common import ObjectDict
+from util.common.cipher import decode_id
 from util.common.decorator import handle_response, authenticated
 from util.tool.date_tool import curr_now
 from util.tool.json_tool import json_dumps
@@ -313,10 +314,41 @@ class EmployeeChattingHandler(BaseHandler):
         :return: 推送开关状态
         """
 
-        tpl_switch = self.json_args.get("tpl_switch");
+        tpl_switch = self.json_args.get("tpl_switch")
         switch = yield self.chatting_ps.post_switch(self.role, self.user_id, self.employee_id, self.current_user.company.id,
                                                     tpl_switch)
         self.un_box(switch)
+
+    @handle_response
+    @gen.coroutine
+    def post_invite_message(self):
+        """
+
+        通知后端发送联系员工和候选人的消息模板
+        该场景给联系HR使用。
+        :return: 操作结果
+        """
+
+        entry_type = self.json_args.get("entry_type", 1)
+        psc = self.json_args.get("psc", 0)
+        recom = self.json_args.get("recom", 0)
+        if recom:
+            recom_id = decode_id(recom)
+            self.logger.debug("ChattingRoomsHandler post_invite_message recom_id:{}".format(recom_id))
+            _, employee_info = yield self.employee_ps.get_employee_info(recom_id, self.current_user.company.id)
+            employee_id = employee_info.id
+            ret = yield self.chatting_ps.post_invite_message(
+                self.current_user.company.id,
+                employee_id,
+                self.json_args.get("position_id", 0),
+                self.current_user.sysuser.id,
+                entry_type,
+                psc
+            )
+            self.un_box(ret)
+        else:
+            return self.send_json_success()
+
 
     @handle_response
     @gen.coroutine
@@ -325,7 +357,6 @@ class EmployeeChattingHandler(BaseHandler):
         进入聊天室
         :return: 推送开关状态
         """
-        self.logger.debug("enter room. employee_id:{}, user_id:{}".format(self.employee_id, self.user_id))
 
         if (not self.json_args.get("room_id") or int(self.json_args.get("room_id")) == 0) and (self.user_id == 0 or self.employee_id == 0):
             if self.role == "employee":
@@ -345,7 +376,8 @@ class EmployeeChattingHandler(BaseHandler):
                 employee_id = room_info.data.employee_id
 
         ret = yield self.chatting_ps.enter_the_room(self.json_args.get("room_id") or 0, self.role, user_id, employee_id,
-                                                    self.current_user.company.id, self.json_args.get("pid") or 0)
+                                                    self.current_user.company.id, self.json_args.get("pid") or 0,
+                                                    self.params.get("entry_type"))
 
         if self.role == "employee" and ret and ret.code == "US30500":
             self._send_json(data={}, status_code=30500, message=CHATTING_EMPLOYEE_RESIGNATION_TIPS, http_code=200)

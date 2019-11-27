@@ -831,6 +831,14 @@ class ContactReferralInfoHandler(BaseHandler):
             recom = decode_id(self.params.recom)
             psc = self.params.psc if self.params.psc else 0
 
+        # 通知基础服务发送员工候选人聊天室消息末班
+        self.chatting_ps.post_invite_message(self.current_user.company.id,
+                                             self.params.employee_id,
+                                             pid,
+                                             self.current_user.sysuser.id,
+                                             3,
+                                             psc)
+
         if_seek_check_ret = yield self.user_ps.if_ever_seek_recommend(
             recom, psc, pid,
             self.current_user.company.id,
