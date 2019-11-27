@@ -97,8 +97,9 @@ class IsAgreePrivacyHandler(BaseHandler):
                     self.send_json_success(data=data)
                 else:   # 没同意过
                     custom_privacy_info = yield self.privacy_ps.get_custom_privacy_info(self.current_user.company.id)  # 获取客户自定义隐私协议信息
+                    custom_privacy_info.data.update({"agree": custom_privacy_status.data})
                     data = ObjectDict(qx_privacy=show_privacy_agreement,
-                                      custom_privacy=custom_privacy_info.data.update({"agree": custom_privacy_status.data}))
+                                      custom_privacy=custom_privacy_info.data)
                     self.send_json_success(data=data)
             else: # oms开关关闭
                 data = ObjectDict(qx_privacy=show_privacy_agreement,
