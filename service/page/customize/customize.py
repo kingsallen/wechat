@@ -5,7 +5,7 @@ import conf.path as path
 from service.page.base import PageService
 from util.common import ObjectDict
 from util.tool.url_tool import make_url
-from util.common.decorator import log_time, log_time_common_func
+from util.common.decorator import log_core, log_time
 import conf.common as const
 
 
@@ -53,7 +53,7 @@ class CustomizePageService(PageService):
             return (True, {"custom_field": position_info.job_custom or "",
                            "job_number": position_info.jobnumber or ""})
 
-    @log_time_common_func(threshold=20)
+    @log_time(threshold=20)
     def get_suppress_apply(self, position_info):
         """
         诺华集团定制。
@@ -78,7 +78,7 @@ class CustomizePageService(PageService):
             return True
         return False
 
-    @log_time_common_func(threshold=20)
+    @log_time(threshold=20)
     def get_delegate_drop(self, current_wechat, current_employee, params):
         return ObjectDict({
             'is_delegate_drop': self._is_edx_wechat(current_wechat, current_employee),

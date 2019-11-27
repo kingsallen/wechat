@@ -40,7 +40,7 @@ def handle_response(func):
             yield func(self, *args, **kwargs)
         except Exception as e:
             user_id = 0
-            if self.current_user.sysuser:
+            if self.current_user and self.current_user.sysuser:
                 user_id = self.current_user.sysuser.id
             error_log_content = {'user_id': user_id, 'message': traceback.format_exc()}
 
@@ -598,7 +598,7 @@ class NewJDStatusCheckerAddFlag(BaseNewJDStatusChecker):
         yield func(self._handler, *args, **kwargs)
 
 
-def log_time(func=None, threshold=0):
+def log_core(func=None, threshold=0):
     """
     记录协程运行时间的的装饰器
     :param func:
@@ -607,7 +607,7 @@ def log_time(func=None, threshold=0):
     """
 
     if func is None:
-        return functools.partial(log_time, threshold=threshold)
+        return functools.partial(log_core, threshold=threshold)
 
     @functools.wraps(func)
     @gen.coroutine
@@ -622,7 +622,7 @@ def log_time(func=None, threshold=0):
                 "func_name": func.__name__,
                 "doc": func.__doc__,
                 "time": func_time,
-                "timestamp": end
+                "timestamp": time.time()
             }
             try:
                 c.update({
@@ -638,7 +638,7 @@ def log_time(func=None, threshold=0):
     return wrapper
 
 
-def log_time_common_func(func=None, threshold=0):
+def log_time(func=None, threshold=0):
     """
     记录普通方法运行时间的的装饰器
     :param func:
@@ -647,7 +647,7 @@ def log_time_common_func(func=None, threshold=0):
     """
 
     if func is None:
-        return functools.partial(log_time_common_func, threshold=threshold)
+        return functools.partial(log_time, threshold=threshold)
 
     @functools.wraps(func)
     def wrapper(self, *args, **kwargs):
@@ -661,7 +661,7 @@ def log_time_common_func(func=None, threshold=0):
                 "func_name": func.__name__,
                 "doc": func.__doc__,
                 "time": func_time,
-                "timestamp": end
+                "timestamp": time.time()
             }
             try:
                 c.update({"args": str(args), "kwargs": str(kwargs)})  # 防止有些奇怪的对象string的时候报错

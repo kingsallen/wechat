@@ -8,7 +8,8 @@ from util.common import ObjectDict
 from util.tool.str_tool import gen_salary, set_literl
 from util.tool.date_tool import jd_update_date, str_2_date
 import conf.common as const
-from util.common.decorator import log_time, log_time
+
+from util.common.decorator import log_core
 
 
 class UsercenterPageService(PageService):
@@ -114,7 +115,7 @@ class UsercenterPageService(PageService):
             obj_list.append(fav_pos)
         raise gen.Return(obj_list)
 
-    @log_time(threshold=20)
+    @log_core(threshold=20)
     @gen.coroutine
     def get_user_position_stared_list(self, user_id, position_id_list):
         """返回用户感兴趣职位列表"""
@@ -130,7 +131,7 @@ class UsercenterPageService(PageService):
             fav_position_id_list = [e.position_id for e in fav_position_list]
         return fav_position_id_list
 
-    @log_time(threshold=20)
+    @log_core(threshold=20)
     @gen.coroutine
     def get_applied_applications_list(self, user_id, position_id_list):
         """返回用户求职记录列表"""

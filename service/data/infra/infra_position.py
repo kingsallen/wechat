@@ -14,7 +14,7 @@ from thrift_gen.gen.position.service.PositionServices import Client as PositionS
 from util.common import ObjectDict
 from util.tool import http_tool
 from util.tool.http_tool import http_get, http_post, http_patch, http_get_rp, http_get_v2, http_post_v2
-from util.common.decorator import log_time
+from util.common.decorator import log_core
 
 
 class InfraPositionDataService(DataService):
@@ -22,14 +22,14 @@ class InfraPositionDataService(DataService):
         referer: https://wiki.moseeker.com/position-api.md"""
 
     # @cache_new(ttl=300, escape=['user_id'])
-    @log_time
+    @log_core
     @gen.coroutine
     def get_position_list(self, params):
         """普通职位列表"""
         ret = yield http_get_v2(position.POSITION_LIST, position_service, params, timeout=7)
         return ret
 
-    @log_time
+    @log_core
     @gen.coroutine
     def infra_get_share_position_list(self, share_id):
         """批量分享职位列表"""

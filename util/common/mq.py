@@ -1,6 +1,8 @@
 # coding=utf-8
 
 import pika
+import pika_pool
+import time
 
 from pika import TornadoConnection
 
