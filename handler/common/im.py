@@ -501,7 +501,7 @@ class ChatHandler(BaseHandler):
             speaker=const.CHAT_SPEAKER_USER,
             cid=int(self.room_id),
             pid=int(self.position_id),
-            createTime=curr_now_minute(),
+            chatTime=curr_now_minute(),
             origin=const.ORIGIN_USER_OR_HR,
             id=chat.id,
             roomType=int(self.room_type)
@@ -534,7 +534,6 @@ class ChatHandler(BaseHandler):
         联系HR场景进入聊天室，HR收到消息后自动回复的文本内容, 不记录聊天历史记录
         """
         content = "已收到您的消息，请耐心等待HR小姐姐给您回复哦😘~！"
-
         message_body = dict(
             compoundContent="",
             content=content,
@@ -543,7 +542,7 @@ class ChatHandler(BaseHandler):
             speaker=const.CHAT_SPEAKER_HR,
             cid=int(self.room_id),
             pid=int(self.position_id),
-            createTime=curr_now_minute(),
+            chatTime=curr_now_minute(),
             roomType=int(self.room_type)
         )
         self.logger.debug("publish chat by redis message_body:{}".format(message_body))
@@ -614,7 +613,7 @@ class ChatHandler(BaseHandler):
             speaker=const.CHAT_SPEAKER_HR,
             cid=int(self.room_id),
             pid=int(self.position_id),
-            createTime=curr_now_minute(),
+            chatTime=curr_now_minute(),
             roomType=int(self.room_type)
         )
         self.logger.debug("publish chat by redis message_body:{}".format(message_body))
@@ -667,7 +666,7 @@ class ChatHandler(BaseHandler):
                     speaker=const.CHAT_SPEAKER_BOT,
                     cid=int(self.room_id),
                     pid=int(self.position_id),
-                    createTime=curr_now_minute(),
+                    chatTime=curr_now_minute(),
                     origin=const.ORIGIN_CHATBOT,
                     roomType=int(self.room_type)
                 )
@@ -698,7 +697,7 @@ class ChatHandler(BaseHandler):
                 speaker=const.CHAT_SPEAKER_BOT,
                 cid=int(self.room_id),
                 pid=int(self.position_id),
-                createTime=curr_now_minute(),
+                chatTime=curr_now_minute(),
                 origin=const.ORIGIN_CHATBOT,
                 id=chat.id,
                 roomType=int(self.room_type)
