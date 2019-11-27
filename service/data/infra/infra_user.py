@@ -8,7 +8,7 @@ import conf.alphacloud_api as api
 from service.data.base import DataService
 from util.common import ObjectDict
 from util.tool.http_tool import http_get, http_post, http_put, unboxing, http_get_rp, http_get_v2, http_post_v2, http_post_multipart_form, _v2_async_http_post
-from util.common.decorator import log_core
+from util.common.decorator import log_coro
 from conf.newinfra_service_conf.service_info import user_service, application_service
 from conf.newinfra_service_conf.user import user
 from conf.newinfra_service_conf.application import application
@@ -209,7 +209,7 @@ class InfraUserDataService(DataService):
         ret = yield http_post(path.INFRA_USER_SETTINGS, params)
         return ret
 
-    @log_core
+    @log_coro
     @gen.coroutine
     def is_valid_employee(self, user_id, company_id, timeout=30):
         params = {

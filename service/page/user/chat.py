@@ -9,7 +9,7 @@ import conf.common as const
 from service.page.base import PageService
 from setting import settings
 from util.common import ObjectDict
-from util.common.decorator import log_core
+from util.common.decorator import log_coro
 from util.tool.date_tool import str_2_date
 from util.tool.http_tool import http_post, http_get
 from util.tool.str_tool import gen_salary
@@ -215,7 +215,7 @@ class ChatPageService(PageService):
 
         raise gen.Return(company_conf)
 
-    @log_core
+    @log_coro
     @gen.coroutine
     def infra_clound_get_position_list_rp_ext(self, pids):
         """获取职位的红包信息"""
@@ -229,7 +229,7 @@ class ChatPageService(PageService):
 
         raise gen.Return([])
 
-    @log_core
+    @log_coro
     @gen.coroutine
     def infra_clound_get_position_list(self, params, is_employee, banner):
         """
