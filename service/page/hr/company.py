@@ -11,8 +11,9 @@ from service.page.base import PageService
 from util.tool.url_tool import make_static_url
 from util.tool.dict_tool import sub_dict
 from util.tool.str_tool import is_odd, split, gen_salary, set_literl
-from util.common.decorator import log_coro
 from util.common.exception import InfraOperationError
+from util.common.decorator import log_coro
+
 
 cached_company_sug_wechat = None
 

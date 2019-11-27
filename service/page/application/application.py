@@ -21,7 +21,7 @@ from util.tool.json_tool import json_dumps
 from util.tool.iter_tool import first
 from util.tool.str_tool import trunc
 from util.tool.url_tool import make_static_url
-from util.common.decorator import log_time, log_coro
+from util.common.decorator import log_coro
 
 
 class ApplicationPageService(PageService):
