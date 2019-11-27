@@ -769,6 +769,13 @@ class ProfileSectionHandler(BaseHandler):
             if hasattr(e, "__status") and getattr(e, "__status") == 'x':
                 verb = "delete"
             else:
+                for symbol in """，,、:：;；’'“”""''""":
+                    if symbol in e.get("language"):
+                        self.send_json_error(message='请删除标签中的特殊字符')
+                        return
+                if self.get_bit_count(e.get("language"), 40) > 40:
+                    self.send_json_error(message='请填写20个字以内')
+                    return
                 verb = 'update' if e.id else 'create'
 
             result, res = yield getattr(
@@ -1043,6 +1050,14 @@ class ProfileSectionHandler(BaseHandler):
             if hasattr(e, "__status") and getattr(e, "__status") == 'x':
                 verb = "delete"
             else:
+                for symbol in """，,、:：;；’'“”""''""":
+                    if symbol in e.get("name"):
+                        self.send_json_error(message='请删除标签中的特殊字符')
+                        return
+                if self.get_bit_count(e.get("name"), 40) > 40:
+                    self.send_json_error(message='请填写20个字以内')
+                    return
+
                 verb = 'update' if e.id else 'create'
             result, res = yield getattr(
                 self.profile_ps, verb + "_profile_awards")(e, profile_id)
