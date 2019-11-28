@@ -1,7 +1,7 @@
 # coding=utf-8
+import hashlib
 import json
 import time
-import hashlib
 
 import pypinyin
 from pypinyin import lazy_pinyin
@@ -16,6 +16,7 @@ from util.tool.date_tool import str_2_date
 from util.tool.http_tool import http_post, http_get
 from util.tool.str_tool import gen_salary
 from util.tool.url_tool import make_static_url
+
 
 def md5(str):
     m = hashlib.md5()
@@ -596,25 +597,6 @@ class ChatPageService(PageService):
         raise gen.Return(False)
 
     @gen.coroutine
-    def get_mobot_tohr_switch_status(self, company_id):
-        """
-        获取请转HR开关
-        :param company_id:
-        :return:
-        """
-        res = yield self.infra_company_ds.get_oms_all_switch_status(company_id)
-        if not res.data:
-            self.logger.warning("get_mobot_switch_status is null, company.id:{}".format(company_id))
-            raise gen.Return(False)
-
-        for product in res.data:
-            if product['keyword'].find('请转HR') >= 0:
-                if product['valid'] == 1:
-                    raise gen.Return(True)
-
-        raise gen.Return(False)
-
-    @gen.coroutine
     def get_sokcet_token(self, user_id):
         """
         获取socket访问token
@@ -651,3 +633,50 @@ class ChatPageService(PageService):
         route = '{}{}'.format(settings.get('im_server_api'), '/send/message')
         res = yield http_post(route=route, jdata=data, timeout=5, infra=False)
         raise gen.Return(res)
+
+    @gen.coroutine
+    def get_mobot_switch_status(self, company_id, room_type):
+        """
+        获取是否显示联系HR的开关配置
+        :param company_id:
+        :param room_type: 房间类型 1：社招, 2：校招，3: 员工
+        :return:
+        """
+        data = {'hr_chat_switch': False, 'mobot_switch': False, 'to_hr_switch': False}
+        chat_switch_module = {1: ['社招版MoBot(人工对话模式)'],
+                              2: ['校招MoBot(人工对话模式)'],
+                              3: ['员工版MoBot(人工对话模式)']}
+
+        mobot_switch_module = {1: ['社招版MoBot(人工+智能对话模式)'],
+                               2: ['校招MoBot(人工+智能对话模式)'],
+                               3: ['员工版MoBot(人工+智能对话模式)']}
+
+        to_hr_switch_module = {1: ['社招版MoBot(请转HR（仅开启智能对话模式有效）)'],
+                               2: ['校招MoBot(请转HR（仅开启智能对话模式有效）)'],
+                               3: ['员工版MoBot(请转HR（仅开启智能对话模式有效）)']}
+
+        res = yield self.infra_company_ds.get_oms_all_switch(company_id)
+        products = res.get('data') or []
+
+        for k, v in chat_switch_module.iteritems():
+            for product in products:
+                if product['keyword'] in v:
+                    if product['valid'] == 1 and room_type == k:
+                        data.update({'hr_chat_switch': True})
+                        break
+
+        for k, v in mobot_switch_module.iteritems():
+            for product in products:
+                if product['keyword'] in v:
+                    if product['valid'] == 1 and room_type == k:
+                        data.update({'mobot_switch': True})
+                        break
+
+        for k, v in to_hr_switch_module.iteritems():
+            for product in products:
+                if product['keyword'] in v:
+                    if product['valid'] == 1 and room_type == k:
+                        data.update({'to_hr_switch': True})
+                        break
+
+        raise gen.Return(ObjectDict(data))

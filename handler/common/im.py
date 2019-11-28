@@ -19,6 +19,7 @@ from util.tool.str_tool import to_str, match_session_id
 
 
 class UnreadCountHandler(BaseHandler):
+
     @handle_response
     @gen.coroutine
     def get(self, publisher):
@@ -213,6 +214,8 @@ class ChatHandler(BaseHandler):
         :return:
         """
 
+        self.room_type = self.params.room_type or 1
+
         res_privacy, data_privacy = yield self.privacy_ps.if_privacy_agreement_window(
             self.current_user.sysuser.id)
 
@@ -275,8 +278,8 @@ class ChatHandler(BaseHandler):
         self.logger.debug("get_environ get jssdk config:{}".format(config))
 
         fast_entry = []
-        switch_open = yield self.chat_ps.get_mobot_tohr_switch_status(self.current_user.company.id)
-        if switch_open:
+        switch = yield self.chat_ps.get_mobot_switch_status(self.current_user.company.id, self.room_type)
+        if switch.to_hr_switch:
             fast_entry = [{"msg_type": "html", "content": "请转HR"}]
 
         im_socket_url = '{}/socket/hr/chat'.format(settings.get('im_server_api').replace('http:', 'wss:'))
@@ -349,7 +352,7 @@ class ChatHandler(BaseHandler):
             (self.current_user.sysuser.id, self.params.hr_id, pid, room_id, self.current_user.qxuser, is_gamma)
         )
 
-        mobot_enable = yield self.chat_ps.get_mobot_switch_status(self.current_user.company.id, self.room_type)
+        switch = yield self.chat_ps.get_mobot_switch_status(self.current_user.company.id, self.room_type)
 
         recom = self.position_ps._make_recom(self.current_user.sysuser.id)
 
@@ -361,7 +364,7 @@ class ChatHandler(BaseHandler):
                                               pid, room_id,
                                               self.current_user.qxuser,
                                               is_gamma,
-                                              mobot_enable,
+                                              switch.mobot_switch,
                                               recom,
                                               is_employee)
 
@@ -443,6 +446,66 @@ class ChatHandler(BaseHandler):
     @authenticated
     @gen.coroutine
     def post_message(self):
+        yield self._post_message(save_chat_flag=True)
+
+    @handle_response
+    @authenticated
+    @gen.coroutine
+    def post_trigger(self):
+        yield self._post_message(save_chat_flag=False)
+
+    @gen.coroutine
+    def _reply_content(self, content):
+        message_body = dict(
+            compoundContent="",
+            content=content,
+            stats=0,
+            msgType="html",
+            speaker=const.CHAT_SPEAKER_HR,
+            cid=int(self.room_id),
+            pid=int(self.position_id),
+            chatTime=curr_now_minute(),
+            roomType=int(self.room_type)
+        )
+        self.logger.debug("publish chat by redis message_body:{}".format(message_body))
+
+        # 发送给求职者
+        yield self.chat_ps.send_message(self.user_id, 0, self.room_id, message_body)
+
+    @gen.coroutine
+    def _switch_all_close_reply_content(self):
+        """
+        未开启人工和mobot的场景, 不记录聊天历史记录
+        """
+        content = "尚未开通！"
+        yield self._reply_content(content=content)
+
+    @gen.coroutine
+    def _hr_message_reply_content(self):
+        """
+        联系HR场景进入聊天室，HR收到消息后自动回复的文本内容, 不记录聊天历史记录
+        """
+        content = "已收到您的消息，请耐心等待HR小姐姐给您回复哦😘~！"
+        yield self._reply_content(content=content)
+
+    @gen.coroutine
+    def _hr_welcome_reply_content(self):
+        """
+        联系HR场景进入聊天室，HR自动回复的文本内容, 不记录聊天历史记录
+        """
+        hr_info = yield self.chat_ps.get_company_hr_info(self.hr_id)
+        if hr_info and hr_info.username:
+            content = "您好，我是{company_name}的{hr_name}，关于职位和公司信息有任何问题请随时和我沟通。".format(
+                company_name=self.current_user.company.abbreviation or self.current_user.company.name,
+                hr_name=hr_info.username)
+        else:
+            content = "您好，我是{company_name}HR，关于职位和公司信息有任何问题请随时和我沟通。".format(
+                company_name=self.current_user.company.abbreviation or self.current_user.company.name)
+
+        yield self._reply_content(content=content)
+
+    @gen.coroutine
+    def _post_message(self, save_chat_flag=False):
         """
         用户chat发送消息响应处理
 
@@ -459,6 +522,7 @@ class ChatHandler(BaseHandler):
         @:param hrId int(11) HRID
         @:param roomId int(11) 聊天室ID
         @:param project_id int(11) MoPlan预约的项目ID
+        @:param save_chat_flag false 使用规则触发剧本，不保存聊天记录 true 用户正常对话，保存聊天记录
 
         :return:
         """
@@ -483,145 +547,62 @@ class ChatHandler(BaseHandler):
 
         self.logger.debug('post_message flag:{}, create_new_context:{}'.format(self.flag, create_new_context))
 
-        mobot_enable = yield self.chat_ps.get_mobot_switch_status(company_id, self.room_type)
-        self.logger.debug('post_message mobot_enable:{}, company_id:{}'.format(mobot_enable, company_id))
+        switch = yield self.chat_ps.get_mobot_switch_status(company_id, self.room_type)
+        self.logger.debug('post_message switch:{}, company_id:{}'.format(switch, company_id))
 
-        chat = yield self.chat_ps.save_chat(company_id, int(self.room_id), self.current_user.sysuser.id, msg_type,
-                                            const.ORIGIN_USER_OR_HR, int(self.position_id), content,
-                                            ujson.dumps(compoundContent), const.CHAT_SPEAKER_USER,
-                                            server_id, int(duration))
-        if not chat:
-            logger.error("post_message save_chat failed, user.id:{} msg_type:{}".format(self.current_user.sysuser.id, msg_type))
-            self.send_json_error(message=msg.OPERATE_FAILURE)
-            return
+        if save_chat_flag:
+            chat = yield self.chat_ps.save_chat(company_id, int(self.room_id), self.current_user.sysuser.id, msg_type,
+                                                const.ORIGIN_USER_OR_HR, int(self.position_id), content,
+                                                ujson.dumps(compoundContent), const.CHAT_SPEAKER_USER,
+                                                server_id, int(duration))
+            if not chat:
+                logger.error(
+                    "post_message save_chat failed, user.id:{} msg_type:{}".format(self.current_user.sysuser.id, msg_type))
+                self.send_json_error(message=msg.OPERATE_FAILURE)
+                return
 
-        message_body = dict(
-            msgType=msg_type,
-            content=content,
-            compoundContent=compoundContent,
-            speaker=const.CHAT_SPEAKER_USER,
-            cid=int(self.room_id),
-            pid=int(self.position_id),
-            chatTime=curr_now_minute(),
-            origin=const.ORIGIN_USER_OR_HR,
-            id=chat.id,
-            roomType=int(self.room_type)
-        )
+            message_body = dict(
+                msgType=msg_type,
+                content=content,
+                compoundContent=compoundContent,
+                speaker=const.CHAT_SPEAKER_USER,
+                cid=int(self.room_id),
+                pid=int(self.position_id),
+                chatTime=curr_now_minute(),
+                origin=const.ORIGIN_USER_OR_HR,
+                id=chat.id,
+                roomType=int(self.room_type)
+            )
 
-        self.logger.debug("post_message redis publish message_body:{}".format(message_body))
-        # 发送给HR
-        yield self.chat_ps.send_message(0, self.hr_id, self.room_id, message_body)
+            self.logger.debug("post_message redis publish message_body:{}".format(message_body))
+            # 发送给HR
+            yield self.chat_ps.send_message(0, self.hr_id, self.room_id, message_body)
 
         try:
-            if mobot_enable and msg_type != "job":
+            if switch.mobot_switch and msg_type != "job":
                 yield self._handle_chatbot_message(self.room_type, user_message, create_new_context, from_textfield,
                                                    self.project_id)
         except Exception as e:
             self.logger.error(e)
 
-        # 添加聊天对话埋点记录
-        self._add_sensor_track(msg_type, mobot_enable, content)
-
-        # HR未托管MoBot的文案提示，不保存历史记录
-        if not mobot_enable:
-            yield self._hr_message_reply_content()
-
-        # mobot_enable 提供前端控制 是否出loading状态
-        self.send_json_success(data={"mobot_enable": mobot_enable})
-
-    @gen.coroutine
-    def _hr_message_reply_content(self):
-        """
-        联系HR场景进入聊天室，HR收到消息后自动回复的文本内容, 不记录聊天历史记录
-        """
-        content = "已收到您的消息，请耐心等待HR小姐姐给您回复哦😘~！"
-        message_body = dict(
-            compoundContent="",
-            content=content,
-            stats=0,
-            msgType="html",
-            speaker=const.CHAT_SPEAKER_HR,
-            cid=int(self.room_id),
-            pid=int(self.position_id),
-            chatTime=curr_now_minute(),
-            roomType=int(self.room_type)
-        )
-        self.logger.debug("publish chat by redis message_body:{}".format(message_body))
-
-        # 发送给求职者
-        yield self.chat_ps.send_message(self.user_id, 0, self.room_id, message_body)
-
-    @handle_response
-    @authenticated
-    @gen.coroutine
-    def post_trigger(self):
-        self.room_id = self.params.roomId
-        self.user_id = match_session_id(to_str(self.get_secure_cookie(const.COOKIE_SESSIONID)))
-        self.hr_id = self.params.hrId
-        self.position_id = self.params.get("pid") or 0
-        self.flag = self.params.get("flag") or 0
-        self.project_id = self.params.get("project_id") or 0
-        self.room_type = self.params.get("room_type") or 1
-
-        content = self.json_args.get("content") or ""
-        compoundContent = self.json_args.get("compoundContent") or {}
-        user_message = compoundContent or content
-        msg_type = self.json_args.get("msgType")
-        create_new_context = self.json_args.get("create_new_context") or False
-        from_textfield = self.json_args.get("from_textfield") or False
-
-        self.logger.debug('post_trigger  create_new_context:{}'.format(create_new_context))
-
-        mobot_enable = yield self.chat_ps.get_mobot_switch_status(self.current_user.company.id, self.room_type)
-        self.logger.debug('post_trigger mobot_enable:{}'.format(mobot_enable))
-
-        try:
-            if mobot_enable and msg_type != "job":
-                yield self._handle_chatbot_message(self.room_type, user_message, create_new_context, from_textfield,
-                                                   self.project_id)
-        except Exception as e:
-            self.logger.error(e)
+        # TODO 兼容处理回复问题前端没有socket通知会一直显示loading动画
+        if not switch.mobot_switch:
+            # 什么都没开的文案提示
+            if not switch.hr_chat_switch:
+                yield self._switch_all_close_reply_content()
+            else:
+                # 用户回复内容后响应的文案提示
+                if save_chat_flag:
+                    yield self._hr_message_reply_content()
+                # 触发关键字的欢迎文案回复
+                else:
+                    yield self._hr_welcome_reply_content()
 
         # 添加聊天对话埋点记录
-        self._add_sensor_track(msg_type, mobot_enable, content)
-
-        # HR未托管MoBot的文案提示，不保存历史记录
-        if not mobot_enable:
-            yield self._hr_welcome_reply_content()
+        self._add_sensor_track(msg_type, switch.mobot_switch, content)
 
         # mobot_enable 提供前端控制 是否出loading状态
-        self.send_json_success(data={"mobot_enable": mobot_enable})
-
-    @gen.coroutine
-    def _hr_welcome_reply_content(self):
-        """
-        联系HR场景进入聊天室，HR自动回复的文本内容, 不记录聊天历史记录
-        """
-        hr_info = yield self.chat_ps.get_company_hr_info(self.hr_id)
-        if hr_info and hr_info.username:
-            content = "您好，我是{company_name}的{hr_name}，关于职位和公司信息有任何问题请随时和我沟通。".format(
-                company_name=self.current_user.company.abbreviation or self.current_user.company.name,
-                hr_name=hr_info.username)
-        else:
-            content = "您好，我是{company_name}HR，关于职位和公司信息有任何问题请随时和我沟通。".format(
-                company_name=self.current_user.company.abbreviation or self.current_user.company.name)
-
-        message_body = dict(
-            compoundContent="",
-            content=content,
-            stats=0,
-            msgType="html",
-            speaker=const.CHAT_SPEAKER_HR,
-            cid=int(self.room_id),
-            pid=int(self.position_id),
-            chatTime=curr_now_minute(),
-            roomType=int(self.room_type)
-        )
-        self.logger.debug("publish chat by redis message_body:{}".format(message_body))
-
-        # 发送给求职者
-        yield self.chat_ps.send_message(self.user_id, 0, self.room_id, message_body)
-
+        self.send_json_success(data={"mobot_enable": switch.mobot_switch})
 
     @gen.coroutine
     def _handle_chatbot_message(self, room_type, user_message, create_new_context, from_textfield, project_id):
