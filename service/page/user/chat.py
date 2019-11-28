@@ -630,7 +630,7 @@ class ChatPageService(PageService):
                                2: ['校招MoBot(请转HR（仅开启智能对话模式有效）)'],
                                3: ['员工版MoBot(请转HR（仅开启智能对话模式有效）)']}
 
-        res = yield self.infra_company_ds.get_oms_all_switch(company_id)
+        res = yield self.infra_company_ds.get_oms_all_switch_status(company_id)
         products = res.get('data') or []
 
         for k, v in chat_switch_module.iteritems():
