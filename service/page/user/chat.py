@@ -633,21 +633,21 @@ class ChatPageService(PageService):
         res = yield self.infra_company_ds.get_oms_all_switch_status(company_id)
         products = res.get('data') or []
 
-        for k, v in chat_switch_module.iteritems():
+        for k, v in chat_switch_module.items():
             for product in products:
                 if product['keyword'] in v:
                     if product['valid'] == 1 and room_type == k:
                         data.update({'hr_chat_switch': True})
                         break
 
-        for k, v in mobot_switch_module.iteritems():
+        for k, v in mobot_switch_module.items():
             for product in products:
                 if product['keyword'] in v:
                     if product['valid'] == 1 and room_type == k:
                         data.update({'mobot_switch': True})
                         break
 
-        for k, v in to_hr_switch_module.iteritems():
+        for k, v in to_hr_switch_module.items():
             for product in products:
                 if product['keyword'] in v:
                     if product['valid'] == 1 and room_type == k:
