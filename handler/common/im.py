@@ -281,10 +281,11 @@ class ChatHandler(BaseHandler):
                                 "openLocation"
                                 ]
         })
-        self.logger.debug("get_environ get jssdk config:{}".format(config))
+        self.logger.debug("get_environ get jssdk config:{}, room_type:{}".format(config, self.room_type))
 
         fast_entry = []
         switch = yield self.chat_ps.get_mobot_switch_status(self.current_user.company.id, self.room_type)
+        self.logger.debug("get_environ get switch:{}, to_hr_switch:{}".format(switch, switch.to_hr_switch))
         if switch.to_hr_switch:
             fast_entry = [{"msg_type": "html", "content": "请转HR"}]
 
