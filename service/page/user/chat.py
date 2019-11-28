@@ -631,6 +631,7 @@ class ChatPageService(PageService):
 
         res = yield self.infra_company_ds.get_oms_all_switch_status(company_id)
         products = res.get('data') or []
+        self.logger.debug(products)
 
         for k, v in chat_switch_module.items():
             for product in products:
@@ -653,4 +654,5 @@ class ChatPageService(PageService):
                         data.update({'to_hr_switch': True})
                         break
 
-        raise gen.Return(ObjectDict(data))
+        data = ObjectDict(data)
+        raise gen.Return(data)
