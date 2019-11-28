@@ -2,6 +2,7 @@
 
 import pika
 import pika_pool
+import time
 
 import json
 from globals import logger
@@ -56,6 +57,7 @@ class MQPublisher(object):
     def publish_message(self, message, routing_key=None):
 
         # TODO (tangyiliang) Add random message id
+        start = time.time()
         with self._pool.acquire() as cxt:
             properties = pika.BasicProperties(
                 app_id=self.appid,
@@ -76,9 +78,10 @@ class MQPublisher(object):
             )
 
             self._message_number += 1
+            end = time.time()
             logger.info(
-                'Published message # %i: body:%s, exchange:%s, routing_key:%s' % (
-                    self._message_number, message, self.exchange, routing_key))
+                'Published message # %i: body:%s, exchange:%s, routing_key:%s, time:%s' % (
+                    self._message_number, message, self.exchange, routing_key, (end-start)*1000))
 
 
 class AwardsMQPublisher(MQPublisher):
