@@ -2,6 +2,7 @@
 
 import pika
 import pika_pool
+import time
 
 import time
 
