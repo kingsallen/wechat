@@ -572,31 +572,6 @@ class ChatPageService(PageService):
         raise gen.Return(mobot_enable)
 
     @gen.coroutine
-    def get_mobot_switch_status(self, company_id, room_type):
-        """
-        检查oms控制的一系列开关状态
-        :param company_id:
-        :param product_type: 1 社招 2 校招 3 我是员工
-        :return:
-        """
-        room_type = int(room_type)
-        mobot_type = {1: '社招版MoBot(人工+智能对话模式)',
-                      2: '校招MoBot(人工+智能对话模式)',
-                      3: '员工版MoBot(人工+智能对话模式)'}
-
-        res = yield self.infra_company_ds.get_oms_all_switch_status(company_id)
-        if not res.data:
-            self.logger.warning("get_mobot_switch_status is null, company.id:{}".format(company_id))
-            raise gen.Return(False)
-
-        for product in res.data:
-            if product['keyword'] == mobot_type[room_type]:
-                if product['valid'] == 1:
-                    raise gen.Return(True)
-
-        raise gen.Return(False)
-
-    @gen.coroutine
     def get_sokcet_token(self, user_id):
         """
         获取socket访问token
