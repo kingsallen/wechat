@@ -123,7 +123,7 @@ class ChattingPageService(PageService):
         raise gen.Return(ret)
 
     @gen.coroutine
-    def enter_the_room(self, room_id, role, user_id, employee_id, company_id, position_id):
+    def enter_the_room(self, room_id, role, user_id, employee_id, company_id, position_id, entry_type):
         """
         进入聊天室
         :param room_id: 聊天室编号
@@ -132,10 +132,12 @@ class ChattingPageService(PageService):
         :param employee_id:  员工编号
         :param company_id: 公司编号
         :param position_id: 职位
+        :param entry_type: 场景
         :return: 操作结果
         """
 
-        ret = yield self.infra_im_ds.enter_the_room(room_id, role, user_id, employee_id, company_id, position_id)
+        ret = yield self.infra_im_ds.enter_the_room(room_id, role, user_id, employee_id, company_id, position_id,
+                                                    entry_type)
         raise gen.Return(ret)
 
     @gen.coroutine
@@ -186,4 +188,20 @@ class ChattingPageService(PageService):
 
         ret = yield self.infra_im_ds.post_message(room_id, role, user_id, employee_id, company_id, content, msg_type,
                                                   chat_time)
+        raise gen.Return(ret)
+
+    @gen.coroutine
+    def post_invite_message(self, company_id, employee_id, position_id, user_id, entry_type, psc):
+        """
+        通知后端发送模板消息
+        :param company_id: 公司编号
+        :param employee_id: 员工编号
+        :param position_id: 职位编号
+        :param user_id: 用户编号
+        :param entry_type: 来源
+        :param psc: 分享链路编号
+        :return: 操作结果
+        """
+
+        ret = yield self.infra_im_ds.post_invite_message(company_id, employee_id, position_id, user_id, entry_type, psc)
         raise gen.Return(ret)

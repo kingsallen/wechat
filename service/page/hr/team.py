@@ -14,7 +14,7 @@ from util.common import ObjectDict
 from util.tool import temp_data_tool, iterable_tool
 from util.tool.str_tool import gen_salary, split
 from util.tool.url_tool import make_url, make_static_url
-from util.common.decorator import log_time
+from util.common.decorator import log_coro
 
 
 class TeamPageService(PageService):
@@ -28,7 +28,7 @@ class TeamPageService(PageService):
 
         raise gen.Return(sub_company)
 
-    @log_time
+    @log_coro(threshold=20)
     @gen.coroutine
     def get_team_by_id(self, team_id):
         team = yield self.hr_team_ds.get_team(conds={'id': team_id, 'disable': 0})

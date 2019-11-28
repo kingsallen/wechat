@@ -895,3 +895,6 @@ CHATTING_EMPLOYEE_MSG_TYPE_RESIGNATION = "employee_off"
 
 # 开关模块
 COMPANY_SWITCH_MODULE_CHATTING = 30
+
+# profile 校验特殊符号
+PROFILE_CHECK_SYMBOL = """，,、:：;；‘’'“”""''"""
