@@ -436,7 +436,7 @@ class PositionHandler(BaseHandler):
             "team": team_id,
             "did": did,
             "salary": position_info.salary,
-            "hr_chat": bool(parent_company_info.conf_hr_chat),
+            "hr_chat": position_info.hr_chat_switch,
             # 默认的“团队”做国际化
             "teamname_custom": self.locale.translate('team') if teamname_custom["teamname_custom"] == '团队' else teamname_custom["teamname_custom"],
             "candidate_source": position_info.candidate_source_num,
@@ -449,8 +449,7 @@ class PositionHandler(BaseHandler):
             "recom_info_switch": switch,
             "lbs_oms": lbs_oms,
             "has_store": has_store,
-            "emp_bind_config": bool(conf_response.exists if conf_response else None),  # 是否拥有员工认证配置项
-            "hr_chat_switch": position_info.hr_chat_switch
+            "emp_bind_config": bool(conf_response.exists if conf_response else None)  # 是否拥有员工认证配置项
             # "team": position_info.department.lower() if position_info.department else ""
         })
 

@@ -758,6 +758,7 @@ class PositionPageService(PageService):
 
         raise gen.Return(False)
 
+
     @gen.coroutine
     def get_position_distance_batch(self, pids, longitude, latitude):
         """
