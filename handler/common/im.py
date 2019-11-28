@@ -268,7 +268,8 @@ class ChatHandler(BaseHandler):
                                 "openProductSpecificView",
                                 "addCard",
                                 "chooseCard",
-                                "openCard"
+                                "openCard",
+                                "openLocation"
                                 ]
         })
         self.logger.debug("get_environ get jssdk config:{}".format(config))

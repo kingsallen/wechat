@@ -187,3 +187,37 @@ class InfraCompanyDataService(DataService):
         mobot_conf_info.welcome = conf.mobot_welcome
 
         raise gen.Return(mobot_conf_info)
+
+    @gen.coroutine
+    def get_referral_rule_switch(self, company_id):
+        params = ObjectDict({
+            "company_id": company_id
+        })
+        ret = yield http_get_v2(company.REFERRAL_RULE_SWITCH, company_service, params)
+        return ret
+
+    @gen.coroutine
+    def get_nearby_stores(self, params):
+        """
+        获取用户指定范围内门店位置
+        :param params : {'companyId': 123, 'longitude': 120.749991, 'latitude': 30.770423, 'radius': }
+        """
+        ret = yield http_get_v2(company.COMPANY_NEARBY_STORES, company_service, params)
+        return ret
+
+    @gen.coroutine
+    def get_position_lbs_info(self, params, pid):
+        """
+        根据职位id获取职位的LBS信息
+        :param params :
+        """
+        ret = yield http_get_v2(company.COMPANY_POSITION_LBS.format(pid), company_service, params)
+        return ret
+
+    @gen.coroutine
+    def get_lbs_ip_location(self, remote_ip):
+        """
+        高德地图ip定位接口： 根据remote_ip获取定位信息：经纬度
+        """
+        ret = yield http_get(path.LBS_IP_LOCATION.format(remote_ip), infra=False)
+        return ret

@@ -131,9 +131,13 @@ class DictionaryPageService(PageService):
         res = yield self.infra_dict_ds.get_comment_tags_by_code(code)
         return res
 
-
     @tornado.gen.coroutine
     def get_hope_job_tree(self, field_type):
         ret = yield self.infra_dict_ds.get_hope_job_tree(field_type)
         res = ret[0]["children"]
         return res
+
+    @tornado.gen.coroutine
+    def get_dict_regions(self, locale_display):
+        ret = yield self.infra_dict_ds.get_dict_regions(locale_display)
+        return ret

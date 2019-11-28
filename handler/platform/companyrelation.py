@@ -71,10 +71,17 @@ class CompanyHandler(BaseHandler):
         else:
             origin = const.SA_ORIGIN_PLATFORM
         self.track("cCompanyIndex", properties=ObjectDict(origin=origin))
+        team = yield self.team_ps.get_team(ObjectDict({
+            "company_id": self.current_user.company.id,
+            "disable": const.OLD_YES,
+            "is_show": const.YES
+        }))
+
+        has_team = bool(team)
         if self.flag_should_display_newjd:
             data = yield self.user_company_ps.get_company_data(
                 self.locale, self.params, company, self.current_user)
-
+            data.has_team = has_team
             self.params.share = self._share(company)
             self.render_page(template_name='company/profile.html', data=data)
         else:
@@ -91,6 +98,7 @@ class CompanyHandler(BaseHandler):
             })
 
             add_item(company_data, "company", company)
+            add_item(company_data, "has_team", has_team)
             self.render_page(
                 template_name='company/info_old.html',
                 data=company_data,
@@ -178,3 +186,64 @@ class CompanyHrInfoHandler(BaseHandler):
         """获取hr信息"""
         hr_info = yield self.company_ps.get_main_hr_info(self.current_user.company.id)
         self.send_json_success(data=hr_info)
+
+
+class NearbyStoresHandler(BaseHandler):
+
+    @handle_response
+    @gen.coroutine
+    def get(self):
+        """获取附近店铺"""
+        if self.params.longitude and self.params.latitude:
+            radius = self.params.radius
+
+            params = ObjectDict({
+                "company_id": self.current_user.company.id,
+                "longitude": self.params.longitude,
+                "latitude": self.params.latitude,
+                "radius": float(radius) / 1000 if radius and float(radius) else 1
+            })
+        else:
+            params = ObjectDict({
+                "company_id": self.current_user.company.id
+            })
+            # ret = yield self.company_ps.get_lbs_ip_location(self.request.remote_ip)
+            # longitude = ret.split(";")[0].split(",")[0]
+            # latitude = ret.split(";")[0].split(",")[1]
+
+        stores_info = yield self.company_ps.get_nearby_stores(params)
+
+        if stores_info.data and stores_info.data.stores:
+            for store in stores_info.data.stores:
+                store.update({"coordinates": {"latitude": store["latitude"], "longitude": store["longitude"]}})
+        self.send_json_success(data=stores_info.data)
+
+
+class PositionLbsHandler(BaseHandler):
+
+    @handle_response
+    @gen.coroutine
+    def get(self, position_id):
+        """根据职位id获取职位的LBS信息"""
+        if self.params.longitude and self.params.latitude:
+            radius = self.params.radius
+            params = ObjectDict({
+                "company_id": self.current_user.company.id,
+                "longitude": self.params.longitude,
+                "latitude": self.params.latitude,
+                "radius": float(radius) / 1000 if radius and float(radius) else 1
+            })
+        else:
+            params = ObjectDict({
+                "company_id": self.current_user.company.id
+            })
+        #     ret = yield self.company_ps.get_lbs_ip_location(self.request.remote_ip)
+        #     longitude = ret.split(";")[0].split(",")[0]
+        #     latitude = ret.split(";")[0].split(",")[1]
+
+        stores_info = yield self.company_ps.get_position_lbs_info(params, position_id)
+
+        if stores_info.data and stores_info.data.stores:
+            for store in stores_info.data.stores:
+                store.update({"coordinates": {"latitude": store["latitude"], "longitude": store["longitude"]}})
+        self.send_json_success(data=stores_info.data)

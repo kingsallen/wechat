@@ -83,3 +83,17 @@ class SwitchHandler(BaseHandler):
 
         data = ret.data.get('valid') if ret.data else 0
         self.send_json_success(data=data)
+
+    @handle_response
+    @gen.coroutine
+    def get_referral_rule(self):
+        """
+        获取内推方式开关
+        :return:
+        """
+        ret = yield self.company_ps.get_referral_rule_switch(self.current_user.company.id)
+        if not ret.code == NEWINFRA_API_SUCCESS:
+            self.send_json_error(message=ret.message)
+            return
+
+        self.send_json_success(data=ret.data)

@@ -78,8 +78,21 @@ class EmployeeChattingHandler(BaseHandler):
         if self.user_id == 0 and not self.current_user.employee:
             self.user_id = self.current_user.sysuser.id or 0
 
+        self.logger.debug("EmployeeChattingHandler get params role:{}, employee_id:{}, user_id:{}"
+                          .format(self.role, self.employee_id, self.user_id))
+
+        if self.role == "employee" and not self.current_user.employee:
+            self._send_json(data={}, status_code=30500, message=CHATTING_EMPLOYEE_RESIGNATION_TIPS, http_code=200)
+            return
+        if self.role == "user" and self.current_user.employee:
+            self._send_json(data={}, status_code=305072, message=CHATTING_EMPLOYEE_EMPLOYEE_TIPS, http_code=200)
+            return
+
         try:
             # 重置 event，准确描述
+            if method and isinstance(method, str):
+                method = method.replace("-", "_")
+
             self._event = self._event + method
             yield getattr(self, "get_" + method)()
         except Exception as e:
@@ -122,8 +135,21 @@ class EmployeeChattingHandler(BaseHandler):
         if self.user_id == 0 and not self.current_user.employee:
             self.user_id = self.current_user.sysuser.id or 0
 
+        self.logger.debug("EmployeeChattingHandler get params role:{}, employee_id:{}, user_id:{}"
+                          .format(self.role, self.employee_id, self.user_id))
+
+        if self.role == "employee" and not self.current_user.employee:
+            self._send_json(data={}, status_code=30500, message=CHATTING_EMPLOYEE_RESIGNATION_TIPS, http_code=200)
+            return
+        if self.role == "user" and self.current_user.employee:
+            self._send_json(data={}, status_code=305072, message=CHATTING_EMPLOYEE_EMPLOYEE_TIPS, http_code=200)
+            return
+
         try:
             # 重置 event，准确描述
+            if method and isinstance(method, str):
+                method = method.replace("-", "_")
+
             self._event = self._event + method
             yield getattr(self, "post_" + method)()
         except Exception as e:
@@ -245,6 +271,17 @@ class EmployeeChattingHandler(BaseHandler):
 
     @handle_response
     @gen.coroutine
+    def get_im_switch(self):
+        """
+        获取聊天开关的状态
+        :return: 推送开关状态
+        """
+        self.logger.debug("EmployeeChattingHandler get_im_switch company_id:{}".format(self.current_user.company.id))
+        on = yield self.chatting_ps.get_chatting_switch(self.current_user.company.id, self.current_user.employee)
+        return self.send_json_success(ObjectDict(on=on))
+
+    @handle_response
+    @gen.coroutine
     def post_switch(self):
         """
         关闭消息推送
@@ -264,6 +301,15 @@ class EmployeeChattingHandler(BaseHandler):
         :return: 推送开关状态
         """
         self.logger.debug("enter room. employee_id:{}, user_id:{}".format(self.employee_id, self.user_id))
+
+        if (not self.json_args.get("room_id") or int(self.json_args.get("room_id")) == 0) and (self.user_id == 0 or self.employee_id == 0):
+            if self.role == "employee":
+                self._send_json(data={}, status_code=30500, message=CHATTING_EMPLOYEE_RESIGNATION_TIPS, http_code=200)
+                return
+            if self.role == "user":
+                self._send_json(data={}, status_code=305072, message=CHATTING_EMPLOYEE_EMPLOYEE_TIPS, http_code=200)
+                return
+
         user_id = self.user_id
         employee_id = self.employee_id
         if (self.json_args.get("room_id") and int(self.json_args.get("room_id")) > 0) and (self.user_id == 0 or
