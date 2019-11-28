@@ -214,7 +214,7 @@ class ChatHandler(BaseHandler):
         :return:
         """
 
-        self.room_type = self.params.room_type or 1
+        self.room_type = int(self.params.room_type or 1)
 
         res_privacy, data_privacy = yield self.privacy_ps.if_privacy_agreement_window(
             self.current_user.sysuser.id)
@@ -341,7 +341,7 @@ class ChatHandler(BaseHandler):
         pid = self.params.pid or 0
         room_id = self.params.room_id or 0
 
-        self.room_type = self.params.room_type or 1
+        self.room_type = int(self.params.room_type or 1)
 
         # gamma 项目 hr 欢迎导语不同
         is_gamma = False
@@ -533,7 +533,7 @@ class ChatHandler(BaseHandler):
         self.position_id = self.params.get("pid") or 0
         self.flag = int(self.params.get("flag")) or None
         self.project_id = self.params.get("project_id") or 0
-        self.room_type = self.params.get("room_type") or 1
+        self.room_type = int(self.params.get("room_type") or 1)
 
         content = self.json_args.get("content") or ""
         compoundContent = self.json_args.get("compoundContent") or {}
