@@ -1,16 +1,15 @@
 # coding=utf-8
 
 from tornado import gen
-from handler.base import BaseHandler
 
 import conf.common as const
 import conf.message as msg
-from thrift_gen.gen.employee.struct.ttypes import BindStatus
-from util.common.decorator import handle_response, verified_mobile_oneself, authenticated, check_employee_common
-from util.tool.file_tool import filetype
-from util.tool.str_tool import email_validate, is_alphabet, is_chinese, password_crypt, password_validate
-from util.image.upload import QiniuUpload
+from handler.base import BaseHandler
 from util.common import ObjectDict
+from util.common.decorator import handle_response, verified_mobile_oneself, authenticated, check_employee_common
+from util.image.upload import QiniuUpload
+from util.tool.file_tool import filetype
+from util.tool.str_tool import email_validate, is_alphabet, is_chinese, password_validate
 
 
 class UsercenterHandler(BaseHandler):
@@ -59,9 +58,6 @@ class UsercenterHandler(BaseHandler):
         else:
             unread_praise = 0
 
-        # 是否显示我的消息
-        hr_chat_switch = yield self.position_ps.get_hr_chat_switch_status(self.current_user.company.id, '9')
-
         self.send_json_success(data=ObjectDict(
             headimg=self.static_url(res.data.headimg or const.SYSUSER_HEADIMG),
             name=res.data.name or res.data.nickname,
@@ -71,8 +67,7 @@ class UsercenterHandler(BaseHandler):
             bind_disable=employee_cert_conf.disable == const.OLD_NO,
             bind_status=fe_bind_status,
             has_password=bool(res.data.password),
-            unread_praise=unread_praise,
-            hr_chat_switch=hr_chat_switch
+            unread_praise=unread_praise
         ))
 
     @handle_response

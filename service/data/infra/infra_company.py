@@ -124,6 +124,35 @@ class InfraCompanyDataService(DataService):
         return res
 
     @gen.coroutine
+    def get_hr_chat_switch_status(self, company_id, candidate_source):
+        """
+        获取是否显示联系HR的开关配置
+        :param company_id:
+        :param candidate_source: 0 社招 1 校招 9 全部(显示个人中心首页中我的消息)
+        :return:
+        """
+        mobot_type = {'0': ['社招版MoBot(人工对话模式)', '社招版MoBot(人工+智能对话模式)'],
+                      '1': ['校招MoBot(人工对话模式)', '校招MoBot(人工+智能对话模式)'],
+                      '9': ['社招版MoBot(人工对话模式)', '社招版MoBot(人工+智能对话模式)',
+                            '校招MoBot(人工对话模式)', '校招MoBot(人工+智能对话模式)',
+                            '员工版MoBot(人工对话模式)', '员工版MoBot(人工+智能对话模式)']}
+
+        if candidate_source not in ['0', '1', '9']:
+            raise gen.Return(False)
+
+        res = yield self.get_oms_all_switch_status(company_id)
+        if not res.data:
+            self.logger.warning("get_hr_chat_switch_status is null, company.id:{}".format(company_id))
+            raise gen.Return(False)
+
+        for product in res.data:
+            if product['keyword'] in mobot_type[candidate_source]:
+                if product['valid'] == 1:
+                    raise gen.Return(True)
+
+        raise gen.Return(False)
+
+    @gen.coroutine
     def get_company_hr_info(self, params):
         """
         根据hrId获取HR信息
