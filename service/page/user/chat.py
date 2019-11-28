@@ -616,6 +616,7 @@ class ChatPageService(PageService):
         :param room_type: 房间类型 1：社招, 2：校招，3: 员工
         :return:
         """
+        room_type = int(room_type)
         data = {'hr_chat_switch': False, 'mobot_switch': False, 'to_hr_switch': False}
         chat_switch_module = {1: ['社招版MoBot(人工对话模式)'],
                               2: ['校招MoBot(人工对话模式)'],
@@ -631,28 +632,30 @@ class ChatPageService(PageService):
 
         res = yield self.infra_company_ds.get_oms_all_switch_status(company_id)
         products = res.get('data') or []
-        self.logger.debug(products)
 
         for k, v in chat_switch_module.items():
-            for product in products:
-                if product['keyword'] in v:
-                    if product['valid'] == 1 and room_type == k:
-                        data.update({'hr_chat_switch': True})
-                        break
+            if room_type == k:
+                for product in products:
+                    if product['keyword'] in v:
+                        if product['valid'] == 1:
+                            data.update({'hr_chat_switch': True})
+                            break
 
         for k, v in mobot_switch_module.items():
-            for product in products:
-                if product['keyword'] in v:
-                    if product['valid'] == 1 and room_type == k:
-                        data.update({'mobot_switch': True})
-                        break
+            if room_type == k:
+                for product in products:
+                    if product['keyword'] in v:
+                        if product['valid'] == 1:
+                            data.update({'mobot_switch': True})
+                            break
 
         for k, v in to_hr_switch_module.items():
-            for product in products:
-                if product['keyword'] in v:
-                    if product['valid'] == 1 and room_type == k:
-                        data.update({'to_hr_switch': True})
-                        break
+            if room_type == k:
+                for product in products:
+                    if product['keyword'] in v:
+                        if product['valid'] == 1:
+                            data.update({'to_hr_switch': True})
+                            break
 
         data = ObjectDict(data)
         raise gen.Return(data)
