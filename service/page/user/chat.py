@@ -394,7 +394,7 @@ class ChatPageService(PageService):
         """
         调用MoBot QA接口
 
-        :param room_type mobot区分标识 social, campus, employee
+        :param room_type: 房间类型，1：社招, 2：校招，3: 员工
         :param message: 用户发送到文本内容
         :param user_id: 当前用户id
         :param hr_id: 聊天对象hrid
@@ -419,7 +419,7 @@ class ChatPageService(PageService):
             room_type, user_id, create_new_context))
 
         try:
-            if room_type == 'campus':
+            if room_type == 2:
                 res = yield http_post(
                     route='{host}{uri}'.format(host=settings['chatbot_host'], uri='campus_qa.api'), jdata=params,
                     infra=False)
