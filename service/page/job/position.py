@@ -147,6 +147,10 @@ class PositionPageService(PageService):
             position.city = city
             position.salary = position.salary
 
+        # 是否显示联系HR, oms开启人工或智能对话, 针对校招和社招职位是独立开关控制
+        position.hr_chat_switch = yield self.infra_company_ds.get_hr_chat_switch_status(position_res.company_id,
+                                                                                        str(position_res.candidate_source))
+
         raise gen.Return(position)
 
     @log_coro(threshold=20)
