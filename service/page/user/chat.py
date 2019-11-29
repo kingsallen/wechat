@@ -435,9 +435,9 @@ class ChatPageService(PageService):
                     ret_message = yield self.make_response(r, current_user)
                     messages.append(ret_message)
             else:
-                self.logger.error("mobot {} api result:{}".format(room_type, res))
+                self.logger.debug("mobot {} api result:{}".format(room_type, res))
         except Exception as e:
-            self.logger.error("mobot %s api error: %s, params: %s" % (room_type, e, params))
+            self.logger.debug("mobot %s api error: %s, params: %s" % (room_type, e, params))
             # 回复默认信息
             default_message = dict(resultType=0,
                                    resultTypeName='html',
