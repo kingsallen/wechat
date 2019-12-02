@@ -26,7 +26,7 @@ LANDING_INDEX_EMPLOYMENT = 6  # 工作性质
 LANDING_INDEX_DEGREE = 7
 LANDING_INDEX_CHILD_COMPANY = 8
 LANDING_INDEX_CUSTOM = 9
-LANDING_INDEX_POSITION_TYPE = 10 # 职位属性：店铺职位还是office职位
+LANDING_INDEX_POSITION_TYPE = 10  # 职位属性：店铺职位还是office职位
 
 # 栏目设置
 LANDING = ObjectDict({
@@ -40,12 +40,12 @@ LANDING = ObjectDict({
                                                   "salary_bottom"],
                                   "display_key": "salary",
                                   "form_name":   "salary",
-                                  "es_key":      ["position.salaryTop","position.salaryBottom"]},
+                                  "es_key":      ["position.salary_top", "position.salary_bottom"]},
     LANDING_INDEX_OCCUPATION:    {"name":        "职位职能", "chpe": "职能",
                                   "key":         "occupation",
                                   "display_key": "occupation",
                                   "form_name":   "occupation",
-                                  "es_key":      "jobOccupation.name"},
+                                  "es_key":      "job_occupation.name"},
     LANDING_INDEX_DEPARTMENT:    {"name":        "所属部门", "chpe": "部门",
                                   "key":         "team_name",
                                   "display_key": "team_name",
@@ -55,17 +55,17 @@ LANDING = ObjectDict({
                                   "key":         "candidate_source_name",
                                   "display_key": "candidate_source_name",
                                   "form_name":   "candidate_source",
-                                  "es_key":      "position.candidateSource"},
+                                  "es_key":      "position.candidate_source"},
     LANDING_INDEX_EMPLOYMENT:    {"name":        "工作性质", "chpe": "性质",
                                   "key":         "employment_type_name",
                                   "display_key": "employment_type_name",
                                   "form_name":   "employment_type",
-                                  "es_key":      "employeeTypeData.name"},
+                                  "es_key":      "employee_type_data.name"},
     LANDING_INDEX_DEGREE:        {"name":        "学历要求", "chpe": "学历",
                                   "key":         "degree_name",
                                   "display_key": "degree_name",
                                   "form_name":   "degree",
-                                  "es_key":      "degreeData.name"},
+                                  "es_key":      "degree_data.name"},
     LANDING_INDEX_CHILD_COMPANY: {"name":        "子公司名称", "chpe": "公司",
                                   "key":         "publisher_company_id",
                                   "display_key": "child_company_abbr",
@@ -75,12 +75,12 @@ LANDING = ObjectDict({
                                   "key":         "custom",
                                   "display_key": "custom",
                                   "form_name":   "custom",
-                                  "es_key":      "jobCustom.name"},
+                                  "es_key":      "job_custom.name"},
     LANDING_INDEX_POSITION_TYPE: {"name": "职位类型", "chpe": "类型",
                                   "key": "position_type",
                                   "display_key": "position_type",
                                   "form_name":   "position_type",
-                                  "es_key":      "position.notOffice"}
+                                  "es_key":      "position.not_office"}
 })
 
 # 薪资范围搜索项
