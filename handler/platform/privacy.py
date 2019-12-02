@@ -74,6 +74,8 @@ class IsAgreePrivacyHandler(BaseHandler):
         老用户拒绝老协议：跟新用户一致【只有同意过新协议的用户返回true】
         注意：第一、三种用户跟以前一致，只有第二种情况需要再分情况：user_privacy_record没有记录【已经同意老协议】，如果已经同意新协议无需再弹层，如果拒绝新协议，不同页面需要做不同处理
         """
+        import time
+        self.logger.debug("@@@@@--start_time: {}".format(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))))
         user_id = self.current_user.sysuser.id
         # 获取仟寻隐私协议状态
         result, show_privacy_agreement = yield self.privacy_ps.if_privacy_agreement_window(user_id)
@@ -94,13 +96,16 @@ class IsAgreePrivacyHandler(BaseHandler):
                     data = ObjectDict(qx_privacy=show_privacy_agreement,
                                       custom_privacy={"agree": custom_privacy_status.data}
                                       )
+                    self.logger.debug("@@@@@--end_time-2: {}".format(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))))
                     self.send_json_success(data=data)
                 else:   # 没同意过
                     custom_privacy_info = yield self.privacy_ps.get_custom_privacy_info(self.current_user.company.id)  # 获取客户自定义隐私协议信息
                     custom_privacy_info.data.update({"agree": custom_privacy_status.data})
                     data = ObjectDict(qx_privacy=show_privacy_agreement,
                                       custom_privacy=custom_privacy_info.data)
+                    self.logger.debug("@@@@@--end_time-1: {}".format(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))))
                     self.send_json_success(data=data)
+                    self.logger.debug("@@@@@--end_send_time: {}".format(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))))
             else: # oms开关关闭
                 data = ObjectDict(qx_privacy=show_privacy_agreement,
                                   custom_privacy=None)
