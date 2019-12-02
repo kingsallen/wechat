@@ -16,7 +16,7 @@ from service.data.infra.framework.client.client import ServiceClientFactory
 from thrift_gen.gen.position.service.PositionServices import Client as PositionServiceClient
 from util.common import ObjectDict
 from util.tool import http_tool
-from util.tool.http_tool import http_get, http_post, http_patch, http_get_rp, http_get_v2, http_post_v2
+from util.tool.http_tool import http_get, http_post, http_patch, http_get_v2, http_post_v2
 from util.common.decorator import log_coro
 
 
