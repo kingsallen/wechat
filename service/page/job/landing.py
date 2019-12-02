@@ -216,27 +216,27 @@ class LandingPageService(PageService):
 
         # 国际化
         field_form_name = data.field_form_name
-        positions = data.values
-        conf_search_seq_plus = data.conf_search_seq_plus
+        positions = data.get("values")  # 不要使用data.values，这是dict的built_in method
+        conf_search_seq_plus = data.conf_search_index_plus
         for index, k in enumerate(field_form_name):
             for e in positions:
-                if len(e) > index and e[index] and e[index].get(k):  # 理论上，这个数据一定是有的，但是防止基础服务的数据有问题，还是加上判断
-                    if k == 'candidate_source_name':
-                        text = locale.translate(const.CANDIDATE_SOURCE_SEARCH_LOCALE.get(e[index].get(k)))
+                if len(e) > index and e[index] and e[index].get("text"):  # 理论上，这个数据一定是有的，但是防止基础服务的数据有问题，还是加上判断
+                    if k == 'candidate_source':
+                        text = locale.translate(const.CANDIDATE_SOURCE_SEARCH_LOCALE.get(e[index].get("text")))
                         e[index].update({"text": text})
-                    elif k == 'employment_type_name':
-                        text = locale.translate(const.EMPLOYMENT_TYPE_SEARCH_LOCALE.get(e[index].get(k)))
+                    elif k == 'employment_type':
+                        text = locale.translate(const.EMPLOYMENT_TYPE_SEARCH_LOCALE.get(e[index].get("text")))
                         e[index].update({"text": text})
-                    elif k == 'degree_name':
-                        content = e[index].get(k)
+                    elif k == 'degree':
+                        content = e[index].get("text")
                         if "及以上" in content:
                             content = content.rstrip("及以上")
-                            text = locale.translate(const.DEGREE_SEARCH_LOCALE.get(content.rstrip("及以上")))
+                            text = locale.translate(const.DEGREE_SEARCH_LOCALE.get(content))
                         else:
-                            text = locale.translate(const.DEGREE_SEARCH_LOCALE.get(e.get(k)))
+                            text = locale.translate(const.DEGREE_SEARCH_LOCALE.get(content))
                         e[index].update({"text": text})
                     elif k == 'position_type':
-                        text = locale.translate(const.POSITION_TYPE_LOCALE.get(e[index].get(k)))
+                        text = locale.translate(const.POSITION_TYPE_LOCALE.get(e[index].get("text")))
                         e[index].update({"text": text})
         self.logger.debug("高级筛选项国际化, positions:{}".format(positions))
 
