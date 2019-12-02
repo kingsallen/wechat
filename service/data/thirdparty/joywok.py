@@ -5,10 +5,7 @@ import tornado.gen as gen
 
 import conf.path as path
 from service.data.base import DataService
-from util.common import ObjectDict
-from util.tool.http_tool import http_get, http_post, http_put, unboxing
-from util.common.decorator import log_coro
-from setting import settings
+from util.tool.http_tool import http_get
 
 
 class JoywokDataService(DataService):
