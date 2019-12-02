@@ -12,7 +12,7 @@ from util.common import ObjectDict
 from util.tool import http_tool, str_tool, url_tool
 
 from setting import settings
-from util.common.decorator import log_time
+from util.common.decorator import log_coro
 import time
 
 
@@ -67,7 +67,7 @@ class UserPageService(PageService):
 
         raise gen.Return(user_id)
 
-    @log_time
+    @log_coro
     @gen.coroutine
     def get_user_user(self, params):
         """
@@ -94,7 +94,7 @@ class UserPageService(PageService):
         })
         raise gen.Return(ret)
 
-    @log_time
+    @log_coro
     @gen.coroutine
     def get_wxuser_sysuser_id_wechat_id(self, sysuser_id, wechat_id):
         """根据 sysuer_id 和 wechat_id 获取 wxuser"""

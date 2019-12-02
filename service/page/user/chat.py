@@ -1,5 +1,7 @@
 # coding=utf-8
+import hashlib
 import json
+import time
 
 import pypinyin
 from pypinyin import lazy_pinyin
@@ -9,123 +11,221 @@ import conf.common as const
 from service.page.base import PageService
 from setting import settings
 from util.common import ObjectDict
-from util.common.decorator import log_time
+from util.common.decorator import log_coro
 from util.tool.date_tool import str_2_date
 from util.tool.http_tool import http_post, http_get
 from util.tool.str_tool import gen_salary
 from util.tool.url_tool import make_static_url
 
 
+def md5(str):
+    m = hashlib.md5()
+    m.update(str.encode("utf8"))
+    return m.hexdigest()
+
+
+def gen_signature(timestamp, md5_key):
+    if not timestamp or not md5_key:
+        return ''
+
+    signature = md5('{timestamp}{md5_key}'.format(timestamp=timestamp, md5_key=md5_key))
+    return signature
+
+
 class ChatPageService(PageService):
+
+    INTERNAL_SYSTEM_ACCESS_MD5_KEY = '2Ze0SnNMS27j2'
+
     def __init__(self):
         super().__init__()
 
     @gen.coroutine
-    def get_chatrooms(self, user_id, page_no, page_size):
+    def get_user_chatroom_page(self, user_id, page_no, page_size):
         """获得聊天室列表"""
 
-        ret = yield self.thrift_chat_ds.get_chatrooms_list(user_id, page_no, page_size)
-        obj_list = list()
-        if ret.rooms:
-            for e in ret.rooms:
-                room = ObjectDict()
-                room['id'] = e.id
-                room['hr_id'] = e.hrId
-                room['hr_name'] = e.name or "HR"
-                room['hr_headimg'] = make_static_url(e.headImgUrl or e.companyLogo or const.HR_HEADIMG)
-                room['company_name'] = e.companyName
-                room['chat_time'] = str_2_date(e.createTime, self.constant.TIME_FORMAT_MINUTE)
-                room['unread_num'] = e.unReadNum
-                obj_list.append(room)
+        def get_hr_info(hrs, hr_id):
+            for h in hrs:
+                if h['id'] == hr_id:
+                    return ObjectDict(h)
 
-        raise gen.Return(obj_list)
+        def get_company_info(companys, company_id):
+            for c in companys:
+                if c['id'] == company_id:
+                    return ObjectDict(c)
+
+        def get_company_conf_info(company_confs, company_id):
+            if not company_confs:
+                return None
+
+            for c in company_confs:
+                if c['company_id'] == company_id:
+                    return ObjectDict(c)
+
+        records = []
+        hr_ids = []
+        company_ids = []
+
+        user_chatroom_page = yield self.infra_immobot_ds.get_user_chatroom_page(user_id, page_no, page_size)
+        self.logger.debug(user_chatroom_page)
+
+        if not user_chatroom_page.data.current_page_data:
+            raise gen.Return(records)
+
+        # 过滤hr_ids
+        for r in user_chatroom_page.data.current_page_data:
+            r = ObjectDict(r)
+            if r.hr_id not in hr_ids:
+                hr_ids.append(r.hr_id)
+
+        # 根据hrids批量获取hr信息
+        company_hr_list = yield self.infra_company_ds.get_company_hr_list(hr_ids)
+        if not company_hr_list.data:
+            self.logger.error("get_user_chatroom_page get_company_hr_list error, hr_ids:{}".format(hr_ids))
+            raise gen.Return(records)
+
+        # 过滤company_ids
+        for hr in company_hr_list.data:
+            hr = ObjectDict(hr)
+            if hr.company_id not in company_ids:
+                company_ids.append(hr.company_id)
+
+        # 根据company_ids批量获取公司信息
+        company_list = yield self.infra_company_ds.get_company_list(company_ids)
+        if not company_list.data:
+            self.logger.error("get_user_chatroom_page get_company_list error, company_ids:{}".format(company_ids))
+            raise gen.Return(records)
+
+        # 根据company_ids批量获取公司配置信息
+        company_conf_list = yield self.infra_company_ds.batch_get_company_conf(company_ids)
+        if not company_conf_list.data:
+            self.logger.debug("get_user_chatroom_page company_conf_list not conf, company_ids:{}".format(company_ids))
+
+        for d in user_chatroom_page.data.current_page_data:
+            d = ObjectDict(d)
+            hr = get_hr_info(company_hr_list.data, d.hr_id)
+            company = get_company_info(company_list.data, hr['company_id'])
+            company_conf = get_company_conf_info(company_conf_list.data, hr['company_id'])
+
+            # 如果配置了mobot信息优先显示mobot信息
+            mobot_name = company_conf.mobot_name if company_conf else None
+            mobot_head_img = company_conf.mobot_head_img if company_conf else None
+
+            if not hr or not company:
+                self.logger.warning("get_user_chatroom_page hr or company not exist, hr_id:{}".format(d.hr_id))
+                continue
+
+            room = ObjectDict()
+            room['id'] = d.room_id
+            room['hr_id'] = d.hr_id
+            room['hr_name'] = mobot_name or hr.username or "HR"
+            room['hr_headimg'] = make_static_url(mobot_head_img or hr.headimgurl or company.logo or const.HR_HEADIMG)
+            room['company_name'] = company.abbreviation or company.name or ""
+            room['chat_time'] = str_2_date(d.last_chat_time, self.constant.TIME_FORMAT_MINUTE)
+            room['unread_num'] = d.user_have_unread_msg
+            room['room_type'] = d.room_type
+            records.append(room)
+
+        raise gen.Return(records)
 
     @gen.coroutine
-    def get_chats(self, room_id, page_no, page_size):
-        """获得聊天历史记录"""
+    def get_user_chat_history_record_page(self, room_id, user_id, page_no, page_size):
+        """获取用户聊天历史记录分页数据"""
+        records = []
+        user_chat_history_record_page = yield self.infra_immobot_ds.get_user_chat_history_record_page(
+            room_id, user_id, page_no, page_size)
 
-        ret = yield self.thrift_chat_ds.get_chats(room_id, page_no, page_size)
-        self.logger.debug(ret)
-        obj_list = list()
-        if ret.chatLogs:
-            for e in ret.chatLogs:
-                room = ObjectDict()
-                room['id'] = e.id
-                room['content'] = e.content or ''
-                room['chatTime'] = str_2_date(e.createTime, const.TIME_FORMAT)
-                room['speaker'] = e.speaker  # 0：求职者，1：HR
-                room['msgType'] = e.msgType
-                room['compoundContent'] = json.loads(e.compoundContent if e.compoundContent else '{}') or {}
-                room['stats'] = json.loads(e.stats if e.stats else '{}') or {}
-                self._compliant_chat_log(e, room)
-                obj_list.append(room)
+        # IM37006 数据权限校验失败
+        if user_chat_history_record_page.code != '0':
+            raise gen.Return(user_chat_history_record_page.code)
 
-        raise gen.Return(obj_list)
+        if not user_chat_history_record_page.data.current_page_data:
+            raise gen.Return(records)
 
-    @staticmethod
-    def _compliant_chat_log(message, room):
-        """兼容老的聊天字段"""
-        btn_content = json.loads(message.btnContent) if message.btnContent else message.btnContent
-        if btn_content and type(btn_content) == str:
-            btn_content = json.loads(btn_content)
-        duration = message.duration
-        server_id = message.serverId
-        asset_url = message.assetUrl
-        if type(room['compoundContent']) == dict:
-            room['compoundContent'].update(duration=duration, server_id=server_id, asset_url=asset_url)
-        if message.msgType == 'button':
-            room['compoundContent'] = btn_content
+        for c in user_chat_history_record_page.data.current_page_data:
+            c = ObjectDict(c)
+            if c.msg_type == 'voice':
+                compound_content = dict(duration=c.duration, server_id=c.server_id, asset_url=c.local_url)
+            else:
+                compound_content = json.loads(c.compound_content if c.compound_content else '{}') or {}
+
+            stats = json.loads(c.stats if c.stats else '{}') or {}
+
+            chat = ObjectDict()
+            chat['id'] = c.id
+            chat['content'] = c.content or ''
+            chat['chatTime'] = str_2_date(c.create_time, const.TIME_FORMAT)
+            chat['speaker'] = c.speaker  # 0：求职者，1：HR
+            chat['msgType'] = c.msg_type
+            chat['compoundContent'] = compound_content
+            chat['stats'] = stats
+            records.append(chat)
+
+        raise gen.Return(records)
 
     @gen.coroutine
-    def get_chatroom(self, user_id, hr_id, company_id, position_id, room_id, qxuser, is_gamma, mobot_enable,
-                     recom, is_employee):
-        """进入聊天室"""
+    def get_chatroom(self, room_type, sysuser, hr_id, position_id, room_id, qxuser, is_gamma, mobot_enable, recom,
+                     is_employee):
+        """
+        进入聊天室
+
+        房间类型，1：社招, 2：校招，3: 员工
+        room_type
+        """
         hr_info = ObjectDict()
         mobot_info = ObjectDict(enable=mobot_enable, name='', headimg='')
 
-        ret = yield self.thrift_chat_ds.enter_chatroom(user_id, hr_id, position_id, room_id, is_gamma)
-        if ret.hr:
+        user_info = ObjectDict(
+            user_id=sysuser.id,
+            user_name=sysuser.name,
+            user_headimg=make_static_url(sysuser.headimg or const.SYSUSER_HEADIMG)
+        )
+        ret = yield self.infra_immobot_ds.user_enter_chatroom(room_type, room_id, sysuser.id, hr_id, position_id,
+                                                              is_gamma)
+        if not ret.data:
+            raise gen.Return("")
+
+        room = ObjectDict(ret.data)
+        if room.hr_account:
+            hr_account = ObjectDict(room.hr_account)
             hr_info = ObjectDict(
-                hr_id=ret.hr.hrId,
-                hr_name=ret.hr.hrName or "HR",
-                hr_headimg=make_static_url(ret.hr.hrHeadImg or const.HR_HEADIMG),
-                deleted=ret.hr.isDelete
+                hr_id=hr_account.id,
+                hr_name=hr_account.username or "HR",
+                hr_headimg=make_static_url(hr_account.headimgurl or const.HR_HEADIMG),
+                deleted=(hr_account.disable == 0)
             )
 
-        mobot_conf_data = yield self.infra_company_ds.get_company_mobot_conf(company_id)
-        if mobot_conf_data.get('data'):
-            mobot_conf = mobot_conf_data.get('data')
-            mobot_info.name = mobot_conf['mobot_head_img'] or "小助手"
-            mobot_info.headimg = make_static_url(mobot_conf['mobot_head_img'] or const.HR_HEADIMG)
-
-        user_info = ObjectDict()
-        if ret.user:
-            user_info = ObjectDict(
-                user_id=ret.user.userId,
-                user_name=ret.user.userName,
-                user_headimg=make_static_url(ret.user.userHeadImg or const.SYSUSER_HEADIMG)
-            )
+        if room.company_conf:
+            company_conf = ObjectDict(room.company_conf)
+            mobot_info.name = company_conf.mobot_name or "小助手"
+            mobot_info.headimg = make_static_url(company_conf.mobot_head_img or hr_info.hr_headimg or const.HR_HEADIMG)
 
         position_info = ObjectDict()
-        if ret.position:
+        if room.position:
+            full_position = ObjectDict(room.position)
+            position = ObjectDict(full_position.position) if full_position.position else ObjectDict()
+            company = ObjectDict(full_position.company) if full_position.company else ObjectDict()
+            team = ObjectDict(full_position.team) if full_position.team else ObjectDict()
+            salary = ObjectDict(full_position.salary_data) if full_position.salary_data else ObjectDict()
+            team_name = team.name if team else position.department
+
             position_info = ObjectDict(
-                pid=ret.position.positionId,
-                title=ret.position.positionTitle,
-                company_name=ret.position.companyName,
-                city=ret.position.city,
-                salary=gen_salary(ret.position.salaryTop, ret.position.salaryBottom),
-                update=str_2_date(ret.position.updateTime, const.TIME_FORMAT_MINUTE),
-                status=ret.position.status,
-                team=ret.position.team
+                pid=position.id,
+                title=position.title,
+                company_name=company.name,
+                city=position.city,
+                salary=gen_salary(salary.salary_top, salary.salary_bottom),
+                update=str_2_date(position.update_time, const.TIME_FORMAT_MINUTE),
+                status=position.status,
+                team=team_name
             )
         res = ObjectDict(
             hr=hr_info,
             mobot=mobot_info,
             user=user_info,
             position=position_info,
-            chat_debut=ret.chatDebut,
+            chat_debut=room.is_new_created,
             follow_qx=qxuser.is_subscribe == 1,
-            room_id=ret.roomId,
+            room_id=room.room_id,
             show_position_info=(len(position_info) > 0 and not mobot_enable),
             recom=recom,
             is_employee=is_employee
@@ -133,70 +233,62 @@ class ChatPageService(PageService):
         raise gen.Return(res)
 
     @gen.coroutine
-    def leave_chatroom(self, room_id, speaker=0):
+    def leave_chatroom(self, room_id, user_id, speaker=0):
         """
         离开聊天室
-        :param room_id:
         :param speaker: 0：求职者，1：HR
         :return:
         """
-
-        ret = yield self.thrift_chat_ds.leave_chatroom(room_id, speaker)
+        ret = yield self.infra_immobot_ds.user_leave_chatroom(room_id, user_id, speaker)
         raise gen.Return(ret)
 
     @gen.coroutine
-    def save_chat(self, params):
+    def delete_chatroom(self, room_id, user_id):
         """
-        记录聊天内容
-        :param params:
-        :return:
+        删除聊天室
         """
-
-        ret = yield self.thrift_chat_ds.save_chat(params)
+        ret = yield self.infra_immobot_ds.user_delete_chatroom(room_id, user_id)
         raise gen.Return(ret)
 
     @gen.coroutine
-    def get_chatroom_info(self, room_id):
+    def save_chat(self, company_id, room_id, user_id, msg_type, origin, pid, content, compound_content, speaker,
+                  voice_server_id, voice_duration):
+        """
+        保存聊天记录
+        """
+        ret = yield self.infra_immobot_ds.save_chat_record(company_id, room_id, user_id, msg_type, origin, pid, content,
+                                                           compound_content, speaker, voice_server_id, voice_duration)
+        if not ret.data:
+            raise gen.Return({})
 
-        """返回JD 页，求职者与 HR 之间的未读消息数"""
-        chatroom = yield self.hr_wx_hr_chat_list_ds.get_chatroom(conds={
-            "id": int(room_id),
-        })
-
-        raise gen.Return(chatroom)
+        raise gen.Return(ret.data)
 
     @gen.coroutine
-    def get_unread_chat_num(self, user_id, hr_id):
+    def get_unread_chat_num(self, user_id, hr_id, room_type):
         """返回JD 页，求职者与 HR 之间的未读消息数"""
-
         if user_id is None or not hr_id:
             raise gen.Return(1)
 
-        chatroom = yield self.hr_wx_hr_chat_list_ds.get_chatroom(conds={
-            "hraccount_id": int(hr_id),
-            "sysuser_id": user_id
-        })
-
+        res = yield self.infra_immobot_ds.get_user_chatroom_info(0, user_id, hr_id, room_type)
         # 若无聊天，则默认显示1条未读消息
-        if not chatroom:
+        if not res.data:
             raise gen.Return(1)
 
-        raise gen.Return(chatroom.user_unread_count)
+        room = ObjectDict(res.data)
+        raise gen.Return(room.user_unread_count)
 
     @gen.coroutine
     def get_all_unread_chat_num(self, user_id):
-
         """返回求职者所有的未读消息数，供侧边栏我的消息未读消息提示"""
-
         if user_id is None:
             raise gen.Return(0)
 
-        unread_count_total = yield self.hr_wx_hr_chat_list_ds.get_chat_unread_count_sum(conds={
-            "sysuser_id": user_id,
-        }, fields=["user_unread_count"])
-        if unread_count_total is None:
-            return gen.Return(0)
-        raise gen.Return(unread_count_total.sum_user_unread_count)
+        res = yield self.infra_immobot_ds.get_user_allchatroom_unread(user_id)
+        if not res.data:
+            raise gen.Return(0)
+
+        data = ObjectDict(res.data)
+        raise gen.Return(data.unread_total)
 
     @gen.coroutine
     def get_hr_info(self, publisher):
@@ -215,7 +307,7 @@ class ChatPageService(PageService):
 
         raise gen.Return(company_conf)
 
-    @log_time
+    @log_coro
     @gen.coroutine
     def infra_clound_get_position_list_rp_ext(self, pids):
         """获取职位的红包信息"""
@@ -229,7 +321,7 @@ class ChatPageService(PageService):
 
         raise gen.Return([])
 
-    @log_time
+    @log_coro
     @gen.coroutine
     def infra_clound_get_position_list(self, params, is_employee, banner):
         """
@@ -298,27 +390,18 @@ class ChatPageService(PageService):
         raise gen.Return(position_list)
 
     @gen.coroutine
-    def get_fast_entry(self, company_id):
-        uri = 'company/{company_id}/fastentry/config'.format(company_id=company_id)
-        route = '{host}{uri}'.format(host=settings['chatbot_host'], uri=uri)
-        result = yield http_get(route=route, jdata=None, infra=False, timeout=5)
-        raise gen.Return(result)
-
-    @gen.coroutine
-    def get_chatbot_reply(self, message, user_id, hr_id, position_id, flag, social, campus, create_new_context,
+    def get_chatbot_reply(self, room_type, message, user_id, hr_id, position_id, create_new_context,
                           current_user, from_textfield, project_id):
-        """ 调用 chatbot 返回机器人的回复信息
-               https://wiki.moseeker.com/chatbot.md
+        """
+        调用MoBot QA接口
+
+        :param room_type: 房间类型，1：社招, 2：校招，3: 员工
         :param message: 用户发送到文本内容
         :param user_id: 当前用户id
         :param hr_id: 聊天对象hrid
         :param position_id 当前职位id，不存在则为0
-        :param flag: 0:社招 1:校招 2:meet mobot 3: 智能推荐
-        :param create_new_context: meet mobot标识
-        :param current_user:
-        :param from_textfield:
-        :param social:社招判断开关 1：开启；
-        :param campus:校招判断开关 1：开启；
+        :param create_new_context: 是否需要开启新的会话
+        :param from_textfield: 非法分支输入标识
         :param project_id: MoPlan预约项目ID
         """
         messages = []
@@ -330,19 +413,14 @@ class ChatPageService(PageService):
             position_id=position_id,
             create_new_context=create_new_context,
             from_textfield=from_textfield,
-            project_id=project_id
+            project_id=project_id,
+            room_type=room_type
         )
-        self.logger.debug("get_chatbot_reply==>create_new_context:{} ".format(create_new_context))
-        self.logger.debug("chabot_params:flag:%s, social:%s, capmpus:%s" % (flag, social, campus))
-        self.logger.debug("chabot_params type :flag:%s, social:%s, capmpus:%s"
-                          % (type(flag), type(social), type(campus)))
-        flag = int(flag) if flag else None
+        self.logger.debug("get_chatbot_reply room_type:{}, user_id:{}, create_new_context:{}".format(
+            room_type, user_id, create_new_context))
+
         try:
-            if flag == 1:
-                res = yield http_post(
-                    route='{host}{uri}'.format(host=settings['chatbot_host'], uri='campus_qa.api'), jdata=params,
-                    infra=False)
-            elif flag is None and social == 0 and campus == 1:
+            if room_type == 2:
                 res = yield http_post(
                     route='{host}{uri}'.format(host=settings['chatbot_host'], uri='campus_qa.api'), jdata=params,
                     infra=False)
@@ -351,17 +429,25 @@ class ChatPageService(PageService):
                     route='{host}{uri}'.format(host=settings['chatbot_host'], uri='qa.api'), jdata=params,
                     infra=False)
 
-            self.logger.debug(res.results)
-            results = res.results
-            for r in results:
-                ret_message = yield self.make_response(r, current_user)
-                messages.append(ret_message)
-            self.logger.debug(messages)
+            self.logger.debug(res)
+            if res.status == 0 and res.data.results:
+                for r in res.data.results:
+                    ret_message = yield self.make_response(r, current_user)
+                    messages.append(ret_message)
+            else:
+                self.logger.debug("mobot {} api result:{}".format(room_type, res))
         except Exception as e:
-            self.logger.error("[get_chatbot_reply_fail!!]reeor: %s, params: %s" % (e, params))
-            return []
-        else:
-            return messages
+            self.logger.debug("mobot %s api error: %s, params: %s" % (room_type, e, params))
+            # 回复默认信息
+            default_message = dict(resultType=0,
+                                   resultTypeName='html',
+                                   values=dict(content='很抱歉，HR小姐姐还没告诉我答案，我暂时不能帮你回答问题哦。',
+                                               compoundContent=None))
+            default_result_message = yield self.make_response(default_message, current_user)
+            messages.append(default_result_message)
+
+        self.logger.debug(messages)
+        return messages
 
     @gen.coroutine
     def make_response(self, message, current_user):
@@ -370,13 +456,11 @@ class ChatPageService(PageService):
         """
         is_employee = bool(current_user.employee if current_user else None)
 
-        ids = []
-        res_type = message.get("resultType", "")
         ret = message.get("values", {})
         content = ret.get("content", "")
         compoundContent = ret.get("compoundContent") or {}
         stats = ret.get("stats") or {}
-        msg_type = const.MSG_TYPE.get(res_type)
+        msg_type = message.get("resultTypeName")
         ret_message = ObjectDict()
         ret_message['content'] = content
         ret_message['compound_content'] = compoundContent
@@ -486,3 +570,93 @@ class ChatPageService(PageService):
         # HR聊天是否托管给智能招聘助手，0 不托管，1 托管
         mobot_enable = bool(hr_info.leave_to_mobot) if hr_info else False
         raise gen.Return(mobot_enable)
+
+    @gen.coroutine
+    def get_sokcet_token(self, user_id):
+        """
+        获取socket访问token
+        """
+        timestamp = int(time.time())
+        signature = gen_signature(timestamp, self.INTERNAL_SYSTEM_ACCESS_MD5_KEY)
+        data = dict(signature=signature, timestamp=timestamp, system=1)
+        route = '{}{}'.format(settings.get('im_server_api'), '/user/{user_id}/socket/token'.format(user_id=user_id))
+        res = yield http_get(route=route, jdata=data, timeout=5, infra=False)
+        raise gen.Return(res)
+
+    @gen.coroutine
+    def get_user_online_status(self, user_id):
+        """
+        获取用户socket连接的在线状态
+        """
+        timestamp = int(time.time())
+        signature = gen_signature(timestamp, self.INTERNAL_SYSTEM_ACCESS_MD5_KEY)
+        data = dict(signature=signature, timestamp=timestamp, system=1)
+        route = '{}{}'.format(settings.get('im_server_api'), '/user/{user_id}/online/status'.format(user_id=user_id))
+        res = yield http_get(route=route, jdata=data, timeout=5, infra=False)
+        raise gen.Return(res)
+
+    @gen.coroutine
+    def send_message(self, user_id, hr_id, room_id, send_data):
+        """
+        发送socket通知消息数据
+        """
+        timestamp = int(time.time())
+        signature = gen_signature(timestamp, self.INTERNAL_SYSTEM_ACCESS_MD5_KEY)
+        meta_data = dict(signature=signature, timestamp=timestamp)
+        data = dict(meta_data=meta_data, system=1, user_id=user_id, hr_id=hr_id, room_id=room_id,
+                    send_data=send_data)
+        route = '{}{}'.format(settings.get('im_server_api'), '/send/message')
+        res = yield http_post(route=route, jdata=data, timeout=5, infra=False)
+        raise gen.Return(res)
+
+    @gen.coroutine
+    def get_mobot_switch_status(self, company_id, room_type):
+        """
+        获取是否显示联系HR的开关配置
+        :param company_id:
+        :param room_type: 房间类型 1：社招, 2：校招，3: 员工
+        :return:
+        """
+        room_type = int(room_type)
+        data = {'hr_chat_switch': False, 'mobot_switch': False, 'to_hr_switch': False}
+        chat_switch_module = {1: ['社招版MoBot(人工对话模式)'],
+                              2: ['校招MoBot(人工对话模式)'],
+                              3: ['员工版MoBot(人工对话模式)']}
+
+        mobot_switch_module = {1: ['社招版MoBot(人工+智能对话模式)'],
+                               2: ['校招MoBot(人工+智能对话模式)'],
+                               3: ['员工版MoBot(人工+智能对话模式)']}
+
+        to_hr_switch_module = {1: ['社招版MoBot(请转HR（仅开启智能对话模式有效）)'],
+                               2: ['校招MoBot(请转HR（仅开启智能对话模式有效）)'],
+                               3: ['员工版MoBot(请转HR（仅开启智能对话模式有效）)']}
+
+        res = yield self.infra_company_ds.get_oms_all_switch_status(company_id)
+        products = res.get('data') or []
+
+        for k, v in chat_switch_module.items():
+            if room_type == k:
+                for product in products:
+                    if product['keyword'] in v:
+                        if product['valid'] == 1:
+                            data.update({'hr_chat_switch': True})
+                            break
+
+        for k, v in mobot_switch_module.items():
+            if room_type == k:
+                for product in products:
+                    if product['keyword'] in v:
+                        if product['valid'] == 1:
+                            data.update({'mobot_switch': True})
+                            break
+
+        for k, v in to_hr_switch_module.items():
+            if room_type == k:
+                for product in products:
+                    if product['keyword'] in v:
+                        if product['valid'] == 1:
+                            data.update({'to_hr_switch': True})
+                            break
+
+        data = ObjectDict(data)
+        raise gen.Return(data)

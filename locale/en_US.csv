@@ -24,6 +24,8 @@
 "jd_more_jobs","More Vacancies"
 "edit_custom_profile","Edit profile"
 "profile_main","Profile"
+"profile_check_length","Please enter less than 20 characters"
+"profile_check_char","Please remove special characters"
 
 "team_team_is_hiring","The Team Is Hiring"
 
