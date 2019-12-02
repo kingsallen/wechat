@@ -447,7 +447,7 @@ class PositionPageService(PageService):
     def infra_get_position_list_rp_ext(self, position_list):
         """获取职位的红包信息"""
 
-        params = [("position_id_list", e.id) for e in position_list]  # todo get方法加list参数，先这样处理下，重构的时候再优雅的解决
+        params = [("position_id_list", str(e.id)) for e in position_list]  # todo get方法加list参数，先这样处理下，重构的时候再优雅的解决
         res = yield self.infra_position_ds.get_position_list_rp_ext(params)
         if res.code == const.NEWINFRA_API_SUCCESS:
             raise gen.Return([ObjectDict(e) for e in res.data])
