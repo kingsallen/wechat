@@ -6,6 +6,7 @@ import conf.common as const
 from handler.base import BaseHandler
 from util.common.decorator import handle_response, authenticated
 
+
 class ReleasedPositionHandler(BaseHandler):
     """已发布职位管理"""
 

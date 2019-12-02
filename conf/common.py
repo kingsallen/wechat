@@ -169,9 +169,6 @@ API_WARNING = 2
 NEWINFRA_API_SUCCESS = '0'
 NEWINFRA_API_USER_NOT_EXIST = 'US20000'
 
-# 申请来源
-REHIRING_SOURCE = '8'  # 老员工回聘
-
 # 入库的申请来源
 REHIRING_ORIGIN = 2097152  # 老员工回聘
 TRANSFER_ORIGIN = 4194304  # 员工转岗
@@ -443,6 +440,8 @@ RP_POSITION_STATUS_SCREEN = 4
 NATIONAL_CODE = [
     {'id': 1, 'code': '+86', 'country': '中国'}
 ]
+
+CHINA_CODE = 86
 
 MOBILE_CODE_OPT_TYPE = ObjectDict({
     'code_register': 1,
@@ -895,3 +894,6 @@ CHATTING_EMPLOYEE_MSG_TYPE_RESIGNATION = "employee_off"
 
 # 开关模块
 COMPANY_SWITCH_MODULE_CHATTING = 30
+
+# profile 校验特殊符号
+PROFILE_CHECK_SYMBOL = """，,、:：;；‘’'“”""''"""

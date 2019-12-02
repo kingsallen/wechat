@@ -246,9 +246,14 @@ class PositionPageService(PageService):
         if user_id is None or not position_id:
             raise gen.Return(self.constant.NO)
 
-        ret = yield self.thrift_searchcondition_ds.get_collect_position(user_id, position_id)
+        params = {
+            'user_id': user_id,
+            'position_id': position_id
+        }
 
-        if ret.userCollectPosition and ret.userCollectPosition.status == 0:
+        ret = yield self.infra_user_ds.infra_get_collect_position(params)
+
+        if ret.data and ret.data.code == const.NEWINFRA_API_SUCCESS:
             raise gen.Return(self.constant.YES)
         else:
             raise gen.Return(self.constant.NO)
@@ -260,7 +265,7 @@ class PositionPageService(PageService):
             "id": publisher
         })
         if hr_account.wxuser_id:
-            hr_wx_user = yield self.user_wx_user_ds.get_wxuser(conds={
+            hr_wx_user = yield self.infra_user_ds.infra_get_wxuser({
                 "id": hr_account.wxuser_id
             })
         else:
@@ -279,10 +284,10 @@ class PositionPageService(PageService):
     @gen.coroutine
     def get_hr_wx_user(self, unionid, wechat_id):
         """获取已关注hr用户"""
-        hr_account = yield self.user_wx_user_ds.get_wxuser({
+        hr_account = yield self.infra_user_ds.infra_get_wxuser({
             "unionid": unionid,
             "wechat_id": wechat_id,
-            "is_subscribe": [const.WX_USER_SUBSCRIBED, "="],
+            "is_subscribe": const.WX_USER_SUBSCRIBED,
         })
 
         raise gen.Return(hr_account)
@@ -451,9 +456,9 @@ class PositionPageService(PageService):
     def infra_get_position_list_rp_ext(self, position_list):
         """获取职位的红包信息"""
 
-        params = [("positionIdList", e.id) for e in position_list]  # todo get方法加list参数，先这样处理下，重构的时候再优雅的解决
+        params = [("position_id_list", e.id) for e in position_list]  # todo get方法加list参数，先这样处理下，重构的时候再优雅的解决
         res = yield self.infra_position_ds.get_position_list_rp_ext(params)
-        if res.code == '0':
+        if res.code == const.NEWINFRA_API_SUCCESS:
             raise gen.Return([ObjectDict(e) for e in res.data])
         raise gen.Return(res)
 

@@ -332,8 +332,8 @@ class CompanyPageService(PageService):
             ret.update(hr_logo=make_static_url(main_hr_account.headimgurl))
 
         elif main_hr_account.wxuser_id:
-            hr_wxuser = yield self.user_wx_user_ds.get_wxuser(
-                conds={'id': main_hr_account.wxuser_id})
+            hr_wxuser = yield self.infra_user_ds.infra_get_wxuser(
+                {'id': main_hr_account.wxuser_id})
             if hr_wxuser:
                 ret.update(hr_logo=make_static_url(hr_wxuser.headimgurl))
 

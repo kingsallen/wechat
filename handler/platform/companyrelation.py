@@ -35,27 +35,6 @@ class CompanyVisitReqHandler(BaseHandler):
         self.send_json_success()
 
 
-class CompanyFollowHandler(BaseHandler):
-
-    @handle_response
-    @check_sub_company
-    @authenticated
-    @gen.coroutine
-    def post(self):
-        try:
-            self.guarantee('status')
-        except:
-            raise gen.Return()
-
-        result = yield self.user_company_ps.set_company_follow(
-            current_user=self.current_user, param=self.params)
-
-        if not result:
-            self.send_json_error()
-            return
-        self.send_json_success()
-
-
 class CompanyHandler(BaseHandler):
 
     @handle_response

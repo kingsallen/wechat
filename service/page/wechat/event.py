@@ -108,10 +108,11 @@ class EventPageService(PageService):
             "ORDER BY parentid, id"
         ])
 
-        news = wx_const.WX_NEWS_REPLY_HEAD_TPL % (msg.FromUserName,
-                                         msg.ToUserName,
-                                         str(time.time()),
-                                         len(replies))
+        news = wx_const.WX_NEWS_REPLY_HEAD_TPL % (
+            msg.FromUserName,
+            msg.ToUserName,
+            str(time.time()),
+            len(replies))
 
         for replie in replies:
             item = wx_const.WX_NEWS_REPLY_ITEM_TPL % (
@@ -228,9 +229,9 @@ class EventPageService(PageService):
             raise gen.Return("")
 
         text_info = wx_const.WX_TEXT_REPLY % (msg.FromUserName,
-                                            msg.ToUserName,
-                                            int(time.time()),
-                                            text)
+                                              msg.ToUserName,
+                                              int(time.time()),
+                                              text)
 
         if wechat.third_oauth != 0:
             text_info = self.__encryMsg(text_info, nonce)
@@ -249,7 +250,7 @@ class EventPageService(PageService):
             msgid = msg.MsgID
             yield gen.sleep(1)  # 为了避免数据库插入慢，这里对事件延时1秒处理
             msg_record = yield self.log_wx_message_record_ds.get_wx_message_log_record(conds={"msgid": msgid})
-            user_record = yield self.user_user_ds.get_user({
+            user_record = yield self.infra_user_ds.infra_get_user({
                 "unionid": current_user.wxuser.unionid,
                 "parentid": 0  # 保证查找正常的 user record
             })
@@ -322,16 +323,16 @@ class EventPageService(PageService):
                 )))
 
         is_newbie = False
-        if not current_user.wxuser:
-            # 新微信用户
-            is_newbie = True
-            wxuser_id = yield self._create_wxuser(openid, current_user, wxuser)
+        wxuser_id = current_user.wxuser.id
+        wechat_userinfo = yield get_wxuser(current_user.wechat.access_token, openid)
+        if not wechat_userinfo or openid is None:
+            self.logger.error("[wechat_oauth][create_wxuser]wechat_userinfo is None."
+                              "wechat_userinfo:{0}, openid:{1}".format(wechat_userinfo, openid))
+            raise gen.Return()
+        yield self.infra_user_ds.infra_subscribe(
+            params=ObjectDict(wx_user_id=wxuser_id, wechat_id=current_user.wechat.id, user_info=wechat_userinfo))
 
-            yield self.__opt_help_wxuser(wxuser_id, current_user, msg)
-
-        else:
-            # 老微信用户
-            yield self._update_wxuser(openid, current_user, msg, wxuser)
+        yield self.__opt_help_wxuser(wxuser_id, current_user, msg)
 
         data = ObjectDict({
             "user_id": current_user.wxuser.sysuser_id,
@@ -350,86 +351,6 @@ class EventPageService(PageService):
         raise gen.Return()
 
     @gen.coroutine
-    def _create_wxuser(self, openid, current_user, wechat_userinfo):
-        """
-        创建微信 wxuser 用户
-        :param openid:
-        :param current_user:
-        :return:
-        """
-        wxuser_id = current_user.wxuser.id
-
-        # 已授权给仟寻，或者 HR 雇主平台的用户，已经创建了 wxuser，故不需要再创建 wxuser
-        if (current_user.wechat.id == self.settings.helper_wechat_id
-            or current_user.wechat.id == self.settings.qx_wechat_id) and current_user.wxuser:
-            res = yield self.user_wx_user_ds.update_wxuser(
-                conds={"id": current_user.wxuser.id},
-                fields={
-                    "is_subscribe":    const.WX_USER_SUBSCRIBED,
-                    "nickname":        wechat_userinfo.nickname,
-                    "sex":             wechat_userinfo.sex or 0,
-                    "city":            wechat_userinfo.city,
-                    "country":         wechat_userinfo.country,
-                    "province":        wechat_userinfo.province,
-                    "language":        wechat_userinfo.language,
-                    "headimgurl":      wechat_userinfo.headimgurl,
-                    "unionid":         current_user.wxuser.unionid or wechat_userinfo.unionid,
-                    "subscribe_time" : current_user.wxuser.subscribe_time or curr_now(),
-                    "unsubscibe_time": None,
-                    "source":          const.WX_USER_SOURCE_UPDATE_SHORT
-                })
-
-        if not current_user.wxuser:
-            wxuser_id = yield self.user_wx_user_ds.create_wxuser({
-                "is_subscribe":    const.WX_USER_SUBSCRIBED,
-                "openid":          openid,
-                "nickname":        wechat_userinfo.nickname or "",
-                "sex":             wechat_userinfo.sex or 0,
-                "city":            wechat_userinfo.city or 0,
-                "country":         wechat_userinfo.country or "",
-                "province":        wechat_userinfo.province or "",
-                "language":        wechat_userinfo.language or "",
-                "headimgurl":      wechat_userinfo.headimgurl or "",
-                "wechat_id":       current_user.wechat.id,
-                "unionid":         wechat_userinfo.unionid or "",
-                "subscribe_time":  curr_now(),
-                "unsubscibe_time": None,
-                "source":          const.WX_USER_SOURCE_SUBSCRIBE
-            })
-        raise gen.Return(wxuser_id)
-
-    @gen.coroutine
-    def _update_wxuser(self, openid, current_user, msg, wechat_userinfo):
-        """
-        更新老微信 wxuser 信息
-        :param openid:
-        :param current_user:
-        :param msg:
-        :return:
-        """
-
-        res = yield self.user_wx_user_ds.update_wxuser(
-            conds={"id": current_user.wxuser.id},
-            fields={
-                "is_subscribe":    const.WX_USER_SUBSCRIBED,
-                "nickname":        wechat_userinfo.nickname,
-                "sex":             wechat_userinfo.sex or 0,
-                "city":            wechat_userinfo.city,
-                "country":         wechat_userinfo.country,
-                "province":        wechat_userinfo.province,
-                "language":        wechat_userinfo.language,
-                "headimgurl":      wechat_userinfo.headimgurl,
-                "unionid":         current_user.wxuser.unionid or wechat_userinfo.unionid,
-                "subscribe_time":  current_user.wxuser.subscribe_time or curr_now(),
-                "unsubscibe_time": None,
-                "source":          const.WX_USER_SOURCE_UPDATE_ALL
-            })
-
-        yield self.__opt_help_wxuser(current_user.wxuser.id, current_user.wechat, msg)
-
-        raise gen.Return()
-
-    @gen.coroutine
     def opt_event_unsubscribe(self, current_user):
         """
         处理用户取消关注事件
@@ -438,16 +359,30 @@ class EventPageService(PageService):
         :param nonce:
         :return:
         """
+        wxuser_id = current_user.wxuser.id
+        yield self.infra_user_ds.infra_unsubscribe(wxuser_id)
+        # todo(niuzhenya)做个聚合接口，并由user基础服务去掉用
+        # 取消关注仟寻招聘助手时，将user_hr_account.wxuser_id与user_wx_user.id 解绑
+        if current_user.wechat.id == self.settings.helper_wechat_id:
+            user_hr_account = yield self.user_hr_account_ds.get_hr_account(conds={
+                "wxuser_id": current_user.wxuser.id
+            })
 
-        if current_user.wxuser:
-            res = yield self.user_wx_user_ds.update_wxuser(
-                conds={"id": current_user.wxuser.id},
-                fields={
-                    "is_subscribe":    const.WX_USER_UNSUBSCRIBED,
-                    "unsubscibe_time": current_user.wxuser.subscribe_time or curr_now(),
-                    "subscribe_time":  None,
-                    "source":          const.WX_USER_SOURCE_UNSUBSCRIBE
-                })
+            if user_hr_account:
+                yield self.user_hr_account_ds.update_hr_account(
+                    conds={
+                        "wxuser_id": current_user.wxuser.id
+                    }, fields={
+                        "wxuser_id": None
+                    })
+                user_hr_account_cache = UserHrAccountCache()
+                user_hr_account_cache.update_user_hr_account_session(
+                    user_hr_account.id,
+                    value=ObjectDict(
+                        wxuser_id=0,
+                        wxuser=ObjectDict()
+                    ))
+
             data = ObjectDict({
                 "user_id": current_user.wxuser.sysuser_id,
                 "wechat_id": current_user.wechat.id,
@@ -455,26 +390,6 @@ class EventPageService(PageService):
             })
             # 如果是员工，取消用户员工身份
             yield user_unfollow_wechat_publisher.publish_message(message=data, routing_key="user_unfollow_wechat_check_employee_identity")
-            # 取消关注仟寻招聘助手时，将user_hr_account.wxuser_id与user_wx_user.id 解绑
-            if current_user.wechat.id == self.settings.helper_wechat_id:
-                user_hr_account = yield self.user_hr_account_ds.get_hr_account(conds={
-                    "wxuser_id": current_user.wxuser.id
-                })
-
-                if user_hr_account:
-                    yield self.user_hr_account_ds.update_hr_account(
-                        conds={
-                            "wxuser_id": current_user.wxuser.id
-                        }, fields={
-                            "wxuser_id": None
-                        })
-                    user_hr_account_cache = UserHrAccountCache()
-                    user_hr_account_cache.update_user_hr_account_session(
-                        user_hr_account.id,
-                        value=ObjectDict(
-                            wxuser_id=0,
-                            wxuser=ObjectDict()
-                        ))
 
         raise gen.Return()
 
@@ -513,7 +428,7 @@ class EventPageService(PageService):
     def __opt_help_wxuser(self, wxuser_id, wechat, msg):
         """
         处理仟寻招聘助手的逻辑
-        :param wxuser:
+        :param wxuser_id:
         :param wechat:
         :param msg:
         :return:
@@ -555,7 +470,7 @@ class EventPageService(PageService):
                 #     user_hr_account_cache.pub_wx_binding(scan_info.group(1), msg="-1")
 
                 # 更新 user_hr_account 和 user_wx_user 的关系成功后, 更新 user_hr_account 的缓存, HR招聘管理平台使用, 需同时更新 wxuser_id 和 wxuser
-                wxuser = yield self.user_wx_user_ds.get_wxuser(conds={"id": wxuser_id})
+                wxuser = yield self.infra_user_ds.infra_get_wxuser({"id": wxuser_id})
 
                 user_hr_account_cache.update_user_hr_account_session(
                     hr_id=hr_account_id,
@@ -594,7 +509,7 @@ class EventPageService(PageService):
                     str_scene = re.match(r"([A-Z]+)_", msg.EventKey)
 
         # 取最新的微信用户信息
-        wxuser = yield self.user_wx_user_ds.get_wxuser(conds={
+        wxuser = yield self.infra_user_ds.infra_get_wxuser({
             "openid": msg.FromUserName,
             "wechat_id": wechat.id
         })
@@ -642,7 +557,7 @@ class EventPageService(PageService):
             elif type == 25:
                 # PC端用户绑定
                 if wxuser.sysuser_id:
-                    user_record = yield self.user_user_ds.get_user({
+                    user_record = yield self.infra_user_ds.infra_get_user({
                         "unionid": wxuser.unionid,
                         "parentid": 0  # 保证查找正常的 user record
                     })
@@ -907,11 +822,9 @@ class EventPageService(PageService):
         :return:
         """
         if wxuser.unionid:
-            res = yield self.user_user_ds.update_user(
-                conds={"id": user_id},
-                fields={
-                    "nickname": wxuser.nickname,
-                })
+            res = yield self.infra_user_ds.put_user(
+                {"id": user_id,
+                 "nickname": wxuser.nickname})
             raise gen.Return(True)
         raise gen.Return(False)
 

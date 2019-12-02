@@ -37,7 +37,6 @@ from setting import settings
 import conf.common as constant
 from route import platform_routes, qx_routes, help_routes
 from handler.common.navmenu import NavMenuModule
-from util.common.mq_receiver import RedPacketConsumer
 
 from globals import env, logger, redis, es, sa
 

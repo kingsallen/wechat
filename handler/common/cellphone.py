@@ -121,7 +121,7 @@ class CellphoneBindHandler(CaptchaMixin, BaseHandler):
             self.params.get('mobile')
         )
 
-        if result.status != const.API_SUCCESS:
+        if result.code != const.NEWINFRA_API_SUCCESS:
             self.send_json_error(message=result.message)
             return
         else:
@@ -157,7 +157,7 @@ class CellphoneBindHandler(CaptchaMixin, BaseHandler):
             mobile=mobile,
             type=type
         )
-        if result.status != const.API_SUCCESS:
+        if result.code != const.NEWINFRA_API_SUCCESS:
             self.send_json_error(message=result.message)
             return
         else:
@@ -216,7 +216,7 @@ class CellphoneBindHandler(CaptchaMixin, BaseHandler):
             type=type
         )
 
-        if verify_response.status != const.API_SUCCESS:
+        if verify_response.code != const.NEWINFRA_API_SUCCESS:
             self.send_json_error(message=verify_response.message)
             raise gen.Return(False)
 
@@ -263,6 +263,8 @@ class CellphoneBindHandler(CaptchaMixin, BaseHandler):
         else:
             self.send_json_success()
 
+            if response.code != const.NEWINFRA_API_SUCCESS:
+                return
 
         ret_user_id = response.data.user_id
 

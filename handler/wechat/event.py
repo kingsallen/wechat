@@ -67,13 +67,10 @@ class WechatOauthHandler(MetaBaseHandler):
             if wxuser and not wxuser.is_subscribe and self.msg['Event'] not in ('subscribe', 'unsubscribe'):
                 yield self.user_ps.set_wxuser_is_subscribe(wxuser)
 
-            from service.data.user.user_wx_user import UserWxUserDataService
-            self.user_wx_user_ds = UserWxUserDataService()
-
             if not wxuser:
                 wechat_userinfo = yield wechat_core.get_wxuser(self.wechat.access_token, openid)
 
-                inserted_id = yield self.user_wx_user_ds.create_wxuser({
+                wxuser = yield self.user_ps.create_wxuser({
                     "is_subscribe":    const.WX_USER_SUBSCRIBED,
                     "openid":          openid,
                     "nickname":        wechat_userinfo.nickname or "",
@@ -89,11 +86,6 @@ class WechatOauthHandler(MetaBaseHandler):
                     "unsubscibe_time": None,
                     "source":          const.WX_USER_SOURCE_IWANTYOU
                 })
-
-                # 插入之后重新获取一次插入的 wxuser
-                if inserted_id:
-                    wxuser = yield self.user_wx_user_ds.get_wxuser(conds=
-                        {"id": inserted_id})
 
             user.wechat = self.wechat
             user.wxuser = wxuser

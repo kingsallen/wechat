@@ -492,7 +492,7 @@ class SharechainPageService(PageService):
         for r in records:
             user = ObjectDict()
             user_id = r.presentee_user_id
-            user_info = yield self.user_user_ds.get_user(conds={"id": user_id})
+            user_info = yield self.infra_user_ds.infra_get_user(conds={"id": user_id})
             user['name'] = user_info.name or user_info.nickname
             user['headimg'] = make_static_url(user_info.headimg or const.SYSUSER_HEADIMG)
             user['is_hack'] = False

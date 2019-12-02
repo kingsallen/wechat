@@ -21,7 +21,7 @@ class UsercenterPageService(PageService):
     def get_user(self, user_id):
         """获得用户数据"""
 
-        ret = yield self.infra_user_ds.get_user(user_id)
+        ret = yield self.infra_user_ds.get_user_by_user_id(user_id)
         raise gen.Return(ret)
 
     @gen.coroutine
@@ -36,8 +36,9 @@ class UsercenterPageService(PageService):
     @gen.coroutine
     def update_user(self, user_id, params):
         """更新用户数据"""
+        params.update(id=user_id)
 
-        ret = yield self.infra_user_ds.put_user(user_id, params)
+        ret = yield self.infra_user_ds.put_user(params)
         raise gen.Return(ret)
 
     @gen.coroutine
@@ -74,13 +75,15 @@ class UsercenterPageService(PageService):
         """用户注册"""
 
         params = ObjectDict({
-            'username':    user_creation_form.username,
-            'mobile':      user_creation_form.mobile,
-            'password':    user_creation_form.password,
-            'register_ip': user_creation_form.register_ip,
-            'countryCode': user_creation_form.country_code,
-            'register_time': user_creation_form.register_time
-        })
+                "user": {
+                    'username':    user_creation_form.username,
+                    'mobile':      user_creation_form.mobile,
+                    'password':    user_creation_form.password,
+                    'register_ip': user_creation_form.register_ip,
+                    'countryCode': user_creation_form.country_code,
+                    'register_time': user_creation_form.register_time
+                }
+            })
 
         ret = yield self.infra_user_ds.post_register(params)
         raise gen.Return(ret)
@@ -98,10 +101,12 @@ class UsercenterPageService(PageService):
     @gen.coroutine
     def get_collect_positions(self, user_id):
         """获得职位收藏"""
-
-        ret = yield self.thrift_searchcondition_ds.get_collect_positions(user_id)
+        params = {
+            "user_id": user_id
+        }
+        ret = yield self.infra_user_ds.infra_get_collect_positions(params)
         obj_list = list()
-        for e in ret.userCollectPosition:
+        for e in ret.data:
             fav_pos = ObjectDict()
             fav_pos['id'] = e.id
             fav_pos['title'] = e.title
@@ -122,11 +127,10 @@ class UsercenterPageService(PageService):
         fav_position_id_list = []
         if user_id is None or position_id_list is None:
             return fav_position_id_list
-        param = dict(conds={'sysuser_id': user_id},
-                     fields=['position_id'])
-        if position_id_list and isinstance(position_id_list, list):
-            param.update(appends=["and position_id in %s" % set_literl(position_id_list)])
-        fav_position_list = yield self.user_fav_position_ds.get_user_fav_position_list(**param)
+        params = {"user_id": user_id,
+                  "position_ids": position_id_list}
+        ret = yield self.infra_user_ds.infra_get_fav_positions(params)
+        fav_position_list = ret.data
         if fav_position_list:
             fav_position_id_list = [e.position_id for e in fav_position_list]
         return fav_position_id_list

@@ -53,7 +53,7 @@ class LoginHandler(BaseHandler):
 
         next_url = self.json_args.get("next_url", "")
 
-        if res.status == const.API_SUCCESS:
+        if res.code == const.NEWINFRA_API_SUCCESS:
             session_id = self._make_new_session_id(res.data.user_id)
             self.set_secure_cookie(const.COOKIE_SESSIONID, session_id, httponly=True, domain=settings['root_host'])
             self.send_json_success(data={
@@ -215,7 +215,7 @@ class RegisterHandler(CaptchaMixin, BaseHandler):
 
         if self.params.code_type == 1:
             # 忘记密码
-            if ret.status != const.API_SUCCESS or not ret.data.exist:
+            if ret.code != const.NEWINFRA_API_SUCCESS or not ret.data:
                 # 手机号不存在，无法修改密码
                 self.send_json_error(message=msg.CELLPHONE_INVALID_MOBILE)
                 raise gen.Return()
@@ -223,7 +223,7 @@ class RegisterHandler(CaptchaMixin, BaseHandler):
 
         else:
             # 普通注册
-            if ret.status != const.API_SUCCESS or ret.data.exist:
+            if ret.code != const.NEWINFRA_API_SUCCESS or ret.data:
                 # 手机号已存在，不能再注册新用户
                 self.send_json_error(message=msg.CELLPHONE_MOBILE_HAD_REGISTERED)
                 raise gen.Return()
@@ -235,7 +235,7 @@ class RegisterHandler(CaptchaMixin, BaseHandler):
             mobile=self.params.mobile,
             type=valid_type
         )
-        if result.status != const.API_SUCCESS:
+        if result.code != const.NEWINFRA_API_SUCCESS:
             self.send_json_error(message=result.message)
         else:
             self.set_secure_cookie(const.COOKIE_MOBILE_REGISTER, self.params.mobile, expires_days=0.1, httponly=True)
@@ -269,7 +269,7 @@ class RegisterHandler(CaptchaMixin, BaseHandler):
             self.params.country_code,
             self.params.mobile, self.params.code, valid_type
         )
-        if verify_response.status != const.API_SUCCESS:
+        if verify_response.code != const.NEWINFRA_API_SUCCESS:
             self.send_json_error(message=verify_response.message)
             raise gen.Return()
         elif verify_response.data == const.NO:
@@ -320,7 +320,7 @@ class RegisterHandler(CaptchaMixin, BaseHandler):
         # 忘记密码
         if self.params.code_type == 1:
             res = yield self.usercenter_ps.post_resetpassword(country_code, mobile, self.params.password)
-            if res.status != const.API_SUCCESS:
+            if res.code != const.NEWINFRA_API_SUCCESS:
                 self.send_json_error(message=res.message)
                 raise gen.Return()
         else:
@@ -342,12 +342,12 @@ class RegisterHandler(CaptchaMixin, BaseHandler):
             self.logger.debug("[user creation] user_form: %s" % user_form.to_primitive())
 
             res = yield self.usercenter_ps.post_register(user_form)
-            if res.status != const.API_SUCCESS:
+            if res.code != const.NEWINFRA_API_SUCCESS:
                 self.send_json_error(message=msg.CELLPHONE_REGISTER_FAILED)
                 return
 
             # 设置登录cookie
-            session_id = self._make_new_session_id(res.data.user_id)
+            session_id = self._make_new_session_id(res.data)
             self.set_secure_cookie(const.COOKIE_SESSIONID, session_id, httponly=True, domain=settings['root_host'])
 
         next_url = self.json_args.get("next_url", "")
@@ -374,18 +374,25 @@ class SendValidCodeHandler(BaseHandler):
         else:
             # 校验手机号是否已经被注册
             ret = yield self.usercenter_ps.post_ismobileregistered(mobile=mobile)
-            if ret.status != const.API_SUCCESS or ret.data.exist:
+            if ret.code != const.NEWINFRA_API_SUCCESS or ret.data:
                 # 手机号已存在，不能再注册新用户
                 self.send_json_error(message=msg.CELLPHONE_MOBILE_HAD_REGISTERED)
                 return
             valid_type = const.MOBILE_CODE_OPT_TYPE.referral_confirm
 
+        # 校验手机号是否已经被注册
+        ret = yield self.usercenter_ps.post_ismobileregistered(mobile=mobile)
+        if ret.code != const.NEWINFRA_API_SUCCESS or ret.data:
+            # 手机号已存在，不能再注册新用户
+            self.send_json_error(message=msg.CELLPHONE_MOBILE_HAD_REGISTERED)
+            return
+        valid_type = const.MOBILE_CODE_OPT_TYPE.referral_confirm
         result = yield self.cellphone_ps.send_valid_code(
             mobile=mobile,
             type=valid_type,
             country_code=country_code
         )
-        if result.status != const.API_SUCCESS:
+        if result.code != const.NEWINFRA_API_SUCCESS:
             self.send_json_error(message=result.message)
         else:
             self.send_json_success()

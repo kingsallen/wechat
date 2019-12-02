@@ -122,8 +122,8 @@ class PositionHandler(BaseHandler):
             # 处理职位红包信息
             pext = [e for e in rpext_list if e.pid == position_info.id]
             if pext:
-                position_info.employee_only = pext[0].employeeOnly
-                position_info.is_rp_reward = pext[0].hasMoney
+                position_info.employee_only = pext[0].employee_only
+                position_info.is_rp_reward = pext[0].has_money
             else:
                 position_info.is_rp_reward = False
 
@@ -280,9 +280,9 @@ class PositionHandler(BaseHandler):
             self.employee_ps.is_valid_employee(self.current_user.sysuser.id, position_info.company_id)
         ]
         if red_packet:
-            cover = self.share_url(red_packet.shareImg)
-            title = "{} {}".format(position_info.title, red_packet.shareTitle)
-            description = "".join(split(red_packet.shareDesc))
+            cover = self.share_url(red_packet.share_img)
+            title = "{} {}".format(position_info.title, red_packet.share_title)
+            description = "".join(split(red_packet.share_desc))
         else:
             cover = self.share_url(company_info.logo)
             title = position_info.title
@@ -1043,8 +1043,8 @@ class PositionListDetailHandler(PositionListInfraParamsMixin, BaseHandler):
             for position in position_list:
                 pext = [e for e in rpext_list if e.pid == position.id]
                 if pext:
-                    position.employee_only = pext[0].employeeOnly
-                    position.is_rp_reward = pext[0].hasMoney
+                    position.employee_only = pext[0].employee_only
+                    position.is_rp_reward = pext[0].has_money
                 else:
                     position.is_rp_reward = False
 
@@ -1337,14 +1337,14 @@ class PositionListHandler(PositionListInfraParamsMixin, BaseHandler):
             description = self.locale.translate(msg.SHARE_DES_DEFAULT)
 
         else:
-            cover = self.share_url(rp_share_info.shareImg)
+            cover = self.share_url(rp_share_info.share_img)
             escape = [
                 "pid", "keywords", "cities", "candidate_source",
                 "employment_type", "salary", "department", "occupations",
                 "custom", "degree", "page_from", "page_size", "shareMongoliaFlag"
             ]
-            title = rp_share_info.shareTitle
-            description = rp_share_info.shareDesc
+            title = rp_share_info.share_title
+            description = rp_share_info.share_desc
 
         # transmit_from是判断场景值的字段，且场景值使用偶数表示，当员工通过活动页面跳转到该页面时，值为偶数，
         # 当员工转发出去时需要+1，因此求职者打开员工转发的链接时该值为奇数。

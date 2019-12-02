@@ -1,38 +1,39 @@
 # coding=utf-8
 
 import tornado.gen as gen
-
 import conf.common as const
 import conf.path as path
-import conf.alphacloud_api as api
+
 from service.data.base import DataService
 from util.common import ObjectDict
-from util.tool.http_tool import http_get, http_post, http_put, unboxing, http_get_rp, http_get_v2, http_post_v2, http_post_multipart_form, _v2_async_http_post
 from util.common.decorator import log_coro
+from util.tool.http_tool import http_get, http_post, http_put, unboxing, http_get_v2, http_post_v2, http_put_v2, unboxing_v2, \
+    unboxing_fetchone, http_post_multipart_form, _v2_async_http_post
 from conf.newinfra_service_conf.service_info import user_service, application_service
 from conf.newinfra_service_conf.user import user
 from conf.newinfra_service_conf.application import application
 from util.common.exception import InfraOperationError
 from tornado.httputil import url_concat
 from setting import settings
-import conf.common as const
+
 from requests.models import Request
 
 
 class InfraUserDataService(DataService):
     """对接 User服务
-    referer: https://wiki.moseeker.com/user_account_api.md"""
+    referer: http://39.96.43.140:11005/swagger-ui.html#!/C31471299922514326381211532550921475/getUserByIdUsingGET"""
 
     @gen.coroutine
-    def get_user(self, user_id):
+    def get_user_by_user_id(self, user_id):
         """获得用户数据"""
         params = ObjectDict({
             'user_id': user_id,
         })
 
-        ret = yield http_get(path.INFRA_USER_INFO, params)
-        raise gen.Return(ret)
+        ret = yield http_get_v2(user.INFRA_USER_INFO, user_service, params)
+        raise gen.Return(unboxing_v2(ret))
 
+    # todo(refactor_undo referral)
     @gen.coroutine
     def get_my_info(self, user_id, params):
         """获得用户我的个人中心数据"""
@@ -49,7 +50,7 @@ class InfraUserDataService(DataService):
             'unionid': str(unionid),
         })
 
-        ret = yield http_post(path.INFRA_USER_COMBINE, params)
+        ret = yield http_post_v2(user.INFRA_USER_COMBINE, user_service, params)
         raise gen.Return(ret)
 
     @gen.coroutine
@@ -65,7 +66,7 @@ class InfraUserDataService(DataService):
             'mobile': str(mobile),
             'type': int(type)
         })
-        ret = yield http_post(path.INFRA_USER_VALID, params)
+        ret = yield http_post_v2(user.INFRA_USER_VALID, user_service, params)
         raise gen.Return(ret)
 
     @gen.coroutine
@@ -77,7 +78,7 @@ class InfraUserDataService(DataService):
         params = ObjectDict({
             'mobile': mobile
         })
-        ret = yield http_post(path.INFRA_USER_VOICE_VALID, params)
+        ret = yield http_post_v2(user.INFRA_USER_VOICE_VALID, user_service, params)
         raise gen.Return(ret)
 
     @gen.coroutine
@@ -97,20 +98,17 @@ class InfraUserDataService(DataService):
             'type': int(type),
         })
 
-        ret = yield http_post(path.INFRA_USER_VERIFY, params)
+        ret = yield http_post_v2(user.INFRA_USER_VERIFY, user_service, params)
         raise gen.Return(ret)
 
     @gen.coroutine
     def post_login(self, params):
         """用户登录
         微信 unionid, 或者 mobile+password, 或者mobile+code, 3选1
-        :param mobile: 手机号
-        :param password: 密码
-        :param code: 手机验证码
-        :param unionid: 微信 unionid
+        :param params: mobile: 手机号|| password: 密码|| code: 手机验证码|| unionid: 微信
         """
 
-        ret = yield http_post(path.INFRA_USER_LOGIN, params)
+        ret = yield http_post_v2(user.INFRA_USER_LOGIN, user_service, params)
         raise gen.Return(ret)
 
     @gen.coroutine
@@ -122,14 +120,14 @@ class InfraUserDataService(DataService):
             user_id=user_id
         )
 
-        ret = yield http_post(path.INFRA_USER_LOGOUT, params)
+        ret = yield http_post_v2(user.INFRA_USER_LOGOUT, user_service, params)
         raise gen.Return(ret)
 
     @gen.coroutine
     def post_register(self, params):
         """用户注册 """
 
-        ret = yield http_post(path.INFRA_USER_REGISTER, params)
+        ret = yield http_post_v2(user.INFRA_USER_MOBILE_REGISTER, user_service, params)
         raise gen.Return(ret)
 
     @gen.coroutine
@@ -143,19 +141,14 @@ class InfraUserDataService(DataService):
             mobile=str(mobile),
         )
 
-        ret = yield http_post(path.INFRA_USER_ISMOBILEREGISTERED, params)
+        ret = yield http_post_v2(user.INFRA_USER_ISMOBILEREGISTERED, user_service, params)
         raise gen.Return(ret)
 
     @gen.coroutine
-    def put_user(self, user_id, req):
+    def put_user(self, params):
         """更新用户信息"""
 
-        params = ObjectDict({
-            "id": user_id
-        })
-        params.update(req)
-
-        ret = yield http_put(path.INFRA_USER_INFO, params)
+        ret = yield http_put_v2(user.INFRA_USER_INFO, user_service, params)
         raise gen.Return(ret)
 
     @gen.coroutine
@@ -168,9 +161,10 @@ class InfraUserDataService(DataService):
             "password": password
         })
 
-        ret = yield http_post(path.INFRA_USER_RESETPASSWD, params)
+        ret = yield http_post_v2(user.INFRA_USER_RESETPASSWD, user_service, params)
         raise gen.Return(ret)
 
+    # todo(refactor_undo)
     @gen.coroutine
     def post_scanresult(self, params):
         """
@@ -182,6 +176,7 @@ class InfraUserDataService(DataService):
         ret = yield http_post(path.INFRA_WXUSER_QRCODE_SCANRESULT, params)
         raise gen.Return(ret)
 
+    # todo(refactor_undo company服务)
     @gen.coroutine
     def post_hr_register(self, params):
         """HR用户注册
@@ -191,25 +186,8 @@ class InfraUserDataService(DataService):
         ret = yield http_post(path.INFRA_HRUSER, params)
         raise gen.Return(ret)
 
-    @gen.coroutine
-    def create_user_setting(self, user_id, banner_url='', privacy_policy=0):
-        """
-        添加帐号设置，user_setting,设置profile的公开度
-        :param user_id:
-        :param banner_url:
-        :param privacy_policy:
-        :return: list of dict
-        """
-        params = {
-            'user_id': user_id,
-            'banner_url': banner_url,
-            'privacy_policy': privacy_policy
-        }
-
-        ret = yield http_post(path.INFRA_USER_SETTINGS, params)
-        return ret
-
     @log_coro
+    # todo(refactor_undo employee)
     @gen.coroutine
     def is_valid_employee(self, user_id, company_id, timeout=30):
         params = {
@@ -222,6 +200,7 @@ class InfraUserDataService(DataService):
 
         return data.result if ret else False
 
+    # todo(refactor_undo employee)
     @gen.coroutine
     def get_employee_survey_info(self, sysuser_id, employee_id):
         params = {
@@ -238,6 +217,7 @@ class InfraUserDataService(DataService):
             d = {}
         return result, d
 
+    # todo(refactor_undo employee)
     @gen.coroutine
     def post_employee_survey_info(self, employee_id, survey):
         params = {
@@ -251,11 +231,13 @@ class InfraUserDataService(DataService):
         res = yield http_put(path.INFRA_USER_EMPLOYEE, params)
         return res
 
+    # todo(refactor_undo employee)
     @gen.coroutine
     def update_recommend(self, params, employee_id):
         res = yield http_post(path.UPDATE_RECOMMEND.format(employee_id), params)
         return res
 
+    # todo(refactor_undo application)
     @gen.coroutine
     def get_applied_applications(self, user_id, company_id, page_no=1, page_size=50):
         params = ObjectDict({
@@ -276,21 +258,19 @@ class InfraUserDataService(DataService):
         res = yield http_get_v2(application.NEWINFRA_APPLICATION_RECORD_DETAIL, application_service, params)
         return res
 
-    @gen.coroutine
-    def get_redpacket_list(self, params):
-        res = yield http_get_rp(api.redpacket_service.api.CLOUD_USER_REDPACKET_LIST, api.redpacket_service.service, params)
-        return res
-
+    # todo(refactor_undo referral)
     @gen.coroutine
     def get_bonus_list(self, user_id, params):
         res = yield http_get(path.INFRA_USER_BONUS_LIST.format(user_id), params)
         return res
 
+    # todo(refactor_undo referral)
     @gen.coroutine
     def claim_bonus(self, bonus_id):
         res = yield http_put(path.INFRA_USER_CLAIM_BONUS.format(bonus_id))
         return res
 
+    # todo(refactor_undo referral)
     @gen.coroutine
     def get_popup_info(self, user_id, company_id, position_id):
         """
@@ -305,6 +285,7 @@ class InfraUserDataService(DataService):
         ret = yield http_get(path.INFRA_REFERRAL_POPUP, params)
         return ret
 
+    # todo(refactor_undo referral)
     @gen.coroutine
     def close_popup_window(self, user_id, company_id, type):
         """
@@ -322,6 +303,7 @@ class InfraUserDataService(DataService):
         ret = yield http_put(path.INFRA_REFERRAL_CLOSE_POPUP_WINDOW, params)
         return ret
 
+    # todo(refactor_undo referral)
     @gen.coroutine
     def referral_confirm_submit(self, company_id, user_id, post_user_id, position_id, origin):
         """
@@ -343,6 +325,7 @@ class InfraUserDataService(DataService):
         ret = yield http_post(path.INFRA_REFERRAL_CONTACT_PUSH, params)
         return ret
 
+    # todo(refactor_undo referral)
     @gen.coroutine
     def referral_related_positions(self, user_id, company_id):
         """
@@ -358,6 +341,7 @@ class InfraUserDataService(DataService):
         ret = yield http_get(path.INFRA_REFERRAL_RELATIVE_POSITIONS, params)
         return ret
 
+    # todo(refactor_undo referral)
     @gen.coroutine
     def if_referral_position(self, company_id, recom, psc, pid, click_user_id):
         """
@@ -380,6 +364,7 @@ class InfraUserDataService(DataService):
         ret = yield http_post(path.INFRA_IF_EMPLOYEE_POS, params)
         return ret
 
+    # todo(refactor_undo referral)
     @gen.coroutine
     def if_ever_seek_recommend(self, recom_user_id, psc, pid, company_id, click_user_id):
         """
@@ -399,6 +384,36 @@ class InfraUserDataService(DataService):
             "presentee_user_id": click_user_id
         })
         ret = yield http_get(path.INFRA_IF_SEEK_CHECK, params)
+        return ret
+
+    @gen.coroutine
+    def infra_add_fav_position(self, params):
+        """增加用户感兴趣记录"""
+        ret = yield http_post_v2(user.INFRA_USER_FAV_POSITION, user_service, params)
+        return ret
+
+    @gen.coroutine
+    def infra_get_fav_positions(self, params):
+        """通过职位列表获取用户感兴趣的记录"""
+        ret = yield http_post_v2(user.INFRA_USER_FAV_POSITIONS, user_service, params)
+        return ret
+
+    @gen.coroutine
+    def infra_add_user_settings(self, params):
+        """增加用户设置记录"""
+        ret = yield http_post_v2(user.INFRA_USER_SETTINGS, user_service, params)
+        return ret
+
+    @gen.coroutine
+    def infra_get_collect_positions(self, params):
+        """查看用户收藏职位"""
+        ret = yield http_get_v2(user.INFRA_USER_COLLECT_POSITIONS, user_service, params)
+        return ret
+
+    @gen.coroutine
+    def infra_get_collect_position(self, params):
+        """获取职位收藏状态"""
+        ret = yield http_get_v2(user.INFRA_USER_COLLECT_POSITION, user_service, params)
         return ret
 
     @gen.coroutine
@@ -496,3 +511,95 @@ class InfraUserDataService(DataService):
         if ret.code != const.NEWINFRA_API_SUCCESS:
             raise InfraOperationError(ret.message)
         raise gen.Return(ret.data)
+
+    @gen.coroutine
+    def infra_delete_collect_position(self, params):
+        """增加取消职位收藏"""
+        ret = yield http_post_v2(user.INFRA_USER_CANCEL_COLLECT_POSITION, user_service, params)
+        return ret
+
+    @gen.coroutine
+    def infra_add_user_viewed_position(self, params):
+        """增加用户职位浏览数"""
+        ret = yield http_post_v2(user.INFRA_USER_ADD_VIEWED_POSITION, user_service, params)
+        return ret
+
+    @gen.coroutine
+    def infra_get_user(self, params):
+        """获取用户信息"""
+        ret = yield http_post_v2(user.INFRA_USER_USER_INFO, user_service, params)
+        return unboxing_fetchone(ret)
+
+    @gen.coroutine
+    def infra_get_wxuser(self, params):
+        """获取用户微信信息"""
+        ret = yield http_get_v2(user.INFRA_USER_WX_USER_INFO, user_service, params)
+        return unboxing_v2(ret)
+
+    @gen.coroutine
+    def infra_user_register(self, params):
+        """用户qx授权"""
+        ret = yield http_post_v2(user.INFRA_USER_REGISTER, user_service, params)
+        return ret
+
+    @gen.coroutine
+    def infra_update_user_user(self, params):
+        """更新用户信息"""
+        ret = yield http_post_v2(user.INFRA_USER_INFO, user_service, params)
+        return ret
+
+    @gen.coroutine
+    def infra_bind_wxuser(self, params):
+        """根据 unionid 创建 企业号微信用户信息"""
+        ret = yield http_post_v2(user.INFRA_WXUSER_BIND, user_service, params)
+        return ret
+
+    @gen.coroutine
+    def infra_update_wxuser(self, params):
+        """更新用户wxuser数据"""
+        ret = yield http_put_v2(user.INFRA_WX_USER_INFO, user_service, params)
+        return unboxing_v2(ret)
+
+    @gen.coroutine
+    def infra_update_wxuser_by_unionid(self, params):
+        """更新用户wxuser数据 by unionid"""
+        ret = yield http_put_v2(user.INFRA_WX_USER_INFO_BY_UNIONID, user_service, params)
+        return ret
+
+    @gen.coroutine
+    def infra_create_wxuser(self, params):
+        """增加wxuser信息"""
+        ret = yield http_post_v2(user.INFRA_WX_USER_INFO, user_service, params)
+        return unboxing_v2(ret)
+
+    @gen.coroutine
+    def infra_subscribe(self, params):
+        """用户关注"""
+        ret = yield http_post_v2(user.INFRA_USER_SUBSCRIBE, user_service, params)
+        return unboxing_v2(ret)
+
+    @gen.coroutine
+    def infra_unsubscribe(self, params):
+        """用户取消关注"""
+        ret = yield http_post_v2(user.INFRA_USER_UNSUBSCRIBE, user_service, params)
+        return unboxing_v2(ret)
+
+    @gen.coroutine
+    def infra_get_user_by_joywok_info(self, params):
+        """
+        根据麦当劳APP授权获取的员工信息查找仟寻微信用户，及员工在仟寻系统的认证状态:
+        :param params:
+        :return:
+        """
+        ret = yield http_get_v2(user.INFRA_GET_USER_BY_JOYWOK_USER_INFO, user_service, params)
+        return ret
+
+    @gen.coroutine
+    def infra_auto_bind_employee(self, params):
+        """
+        对joywok的用户做自动认证:
+        :param params:
+        :return:
+        """
+        ret = yield http_post(path.INFRA_AUTO_BIND_EMPLOYEE, params)
+        return ret

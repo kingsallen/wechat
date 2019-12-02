@@ -769,7 +769,7 @@ class ProfileSectionHandler(BaseHandler):
             if hasattr(e, "__status") and getattr(e, "__status") == 'x':
                 verb = "delete"
             else:
-                for symbol in """，,、:：;；‘’'“”""''""":
+                for symbol in const.PROFILE_CHECK_SYMBOL:
                     if symbol in e.get("language"):
                         self.send_json_error(message=self.locale.translate('profile_check_char'))
                         return
@@ -815,7 +815,7 @@ class ProfileSectionHandler(BaseHandler):
             if hasattr(e, "__status") and getattr(e, "__status") == 'x':
                 verb = "delete"
             else:
-                for symbol in """，,、:：;；‘’'“”""''""":
+                for symbol in const.PROFILE_CHECK_SYMBOL:
                     if symbol in e.get("name"):
                         self.send_json_error(message=self.locale.translate('profile_check_char'))
                         return
@@ -850,7 +850,7 @@ class ProfileSectionHandler(BaseHandler):
             if hasattr(e, "__status") and getattr(e, "__status") == 'x':
                 verb = "delete"
             else:
-                for symbol in """，,、:：;；‘’'“”""''""":
+                for symbol in const.PROFILE_CHECK_SYMBOL:
                     if symbol in e.get("name"):
                         self.send_json_error(message=self.locale.translate('profile_check_char'))
                         return
@@ -1050,7 +1050,7 @@ class ProfileSectionHandler(BaseHandler):
             if hasattr(e, "__status") and getattr(e, "__status") == 'x':
                 verb = "delete"
             else:
-                for symbol in """，,、:：;；‘’'“”""''""":
+                for symbol in const.PROFILE_CHECK_SYMBOL:
                     if symbol in e.get("name"):
                         self.send_json_error(message=self.locale.translate('profile_check_char'))
                         return
