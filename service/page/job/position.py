@@ -126,9 +126,9 @@ class PositionPageService(PageService):
         city = ""
         city_ename = ""
         if positions:
-            position = ObjectDict(positions[0])
-            city = position.city
-            city_ename = position.city_ename
+            es_position = ObjectDict(positions[0])
+            city = es_position.city
+            city_ename = es_position.city_ename
 
         # 国际化
         if display_locale == "en_US":
