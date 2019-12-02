@@ -126,7 +126,7 @@ class PositionPageService(PageService):
         city = ""
         city_ename = ""
         if positions:
-            position = positions[0]
+            position = ObjectDict(positions[0])
             city = position.city
             city_ename = position.city_ename
 
