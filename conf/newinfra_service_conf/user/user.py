@@ -19,4 +19,7 @@ INFRA_GET_CHATTING_LEAVE_THE_ROOM = '/v4/chat/{role}/leave-room'
 INFRA_GET_CHATTING_DELETE_THE_ROOM = '/v4/chat/{role}/room'
 INFRA_GET_CHATTING_SWITCH = '/v4/chat/{role}/switch'
 INFRA_USER_COLLECT_POSITION = '/v4/user/collect/position'
+INFRA_IF_CUSTOM_PRIVACY_WINDOW = "/v4/custom_privacy/user_status/get"
+INFRA_GET_CUSTOM_PRIVACY_INFO = '/v4/custom_privacy/get'
+INFRA_IF_AGREE_CUSTOM_PRIVACY = '/v4/custom_privacy/user_status/agree'
 INFRA_CHAT_INVITE_MSG = '/v4/chat/user/sendImInviteMsg'
