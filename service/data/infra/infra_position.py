@@ -7,7 +7,8 @@ import conf.alphacloud_api as api
 import conf.path as path
 import conf.common as const
 from conf.newinfra_service_conf.position import position
-from conf.newinfra_service_conf.service_info import position_service, sharechain_service
+from conf.newinfra_service_conf.search import search
+from conf.newinfra_service_conf.service_info import position_service, sharechain_service, search_service
 from conf.newinfra_service_conf.sharechain import sharechain
 from service.data.base import DataService
 from service.data.infra.framework.client.client import ServiceClientFactory
@@ -249,13 +250,13 @@ class InfraPositionDataService(DataService):
     @gen.coroutine
     def get_es_position_by_id(self, params):
         """根据id查询es中的职位信息"""
-        ret = yield http_get_v2(position.POSITION_ES_BY_ID, position_service, params)
+        ret = yield http_get_v2(search.POSITION_ES_BY_ID, search_service, params)
         return ret
 
     @gen.coroutine
     def get_es_position_list(self, params):
         """查询es中的职位信息"""
-        ret = yield http_post_v2(position.POSITION_LIST_ES, position_service, params)
+        ret = yield http_post_v2(search.POSITION_LIST_ES, search_service, params)
         if ret.code == const.NEWINFRA_API_SUCCESS:
             data = ret.data
         else:
