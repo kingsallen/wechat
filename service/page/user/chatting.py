@@ -100,10 +100,9 @@ class ChattingPageService(PageService):
             if ret.data:
                 on = 2
 
-        if not employee:
-            hr_chat_switch = yield self.infra_company_ds.get_hr_chat_switch_status(company_id, '9')
-            if hr_chat_switch:
-                on = on | 1
+        hr_chat_switch = yield self.infra_company_ds.get_hr_chat_switch_status(company_id, '9')
+        if hr_chat_switch:
+            on = on | 1
 
         return on
 
