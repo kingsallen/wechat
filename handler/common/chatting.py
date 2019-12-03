@@ -242,22 +242,16 @@ class EmployeeChattingHandler(BaseHandler):
         获取未读聊天消息
         :return: 聊天室列表
         """
+        # 获取员工IM未读信息
         ret = yield self.chatting_ps.get_employee_chatting_unread_count(self.params.room_id or 0, self.role,
                                                                         self.user_id, self.employee_id,
                                                                         self.current_user.company.id)
-        if self.role == "employee":
-
-            if ret and ret.code and (ret.code == "0" or ret.code == 0):
-                self.send_json_success({"unread": ret.data})
-            else:
-                self.send_json_error({"unread": ret.data if ret.data else 0}, ret.message)
+        # 获取HRIM未读信息
+        chat_num = yield self.chat_ps.get_all_unread_chat_num(self.current_user.sysuser.id)
+        if ret and ret.code and (ret.code == "0" or ret.code == 0):
+            self.send_json_success({"unread": ret.data + (chat_num if chat_num else 0)})
         else:
-            chat_num = yield self.chat_ps.get_all_unread_chat_num(self.current_user.sysuser.id)
-
-            if ret and ret.code and (ret.code == "0" or ret.code == 0):
-                self.send_json_success({"unread": ret.data + (chat_num if chat_num else 0)})
-            else:
-                self.send_json_error({"unread": (ret.data if ret.data else 0) + (chat_num if chat_num else 0)}, ret.message)
+            self.send_json_error({"unread": (ret.data if ret.data else 0) + (chat_num if chat_num else 0)}, ret.message)
 
     @handle_response
     @gen.coroutine
