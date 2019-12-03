@@ -85,22 +85,20 @@ class ChattingPageService(PageService):
         raise gen.Return(ret)
 
     @gen.coroutine
-    def get_chatting_switch(self, company_id, employee):
+    def get_chatting_switch(self, company_id):
         """
         获取聊天开关的状态
         :param company_id: 公司编号
-        :param employee: 员工身份
-        :return: 开关状态
+        :return: 开关状态 0 所有的开关都关闭, 1 只有HR聊天开关开启 2 只有员工聊天室开关开启 3 HR聊天室开关和员工聊天室开关同时开启
         """
-
         on = 0
         ret = yield self.infra_im_ds.get_chatting_switch(company_id, COMPANY_SWITCH_MODULE_CHATTING)
-
-        if ret and ret.code and (ret.code == NEWINFRA_API_SUCCESS):
-            if ret.data:
-                on = 2
+        self.logger.debug("get_chatting_switch employee_chat_switch:{}".format(ret))
+        if ret and ret.code and ret.code == NEWINFRA_API_SUCCESS:
+            on = 2
 
         hr_chat_switch = yield self.infra_company_ds.get_hr_chat_switch_status(company_id, '9')
+        self.logger.debug("get_chatting_switch hr_chat_switch:{}".format(hr_chat_switch))
         if hr_chat_switch:
             on = on | 1
 
