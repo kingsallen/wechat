@@ -222,14 +222,14 @@ def http_post_multipart_form(route, form, timeout=30, raise_error=True, headers=
         raise e
     else:
         body = objectdictify(ujson.decode(response.body))
-        if body.status in INFRA_ERROR_CODES:
+        if body.status in INFRA_ERROR_CODES or body.code in constant.NEWINFRA_ERROR_CODES:
             raise InfraOperationError(body.message)
 
         return body
 
 
 def unboxing(http_response):
-    """标准 restful api 返回拆箱"""
+    """alphadog标准 restful api 返回拆箱"""
 
     result = bool(http_response.status == constant.API_SUCCESS)
 
@@ -256,7 +256,7 @@ def unboxing_fetchone(http_response):
 
 
 def unboxing_v2(http_response):
-    """解析服务返回结果"""
+    """解析alphacloud服务返回结果"""
 
     result = bool(http_response.code == constant.NEWINFRA_API_SUCCESS)
     data = ObjectDict()
@@ -266,15 +266,15 @@ def unboxing_v2(http_response):
     return data
 
 
-def unboxing_v2(http_response):
-    """解析服务返回结果"""
-
+def unboxing_cloud(http_response):
+    """alphacloud标准 restful api 返回拆箱"""
     result = bool(http_response.code == constant.NEWINFRA_API_SUCCESS)
-    data = ObjectDict()
-    if result:
-        data = http_response.data or ObjectDict()
 
-    return data
+    if result:
+        data = http_response.data
+    else:
+        data = http_response
+    return result, data
 
 
 @gen.coroutine
