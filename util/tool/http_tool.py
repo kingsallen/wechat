@@ -222,7 +222,7 @@ def http_post_multipart_form(route, form, timeout=30, raise_error=True, headers=
         raise e
     else:
         body = objectdictify(ujson.decode(response.body))
-        if body.status in INFRA_ERROR_CODES:
+        if body.status in INFRA_ERROR_CODES or body.code in constant.NEWINFRA_ERROR_CODES:
             raise InfraOperationError(body.message)
 
         return body
