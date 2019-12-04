@@ -37,7 +37,6 @@ class InfraDictDataService(DataService):
     # 港澳台城市编号前缀
     _GAT_PREFIX = [81, 82, 71]
 
-    @cache(ttl=60 * 60 * 5)
     @gen.coroutine
     def get_const_dict(self, parent_code, locale=None):
         """根据 parent_code 获取常量字典
@@ -80,7 +79,6 @@ class InfraDictDataService(DataService):
 
         return ret
 
-    @cache(ttl=60 * 60 * 5)
     @gen.coroutine
     def get_sms_country_codes(self, display_locale):
         """获取国家电话区号"""
@@ -217,14 +215,12 @@ class InfraDictDataService(DataService):
         colleges = yield self.get_colleges()
         return self.get_code_by_name_from(colleges, school_name)
 
-    @cache(ttl=60 * 60 * 5)
     @gen.coroutine
     def get_colleges(self):
         """获取所有学校列表"""
         response = yield http_get_v2(dictionary.NEWINFRA_DICT_COLLEGE_ALL, dict_service)
         return unboxing_v2(response)
 
-    @cache(ttl=60 * 60 * 5)
     @gen.coroutine
     def get_mainland_colleges(self):
         """获取国内所有院校列表"""
@@ -237,7 +233,6 @@ class InfraDictDataService(DataService):
         data = ObjectDict({"list": ret})
         return data
 
-    @cache(ttl=60 * 60 * 5)
     @gen.coroutine
     def get_overseas_colleges(self, country_id):
         """根据id获取国外院校列表"""
@@ -281,7 +276,6 @@ class InfraDictDataService(DataService):
     def _make_level_2_cities_result(http_response):
         return http_response.data
 
-    @cache(ttl=60 * 60 * 5)
     @gen.coroutine
     def get_cities(self, locale_display=None, hot=False):
         """获取城市列表
@@ -344,14 +338,12 @@ class InfraDictDataService(DataService):
             ret = sorted(cities, key=lambda x: x.text)
             return ret
 
-    @cache(ttl=60 * 60 * 5)
     @gen.coroutine
     def get_hot_cities(self):
         """Alias for get_cities(hot=False) :)"""
         cities = yield self.get_cities(hot=True)
         return cities
 
-    @cache(ttl=60 * 60 * 5)
     @gen.coroutine
     def get_city_code_by(self, city_name):
         """city_name -> code
@@ -399,7 +391,6 @@ class InfraDictDataService(DataService):
         else:
             return None
 
-    @cache(ttl=60 * 60 * 5)
     @gen.coroutine
     def get_mars_industries(self):
         """获取Mars行业"""
@@ -421,7 +412,6 @@ class InfraDictDataService(DataService):
             industries.append(out)
         return industries
 
-    @cache(ttl=60 * 60 * 5)
     @gen.coroutine
     def get_industries(self, level=2, locale_display=None):
         """获取行业
@@ -460,7 +450,6 @@ class InfraDictDataService(DataService):
             industries.append(out)
         return industries
 
-    @cache(ttl=60 * 60 * 5)
     @gen.coroutine
     def get_functions(self, code=0, locale_display=None):
         """获取职能
