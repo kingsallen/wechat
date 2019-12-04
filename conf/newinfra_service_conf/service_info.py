@@ -10,12 +10,6 @@ dict_service = ObjectDict(
 
 # interfaceid必传，但是又没有什么用，也没有拓展使用的打算，这里都用默认值写死
 
-dict_service = ObjectDict(
-    appid="A11003",
-    interfaceid="A11003001",
-    service_name="dict"
-)
-
 user_service = ObjectDict(
     appid="A11005",
     interfaceid="A11005001",
