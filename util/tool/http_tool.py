@@ -229,7 +229,7 @@ def http_post_multipart_form(route, form, timeout=30, raise_error=True, headers=
 
 
 def unboxing(http_response):
-    """标准 restful api 返回拆箱"""
+    """alphadog标准 restful api 返回拆箱"""
 
     result = bool(http_response.status == constant.API_SUCCESS)
 
@@ -256,7 +256,7 @@ def unboxing_fetchone(http_response):
 
 
 def unboxing_v2(http_response):
-    """解析服务返回结果"""
+    """解析alphacloud服务返回结果"""
 
     result = bool(http_response.code == constant.NEWINFRA_API_SUCCESS)
     data = ObjectDict()
@@ -264,6 +264,17 @@ def unboxing_v2(http_response):
         data = http_response.data
 
     return data
+
+
+def unboxing_cloud(http_response):
+    """alphacloud标准 restful api 返回拆箱"""
+    result = bool(http_response.code == constant.NEWINFRA_API_SUCCESS)
+
+    if result:
+        data = http_response.data
+    else:
+        data = http_response
+    return result, data
 
 
 @gen.coroutine
