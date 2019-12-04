@@ -53,17 +53,6 @@ class WorkwxDataService(DataService):
         path = "{0}/{1}{2}".format(settings['cloud'], user_service.service_name, user.INFRA_USER_BIND_WORKWX_QXUSER)
         route = url_concat(path, params)  #post请求参数写在url里面，不能写在body里面
         ret = yield _v2_async_http_post(route)
-        if ret.code != const.NEWINFRA_API_SUCCESS:
-            # raise InfraOperationError(ret.message)
-            self.render_page(
-                'system/info.html',
-                data={
-                    'code': 500,
-                    'message': ret.message
-                },
-                http_code=500
-            )
-            return
         raise gen.Return(ret)
 
     @gen.coroutine
@@ -79,17 +68,6 @@ class WorkwxDataService(DataService):
         path = "{0}/{1}{2}".format(settings['cloud'], user_service.service_name, user.INFRA_USER_UNBIND_WORKWX_QXUSER)
         route = url_concat(path, params)  #post请求参数写在url里面，不能写在body里面
         ret = yield _v2_async_http_post(route)
-        if ret.code != const.NEWINFRA_API_SUCCESS:
-            # raise InfraOperationError(ret.message)
-            self.render_page(
-                'system/info.html',
-                data={
-                    'code': 500,
-                    'message': ret.message
-                },
-                http_code=500
-            )
-            return
         raise gen.Return(ret)
 
     @gen.coroutine

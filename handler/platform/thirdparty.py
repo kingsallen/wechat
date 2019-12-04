@@ -198,7 +198,17 @@ class EmployeeQrcodeHandler(BaseHandler):
         if self.current_user.wxuser.is_subscribe:
             # 如果已经绑定过(以前访问绑定过),无需再绑定
             if int(workwx_user_record.sys_user_id) <= 0:
-                yield self.workwx_ps.bind_workwx_qxuser(self.current_user.sysuser.id, workwx_userid, company_id)
+                ret = yield self.workwx_ps.bind_workwx_qxuser(self.current_user.sysuser.id, workwx_userid, company_id)
+                if ret.code != const.NEWINFRA_API_SUCCESS:
+                    self.render_page(
+                        'system/info.html',
+                        data={
+                            'code': 500,
+                            'message': ret.message
+                        },
+                        http_code=500
+                    )
+                    return
 
             is_valid_employee = yield self.employee_ps.is_valid_employee(
                 self.current_user.sysuser.id,
