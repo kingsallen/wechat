@@ -4,7 +4,7 @@ from tornado import gen
 from service.data.base import DataService
 from util.common.decorator import cache
 from util.common import ObjectDict
-from util.common.decorator import log_time
+from util.common.decorator import log_coro
 
 
 class UserWxUserDataService(DataService):
@@ -21,7 +21,7 @@ class UserWxUserDataService(DataService):
         response = yield self.user_wx_user_dao.get_record_by_conds(conds, fields)
         raise gen.Return(response)
 
-    @log_time
+    @log_coro
     @gen.coroutine
     def get_wxuser(self, conds=None, fields=None):
         if not self._valid_conds(conds):

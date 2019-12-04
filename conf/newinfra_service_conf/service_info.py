@@ -61,3 +61,9 @@ profile_service = ObjectDict(
     interfaceid="A11011001",
     service_name="profile"
 )
+
+im_service = ObjectDict(
+    appid="A11037",
+    interfaceid="A11037001",
+    service_name="im"
+)

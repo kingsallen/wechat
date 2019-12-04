@@ -9,7 +9,7 @@ from thrift_gen.gen.common.struct.ttypes import BIZException
 from thrift_gen.gen.company.service.CompanyServices import \
     Client as CompanyServicesClient
 from util.tool.dict_tool import ObjectDict
-from util.tool.http_tool import http_get, unboxing, http_post, http_get_v2
+from util.tool.http_tool import http_get, unboxing, http_post, http_get_v2, http_put_v2
 
 from conf.newinfra_service_conf.service_info import company_service
 from conf.newinfra_service_conf.company import company
@@ -95,14 +95,6 @@ class InfraCompanyDataService(DataService):
         return res
 
     @gen.coroutine
-    def get_company_mobot_conf(self, company_id):
-        params = ObjectDict({
-            "company_id": company_id,
-        })
-        res = yield http_get(path.MOBOT_IMAGE, params)
-        return res
-
-    @gen.coroutine
     def check_oms_switch_status(self, company_id, module_name):
         """
         检查oms控制的一系列开关状态
@@ -118,6 +110,49 @@ class InfraCompanyDataService(DataService):
         return res
 
     @gen.coroutine
+    def get_oms_all_switch_status(self, company_id):
+        """
+        获取oms开关状态
+        :param company_id: 公司id
+        :return:
+        """
+        params = ObjectDict({
+            "companyId": company_id,
+            "appid": 102,
+        })
+        res = yield http_get(path.OMS_SWITCH_ALL, params)
+        return res
+
+    @gen.coroutine
+    def get_hr_chat_switch_status(self, company_id, candidate_source):
+        """
+        获取是否显示联系HR的开关配置
+        :param company_id:
+        :param candidate_source: 0 社招 1 校招 9 全部(显示个人中心首页中我的消息)
+        :return:
+        """
+        mobot_type = {'0': ['社招版MoBot(人工对话模式)', '社招版MoBot(人工+智能对话模式)'],
+                      '1': ['校招MoBot(人工对话模式)', '校招MoBot(人工+智能对话模式)'],
+                      '9': ['社招版MoBot(人工对话模式)', '社招版MoBot(人工+智能对话模式)',
+                            '校招MoBot(人工对话模式)', '校招MoBot(人工+智能对话模式)',
+                            '员工版MoBot(人工对话模式)', '员工版MoBot(人工+智能对话模式)']}
+
+        if candidate_source not in ['0', '1', '9']:
+            raise gen.Return(False)
+
+        res = yield self.get_oms_all_switch_status(company_id)
+        if not res.data:
+            self.logger.warning("get_hr_chat_switch_status is null, company.id:{}".format(company_id))
+            raise gen.Return(False)
+
+        for product in res.data:
+            if product['keyword'] in mobot_type[candidate_source]:
+                if product['valid'] == 1:
+                    raise gen.Return(True)
+
+        raise gen.Return(False)
+
+    @gen.coroutine
     def get_company_hr_info(self, params):
         """
         根据hrId获取HR信息
@@ -125,6 +160,62 @@ class InfraCompanyDataService(DataService):
         """
         ret = yield http_get_v2(company.COMPANY_HR_INFO, company_service, params)
         return ret
+
+    @gen.coroutine
+    def get_company_hr_list(self, params):
+        """
+        根据hr_ids批量获取HR列表数据
+        :param params : [1, 2]
+        """
+        ret = yield http_put_v2(company.COMPANY_HR_LIST, company_service, params)
+        return ret
+
+    @gen.coroutine
+    def get_company_list(self, params):
+        """
+        根据company_ids批量获取公司列表数据
+        :param params : [1, 2]
+        """
+        ret = yield http_put_v2(company.COMPANY_LIST, company_service, params)
+        return ret
+
+    @gen.coroutine
+    def get_company_conf(self, params):
+        """
+        根据company_id获取公司列表数据
+        :param params : {'companyId': 1}
+        """
+        ret = yield http_put_v2(company.COMPANY_CONF, company_service, params)
+        return ret
+
+    @gen.coroutine
+    def batch_get_company_conf(self, company_ids):
+        """
+        根据company_id获取公司列表数据
+        :param params : companyIds: [1, 2, 3]
+        """
+        params = ObjectDict({
+            "companyIds": company_ids,
+        })
+        ret = yield http_get_v2(company.COMPANY_CONF_BY_COMPANY_IDS, company_service, params)
+        return ret
+
+    @gen.coroutine
+    def get_company_mobot_conf(self, company_id):
+        params = ObjectDict({
+            "company_id": company_id,
+        })
+        res = yield self.get_company_conf(params)
+        if not res.data:
+            raise gen.Return({})
+
+        mobot_conf_info = ObjectDict(dict(name='', headimg='', welcome=''))
+        conf = ObjectDict(res.data)
+        mobot_conf_info.name = conf.mobot_name
+        mobot_conf_info.headimg = conf.mobot_head_img
+        mobot_conf_info.welcome = conf.mobot_welcome
+
+        raise gen.Return(mobot_conf_info)
 
     @gen.coroutine
     def get_referral_rule_switch(self, company_id):

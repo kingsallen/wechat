@@ -962,7 +962,9 @@ class ProfilePageService(PageService):
             experience_item.logo = w.get("company_logo", "")
             start_date = w.get("start_date", "")
             end_date = w.get("end_date", "")
-            if not end_date or int(w.get("end_until_now", 0)):
+            if not end_date and not start_date:
+                experience_item.time = ""
+            elif not end_date or int(w.get("end_until_now", 0)):
                 experience_item.time = start_date[:7] + " " + locale.translate(const.UNTIL_NOW) if locale else "至今"
             else:
                 experience_item.time = start_date[:7] + " " + (locale.translate(const.TO) if locale else "至") + " " + end_date[:7]
@@ -983,7 +985,9 @@ class ProfilePageService(PageService):
             education_item.logo = e.get("college_logo", "")
             start_date = e.get("start_date", "")
             end_date = e.get("end_date", "")
-            if not end_date or int(e.get("end_until_now", 0)):
+            if not end_date and not start_date:
+                education_item.time = ""
+            elif not end_date or int(e.get("end_until_now", 0)):
                 education_item.time = start_date[:7] + " " + locale.translate(const.UNTIL_NOW) if locale else "至今"
             else:
                 education_item.time = start_date[:7] + " " + (locale.translate(const.TO) if locale else "至") + " " + end_date[:7]
@@ -1002,7 +1006,9 @@ class ProfilePageService(PageService):
             project_item.description = p.get("description", "")
             start_date = p.get("start_date", "")
             end_date = p.get("end_date", "")
-            if not end_date or int(p.get("end_until_now", 0)):
+            if not end_date and not start_date:
+                project_item.time = ""
+            elif not end_date or int(p.get("end_until_now", 0)):
                 project_item.time = start_date[:7] + " " + locale.translate(const.UNTIL_NOW) if locale else "至今"
             else:
                 project_item.time = start_date[:7] + " " + (locale.translate(const.TO) if locale else "至") + " " + end_date[:7]
@@ -1236,8 +1242,8 @@ class ProfilePageService(PageService):
         importer = ObjectDict(
             # profile_import_51job=None,
             profile_import_51job=make_url(path.RESUME_URL, params, m='authorization', way=const.RESUME_WAY_51JOB),
-            # profile_import_zhilian=make_url(path.RESUME_URL, params, m='authorization', way=const.RESUME_WAY_ZHILIAN),
-            profile_import_zhilian=None,
+            profile_import_zhilian=make_url(path.RESUME_URL, params, m='authorization', way=const.RESUME_WAY_ZHILIAN),
+            # profile_import_zhilian=None,
             # set later.
             profile_import_liepin=None,
             profile_import_linkedin=make_url(path.RESUME_URL, params, m='authorization', way=const.RESUME_WAY_LINKEDIN),

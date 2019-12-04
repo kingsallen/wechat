@@ -394,30 +394,6 @@ BONUS = {
     103: "undo_on_board"
 }
 
-# 聊天相关
-MSG_TYPE = {
-    0: "html",
-    1: "button_radio",
-    2: "cards",
-    3: "jobCard",
-    4: "citySelect",
-    5: "teamSelect",
-    6: "redirect",
-    7: "jobSelect",
-    8: "employeeBind",
-    9: "textPlaceholder",
-    10: "positionSelect",
-    11: "industrySelect",
-    12: "satisfaction",
-    13: "uploadResume",
-    14: "shareReport",
-    15: "positionSubscribe",
-    16: "toHrHumanAnswer",
-    17: "moplanAppointmentProject",
-    18: "moplanUserModifyAppointmentMobile",
-    19: "uploadImage",
-}
-
 # 积分配置类型
 REWARD_VERIFICATION = "完成员工认证"
 REWARD_CLICK_JOB = "转发职位被点击"
@@ -427,11 +403,6 @@ REWARD_PASS_REVIEW = "简历评审合格"
 REWARD_PASS_INTERVIEW = "面试通过"
 REWARD_ON_BOARD = "入职"
 REWARD_UPLOAD_PROFILE = "员工上传人才简历"
-
-# 操作的聊天类型
-INTERACTIVE_MSG = ["employeeBind", "jobSelect", "teamSelect", "citySelect", "jobCard", "positionSelect",
-                   "industrySelect", "uploadResume", "shareReport", "positionSubscribe", "moplanAppointmentProject",
-                   "moplanUserModifyAppointmentMobile", "uploadImage"]
 
 # 默认图标
 SYSUSER_HEADIMG = "weixin/images/hr-avatar-default.png"
@@ -924,3 +895,6 @@ CHATTING_EMPLOYEE_MSG_TYPE_RESIGNATION = "employee_off"
 
 # 开关模块
 COMPANY_SWITCH_MODULE_CHATTING = 30
+
+# profile 校验特殊符号
+PROFILE_CHECK_SYMBOL = """，,、:：;；‘’'“”""''"""
