@@ -12,7 +12,7 @@ NEWINFRA_DICT_COLLEGE_BY_COUNTRY_CODE = "/v4/college/country"
 NEWINFRA_DICT_INDUSTRY = "/v4/industry"
 NEWINFRA_DICT_MARS_INDUSTRY = "/v4/mars-industries"
 NEWINFRA_DICT_INDUSTRY_PARENT = "/v4/industrytype/all"
-NEWINFRA_DICT_INDUSTRY_CODE_LIST = "/v4/industry/code"
+NEWINFRA_DICT_INDUSTRY_CODE_LIST = "/v4/industry/type"
 NEWINFRA_DICT_POSITION = "/v4/position"
 NEWINFRA_DICT_REFERRAL_EVALUATE = "/v4/dict/referral/evaluate"
 
