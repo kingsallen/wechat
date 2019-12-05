@@ -122,7 +122,6 @@ common_routes = [
     (r"/health_check",                               handler.common.health_check.HealthcheckHandler,            {"event": "health_check"}),
 
     # websocket
-    (r"/websocket/([A-Za-z0-9_]{1,32})",             handler.common.im.ChatWebSocketHandler),
     (r"/ws/chatting/([A-Za-z0-9_]{1,32})",           handler.common.chatting.ChattingWebSocketHandler),
 
     (r"/api/send/vcode/?",                           handler.common.passport.SendValidCodeHandler,              {"event": "send_vcode"}),
@@ -152,6 +151,7 @@ common_routes = [
     (r"/api/position/list/?",                        handler.platform.position.PositionListDetailHandler,       {"event": "api_position_list"}),
     (r"/api/position/list/sug",                      handler.platform.position.PositionListSugHandler,          {"event": "position_list_sug"}),
     (r"/api/position/search/history",                handler.platform.position.PositionSearchHistoryHandler,    {"event": "position_search_history"}),
+    (r"/api/position/distance_batch",                handler.platform.position.PositionDistanceBatchHandler,    {"event": "api_position_distance_batch"}),
     (r"/api/chat/unread[\/]*([0-9]+)*",              handler.common.im.UnreadCountHandler,                      {"event": "chat_"}),
     (r"/api/mobilebinded",                           handler.common.usercenter.UserMobileBindedHandler,         {"event": "user_usermobilebinded"}),
     (r"/api/cellphone[\/]*([a-z_]+)*",               handler.common.cellphone.CellphoneBindHandler,             {"event": "cellphone_"}),
@@ -164,8 +164,9 @@ common_routes = [
     (r"/api/resume/import",                          handler.common.resume.ResumeImportHandler,                 {"event": "resume_import"}),
     (r"/api/sug/company",                            handler.common.suggest.SuggestCompanyHandler,              {"event": "sug_company"}),
     (r"/api/sug/college",                            handler.common.suggest.SuggestCollegeHandler,              {"event": "sug_college"}),
-    (r"/api/chatting[\/]*([a-z]+)*",                 handler.common.chatting.EmployeeChattingHandler,           {"event": "chatting_rooms_"}),
+    (r"/api/chatting[\/]*([a-z\-]+)*",               handler.common.chatting.EmployeeChattingHandler,           {"event": "chatting_rooms_"}),
     (r"/api/chat[\/]*([a-z]+)*",                     handler.common.im.ChatHandler,                             {"event": "chat_"}),
+    (r"/api/chat/socket/token",                      handler.common.im.ChatSocketTokenHandler,                  {"event": "chat_"}),
     (r"/api/application",                            handler.common.application.ApplicationHandler,             {"event": "application_profile"}),
     (r"/api/JSSDKError",                             handler.common.jssdkerror.JSSDKErrorHandler,               {"event": "frontend_jssdkerror"}),
     (r"/api/jslog",                                  handler.common.jslog.JSLogHandler,                         {"event": "frontend_jslog"}),

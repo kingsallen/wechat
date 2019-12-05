@@ -71,10 +71,17 @@ class CompanyHandler(BaseHandler):
         else:
             origin = const.SA_ORIGIN_PLATFORM
         self.track("cCompanyIndex", properties=ObjectDict(origin=origin))
+        team = yield self.team_ps.get_team(ObjectDict({
+            "company_id": self.current_user.company.id,
+            "disable": const.OLD_YES,
+            "is_show": const.YES
+        }))
+
+        has_team = bool(team)
         if self.flag_should_display_newjd:
             data = yield self.user_company_ps.get_company_data(
                 self.locale, self.params, company, self.current_user)
-
+            data.has_team = has_team
             self.params.share = self._share(company)
             self.render_page(template_name='company/profile.html', data=data)
         else:
@@ -91,6 +98,7 @@ class CompanyHandler(BaseHandler):
             })
 
             add_item(company_data, "company", company)
+            add_item(company_data, "has_team", has_team)
             self.render_page(
                 template_name='company/info_old.html',
                 data=company_data,
@@ -193,7 +201,7 @@ class NearbyStoresHandler(BaseHandler):
                 "company_id": self.current_user.company.id,
                 "longitude": self.params.longitude,
                 "latitude": self.params.latitude,
-                "radius": int(radius) / 1000 if radius and int(radius) else 1
+                "radius": float(radius) / 1000 if radius and float(radius) else 1
             })
         else:
             params = ObjectDict({
@@ -223,7 +231,7 @@ class PositionLbsHandler(BaseHandler):
                 "company_id": self.current_user.company.id,
                 "longitude": self.params.longitude,
                 "latitude": self.params.latitude,
-                "radius": int(radius) / 1000 if radius and int(radius) else 1
+                "radius": float(radius) / 1000 if radius and float(radius) else 1
             })
         else:
             params = ObjectDict({

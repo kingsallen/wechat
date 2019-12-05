@@ -10,23 +10,18 @@ from tornado.escape import json_decode
 
 import conf.common as const
 import conf.message as msg
-import conf.path as path
 from cache.application.email_apply import EmailApplyCache
 from service.page.base import PageService
 from service.page.employee.employee import EmployeePageService
-from service.page.user.profile import ProfilePageService
 from service.page.user.sharechain import SharechainPageService
-from thrift_gen.gen.mq.struct.ttypes import SmsType
 from util.common import ObjectDict
 from util.common.mq import award_publisher
-from util.tool.dict_tool import objectdictify, purify, rename_keys
+from util.tool.dict_tool import objectdictify, rename_keys
 from util.tool.json_tool import json_dumps
 from util.tool.iter_tool import first
-from util.tool.mail_tool import send_mail as send_email_service
-from util.tool.pdf_tool import generate_resume_for_hr
 from util.tool.str_tool import trunc
-from util.tool.url_tool import make_url, make_static_url
-from util.common.decorator import log_time
+from util.tool.url_tool import make_static_url
+from util.common.decorator import log_coro
 
 
 class ApplicationPageService(PageService):
@@ -35,7 +30,7 @@ class ApplicationPageService(PageService):
         super().__init__()
         self.email_apply_session = EmailApplyCache()
 
-    @log_time
+    @log_coro(threshold=20)
     @gen.coroutine
     def get_application(self, position_id, user_id):
         """返回用户申请的职位"""
@@ -65,7 +60,7 @@ class ApplicationPageService(PageService):
 
         raise gen.Return(response)
 
-    @log_time
+    @log_coro(threshold=30)
     @gen.coroutine
     def is_allowed_apply_position(self, user_id, company_id, position_id):
         """获取一个月内该用户的申请数量
@@ -96,6 +91,7 @@ class ApplicationPageService(PageService):
 
         raise gen.Return(bool_res)
 
+    @log_coro(threshold=20)
     @gen.coroutine
     def get_application_apply_status(self, user_id, company_id):
         """

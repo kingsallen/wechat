@@ -1,16 +1,15 @@
 # coding=utf-8
 
 from tornado import gen
-from handler.base import BaseHandler
 
 import conf.common as const
 import conf.message as msg
-from thrift_gen.gen.employee.struct.ttypes import BindStatus
-from util.common.decorator import handle_response, verified_mobile_oneself, authenticated, check_employee_common
-from util.tool.file_tool import filetype
-from util.tool.str_tool import email_validate, is_alphabet, is_chinese, password_crypt, password_validate
-from util.image.upload import QiniuUpload
+from handler.base import BaseHandler
 from util.common import ObjectDict
+from util.common.decorator import handle_response, verified_mobile_oneself, authenticated, check_employee_common
+from util.image.upload import QiniuUpload
+from util.tool.file_tool import filetype
+from util.tool.str_tool import email_validate, is_alphabet, is_chinese, password_validate
 
 
 class UsercenterHandler(BaseHandler):
@@ -58,6 +57,7 @@ class UsercenterHandler(BaseHandler):
             unread_praise = yield self.employee_ps.get_unread_praise(self.current_user.employee.id)
         else:
             unread_praise = 0
+
         self.send_json_success(data=ObjectDict(
             headimg=self.static_url(res.data.headimg or const.SYSUSER_HEADIMG),
             name=res.data.name or res.data.nickname,
