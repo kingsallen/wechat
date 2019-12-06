@@ -212,7 +212,7 @@ class LandingPageService(PageService):
             "conf_search_seq": conf_search_seq,
             "company_id": company.get("id"),
             "display_locale": display_locale,
-            "referral": is_referral,
+            "referral": True if is_referral == "1" else False,
             "params": display_key_dict
         })
         data = yield self.infra_position_ds.get_es_position_list(search_params)
