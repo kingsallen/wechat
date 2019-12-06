@@ -32,7 +32,7 @@ class InfraUserDataService(DataService):
         })
 
         ret = yield http_get_v2(user.INFRA_USER_INFO, user_service, params)
-        raise gen.Return(unboxing_v2(ret))
+        raise gen.Return(unboxing_v2(ret)) or ObjectDict()
 
     # todo(refactor_undo referral)
     @gen.coroutine
@@ -442,7 +442,6 @@ class InfraUserDataService(DataService):
         ret = yield http_post(path.INFRA_AUTO_BIND_EMPLOYEE, params)
         return ret
 
-
     @gen.coroutine
     def post_wx_change_mobile(self, country_code, mobile, user_id):
         """手机号和微信号绑定接口"""
@@ -534,7 +533,7 @@ class InfraUserDataService(DataService):
     def infra_get_wxuser(self, params):
         """获取用户微信信息"""
         ret = yield http_get_v2(user.INFRA_USER_WX_USER_INFO, user_service, params)
-        return unboxing_v2(ret)
+        return unboxing_v2(ret) or ObjectDict()
 
     @gen.coroutine
     def infra_user_register(self, params):
@@ -583,23 +582,3 @@ class InfraUserDataService(DataService):
         """用户取消关注"""
         ret = yield http_post_v2(user.INFRA_USER_UNSUBSCRIBE, user_service, params)
         return unboxing_v2(ret)
-
-    @gen.coroutine
-    def infra_get_user_by_joywok_info(self, params):
-        """
-        根据麦当劳APP授权获取的员工信息查找仟寻微信用户，及员工在仟寻系统的认证状态:
-        :param params:
-        :return:
-        """
-        ret = yield http_get_v2(user.INFRA_GET_USER_BY_JOYWOK_USER_INFO, user_service, params)
-        return ret
-
-    @gen.coroutine
-    def infra_auto_bind_employee(self, params):
-        """
-        对joywok的用户做自动认证:
-        :param params:
-        :return:
-        """
-        ret = yield http_post(path.INFRA_AUTO_BIND_EMPLOYEE, params)
-        return ret
