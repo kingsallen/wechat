@@ -32,7 +32,7 @@ class InfraUserDataService(DataService):
         })
 
         ret = yield http_get_v2(user.INFRA_USER_INFO, user_service, params)
-        raise gen.Return(unboxing_v2(ret)) or ObjectDict()
+        return unboxing_v2(ret) or ObjectDict()
 
     # todo(refactor_undo referral)
     @gen.coroutine
