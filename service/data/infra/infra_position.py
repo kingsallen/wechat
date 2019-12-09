@@ -246,6 +246,7 @@ class InfraPositionDataService(DataService):
         :return:
         """
         ret = yield http_post_v2(position.POSITION_LIST_GET_DISTANCE, position_service, params)
+        return ret
 
     @gen.coroutine
     def get_es_position_by_id(self, params):
