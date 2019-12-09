@@ -15,7 +15,6 @@ from util.common import ObjectDict
 from util.common.decorator import handle_response, authenticated
 from util.common.decorator import relate_user_and_former_employee
 from util.tool.date_tool import curr_now_minute
-from util.tool.str_tool import to_str, match_session_id
 
 
 class UnreadCountHandler(BaseHandler):
@@ -528,7 +527,7 @@ class ChatHandler(BaseHandler):
         :return:
         """
         self.room_id = self.params.roomId
-        self.user_id = match_session_id(to_str(self.get_secure_cookie(const.COOKIE_SESSIONID)))
+        self.user_id = self.current_user.sysuser.id
         self.hr_id = self.params.hrId
         self.position_id = self.params.get("pid") or 0
         self.flag = int(self.params.get("flag")) or None
@@ -611,7 +610,7 @@ class ChatHandler(BaseHandler):
         处理 chatbot message
         获取消息 -> pub消息 -> 入库
 
-        :param room_type mobot区分标识 social, campus, employee
+        :param room_type 房间类型 1：社招, 2：校招，3: 员工
         """
         # 聚合号入口应该使用对应hr对应所在的company_id
         company_id = self.current_user.company.id
@@ -637,7 +636,7 @@ class ChatHandler(BaseHandler):
             msg_type = bot_message.msg_type
             compound_content = bot_message.compound_content
             if bot_message.msg_type == '':
-                logger.warning("_handle_chatbot_message msg_type is null")
+                self.logger.warning("_handle_chatbot_message msg_type is null")
                 continue
 
             if msg_type == "cards":
@@ -669,7 +668,7 @@ class ChatHandler(BaseHandler):
                                                 const.ORIGIN_CHATBOT, int(self.position_id), bot_message.content,
                                                 compoundContent, const.CHAT_SPEAKER_BOT, 0, 0)
             if not chat:
-                logger.warning("_handle_chatbot_message save_chat chat is null")
+                self.logger.warning("_handle_chatbot_message save_chat chat is null")
                 continue
 
             message_body = dict(

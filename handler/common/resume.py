@@ -445,10 +445,11 @@ class ChatbotResumeSubmitHandler(BaseHandler):
         data = {'name': args.name, 'success': success}
         if success:
             data['referral_id'] = result.data
-        url = '/m/chat/room?hr_id={}&wechat_signature={}&flag=4&data={}'.format(
+        url = '/m/mobot?hr_id={}&wechat_signature={}&flag=4&data={}&room_type={}'.format(
             self.json_args.hr_id,
             self.current_user.wechat.signature,
-            urllib.parse.quote(json.dumps(data))
+            urllib.parse.quote(json.dumps(data)),
+            self.json_args.room_type or 1
         )
         self.send_json_success({'next_url': url})
 

@@ -429,15 +429,14 @@ class ChatPageService(PageService):
                     route='{host}{uri}'.format(host=settings['chatbot_host'], uri='qa.api'), jdata=params,
                     infra=False)
 
-            self.logger.debug(res)
             if res.status == 0 and res.data.results:
                 for r in res.data.results:
                     ret_message = yield self.make_response(r, current_user)
                     messages.append(ret_message)
             else:
-                self.logger.debug("mobot {} api result:{}".format(room_type, res))
+                self.logger.warning("mobot {} api result:{}".format(room_type, res))
         except Exception as e:
-            self.logger.debug("mobot %s api error: %s, params: %s" % (room_type, e, params))
+            self.logger.warning("mobot %s api error: %s, params: %s" % (room_type, e, params))
             # 回复默认信息
             default_message = dict(resultType=0,
                                    resultTypeName='html',
