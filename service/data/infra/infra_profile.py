@@ -622,8 +622,8 @@ class InfraProfileDataService(DataService):
         params = {"profile_id": profile_id}
         if record.get('city_name'):
             params.update({"city": record.city_name})
-        if record.get('position_name'):
-            for item in record.get('position_name'):
+        if record.get('position'):
+            for item in record.get('position'):
                 index = 0
                 params.update({"positions[{}]position_name".format(index): item.get("position_name")})
                 params.update({"positions[{}]position_code".format(index): item.get("position_code")})
