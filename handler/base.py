@@ -848,7 +848,11 @@ class BaseHandler(MetaBaseHandler):
         recom = yield self.user_ps.get_user_user({
             "id": recom_user_id
         })
-        if recom:
+        if recom and recom.parentid != 0:
+            recom = yield self.user_ps.get_user_user({
+                "id": recom.parentid
+            })
+        if recom and recom.unionid:
             recom_wxuser = yield self.user_ps.get_wxuser_unionid_wechat_id(
                 unionid=recom.unionid, wechat_id=self._wechat.id)
             recom.openid = recom_wxuser.openid
