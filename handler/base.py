@@ -848,7 +848,11 @@ class BaseHandler(MetaBaseHandler):
         recom = yield self.user_ps.get_user_user({
             "id": recom_user_id
         })
-        if recom:
+        if recom and recom.parentid != 0:
+            recom = yield self.user_ps.get_user_user({
+                "id": recom.parentid
+            })
+        if recom and recom.unionid:
             recom_wxuser = yield self.user_ps.get_wxuser_unionid_wechat_id(
                 unionid=recom.unionid, wechat_id=self._wechat.id)
             recom.openid = recom_wxuser.openid
@@ -1292,7 +1296,17 @@ class BaseHandler(MetaBaseHandler):
         # 访问企业微信页面
         if workwx_sysuser_id <= 0:
             # 绑定仟寻用户和企业微信: 如果需要跳转微信，不能企业微信做绑定，必须去微信做绑定(因为有可能通过mobile绑定的仟寻用户跟跳转的仟寻用户不是同一个人)；如果不跳微信需要在企业微信做绑定
-            yield self.workwx_ps.bind_workwx_qxuser(sysuser.id, workwx_userid, self._wechat.company_id)
+            ret = yield self.workwx_ps.bind_workwx_qxuser(sysuser.id, workwx_userid, self._wechat.company_id)
+            if ret.code != const.NEWINFRA_API_SUCCESS:
+                self.render_page(
+                    'system/info.html',
+                    data={
+                        'code': 500,
+                        'message': ret.message
+                    },
+                    http_code=500
+                )
+                return
         if bind_employee:  # 如果员工认证失败，需要解除绑定
             try:
                 yield self.workwx_ps.employee_bind(sysuser.id, self._wechat.company_id)

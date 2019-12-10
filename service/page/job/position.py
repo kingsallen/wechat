@@ -114,30 +114,21 @@ class PositionPageService(PageService):
             if job_custom_res:
                 position.job_custom = job_custom_res.name
 
-        # 从 ES 中拉取职位的城市信息 （以后全部放到基础服务获取）
-        data = {
-            "query": {
-                "bool": {
-                    "must": [
-                        {"match": {"id": position_id}}
-                    ]
-                }
-            }
-        }
         # 防止因为es的不稳定导致的职位详情页无法访问的情况。
         try:
-            response = self.es.search(index='index', body=data, timeout=1)
-            result_list = response.hits.hits
+            response = yield self.infra_position_ds.get_es_position_by_id(ObjectDict({
+                "position_id": position_id
+            }))
+            positions = response.data
         except Exception as e:
-            self.logger.error("position info es search error: {}".format(e))
-            result_list = []
+            self.logger.error("infra get position info es search error: {}".format(e))
+            positions = []
         city = ""
         city_ename = ""
-        if result_list:
-            result = result_list[0]
-            source = ObjectDict(result.get("_source"))
-            city = source.city
-            city_ename = source.city_ename
+        if positions:
+            es_position = ObjectDict(positions[0])
+            city = es_position.city
+            city_ename = es_position.city_ename
 
         # 国际化
         if display_locale == "en_US":
