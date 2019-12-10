@@ -106,4 +106,4 @@ class IsAgreePrivacyHandler(BaseHandler):
                                   custom_privacy=None)
                 self.send_json_success(data=data)
         else:
-            self.send_json_error(message="获取仟寻隐私协议状态失败")
+            self.send_json_error(message=show_privacy_agreement.message)
