@@ -316,7 +316,7 @@ class InfraDictDataService(DataService):
                 is_gat = any(
                     map(lambda x: str(el.get('code')).startswith(str(x)),
                         self._GAT_PREFIX))
-                if locale_display == "en_US":
+                if locale_display.code == "en_US":
                     h = el.get('name')[0] if el.get('name') else el.get('name')
                 else:
                     if is_gat:
