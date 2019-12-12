@@ -323,7 +323,10 @@ class InfraDictDataService(DataService):
                     map(lambda x: str(el.get('code')).startswith(str(x)),
                         self._GAT_PREFIX))
                 if locale_display.code == "en_US":
-                    h = el.get('name')[0] if el.get('name') else el.get('name')
+                    if is_gat:
+                        h = "港,澳,台"
+                    else:
+                        h = el.get('name')[0] if el.get('name') else el.get('name')
                 else:
                     if is_gat:
                         h = "港,澳,台"
