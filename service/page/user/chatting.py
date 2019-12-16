@@ -102,6 +102,7 @@ class ChattingPageService(PageService):
         if hr_chat_switch:
             on = on | 1
 
+        self.logger.debug("get_chatting_switch on:{}".format(on))
         return on
 
     @gen.coroutine
