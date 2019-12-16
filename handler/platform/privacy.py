@@ -97,6 +97,12 @@ class IsAgreePrivacyHandler(BaseHandler):
                 else:   # 没同意过
                     custom_privacy_info = yield self.privacy_ps.get_custom_privacy_info(self.current_user.company.id)  # 获取客户自定义隐私协议信息
                     if custom_privacy_info.data:
+                        if not custom_privacy_info.data.title and not custom_privacy_info.data.title.strip() and not custom_privacy_info.data.content and not custom_privacy_info.data.content.strip():
+                            custom_privacy_info.data.title = custom_privacy_info.data.etitle
+                            custom_privacy_info.data.content = custom_privacy_info.data.econtent
+                        elif not custom_privacy_info.data.etitle and not custom_privacy_info.data.etitle.strip() and not custom_privacy_info.data.econtent and not custom_privacy_info.data.econtent.strip():
+                            custom_privacy_info.data.etitle = custom_privacy_info.data.title
+                            custom_privacy_info.data.econtent = custom_privacy_info.data.content
                         custom_privacy_info.data.update({"agree": custom_privacy_status.data})
                         data = ObjectDict(qx_privacy=show_privacy_agreement,
                                           custom_privacy=custom_privacy_info.data)
