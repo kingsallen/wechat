@@ -94,16 +94,25 @@ class IsAgreePrivacyHandler(BaseHandler):
                     data = ObjectDict(qx_privacy=show_privacy_agreement,
                                       custom_privacy={"agree": custom_privacy_status.data}
                                       )
-                    self.send_json_success(data=data)
                 else:   # 没同意过
                     custom_privacy_info = yield self.privacy_ps.get_custom_privacy_info(self.current_user.company.id)  # 获取客户自定义隐私协议信息
-                    custom_privacy_info.data.update({"agree": custom_privacy_status.data})
-                    data = ObjectDict(qx_privacy=show_privacy_agreement,
-                                      custom_privacy=custom_privacy_info.data)
-                    self.send_json_success(data=data)
+                    if custom_privacy_info.data:
+                        if not custom_privacy_info.data.title and not custom_privacy_info.data.content:
+                            custom_privacy_info.data.title = custom_privacy_info.data.etitle
+                            custom_privacy_info.data.content = custom_privacy_info.data.econtent
+                        elif not custom_privacy_info.data.etitle and not custom_privacy_info.data.econtent:
+                            custom_privacy_info.data.etitle = custom_privacy_info.data.title
+                            custom_privacy_info.data.econtent = custom_privacy_info.data.content
+                        custom_privacy_info.data.update({"agree": custom_privacy_status.data})
+                        data = ObjectDict(qx_privacy=show_privacy_agreement,
+                                          custom_privacy=custom_privacy_info.data)
+                    else: # 客户自定义隐私协议为空则不弹
+                        data = ObjectDict(qx_privacy=show_privacy_agreement,
+                                          custom_privacy=None
+                                          )
             else: # oms开关关闭
                 data = ObjectDict(qx_privacy=show_privacy_agreement,
                                   custom_privacy=None)
-                self.send_json_success(data=data)
+            self.send_json_success(data=data)
         else:
             self.send_json_error(message=show_privacy_agreement.message)
