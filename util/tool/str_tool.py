@@ -1,7 +1,7 @@
 # coding=utf-8
 
 # Copyright 2016 MoSeeker
-import ast
+
 import functools
 import hashlib
 import random
@@ -9,9 +9,6 @@ import re
 import string
 import uuid
 
-import ujson
-
-from util.tool.dict_tool import objectdictify
 from util.tool.iter_tool import first
 
 import pypinyin
@@ -384,23 +381,6 @@ def json_hump2underline(hump_json_str, ptn = r'"\s*(\w+)\s*"\s*:'):
     # 使用hump2underline函数作为re.sub函数第二个参数的回调函数
     sub = re.sub(attr_ptn, lambda x: '"' + hump2underline(x.group(1)) + '" :', hump_json_str)
     return sub
-
-
-def dict_hump2underline(dict_object):
-    """
-    把字典中的驼峰kv转为下划线
-    :param dict_object:
-    :return:
-    """
-    result = dict_object
-    success = False
-    try:
-        hump_dict_object = json_hump2underline(str(dict_object))
-        dict_object = ast.literal_eval(hump_dict_object)
-        result = objectdictify(ujson.loads(dict_object))
-        success = True
-    finally:
-        return success, result
 
 
 def json_underline2hump(underline_json_str):

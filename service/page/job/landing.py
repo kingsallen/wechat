@@ -3,9 +3,15 @@
 from tornado import gen
 from service.page.base import PageService
 from util.common import ObjectDict
-from util.tool.str_tool import set_literl, dict_hump2underline
+from util.tool.dict_tool import sub_dict
+from util.tool.str_tool import split, set_literl
+from util.tool.iter_tool import list_dedup_list
 import conf.common as const
+import re
 import conf.platform as platform_const
+from util.common.es import BaseES
+from pypinyin import lazy_pinyin
+import pypinyin
 
 
 class LandingPageService(PageService):
@@ -213,16 +219,15 @@ class LandingPageService(PageService):
 
         # 国际化
         field_form_name = data.field_form_name
-        _, field_form_name = dict_hump2underline(field_form_name)
         positions = data.get("values")  # 不要使用data.values，这是dict的built_in method
         conf_search_seq_plus = data.conf_search_index_plus
         for index, k in enumerate(field_form_name):
             for e in positions:
                 if len(e) > index and e[index] and e[index].get("text"):  # 理论上，这个数据一定是有的，但是防止基础服务的数据有问题，还是加上判断
-                    if k == 'candidate_source' or 'candidateSource':
+                    if k == 'candidate_source':
                         text = locale.translate(const.CANDIDATE_SOURCE_SEARCH_LOCALE.get(e[index].get("text")))
                         e[index].update({"text": text})
-                    elif k == 'employment_type' or 'employmentType':
+                    elif k == 'employment_type':
                         text = locale.translate(const.EMPLOYMENT_TYPE_SEARCH_LOCALE.get(e[index].get("text")))
                         e[index].update({"text": text})
                     elif k == 'degree':
@@ -233,7 +238,7 @@ class LandingPageService(PageService):
                         else:
                             text = locale.translate(const.DEGREE_SEARCH_LOCALE.get(content))
                         e[index].update({"text": text})
-                    elif k == 'position_type' or 'positionType':
+                    elif k == 'position_type':
                         text = locale.translate(const.POSITION_TYPE_LOCALE.get(e[index].get("text")))
                         e[index].update({"text": text})
         self.logger.debug("高级筛选项国际化, positions:{}".format(positions))
