@@ -95,7 +95,8 @@ class ChattingPageService(PageService):
         ret = yield self.infra_im_ds.get_chatting_switch(company_id, COMPANY_SWITCH_MODULE_CHATTING)
         self.logger.debug("get_chatting_switch employee_chat_switch:{}".format(ret))
         if ret and ret.code and ret.code == NEWINFRA_API_SUCCESS:
-            on = 2
+            if ret.data:
+                on = 2
 
         hr_chat_switch = yield self.infra_company_ds.get_hr_chat_switch_status(company_id, '9')
         self.logger.debug("get_chatting_switch hr_chat_switch:{}".format(hr_chat_switch))
