@@ -33,7 +33,7 @@ class PositionStarHandler(BaseHandler):
             ret = yield self.user_ps.unfavorite_position(
                 self.current_user.sysuser.id, self.params.pid)
 
-        if ret == 0:
+        if ret == const.NEWINFRA_API_SUCCESS:
             self.send_json_success()
         else:
             self.send_json_error()
