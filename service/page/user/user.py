@@ -596,6 +596,7 @@ class UserPageService(PageService):
         """
         ret = yield self.infra_user_ds.get_custom_file(
             file_id, sysuser_id)
+        return ret
 
     @gen.coroutine
     def subscribe(self, user_id, position_id):
