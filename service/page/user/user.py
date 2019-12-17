@@ -342,7 +342,7 @@ class UserPageService(PageService):
             "position_id": position_id
         }
         ret = yield self.infra_user_ds.infra_create_collect_position(params)
-        raise gen.Return(ret.data.status)
+        raise gen.Return(ret.data.code)
 
     @gen.coroutine
     def favorite_referral_position(self, user_id, employee_id, position_id, psc):
@@ -359,7 +359,7 @@ class UserPageService(PageService):
             "psc": psc
         }
         ret = yield self.infra_user_ds.infra_create_collect_position(params)
-        raise gen.Return(ret.data.status)
+        raise gen.Return(ret.data.code)
 
     @gen.coroutine
     def unfavorite_position(self, user_id, position_id):
@@ -372,7 +372,7 @@ class UserPageService(PageService):
             "position_id": position_id
         }
         ret = yield self.infra_user_ds.infra_delete_collect_position(params)
-        raise gen.Return(ret.data.status)
+        raise gen.Return(ret.data.code)
 
     @gen.coroutine
     def add_user_fav_position(self, position_id, user_id, favorite, mobile, recom_user_id):
