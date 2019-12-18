@@ -797,7 +797,7 @@ class PositionHandler(BaseHandler):
                 if self.current_user.wechat:
                     link = self.make_url(
                         path.POSITION_PATH.format(position_info.id),
-                        self.params)
+                        wechat_signature=self.params.wechat_signature)
                 else:
                     link = self.make_url(path.GAMMA_POSITION_HOME.format(position_info.id), self.params)
 
