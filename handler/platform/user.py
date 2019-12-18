@@ -813,7 +813,6 @@ class PositionForwardFromEmpHandler(BaseHandler):
 
     # IM优化 职位详情页浮层，在求职者查看员工姓名时，只显示第一个字，其他以*代替，开头为英文or其他字符的，显示1个字符
     def hideName(self,name):
-        print("hideName(%s) type:%s len:%s" % (name, type(name), len(name)))
         if len(name) == 0 :
             return name
         d = name.encode('utf-8').decode('utf-8')
@@ -822,7 +821,7 @@ class PositionForwardFromEmpHandler(BaseHandler):
         while loop > 0 :
             str += u'*'
             loop = loop-1 ;
-        return str.encode('utf-8')
+        return str
 
 class ContactReferralInfoHandler(BaseHandler):
 
