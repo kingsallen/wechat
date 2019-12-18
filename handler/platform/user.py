@@ -816,13 +816,13 @@ class PositionForwardFromEmpHandler(BaseHandler):
         print("hideName(%s) type:%s len:%s" % (name, type(name), len(name)))
         if len(name) == 0 :
             return name
-        d = name.decode('utf-8') if type(name) == str else name
+        d = name.encode('utf-8').decode('utf-8')
         str = d[0]
         loop = len(d) - 1
         while loop > 0 :
             str += u'*'
             loop = loop-1 ;
-        return str.encode('utf-8') if type(name) == str else str
+        return str.encode('utf-8')
 
 class ContactReferralInfoHandler(BaseHandler):
 
