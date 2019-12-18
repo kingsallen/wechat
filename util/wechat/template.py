@@ -176,7 +176,8 @@ def position_view_five_notice_tpl(wechat_id, openid, link, title,
         keyword3=salary,
         keyword4="{}年{}月{}日{:0>2}:{:0>2} ".format(d.year, d.month, d.day,
                                                   d.hour, d.minute))
-    send_switch = yield messager.get_send_switch(current_wechat_id, const.TEMPLATES_SWITCH.JD_SCAN_FIVE_TIME) if current_wechat_id else True
+    # send_switch = yield messager.get_send_switch(current_wechat_id, const.TEMPLATES_SWITCH.JD_SCAN_FIVE_TIME) if current_wechat_id else True
+    send_switch = True
     ret = yield messager.send_template(
         wechat_id, openid, sys_template_id, link, json_data, qx_retry=False, platform_switch=send_switch)
 
